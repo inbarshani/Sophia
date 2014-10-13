@@ -1,0 +1,12 @@
+"#","Status","Name","Description","Expected Result","Screen Capture (Expected)","Actual Result","Screen Capture (Actual)","Attachments"
+1,"Passed","Connect to Mercury Tours Site","Open your Web browser and type the    <<<Mercury Tours URL>>>.","The Mercury Tours site opens.",,"11:33:53.37",,
+2,"Passed","Registration","Complete the Contact Information section. Complete the Mailing Information section. Complete the User Information section.Click the Submit button.","User profile should be registered.",,"11:36:16.03",,
+3,"Passed","Sign-On to Mercury Tours Application","1. Type the <<<User Name>>> in the User Name field.
+2. Type the <<<Password>>> in the Password field. 
+3. Click the Sign-On button.","The Find a Flight page opens.
+In the top navigation bar ""Sign-Off"", ""Itinerary"" and ""Profile"" menu items are available.",,"11:39:25.54",,
+4,"Failed","Click the Profile button.","Click the Profile button.","The Edit Profile page opens.The Contact and Mailing information should be the same as you have specified on registration.",,"11:42:19.99",,
+5,"Passed","Change Contact Information","Change the Contact Information section: First Name Last NamePhone Email Click the Submit button.","The current user profile should be updated.",,"11:48:08.04",,
+6,"Failed","Click the Profile button.","Click the Profile button.","The Edit Profile page opens.The Mailing information should be the same as you have specified on registration.The Contact information should be the same as you have specified in previous step.",,"11:51:40.58",,
+7,"Failed","Change Mailing Information","Change the Mailing Information section: Address City State / Province Postal CodeCountry Click the Submit button.","The current user profile should be updated.",,"11:52:41.34",,
+8,"Failed","Click the Profile button.","Click the Profile button.","The Edit Profile page opens.The Contact information should not change.The Mailing information should be the same as you have specified in previous step.",,"11:55:02.17",,
