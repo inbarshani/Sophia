@@ -27,10 +27,8 @@ var jsonRequestLog = null;
 
 //end_parsed will be emitted once parsing finished
 csvRequestConverter.on("end_parsed", function(jsonObj) {
-    //console.log(jsonObj); //here is your result json object
     jsonRequestLog = jsonObj;
-    //console.log(require('util').inspect(jsonRequestLog));
-    var queryRequest = 'CREATE (request:Request {data})\n';
+    var queryRequest = 'CREATE (request:ServerRequest {data})\n';
 
     for (var counter=0; counter<jsonRequestLog.length;counter++) {
         //console.log('committing: ' + require('util').inspect(jsonRequest) + '\n');
@@ -60,6 +58,18 @@ var jsonErrLog = null;
 csvErrConverter.on("end_parsed", function(jsonObj) {
     //console.log(jsonObj); //here is your result json object
     jsonErrLog = jsonObj;
+    var queryErr = 'CREATE (err:ServerError {data})\n';
+
+    for (var counter=0; counter<jsonErrLog.length;counter++) {
+        //console.log('committing: ' + require('util').inspect(jsonRequest) + '\n');
+        var params = {
+            err: counter,
+            data: jsonErrLog[counter]
+        };
+        db.query(queryErr, params, function(err, results) {
+            if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');
+        });
+    }
 });
 
 //read from file
