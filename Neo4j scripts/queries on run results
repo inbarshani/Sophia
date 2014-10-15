@@ -1,0 +1,1 @@
+MATCH (n {HTTP_verb: 'POST'}) RETURN COUNT(n)
