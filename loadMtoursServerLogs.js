@@ -1,18 +1,32 @@
-var Converter=require("csvtojson").core.Converter;
-var fs=require("fs");
-var neo4j=require("neo4j");
+var Converter = require("csvtojson").core.Converter;
+var fs = require("fs");
+var neo4j = require("neo4j");
 
-var csvRequestLog="./recording 8-10, 11-00/2014_10_08.request.log";
-var fileStream=fs.createReadStream(csvRequestLog);
+// define parsers for log
+var parserMgr = require("csvtojson").core.parserMgr;
+
+/* /^POST|GET|PUT|DELETE/ */
+parserMgr.addParser("httpParser", /HTTP$/, function(params) {
+    var itemData = params.item.split(' ');
+    params.resultRow["HTTP_verb"] = itemData[0];
+    params.resultRow["HTTP_target"] = itemData[1];
+    params.resultRow["HTTP_ver"] = itemData[2];
+});
+
+var csvRequestLog = "./recording 8-10, 11-00/2014_10_08.request.log";
+var fileStream = fs.createReadStream(csvRequestLog);
 //new converter instance
-var csvConverter=new Converter({constructResult:true});
+var csvConverter = new Converter({
+    delimiter: ' ',
+    quote: "\\\"|\\[|\\]"
+});
 
 var jsonRequestLog = null;
 
 //end_parsed will be emitted once parsing finished
-csvConverter.on("end_parsed",function(jsonObj){
-   console.log(require('util').inspect(jsonObj)); //here is your result json object
-   jsonRequestLog = jsonObj;
+csvConverter.on("end_parsed", function(jsonObj) {
+    console.log(jsonObj); //here is your result json object
+    jsonRequestLog = jsonObj;
 });
 
 //read from file
