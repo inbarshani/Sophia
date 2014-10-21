@@ -83,7 +83,7 @@ var dateTime = {
                     y = 4;
                 }
                 year = _getInt(val, i_val, x, y);
-                console.log('Year: ' + year);
+                //console.log('Year: ' + year);
                 if (year == null) {
                     return 0;
                 }
@@ -110,7 +110,7 @@ var dateTime = {
                         }
                     }
                 }
-                console.log('Month: ' + month);
+                //console.log('Month: ' + month);
                 if ((month < 1) || (month > 12)) {
                     return 0;
                 }
@@ -124,28 +124,28 @@ var dateTime = {
                 }
             } else if (token == "MM" || token == "M") {
                 month = _getInt(val, i_val, token.length, 2);
-                console.log('month: ' + month);
+                //console.log('month: ' + month);
                 if (month == null || (month < 1) || (month > 12)) {
                     return 0;
                 }
                 i_val += month.length;
             } else if (token == "dd" || token == "d") {
                 date = _getInt(val, i_val, token.length, 2);
-                console.log('date: ' + date);
+                //console.log('date: ' + date);
                 if (date == null || (date < 1) || (date > 31)) {
                     return 0;
                 }
                 i_val += date.length;
             } else if (token == "hh" || token == "h") {
                 hh = _getInt(val, i_val, token.length, 2);
-                console.log('hh: ' + hh);
+                //console.log('hh: ' + hh);
                 if (hh == null || (hh < 1) || (hh > 12)) {
                     return 0;
                 }
                 i_val += hh.length;
             } else if (token == "HH" || token == "H") {
                 hh = _getInt(val, i_val, token.length, 2);
-                console.log('HH: ' + hh);
+                //console.log('HH: ' + hh);
                 if (hh == null || (hh < 0) || (hh > 23)) {
                     return 0;
                 }
@@ -165,28 +165,28 @@ var dateTime = {
                 hh--;
             } else if (token == "mm" || token == "m") {
                 mm = _getInt(val, i_val, token.length, 2);
-                console.log('mm: ' + mm);
+                //console.log('mm: ' + mm);
                 if (mm == null || (mm < 0) || (mm > 59)) {
                     return 0;
                 }
                 i_val += mm.length;
             } else if (token == "ss" || token == "s") {
                 ss = _getInt(val, i_val, token.length, 2);
-                console.log('ss: ' + ss);
+                //console.log('ss: ' + ss);
                 if (ss == null || (ss < 0) || (ss > 59)) {
                     return 0;
                 }
                 i_val += ss.length;
             } else if (token == "LLL" || token == "lll") {
                 ms = _getInt(val, i_val, token.length, 3);
-                console.log('ms: ' + ms);
+                //console.log('ms: ' + ms);
                 if (ms == null || (ms < 0) || (ms > 999)) {
                     return 0;
                 }
                 i_val += ms.length;
             } else if (token == "LL" || token == "ll") {
                 ms = _getInt(val, i_val, token.length, 2);
-                console.log('ms: ' + ms);
+                //console.log('ms: ' + ms);
                 if (ms == null || (ms < 0) || (ms > 999)) {
                     return 0;
                 }

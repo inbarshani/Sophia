@@ -7,6 +7,7 @@ var dateTime = require("./dateTime");
 
 // define parsers for log
 var parserMgr = require("csvtojson").core.parserMgr;
+parserMgr.clearParsers();
 
 /* /^POST|GET|PUT|DELETE/ */
 parserMgr.addParser("httpParser", /HTTP$/, function(params) {

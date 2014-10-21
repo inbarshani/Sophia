@@ -7,6 +7,7 @@ var dateTime = require("./dateTime");
 
 // define parsers for log
 var parserMgr = require("csvtojson").core.parserMgr;
+parserMgr.clearParsers();
 
 /* Memory on myd-vm06792.hpswlabs.adapps.hp.com */
 parserMgr.addParser("targetServer", /Name$/, function(params) {

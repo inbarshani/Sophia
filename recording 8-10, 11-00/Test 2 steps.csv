@@ -1,4 +1,4 @@
-"#","Status","Name","Description","Expected Result","Screen Capture (Expected)","Actual Result","Screen Capture (Actual)","Attachments"
+StepNumber,Status,Name,Description,ExpectedResult,m_omit,ActualResult,m_omit,m_omit
 1,"Passed","Connect to Mercury Tours Site","Open your Web browser and type the    <<<Mercury Tours URL>>>.","The Mercury Tours site opens.",,"11:57:30.11",,
 2,"Passed","Sign-On to Mercury Tours Application","1. Type the <<<User Name>>> in the User Name field.
 2. Type the <<<Password>>> in the Password field. 
@@ -9,11 +9,5 @@ In the top navigation bar ""Sign-Off"", ""Itinerary"" and ""Profile"" menu items
 5,"Passed","Book Flight","Complete the First Name and Last Name fields. Select the <meal preference> from the Meal list. Select the <<<Credit Card Type>>> from the Card Type list. Complete the credit card Number field. Select the <<<Credit Card Expiration Month and Year>>> from the credit card Expiration list. Complete the credit card owner First, Middle and Last Name fields. <<<Ticketless Travel: Select/Do Not Select>>> Ticketless Travel option. Complete the Billing Address section. <<<Same as Billing Address: Select/Do Not Select>>> Same as Billing Address option. If Ticketless Travel and Same as Billing Address options are not selected, complete the Delivery Address section. Click the Secure Purchase button.","Should work fine.",,"12:07:49.71",,
 6,"Passed","Flight Confirmation","In the Flight Confirmation page, verify the following: 
 The Flight Confirmation details.The Departing flight information. The Returning flight information. Passengers section. Billed To section. Delivery Address section.","The date, time and number of flight confirmation are specified.
-The correct Departing Flight information is the same as the one selected in the Select Flight page.
-If Round Trip option selected, the correct Returning Flight information is the same as the one selected in the Select Flight page. If the One Way trip option is selected, the Returning section is empty.
-The number of passengers should be the same as the number selected in the Find Flight page.
-The address shown in the section should be the same as the Billing Address specified in the Book Flight page.
-If the Ticketless Travel option is selected on Book Flight page, the Delivery Address section is empty. If Same As Billing Address option is selected on Book Flight page, the Delivery Address contains the same address as in the Billed To section. Otherwise the Delivery address is the same as the Delivery Address specified in the Book Flight page.",,"12:14:19.60",,
-7,"Failed","Print Confirmation","Print the Flight Confirmation. Check each of the following possibilities:
-    - Click the Print It! button.
-    - Select the Print option from the File menu of the browser.","",,"12:15:43.36",,
+The correct Departing Flight information is the same as the one selected in the Select Flight page. If Round Trip option selected, the correct Returning Flight information is the same as the one selected in the Select Flight page. If the One Way trip option is selected, the Returning section is empty. The number of passengers should be the same as the number selected in the Find Flight page. The address shown in the section should be the same as the Billing Address specified in the Book Flight page. If the Ticketless Travel option is selected on Book Flight page, the Delivery Address section is empty. If Same As Billing Address option is selected on Book Flight page, the Delivery Address contains the same address as in the Billed To section. Otherwise the Delivery address is the same as the Delivery Address specified in the Book Flight page.",,"12:14:19.60",,
+7,"Failed","Print Confirmation","Print the Flight Confirmation. Check each of the following possibilities:    - Click the Print It! button.    - Select the Print option from the File menu of the browser.","",,"12:15:43.36",,
