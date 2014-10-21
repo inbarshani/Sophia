@@ -21,7 +21,7 @@ parserMgr.addParser("timeConverter", /TIME$/, function(params) {
     //console.log("TIME: "+itemData+"\n");
     var date;
     if (itemData.substring(0,4) == "2014")
-        date = dateTime.getDateFromFormat(itemData, "yyyy-mm-dd HH:mm:ss.sss");
+        date = dateTime.getDateFromFormat(itemData, "yyyy-mm-dd HH:mm:ss.lll");
     else
         date = dateTime.getDateFromFormat(itemData, "dd/MMM/yyyy:HH:mm:ss +0200");
     //console.log("date: "+date+" is " + date.getTime() + " ticks\n");
