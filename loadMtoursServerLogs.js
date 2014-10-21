@@ -3,6 +3,7 @@ var fs = require("fs");
 var neo4j = require("neo4j");
 // connect to neo4j DB
 var db = new neo4j.GraphDatabase('http://localhost:7474');
+var dateTime = require("./dateTime");
 
 // define parsers for log
 var parserMgr = require("csvtojson").core.parserMgr;
@@ -13,6 +14,19 @@ parserMgr.addParser("httpParser", /HTTP$/, function(params) {
     params.resultRow["HTTP_verb"] = itemData[0];
     params.resultRow["HTTP_target"] = itemData[1];
     params.resultRow["HTTP_ver"] = itemData[2];
+});
+
+parserMgr.addParser("timeConverter", /TIME$/, function(params) {
+    var itemData = params.item;
+    //console.log("TIME: "+itemData+"\n");
+    var date;
+    if (itemData.substring(0,4) == "2014")
+        date = dateTime.getDateFromFormat(itemData, "yyyy-mm-dd HH:mm:ss.sss");
+    else
+        date = dateTime.getDateFromFormat(itemData, "dd/MMM/yyyy:HH:mm:ss +0200");
+    //console.log("date: "+date+" is " + date.getTime() + " ticks\n");
+    params.resultRow["TIME"] = date.toString();
+    params.resultRow["TIME_TICKS"] = date.getTime();
 });
 
 var csvRequestLog = "./recording 8-10, 11-00/2014_10_08.request.log";

@@ -1,4 +1,4 @@
-Run Time,Name,Status,Summary,Triggered Alerts,
+Run Time,Name,Status,Summary,m_omit,m_omit
 "10:23 8/10/2014","Cpu monitor on myd-vm06792.hpswlabs.adapps.hp.com","Status: Good; Monitor Availability: Data Collected","0% avg, cpu1 0%, cpu2 1%, cpu3 0%, cpu4 0%","",
 "10:24 8/10/2014","Cpu monitor on myd-vm06792.hpswlabs.adapps.hp.com","Status: Good; Monitor Availability: Data Collected","0% avg, cpu1 0%, cpu2 0%, cpu3 0%, cpu4 0%","",
 "10:24 8/10/2014","Cpu monitor on myd-vm06792.hpswlabs.adapps.hp.com","Status: Good; Monitor Availability: Data Collected","0% avg, cpu1 0%, cpu2 0%, cpu3 0%, cpu4 0%","",

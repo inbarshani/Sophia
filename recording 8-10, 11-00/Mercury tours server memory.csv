@@ -1,4 +1,4 @@
-Run Time,Name,Status,Summary,Triggered Alerts,
+Run Time,Name,Status,Summary,m_omit,m_omit
 "10:23 8/10/2014","Memory on myd-vm06792.hpswlabs.adapps.hp.com","Status: Good; Monitor Availability: Data Collected","50% virtual memory used, 8152MB virtual memory free, 0 pages/sec","",
 "10:24 8/10/2014","Memory on myd-vm06792.hpswlabs.adapps.hp.com","Status: Good; Monitor Availability: Data Collected","50% virtual memory used, 8152MB virtual memory free, 0 pages/sec","",
 "10:24 8/10/2014","Memory on myd-vm06792.hpswlabs.adapps.hp.com","Status: Good; Monitor Availability: Data Collected","50% virtual memory used, 8153MB virtual memory free, 0 pages/sec","",
