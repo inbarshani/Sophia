@@ -18,6 +18,7 @@ parserMgr.addParser("targetServer", /Name$/, function(params) {
 /* Status: Good; Monitor Availability: Data Collected */
 parserMgr.addParser("status", /Status$/, function(params) {
     var itemData = params.item.split(' ');
+    console.log('raw status: '+params.item);
     params.resultRow["STATUS"] = itemData[1].substring(0, itemData[1].length-1);
 });
 

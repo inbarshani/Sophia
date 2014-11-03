@@ -7,10 +7,10 @@ db.query('MATCH (n) OPTIONAL MATCH (n)-[m]-() DELETE n, m', null, function(err, 
     if (err) console.error('neo4j query to delete all failed: ' + err + '\n');
     else
     {
+    	var loadTestSteps = require('./loadTestSteps');
     	var loadMtoursServerLogs = require('./loadMtoursServerLogs');
     	var loadMtoursServerCPU = require('./loadMtoursServerCPU');
     	var loadMtoursServerMemory = require('./loadMtoursServerMemory');
-    	var loadTestSteps = require('./loadTestSteps');
 
     }
 });

@@ -36,22 +36,41 @@ function endParseLoadToDB(testNumber) {
     return function(jsonObj) {
         jsonStepsLog = jsonObj;
         //console.log(jsonStepsLog);
-        var querySteps = 'CREATE (step:TestStep {data})\n';
-        // TODO: link to a the Test node, link steps together
+        // create test node
+        db.query('CREATE (test:Test {TestNumbder:' + testNumber + '})\n', {}, function(err, results) {
+            if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');
+        });
+        // create step node, link to a the Test node, link steps together
+        var querySteps = 'CREATE (step:TestStep {data}) return step.StepNumber\n';
+        var queryLinkSteps = 'MATCH (a:TestStep),(b:TestStep),(c:Test)' +
+            'WHERE a.StepNumber = {currentStep} AND a.TestNumber = ' + testNumber + ' ' +
+            'AND b.StepNumber = {prevStep} AND b.TestNumber = ' + testNumber + ' ' +
+            'AND c.TestNumber = ' + testNumber + ' ' +
+            'CREATE (b)-[:PRCEDE]->(a), (c)-[:INCLUDE]->(a)\n';
         for (var counter = 0; counter < jsonStepsLog.length; counter++) {
             //console.log('committing: ' + require('util').inspect(jsonSteps) + '\n');
             jsonStepsLog[counter].TestNumber = testNumber;
             var params = {
-                step: counter,
                 data: jsonStepsLog[counter]
             };
             db.query(querySteps, params, function(err, results) {
-                if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');
+                if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');                
+                var stepNumber = parseInt(results[0]['step.StepNumber']);
+                console.log('results[0]: ' + JSON.stringify(results[0]) + ' step.stepNumber: '+stepNumber);
+                if (stepNumber > 0) {
+                    var linkparams = {
+                        currentStep: ''+stepNumber,
+                        prevStep: ''+(stepNumber - 1)
+                    };
+                    console.log(queryLinkSteps + ' ' + JSON.stringify(linkparams));
+                    db.query(queryLinkSteps, linkparams, function(err, results) {
+                        if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');
+                    });
+                }
             });
         }
     }
 };
-
 
 //read from file
 var csvStepsLog = "./recording 8-10, 11-00/Test 1 steps.csv";
