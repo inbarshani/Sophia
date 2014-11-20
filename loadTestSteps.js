@@ -8,86 +8,109 @@ var lastDateMeasured = null;
 
 // define parsers for log
 var parserMgr = require("csvtojson").core.parserMgr;
-parserMgr.clearParsers();
 
-/* omit didn't work */
-parserMgr.addParser("m_omit", /m_omit$/, function(params) {});
+module.exports = {
+    read: function (fn) {
 
-parserMgr.addParser("timeConverter", /ActualResult$/, function(params) {
-    var itemData = params.item;
-    //console.log("TIME: "+itemData+"\n");
-    var date = null;
-    if (itemData) {
-        lastDateMeasured = dateTime.getDateFromFormat(itemData, "hh:mm:ss.ll");
-        lastDateMeasured.setDate(8);
-        lastDateMeasured.setMonth(9);
-        lastDateMeasured.setFullYear(2014);
-    }
-    date = lastDateMeasured;
-    //console.log("date: "+date+" is " + date.getTime() + " ticks\n");
-    params.resultRow["TIME"] = date.toString();
-    params.resultRow["TIME_TICKS"] = date.getTime();
-});
+        parserMgr.clearParsers();
 
+        /* omit didn't work */
+        parserMgr.addParser("m_omit", /m_omit$/, function(params) {});
 
-var jsonStepsLog = null;
-
-function endParseLoadToDB(testNumber) {
-    return function(jsonObj) {
-        jsonStepsLog = jsonObj;
-        //console.log(jsonStepsLog);
-        // create test node
-        db.query('CREATE (test:Test {TestNumbder:' + testNumber + '})\n', {}, function(err, results) {
-            if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');
+        parserMgr.addParser("timeConverter", /ActualResult$/, function(params) {
+            var itemData = params.item;
+            //console.log("TIME: "+itemData+"\n");
+            var date = null;
+            if (itemData) {
+                lastDateMeasured = dateTime.getDateFromFormat(itemData, "hh:mm:ss.ll");
+                lastDateMeasured.setDate(8);
+                lastDateMeasured.setMonth(9);
+                lastDateMeasured.setFullYear(2014);
+            }
+            date = lastDateMeasured;
+            //console.log("date: "+date+" is " + date.getTime() + " ticks\n");
+            params.resultRow["TIME"] = date.toString();
+            params.resultRow["TIME_TICKS"] = date.getTime();
         });
-        // create step node, link to a the Test node, link steps together
-        var querySteps = 'CREATE (step:TestStep {data}) return step.StepNumber\n';
-        var queryLinkSteps = 'MATCH (a:TestStep),(b:TestStep),(c:Test)' +
-            'WHERE a.StepNumber = {currentStep} AND a.TestNumber = ' + testNumber + ' ' +
-            'AND b.StepNumber = {prevStep} AND b.TestNumber = ' + testNumber + ' ' +
-            'AND c.TestNumber = ' + testNumber + ' ' +
-            'CREATE (b)-[:PRCEDE]->(a), (c)-[:INCLUDE]->(a)\n';
-        for (var counter = 0; counter < jsonStepsLog.length; counter++) {
-            //console.log('committing: ' + require('util').inspect(jsonSteps) + '\n');
-            jsonStepsLog[counter].TestNumber = testNumber;
-            var params = {
-                data: jsonStepsLog[counter]
-            };
-            db.query(querySteps, params, function(err, results) {
-                if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');                
-                var stepNumber = parseInt(results[0]['step.StepNumber']);
-                console.log('results[0]: ' + JSON.stringify(results[0]) + ' step.stepNumber: '+stepNumber);
-                if (stepNumber > 0) {
-                    var linkparams = {
-                        currentStep: ''+stepNumber,
-                        prevStep: ''+(stepNumber - 1)
+
+
+        var jsonStepsLog = null;
+
+        function endParseLoadToDB(testNumber, isLast) {
+            return function(jsonObj) {
+                jsonStepsLog = jsonObj;
+                //console.log(jsonStepsLog);
+                // create test node
+                var query = 'CREATE (test:Test {TestNumber:' + testNumber + '})\n';
+                db.query(query, {}, function(err, results) {
+                    if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');
+                });
+                // create step node, link to a the Test node, link steps together
+                var querySteps = 'CREATE (step:TestStep {data}) return step.StepNumber\n';
+                var queryLinkSteps;
+                for (var counter = 0; counter < jsonStepsLog.length; counter++) {
+                    //console.log('committing: ' + require('util').inspect(jsonSteps) + '\n');
+                    jsonStepsLog[counter].TestNumber = testNumber;
+                    var params = {
+                        data: jsonStepsLog[counter]
                     };
-                    console.log(queryLinkSteps + ' ' + JSON.stringify(linkparams));
-                    db.query(queryLinkSteps, linkparams, function(err, results) {
-                        if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');
+                    db.query(querySteps, params, function(err, results) {
+                        if (err) console.error('neo4j query failed: ' + querySteps + ' params: ' + params + '\n');                
+                        var stepNumber = parseInt(results[0]['step.StepNumber']);
+                        console.log('results[0]: ' + JSON.stringify(results[0]) + ' step.stepNumber: '+stepNumber);
+                        var linkparams;
+                        if (stepNumber > 0) {
+                            if (stepNumber == 1) {
+                                 linkparams = {
+                                    currentStep: ''+stepNumber
+                                };
+                                queryLinkSteps = 'MATCH (a:TestStep),(c:Test)' +
+                                    'WHERE a.StepNumber = {currentStep} AND a.TestNumber = ' + testNumber + ' ' +
+                                    'AND c.TestNumber = ' + testNumber + ' ' +
+                                    'CREATE (c)-[:INCLUDE]->(a)\n';
+                            } else {
+                                 linkparams = {
+                                    currentStep: ''+stepNumber,
+                                    prevStep: ''+(stepNumber - 1)
+                                };
+
+                                queryLinkSteps = 'MATCH (a:TestStep),(b:TestStep),(c:Test)' +
+                                    'WHERE a.StepNumber = {currentStep} AND a.TestNumber = ' + testNumber + ' ' +
+                                    'AND b.StepNumber = {prevStep} AND b.TestNumber = ' + testNumber + ' ' +
+                                    'AND c.TestNumber = ' + testNumber + ' ' +
+                                    'CREATE (b)-[:PRCEDE]->(a), (c)-[:INCLUDE]->(a)\n';
+                            }
+                            console.log(queryLinkSteps + ' ' + JSON.stringify(linkparams));
+                            db.query(queryLinkSteps, linkparams, function(err, results) {
+                                if (err) console.error('neo4j query failed: ' + queryLinkSteps + ' params: ' + linkparams + '\n');
+                            });
+                        }
                     });
                 }
-            });
-        }
+                if (isLast == true) {
+                    fn();
+                }
+            }
+        };
+
+        //read from file
+        var csvStepsLog = "./recording 8-10, 11-00/Test 1 steps.csv";
+        var fileStream = fs.createReadStream(csvStepsLog);
+        //new converter instance
+        var csvStepsConverter = new Converter({
+            delimiter: ','
+        });
+        //end_parsed will be emitted once parsing finished
+        csvStepsConverter.on("end_parsed", endParseLoadToDB(1, false));
+        fileStream.pipe(csvStepsConverter);
+
+        csvStepsLog = "./recording 8-10, 11-00/Test 2 steps.csv";
+        csvStepsConverter = new Converter({
+            delimiter: ','
+        });
+        //end_parsed will be emitted once parsing finished
+        csvStepsConverter.on("end_parsed", endParseLoadToDB(2, true));
+        fileStream = fs.createReadStream(csvStepsLog);
+        fileStream.pipe(csvStepsConverter);
     }
-};
-
-//read from file
-var csvStepsLog = "./recording 8-10, 11-00/Test 1 steps.csv";
-var fileStream = fs.createReadStream(csvStepsLog);
-//new converter instance
-var csvStepsConverter = new Converter({
-    delimiter: ','
-});
-//end_parsed will be emitted once parsing finished
-csvStepsConverter.on("end_parsed", endParseLoadToDB(1));
-fileStream.pipe(csvStepsConverter);
-
-csvStepsLog = "./recording 8-10, 11-00/Test 2 steps.csv";
-csvStepsConverter = new Converter({
-    delimiter: ','
-});
-//end_parsed will be emitted once parsing finished
-csvStepsConverter.on("end_parsed", endParseLoadToDB(2));
-fileStream = fs.createReadStream(csvStepsLog);
-fileStream.pipe(csvStepsConverter);
+}
