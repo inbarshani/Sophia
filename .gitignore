@@ -22,7 +22,17 @@ build/Release
 # Dependency directory
 # Commenting this out is preferred by some people, see
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git-
-node_modules
+node_modules/*
+!node_modules/csvtojson
+
+node_modules/csvtojson/*
+!node_modules/csvtojson/libs
+
+node_modules/csvtojson/libs/*
+!node_modules/csvtojson/libs/core
+
+node_modules/csvtojson/libs/core/*
+!node_modules/csvtojson/libs/core/parserMgr.js
 
 # Users Environment Variables
 .lock-wscript
