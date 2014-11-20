@@ -7,12 +7,12 @@ var dateTime = require("./dateTime");
 var lastDateMeasured = null;
 
 // define parsers for log
-var parserMgr = require("csvtojson").core.parserMgr;
+var parserMgr = new require("csvtojson").core.parserMgr;
 
 module.exports = {
-    read: function (fn) {
+    read: function(fn) {
 
-        parserMgr.clearParsers();
+        //parserMgr.clearParsers();
 
         /* omit didn't work */
         parserMgr.addParser("m_omit", /m_omit$/, function(params) {});
@@ -43,11 +43,10 @@ module.exports = {
                 // create test node
                 var query = 'CREATE (test:Test {TestNumber:' + testNumber + '})\n';
                 db.query(query, {}, function(err, results) {
-                    if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');
+                    if (err) console.error('neo4j query failed: ' + query + ' params: ' + JSON.stringify(params) + '\n');
                 });
                 // create step node, link to a the Test node, link steps together
                 var querySteps = 'CREATE (step:TestStep {data}) return step.StepNumber\n';
-                var queryLinkSteps;
                 for (var counter = 0; counter < jsonStepsLog.length; counter++) {
                     //console.log('committing: ' + require('util').inspect(jsonSteps) + '\n');
                     jsonStepsLog[counter].TestNumber = testNumber;
@@ -55,26 +54,27 @@ module.exports = {
                         data: jsonStepsLog[counter]
                     };
                     db.query(querySteps, params, function(err, results) {
-                        if (err) console.error('neo4j query failed: ' + querySteps + ' params: ' + params + '\n');                
+                        if (err) console.error('neo4j query failed: ' + querySteps + ' params: ' + params + '\n');
                         var stepNumber = parseInt(results[0]['step.StepNumber']);
-                        console.log('results[0]: ' + JSON.stringify(results[0]) + ' step.stepNumber: '+stepNumber);
+                        console.log('results[0]: ' + JSON.stringify(results[0]) + ' step.stepNumber: ' + stepNumber);
                         var linkparams;
+                        var queryLinkSteps;
                         if (stepNumber > 0) {
                             if (stepNumber == 1) {
-                                 linkparams = {
-                                    currentStep: ''+stepNumber
+                                linkparams = {
+                                    currentStep: '' + stepNumber
                                 };
-                                queryLinkSteps = 'MATCH (a:TestStep),(c:Test)' +
+                                queryLinkSteps = 'MATCH (a:TestStep),(c:Test) ' +
                                     'WHERE a.StepNumber = {currentStep} AND a.TestNumber = ' + testNumber + ' ' +
                                     'AND c.TestNumber = ' + testNumber + ' ' +
                                     'CREATE (c)-[:INCLUDE]->(a)\n';
                             } else {
-                                 linkparams = {
-                                    currentStep: ''+stepNumber,
-                                    prevStep: ''+(stepNumber - 1)
+                                linkparams = {
+                                    currentStep: '' + stepNumber,
+                                    prevStep: '' + (stepNumber - 1)
                                 };
 
-                                queryLinkSteps = 'MATCH (a:TestStep),(b:TestStep),(c:Test)' +
+                                queryLinkSteps = 'MATCH (a:TestStep),(b:TestStep),(c:Test) ' +
                                     'WHERE a.StepNumber = {currentStep} AND a.TestNumber = ' + testNumber + ' ' +
                                     'AND b.StepNumber = {prevStep} AND b.TestNumber = ' + testNumber + ' ' +
                                     'AND c.TestNumber = ' + testNumber + ' ' +
@@ -82,7 +82,7 @@ module.exports = {
                             }
                             console.log(queryLinkSteps + ' ' + JSON.stringify(linkparams));
                             db.query(queryLinkSteps, linkparams, function(err, results) {
-                                if (err) console.error('neo4j query failed: ' + queryLinkSteps + ' params: ' + linkparams + '\n');
+                                if (err) console.error('neo4j query failed: ' + queryLinkSteps + ' params: ' + JSON.stringify(linkparams) + '\n');
                             });
                         }
                     });

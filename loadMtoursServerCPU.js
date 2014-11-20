@@ -6,13 +6,13 @@ var db = new neo4j.GraphDatabase('http://localhost:7474');
 var dateTime = require("./dateTime");
 
 // define parsers for log
-var parserMgr = require("csvtojson").core.parserMgr;
+var parserMgr = new require("csvtojson").core.parserMgr;
 
 module.exports = {
     read: function (fn) {
 
         //read from file
-        parserMgr.clearParsers();
+        // parserMgr.clearParsers();
 
         /* Cpu monitor on myd-vm06792.hpswlabs.adapps.hp.com */
         parserMgr.addParser("targetServer", /Name$/, function(params) {
@@ -44,7 +44,7 @@ module.exports = {
         parserMgr.addParser("timeConverter", /Run Time$/, function(params) {
             var itemData = params.item;
             //console.log("TIME: "+itemData+"\n");
-            var date= dateTime.getDateFromFormat(itemData, "hh:mm d/mm/yyyy");
+            var date= dateTime.getDateFromFormat(itemData, "hh:mm d/MM/yyyy");
             //console.log("date: "+date+" is " + date.getTime() + " ticks\n");
             params.resultRow["TIME"] = date.toString();
             params.resultRow["TIME_TICKS"] = date.getTime();
@@ -63,12 +63,11 @@ module.exports = {
         csvCPUConverter.on("end_parsed", function(jsonObj) {
             jsonCPULog = jsonObj;
             //console.log(jsonCPULog);
-            var queryCPU = 'CREATE (request:ServerCPU {data})\n';
+            var queryCPU = 'CREATE (n:ServerCPU {data})\n';
 
             for (var counter=0; counter<jsonCPULog.length;counter++) {
                 //console.log('committing: ' + require('util').inspect(jsonCPU) + '\n');
                 var params = {
-                    request: counter,
                     data: jsonCPULog[counter]
                 };
                 db.query(queryCPU, params, function(err, results) {

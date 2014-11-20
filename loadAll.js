@@ -11,13 +11,13 @@ db.query('MATCH (n) OPTIONAL MATCH (n)-[m]-() DELETE n, m', null, function(err, 
     	var loadMtoursServerLogs = require('./loadMtoursServerLogs');
     	var loadMtoursServerCPU = require('./loadMtoursServerCPU');
     	var loadMtoursServerMemory = require('./loadMtoursServerMemory');
-    	loadMtoursServerMemory.read(function(){
+    	loadTestSteps.read(function(){
     		console.log('call cpu');
     		loadMtoursServerCPU.read(function(){
 	    		console.log('call logs');
 	    		loadMtoursServerLogs.read(function(){
 	    			console.log('call test');
-		    		loadTestSteps.read(function(){
+		    		loadMtoursServerMemory.read(function(){
 			    		console.log('end');
     				});
 	    		});

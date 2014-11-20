@@ -1,17 +1,20 @@
 {
-  "name": "Sophia",
-  "version": "0.0.1",
-  "description": "Sophia",
-  "main": "convert.js",
-  "dependencies": {
-    "csvtojson": "0.X.X",
-    "neo4j": "1.X.X"
-  },
-  "author": {
-    "name": "HP Software",
-    "email": "inbar.shani@hp.com"
-  },
-  "engine": {
-    "node": ">=0.4"
-  }
+    "name": "Sophia",
+    "version": "0.0.1",
+    "description": "Sophia",
+    "main": "convert.js",
+    "dependencies": {
+        "csvtojson": "0.X.X",
+        "neo4j": "1.X.X"
+    },
+    "scripts": {
+      "start": "node loadAll.js"
+    },
+    "author": {
+        "name": "HP Software",
+        "email": "inbar.shani@hp.com"
+    },
+    "engine": {
+        "node": ">=0.4"
+    }
 }

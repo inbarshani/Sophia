@@ -2,7 +2,7 @@ var Converter = require("csvtojson").core.Converter;
 var fs = require("fs");
 var neo4j = require("neo4j");
 var dateTime = require("./dateTime");
-var parserMgr = require("csvtojson").core.parserMgr;
+var parserMgr = new require("csvtojson").core.parserMgr;
 
 // connect to neo4j DB
 var db = new neo4j.GraphDatabase('http://localhost:7474');
@@ -12,7 +12,7 @@ module.exports = {
 //read from file
 read: function (fn) {
     // define parsers for log
-    parserMgr.clearParsers();
+    // parserMgr.clearParsers();
 
     /* Memory on myd-vm06792.hpswlabs.adapps.hp.com */
     parserMgr.addParser("targetServer", /Name$/, function(params) {
@@ -43,7 +43,7 @@ read: function (fn) {
     parserMgr.addParser("timeConverter", /Run Time$/, function(params) {
         var itemData = params.item;
         //console.log("TIME: "+itemData+"\n");
-        var date= dateTime.getDateFromFormat(itemData, "hh:mm d/mm/yyyy");
+        var date= dateTime.getDateFromFormat(itemData, "hh:mm d/MM/yyyy");
         //console.log("date: "+date+" is " + date.getTime() + " ticks\n");
         params.resultRow["TIME"] = date.toString();
         params.resultRow["TIME_TICKS"] = date.getTime();
@@ -62,16 +62,15 @@ read: function (fn) {
     csvMemoryConverter.on("end_parsed", function(jsonObj) {
         jsonMemoryLog = jsonObj;
         //console.log(jsonMemoryLog);
-        var queryMemory = 'CREATE (request:ServerMemory {data})\n';
+        var queryMemory = 'CREATE (n:ServerMemory {data})\n';
 
         for (var counter=0; counter<jsonMemoryLog.length;counter++) {
             //console.log('committing: ' + require('util').inspect(jsonMemory) + '\n');
             var params = {
-                request: counter,
                 data: jsonMemoryLog[counter]
             };
             db.query(queryMemory, params, function(err, results) {
-                if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');
+                if (err) console.error('neo4j query failed: ' + queryMemory + ' params: ' + JSON.stringify(params) + '\n');
             });
         }
         fn();

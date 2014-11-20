@@ -1,1 +1,5 @@
 MATCH (n {HTTP_verb: 'POST'}) RETURN COUNT(n)
+
+match (a:TestStep),(b:Test) return a, b
+
+MATCH (n) WHERE NONE(l in labels(n) WHERE l="TestStep" OR l="Test") return n order by n.TIME_TICKS LIMIT 10

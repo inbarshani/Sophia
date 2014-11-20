@@ -6,12 +6,12 @@ var db = new neo4j.GraphDatabase('http://localhost:7474');
 var dateTime = require("./dateTime");
 
 // define parsers for log
-var parserMgr = require("csvtojson").core.parserMgr;
+var parserMgr = new require("csvtojson").core.parserMgr;
 
 module.exports = {
     read: function (fn) {
 
-        parserMgr.clearParsers();
+        //parserMgr.clearParsers();
 
         /* /^POST|GET|PUT|DELETE/ */
         parserMgr.addParser("httpParser", /HTTP$/, function(params) {
@@ -26,9 +26,15 @@ module.exports = {
             //console.log("TIME: "+itemData+"\n");
             var date;
             if (itemData.substring(0,4) == "2014")
-                date = dateTime.getDateFromFormat(itemData, "yyyy-mm-dd HH:mm:ss.lll");
+            {
+                date = dateTime.getDateFromFormat(itemData, "yyyy-MM-dd HH:mm:ss.lll");
+                //date.setMonth(date.getMonth()-1); // compensate for diff in mm format
+            }
             else
+            {
                 date = dateTime.getDateFromFormat(itemData, "dd/MMM/yyyy:HH:mm:ss +0200");
+                date.setHours(date.getHours()+1); // compensate for timezone diff
+            }
             //console.log("date: "+date+" is " + date.getTime() + " ticks\n");
             params.resultRow["TIME"] = date.toString();
             params.resultRow["TIME_TICKS"] = date.getTime();
@@ -47,12 +53,11 @@ module.exports = {
         //end_parsed will be emitted once parsing finished
         csvRequestConverter.on("end_parsed", function(jsonObj) {
             jsonRequestLog = jsonObj;
-            var queryRequest = 'CREATE (request:ServerRequest {data})\n';
+            var queryRequest = 'CREATE (n:ServerRequest {data})\n';
 
             for (var counter=0; counter<jsonRequestLog.length;counter++) {
                 //console.log('committing: ' + require('util').inspect(jsonRequest) + '\n');
                 var params = {
-                    request: counter,
                     data: jsonRequestLog[counter]
                 };
                 db.query(queryRequest, params, function(err, results) {
