@@ -41,10 +41,11 @@ module.exports = {
         parserMgr.addParser("m_omit", /m_omit$/, function(params) {
         });
 
+        /* 11:20 8/10/2014 */
         parserMgr.addParser("timeConverter", /Run Time$/, function(params) {
             var itemData = params.item;
             //console.log("TIME: "+itemData+"\n");
-            var date= dateTime.getDateFromFormat(itemData, "hh:mm d/MM/yyyy");
+            var date= dateTime.getDateFromFormat(itemData, "HH:mm d/MM/yyyy");
             //console.log("date: "+date+" is " + date.getTime() + " ticks\n");
             params.resultRow["TIME"] = date.toString();
             params.resultRow["TIME_TICKS"] = date.getTime();

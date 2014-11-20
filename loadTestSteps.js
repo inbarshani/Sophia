@@ -22,7 +22,8 @@ module.exports = {
             //console.log("TIME: "+itemData+"\n");
             var date = null;
             if (itemData) {
-                lastDateMeasured = dateTime.getDateFromFormat(itemData, "hh:mm:ss.ll");
+                lastDateMeasured = dateTime.getDateFromFormat(itemData, "HH:mm:ss.ll");
+                lastDateMeasured.setHours(lastDateMeasured.getHours()-1);
                 lastDateMeasured.setDate(8);
                 lastDateMeasured.setMonth(9);
                 lastDateMeasured.setFullYear(2014);

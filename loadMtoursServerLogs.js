@@ -33,7 +33,7 @@ module.exports = {
             else
             {
                 date = dateTime.getDateFromFormat(itemData, "dd/MMM/yyyy:HH:mm:ss +0200");
-                date.setHours(date.getHours()+1); // compensate for timezone diff
+                //date.setHours(date.getHours()+1); // compensate for timezone diff
             }
             //console.log("date: "+date+" is " + date.getTime() + " ticks\n");
             params.resultRow["TIME"] = date.toString();

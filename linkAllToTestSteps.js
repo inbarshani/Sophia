@@ -3,19 +3,37 @@ var neo4j = require("neo4j");
 var db = new neo4j.GraphDatabase('http://localhost:7474');
 // query for all non-Test/TestSteps objects orderd by time ticks
 // query for all nodes orderd by time ticks
-db.query('MATCH (n) return ID(n), n.TIME_TICKS, labels(n) order by n.TIME_TICKS', null, function(err, results) {
+db.query('MATCH (n) return ID(n), n.TIME_TICKS, n.TIME, labels(n) order by n.TIME_TICKS', null, function(err, results) {
     if (err) console.error('neo4j query to order all nodes by TIME_TICKS failed: ' + err + '\n');
     else
     {
         //console.log('match all nodes which are not test/steps');
         //console.log('resuts.length: '+results.length);
+        var prevObj = null;
+        // TODO: handle data with time before first step
         for(var i=0;i<results.length;i++)
         {
-            console.log('result: '+JSON.stringify(results[i]));
+            //console.log('result: '+JSON.stringify(results[i]));
             var id = results[i]['ID(n)'];
             var time = results[i]['n.TIME_TICKS'];
             var type = results[i]['labels(n)'];
-            console.log('result id: '+id+' time: '+time+' type: '+type);
+            //console.log('result id: '+id+' time: '+time+' type: '+type);
+            if (type == "TestStep")
+                prevObj = {"id": id, "time": time};
+            else if (type != "Test")
+            {
+                // define a link to prev obj
+                if (prevObj)
+                {
+                    var queryLinkObjs = 'MATCH (a),(b) ' +
+                                    'WHERE ID(a) = '+ id +' AND ID(b) = ' + prevObj.id + ' ' +
+                                    'CREATE (a)-[:LINK]->(b)\n';
+                    db.query(queryLinkObjs, null, function(err, results) {
+                        if (err) console.error('neo4j query failed: ' + queryLinkObjs + ' err: '+err+'\n');
+                    });
+                }
+                prevObj = {"id": id, "time": time};
+            }
         }
     }
 });
