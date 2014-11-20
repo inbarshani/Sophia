@@ -1,6 +1,7 @@
 # Logs
 logs
 log.txt
+err.txt
 npm-debug.log
 
 # Runtime data

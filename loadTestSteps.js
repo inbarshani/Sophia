@@ -7,12 +7,12 @@ var dateTime = require("./dateTime");
 var lastDateMeasured = null;
 
 // define parsers for log
-var parserMgr = new require("csvtojson").core.parserMgr;
+var parserMgr = require("csvtojson").core.parserMgr;
 
 module.exports = {
     read: function(fn) {
 
-        //parserMgr.clearParsers();
+        parserMgr.clearParsers();
 
         /* omit didn't work */
         parserMgr.addParser("m_omit", /m_omit$/, function(params) {});

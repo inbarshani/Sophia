@@ -16,7 +16,7 @@ db.query('MATCH (n) OPTIONAL MATCH (n)-[m]-() DELETE n, m', null, function(err, 
     		loadMtoursServerCPU.read(function(){
 	    		console.log('call logs');
 	    		loadMtoursServerLogs.read(function(){
-	    			console.log('call test');
+	    			console.log('call memory');
 		    		loadMtoursServerMemory.read(function(){
 			    		console.log('end');
     				});

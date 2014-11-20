@@ -6,12 +6,12 @@ var db = new neo4j.GraphDatabase('http://localhost:7474');
 var dateTime = require("./dateTime");
 
 // define parsers for log
-var parserMgr = new require("csvtojson").core.parserMgr;
+var parserMgr = require("csvtojson").core.parserMgr;
 
 module.exports = {
-    read: function (fn) {
+    read: function (callback) {
 
-        //parserMgr.clearParsers();
+        parserMgr.clearParsers();
 
         /* /^POST|GET|PUT|DELETE/ */
         parserMgr.addParser("httpParser", /HTTP$/, function(params) {
@@ -94,7 +94,7 @@ module.exports = {
                     if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');
                 });
             }
-            fn();
+            if (callback) callback();
         });
 
         //read from file
