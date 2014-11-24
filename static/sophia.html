@@ -1,0 +1,93 @@
+<html>
+<head>
+<script src="js/sigma.min.js"></script>
+<script src="js/plugins/sigma.parsers.json.min.js"></script>
+<script src="js/jquery-2.1.0.js"></script>
+<script>
+
+var data1 = {
+  "nodes": [
+    {
+      "id": "n0",
+      "label": "A node",
+      "size": 3
+    },
+    {
+      "id": "n1",
+      "label": "Another node",
+      "size": 2
+    },
+    {
+      "id": "n2",
+      "label": "And a last one",
+      "size": 1
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "n0",
+      "target": "n1"
+    },
+    {
+      "id": "e1",
+      "source": "n1",
+      "target": "n2"
+    },
+    {
+      "id": "e2",
+      "source": "n2",
+      "target": "n0"
+    }
+  ]
+};
+
+$(document).ready(function() {
+  $('#nfj_query').click(function() {
+  	runQuery();
+  });
+
+
+  function runQuery() {
+	actionDescription = 'execute query';
+	var statements = [];
+	statements[0] = {
+						includeStats: true, 
+						resultDataContents: ["row", "graph"], 
+						statement: "MATCH (a)-[r]->(b)↵WHERE labels(a) <> [] AND labels(b) <> []↵RETURN DISTINCT head(labels(a)) AS This, type(r) as To, head(labels(b)) AS That"};
+	$.ajax({  
+		type: 'POST',  
+		url: '/query',  
+		cache: false,
+		data: statements,
+		success: function(data){showNodes(data);},
+		error: function (textStatus, errorThrown){alert(actionDescription  +  textStatus + errorThrown);}
+	});  
+
+  }
+
+  function showNodes(data) {
+	var sig = new sigma({ 
+        graph: data1,
+        container: 'container',
+        settings: {
+            defaultNodeColor: '#ec5148'
+        }
+	});
+  }
+
+});
+</script>
+<style type="text/css">
+  #container {
+    max-width: 400px;
+    height: 400px;
+    margin: auto;
+  }
+</style>
+</head>
+<body>
+<button id='nfj_query'>Query</button>
+<div id="container"></div>
+</body>
+</html>
