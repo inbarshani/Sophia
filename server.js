@@ -7,37 +7,51 @@ var app = express();
 
 app.use(express.static(__dirname + '/static'));
 
-app.post('/query', function(request, response) {
+app.get('/query', function(request, response) {
 
 /*    
     examples for request parameters (JSON objects):
     console.log(request.body.user.name);
     console.log(request.body.user.email);
     */
-    db.query('MATCH (node) OPTIONAL MATCH (node)-[rel]-() RETURN node, rel', null, function(err, results) {
+    db.query('MATCH node RETURN node', null, function(err, results) {
       if (err) throw err;
       var nodes = [], edges = [];
-      var objs = results.map(function (result) {
+      results.map(function (result) {
+        var node = {};
         var id;
-        if (result.node) {
-          id = result.node._data.metadata.id;
-          result.node._data.data.id = id;
-          nodes.push(result.node._data.data);
-//          return {result.node._data.data};
-        } else if (result.rel) {
-          // TODO: check why this is never called
-          console.log("rel");
-          var edge = {"start": result.rel._data.start,
-          "end": result.rel._data.end,
-          "type": result.rel._data.type};
-          edges.push(edge);
+        var label;
+        var name;
+        id = result.node._data.metadata.id;
+        if (result.node._data.metadata.labels.length > 0) {
+          label = result.node._data.metadata.labels[0];
+        } else {
+          label = "Node";
         }
-//        return edge;
-      });      
-      var obj = {"nodes": nodes, "edges": edges}
+        if (result.node._data.data.Name) {
+          name = result.node._data.data.Name;
+        } else {
+          name = label;
+        }
+        node.name = name;
+        node.label = label;
+        node.id = id;
+        node.properties = result.node._data.data;
+        nodes.push(node);
+      });     
+      db.query('MATCH (node) OPTIONAL MATCH (node)-[rel]-() RETURN rel', null, function(err, results) {
+        results.map(function (result) {
+          var url = result.rel.db.url + "/db/data/node/";
+          var edge = {"source": parseInt(result.rel._data.start.replace(url, "")),
+            "target": parseInt(result.rel._data.end.replace(url, "")),
+            "value": result.rel._data.type,
+            "id": result.rel._data.metadata.id            
+          };
+          edges.push(edge);
+      });
+      var obj = {"nodes": nodes, "links": edges}
       response.send(JSON.stringify(obj));
     });
-
-
+  });
 });
 app.listen(8080);

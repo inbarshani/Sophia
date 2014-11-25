@@ -1,93 +1,89 @@
 <html>
-<head>
-<script src="js/sigma.min.js"></script>
-<script src="js/plugins/sigma.parsers.json.min.js"></script>
+<meta charset="utf-8">
+<style>
+
+.node {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.link {
+  stroke: #999;
+  stroke-opacity: .6;
+}
+
+</style>
+<body>
+    <button id='nfj_query'>Query</button>
+    <div id="graph_container"></div>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="js/jquery-2.1.0.js"></script>
+
 <script>
-
-var data1 = {
-  "nodes": [
-    {
-      "id": "n0",
-      "label": "A node",
-      "size": 3
-    },
-    {
-      "id": "n1",
-      "label": "Another node",
-      "size": 2
-    },
-    {
-      "id": "n2",
-      "label": "And a last one",
-      "size": 1
-    }
-  ],
-  "edges": [
-    {
-      "id": "e0",
-      "source": "n0",
-      "target": "n1"
-    },
-    {
-      "id": "e1",
-      "source": "n1",
-      "target": "n2"
-    },
-    {
-      "id": "e2",
-      "source": "n2",
-      "target": "n0"
-    }
-  ]
-};
-
 $(document).ready(function() {
   $('#nfj_query').click(function() {
-  	runQuery();
+    runQuery();
   });
 
+  var width = 2048,
+      height = 1024;
 
-  function runQuery() {
-	actionDescription = 'execute query';
-	var statements = [];
-	statements[0] = {
-						includeStats: true, 
-						resultDataContents: ["row", "graph"], 
-						statement: "MATCH (a)-[r]->(b)↵WHERE labels(a) <> [] AND labels(b) <> []↵RETURN DISTINCT head(labels(a)) AS This, type(r) as To, head(labels(b)) AS That"};
-	$.ajax({  
-		type: 'POST',  
-		url: '/query',  
-		cache: false,
-		data: statements,
-		success: function(data){showNodes(data);},
-		error: function (textStatus, errorThrown){alert(actionDescription  +  textStatus + errorThrown);}
-	});  
+  var color = d3.scale.category20();
 
+  var force = d3.layout.force()
+      .charge(-120)
+      .linkDistance(50)
+      .size([width, height]);
+
+  var svg;
+
+
+  function runQuery(query) {
+  d3.select("div").html('');
+  svg = d3.select("div").append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    d3.json("/query", function(error, graph) {
+      force
+          .nodes(graph.nodes)
+          .links(graph.links)
+          .start();
+
+      var link = svg.selectAll(".link")
+          .data(graph.links)
+        .enter().append("line")
+          .attr("class", "link")
+          .style("stroke-width", 5);
+
+      var node = svg.selectAll(".node")
+          .data(graph.nodes)
+        .enter().append("circle")
+          .attr("class", "node")
+          .attr("r", 20)
+          .style("fill", function(d) { 
+            return color(d.label); 
+          })
+          .call(force.drag);
+
+      node.append("title")
+          .text(function(d) { 
+            return d.name; 
+          });
+
+      force.on("tick", function() {
+        link.attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+
+        node.attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; });
+      });
+    });
   }
-
-  function showNodes(data) {
-	var sig = new sigma({ 
-        graph: data1,
-        container: 'container',
-        settings: {
-            defaultNodeColor: '#ec5148'
-        }
-	});
-  }
-
 });
 </script>
-<style type="text/css">
-  #container {
-    max-width: 400px;
-    height: 400px;
-    margin: auto;
-  }
-</style>
-</head>
-<body>
-<button id='nfj_query'>Query</button>
-<div id="container"></div>
 </body>
 </html>
