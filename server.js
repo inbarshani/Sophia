@@ -39,7 +39,7 @@ app.get('/query', function(request, response) {
         node.properties = result.node._data.data;
         nodes.push(node);
       });     
-      db.query('MATCH (node) OPTIONAL MATCH (node)-[rel]-() RETURN rel', null, function(err, results) {
+      db.query('MATCH (node)-[rel]-() RETURN rel', null, function(err, results) {
         results.map(function (result) {
           var url = result.rel.db.url + "/db/data/node/";
           var edge = {"source": parseInt(result.rel._data.start.replace(url, "")),
