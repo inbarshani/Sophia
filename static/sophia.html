@@ -12,21 +12,41 @@
   stroke-opacity: .6;
 }
 
+#details {
+  width: 300px;
+  height: 400px;
+  overflow: show;
+  border: 2 px solid black;
+  background-color: #eee;
+  position: absolute;
+  top: 10%;
+  left: 1350;
+  visibility: hidden;
+}
+
 </style>
 <body>
     <button id='nfj_query'>Query</button>
     <div id="graph_container"></div>
+    <div id='details'>
+    <div class='header'></div>
+      <ul id='properties'>
+      </ul>  
+
+    </div>
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="js/jquery-2.1.0.js"></script>
 
 <script>
+var lastNode;
+
 $(document).ready(function() {
   $('#nfj_query').click(function() {
     runQuery();
   });
 
-  var width = 2048,
+  var width = 1600,
       height = 1024;
 
   var color = d3.scale.category20();
@@ -40,8 +60,8 @@ $(document).ready(function() {
 
 
   function runQuery(query) {
-  d3.select("div").html('');
-  svg = d3.select("div").append("svg")
+  d3.select("#graph_container").html('');
+  svg = d3.select("#graph_container").append("svg")
       .attr("width", width)
       .attr("height", height);
 
@@ -80,6 +100,28 @@ $(document).ready(function() {
 
         node.attr("cx", function(d) { return d.x; })
             .attr("cy", function(d) { return d.y; });
+      });
+
+      svg.selectAll("circle.node").on("click", function(){
+        if (lastNode) {
+          d3.select(lastNode)
+            .style("stroke","white");
+        }
+        lastNode = this;
+        d3.select(this)
+          .style("stroke","red");
+        var props = this.__data__.properties;
+        if (props != undefined) {
+          var list = '';
+            for(var key in props) {
+              if(props.hasOwnProperty(key)) {
+                list += '<li>' + key + ': ' + props[key] + '</li>';
+              }
+            }
+          $('#details > ul').html(list);
+          $('#details > div.header').text(this.__data__.name);
+          $('#details').css('visibility', 'visible');
+        }
       });
     });
   }
