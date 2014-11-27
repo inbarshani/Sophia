@@ -1,0 +1,211 @@
+<meta charset="utf-8">
+<style>
+
+body {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 11px;
+}
+.node {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+.node-text {
+  font: 9px helvetica;
+  font-weight: bold;
+}
+
+.link {
+  stroke: #999;
+  stroke-opacity: .6;
+}
+
+#details {
+  width: 300px;
+  height: 400px;
+  border: 2 px solid black;
+  background-color: #000;
+  color: #fff;
+  position: absolute;
+  top: 10%;
+  left: 1350;
+  border-radius: 6px;
+  visibility: hidden;
+}
+#properties {
+  width: 300px;
+  table-layout:fixed;
+}
+
+td {
+  border-bottom: 1px solid #999;
+  vertical-align: text-top;
+}
+.header {
+  border-bottom: 1px solid #999;
+  font-size: 18px;
+}
+
+.key_text {
+  font-size: 10px;
+  color: #ddd;
+  width: 100px;
+}
+.value_text {
+  font-size: 10px;
+  color: #fff;
+  word-wrap:break-word;
+}
+.close {
+  color: #fff;
+  float: right;
+  padding: 5px;
+  font-size: 14px;
+  font-weight: 400;
+  text-decoration: none;
+}
+
+</style>
+<body>
+  <button id='nfj_query'>Query</button>
+  <div id="graph_container"></div>
+  <div id='details'>
+  <div class='header'><span></span><a href="#" class="close" onclick="hideDetails();">X</a></div>
+    <table id='properties'>
+    </table>  
+  </div>
+
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="js/jquery-2.1.0.js"></script>
+
+  <script>
+    var lastNode;
+
+    $(document).ready(function() {
+      $('#nfj_query').click(function() {
+        runQuery( $('#nfj_query').val());
+      });
+
+      var width = 1600,
+          height = 1024;
+
+      var color = d3.scale.category20();
+
+      var force = d3.layout.force()
+          .charge(-120)
+          .linkDistance(50)
+          .size([width, height]);
+
+      var svg;
+
+      function runQuery(query) {
+        d3.select("#graph_container").html('');
+        svg = d3.select("#graph_container").append("svg")
+          .attr("width", width)
+          .attr("height", height);
+
+        d3.json("/query", function(error, graph) {
+          // create a lookup of node id to node index
+          var lookupIndex = {};
+          for (var i=0;i<graph.nodes.length;i++) {
+            lookupIndex[graph.nodes[i].id] = i;
+          }
+          graph.links.forEach(function(link) {
+            link.source = lookupIndex[link.source];
+            link.target = lookupIndex[link.target];
+          });
+          force
+            .nodes(graph.nodes)
+            .links(graph.links)
+            .start();
+
+          var link = svg.selectAll(".link")
+            .data(graph.links)
+            .enter().append("line")
+            .attr("class", "link")
+            .style("stroke-width", 5);
+
+          var node = svg.selectAll(".node")
+            .data(graph.nodes)
+            .enter().append("circle")
+            .attr("class", "node")
+            .attr("r", 20)
+            .style("fill", function(d) { 
+              return color(d.label); 
+            })
+            .call(force.drag);
+
+          node.append("title")
+            .text(function(d) { return d.name; });
+
+          var labels = svg.selectAll("text")
+            .data(graph.nodes)
+            .enter()
+            .append("text")
+            .attr("class", "node-text")
+            .attr({"x":function(d){ return d.x; },
+                   "y":function(d){return d.y;}})
+            .text(function(d){return getNodeLabel(d);})
+            .call(force.drag);
+
+          force.on("tick", function() {
+            link.attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+
+            node.attr("cx", function(d) { return d.x; })
+              .attr("cy", function(d) { return d.y; });
+
+            labels.attr("x", function(d) { return d.x - 15; })
+              .attr("y", function(d) { return d.y + 5; }); 
+          });
+
+          svg.selectAll("circle.node").on("click", function(){
+            if (lastNode) {
+              d3.select(lastNode)
+                .style("stroke","white");
+            }
+            lastNode = this;
+            d3.select(this)
+              .style("stroke","red");
+            var props = this.__data__.properties;
+            if (props != undefined) {
+              var list = '';
+              for(var key in props) {
+                if(props.hasOwnProperty(key)) {
+                  list += '<tr><td class="key_text">' + key + ' </td><td class="value_text">' + props[key] + '</td></tr>';
+                }
+              }
+              $('#details > table').html(list);
+              $('#details > div.header > span').text(this.__data__.name);
+              $('#details').css('visibility', 'visible');
+            }
+          });
+        });
+      }
+
+      function getNodeLabel(d) {
+        if (d.label == 'Test') {
+          return 'Test ' + d.properties.TestNumber;
+        } else if (d.label == 'TestStep') {
+          return d.properties.Status;
+        } else if (d.label == 'ServerRequest') {
+          if (d.properties.HTTP_result == '200') {
+            return '200 OK';
+          } else {
+            return 'Error ' + d.properties.HTTP_result;
+          }
+        } else if (d.label == 'ServerCPU') {
+          return 'CPU: ' + d.properties.AVG;
+        } else if (d.label == 'ServerMemory') {
+          return 'Used: ' + d.properties.VIRTUAL_USED_PRECENT;
+        }
+        return d.label;
+      }
+    });
+
+    function hideDetails() {
+      $('#details').css('visibility', 'hidden');
+    }
+  </script>
+</body>
