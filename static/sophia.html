@@ -103,6 +103,16 @@ $(document).ready(function() {
       .attr("height", height);
 
     d3.json("/query", function(error, graph) {
+      // create a lookup of node id to node index
+      var lookupIndex = {};
+      for (var i=0;i<graph.nodes.length;i++)
+      {
+        lookupIndex[graph.nodes[i].id] = i;
+      }
+      graph.links.forEach(function(link) {
+        link.source = lookupIndex[link.source];
+        link.target = lookupIndex[link.target];
+      });
       force
           .nodes(graph.nodes)
           .links(graph.links)

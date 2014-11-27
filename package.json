@@ -6,7 +6,8 @@
   "dependencies": {
     "csvtojson": "0.X.X",
     "express": "^4.10.3",
-    "neo4j": "1.X.X"
+    "neo4j": "1.X.X",
+    "node-offline-debug": "1.x.x"
   },
   "scripts": {
     "start": "node loadAll.js"
