@@ -2,6 +2,10 @@
 <meta charset="utf-8">
 <style>
 
+body {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 11px;
+}
 .node {
   stroke: #fff;
   stroke-width: 1.5px;
@@ -15,13 +19,46 @@
 #details {
   width: 300px;
   height: 400px;
-  overflow: show;
   border: 2 px solid black;
-  background-color: #eee;
+  background-color: #000;
+  color: #fff;
   position: absolute;
   top: 10%;
   left: 1350;
+  border-radius: 6px;
   visibility: hidden;
+}
+#properties {
+  width: 300px;
+  table-layout:fixed;
+}
+
+td {
+  border-bottom: 1px solid #999;
+  vertical-align: text-top;
+}
+.header {
+  border-bottom: 1px solid #999;
+  font-size: 18px;
+}
+
+.key_text {
+  font-size: 10px;
+  color: #ddd;
+  width: 100px;
+}
+.value_text {
+  font-size: 10px;
+  color: #fff;
+  word-wrap:break-word;
+}
+.close {
+  color: #fff;
+  float: right;
+  padding: 5px;
+  font-size: 14px;
+  font-weight: 400;
+  text-decoration: none;
 }
 
 </style>
@@ -29,9 +66,9 @@
     <button id='nfj_query'>Query</button>
     <div id="graph_container"></div>
     <div id='details'>
-    <div class='header'></div>
-      <ul id='properties'>
-      </ul>  
+    <div class='header'><span></span><a href="#" class="close" onclick="hideDetails();">X</a></div>
+      <table id='properties'>
+      </table>  
 
     </div>
 
@@ -115,17 +152,22 @@ $(document).ready(function() {
           var list = '';
             for(var key in props) {
               if(props.hasOwnProperty(key)) {
-                list += '<li>' + key + ': ' + props[key] + '</li>';
+                list += '<tr><td class="key_text">' + key + ' </td><td class="value_text">' + props[key] + '</td></tr>';
               }
             }
-          $('#details > ul').html(list);
-          $('#details > div.header').text(this.__data__.name);
+          $('#details > table').html(list);
+          $('#details > div.header > span').text(this.__data__.name);
           $('#details').css('visibility', 'visible');
         }
       });
     });
   }
+
 });
+
+  function hideDetails() {
+    $('#details').css('visibility', 'hidden');
+  }
 </script>
 </body>
 </html>
