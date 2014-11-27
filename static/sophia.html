@@ -10,6 +10,10 @@ body {
   stroke: #fff;
   stroke-width: 1.5px;
 }
+.node-text {
+  font: 9px helvetica;
+  font-weight: bold;
+}
 
 .link {
   stroke: #999;
@@ -139,6 +143,18 @@ $(document).ready(function() {
             return d.name; 
           });
 
+      var labels = svg.selectAll("text")
+              .data(graph.nodes)
+              .enter()
+              .append("text")
+              .attr("class", "node-text")
+              .attr({"x":function(d){
+                return d.x;
+              },
+                 "y":function(d){return d.y;}})
+              .text(function(d){return getNodeLabel(d);})
+              .call(force.drag);
+
       force.on("tick", function() {
         link.attr("x1", function(d) { return d.source.x; })
             .attr("y1", function(d) { return d.source.y; })
@@ -147,6 +163,12 @@ $(document).ready(function() {
 
         node.attr("cx", function(d) { return d.x; })
             .attr("cy", function(d) { return d.y; });
+
+        labels.attr("x", function(d) { return d.x - 15; })
+            .attr("y", function(d) { 
+              return d.y + 5; 
+            }); 
+
       });
 
       svg.selectAll("circle.node").on("click", function(){
@@ -171,6 +193,25 @@ $(document).ready(function() {
         }
       });
     });
+  }
+
+  function getNodeLabel(d) {
+    if (d.label == 'Test') {
+      return 'Test ' + d.properties.TestNumber;
+    } else if (d.label == 'TestStep') {
+      return d.properties.Status;
+    } else if (d.label == 'ServerRequest') {
+      if (d.properties.HTTP_result == '200') {
+        return '200 OK';
+      } else {
+        return 'Error ' + d.properties.HTTP_result;
+      }
+    } else if (d.label == 'ServerCPU') {
+      return 'CPU: ' + d.properties.AVG;
+    } else if (d.label == 'ServerMemory') {
+      return 'Used: ' + d.properties.VIRTUAL_USED_PRECENT;
+    }
+    return d.label;
   }
 
 });
