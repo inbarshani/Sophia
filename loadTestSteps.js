@@ -57,7 +57,7 @@ module.exports = {
                     db.query(querySteps, params, function(err, results) {
                         if (err) console.error('neo4j query failed: ' + querySteps + ' params: ' + params + '\n');
                         var stepNumber = parseInt(results[0]['step.StepNumber']);
-                        console.log('results[0]: ' + JSON.stringify(results[0]) + ' step.stepNumber: ' + stepNumber);
+                        //console.log('results[0]: ' + JSON.stringify(results[0]) + ' step.stepNumber: ' + stepNumber);
                         var linkparams;
                         var queryLinkSteps;
                         if (stepNumber > 0) {
@@ -81,7 +81,7 @@ module.exports = {
                                     'AND c.TestNumber = ' + testNumber + ' ' +
                                     'CREATE (b)-[:PRCEDE]->(a), (c)-[:INCLUDE]->(a)\n';
                             }
-                            console.log(queryLinkSteps + ' ' + JSON.stringify(linkparams));
+                            //console.log(queryLinkSteps + ' ' + JSON.stringify(linkparams));
                             db.query(queryLinkSteps, linkparams, function(err, results) {
                                 if (err) console.error('neo4j query failed: ' + queryLinkSteps + ' params: ' + JSON.stringify(linkparams) + '\n');
                             });
