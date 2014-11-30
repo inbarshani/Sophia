@@ -1,89 +1,92 @@
 <html>
   <meta charset="utf-8">
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui.min.css">
+    <link rel="stylesheet" href="css/autn.css">
+  </head>
   <style>
-    body {
-      font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-      font-size: 11px;
-    }
-    .node {
-      stroke: #fff;
-      stroke-width: 1.5px;
-    }
-    .node-text {
-      font: 11px helvetica;
-      font-weight: bold;
-    }
-    .link {
-      stroke: #999;
-      stroke-opacity: .6;
-    }
-    #details {
-      width: 300px;
-      height: 400px;
-      border: 2 px solid black;
-      background-color: #000;
-      color: #fff;
-      position: absolute;
-      top: 10%;
-      left: 1350;
-      border-radius: 6px;
-      visibility: hidden;
-    }
-    #properties {
-      width: 300px;
-      table-layout:fixed;
-    }
-    td {
-      border-bottom: 1px solid #999;
-      vertical-align: text-top;
-    }
-    .header {
-      border-bottom: 1px solid #999;
-      font-size: 18px;
-    }
-    .key_text {
-      font-size: 10px;
-      color: #ddd;
-      width: 100px;
-    }
-    .value_text {
-      font-size: 10px;
-      color: #fff;
-      word-wrap:break-word;
-    }
-    .close {
-      color: #fff;
-      float: right;
-      padding: 5px;
-      font-size: 14px;
-      font-weight: 400;
-      text-decoration: none;
-    }
   </style>
   <body>
-    <form name='query_form' action="#">
-      <input type="Text" name="q" id="q" placeholder="Entre query text">
-      <input type='submit' id='nfj_query' value='Query'></input>
-    </form>
-    <div id="graph_container"></div>
-    <div id='details'>
-    <div class='header'><span></span><a href="#" class="close" onclick="hideDetails();">X</a></div>
-      <table id='properties'>
-      </table>  
-    </div>
-    <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script src="js/jquery-2.1.0.js"></script>
+    <header class="main-header">
+      <div class="main-logo">
+        <img src="./img/hp_logo_blue.png" class="img-logo">
+      </div>
+      <h1 class="main-title">Sophia</h1>
+    </header>
+
+    <section style="width: 1600px;">
+      <div style="margin-left: 10px; margin-top: 0px;">
+        <aside style="width: 400px;">
+          <div class="entry-content">
+            <article class="entry widget">  
+              <h3 class="section-title">Test Steps</h3>
+              <div class="entry-wrapper">
+                <!--form name='query_form' action="#"-->
+                  <div>
+                    <label for="q">Description:</label>
+                    <input type="Text" name="q" id="q" placeholder="Enter Query Text" class="ui-widget ui-corner-all" style="width:100%;">
+                  </div>
+                  <div>
+                    <label for="dateBiasRange">Expected Results:</label>
+                    <input type="Text" name="expected" id="expected" placeholder="Enter Expectd Results" class="ui-widget ui-corner-all" style="width:100%;">
+                </div>
+                <div class="table-row">
+                  <button id='nfj_query' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' style="width:100px; height: 30px;">Submit</button>
+                </div>
+                <div class="table-row">
+                  <section id="errorsAndWarnings" class="final-details"></section>
+                </div>
+              <!--/form-->
+            </article>
+          </div>
+        </aside>
+        <aside style="width: 1150px; float: right;">
+          <div class="entry-content">
+            <article class="entry widget">  
+              <h3 class="section-title">Graph Results</h3>
+              <div class="entry-wrapper graph" id='graphWrapper'>
+                <section class="right">
+                  <div id="graph_container"></div>
+                </section>
+              </div>
+            </article>
+          </div>
+        </aside>
+        <div id='details'>
+        <div class='header'><span></span><a href="#" class="close" onclick="hideDetails();">X</a></div>
+          <table id='properties'>
+          </table>  
+        </div>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="js/jquery-2.1.0.js"></script>
+        <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
+      </div>
+    </section>
     <script>
       var lastNode;
       var nodeR = 30;
 
       $(document).ready(function() {
         $('#nfj_query').click(function() {
-          runQuery( $('#q').val());
+          if ($('#q').val().length == 0) {
+            error('Step Description cannot be empty');
+            return false;
+          }
+          if ($('#expected').val().length == 0) {
+            error('Expected Results cannot be empty');
+            return false;
+          }
+          var expectedArr = $('#expected').val().split(" ");
+          if (expectedArr.length != 4) {
+            error('Expected results must contain 4 parts:<br>{entity name} {property} {sign} {value}.<br> For example: ServerCPU AVG > 4');
+            return false;
+          }
+
+          runQuery( $('#q').val(), $('#expected').val());
         });
 
-        var width = 1600,
-            height = 1024;
+        var width = 1150,
+            height = $('#graphWrapper').css('height').replace('px', '');
 
         var color = d3.scale.category20();
 
@@ -94,13 +97,13 @@
 
         var svg;
 
-        function runQuery(query) {
+        function runQuery(query, expected) {
           d3.select("#graph_container").html('');
           svg = d3.select("#graph_container").append("svg")
             .attr("width", width)
             .attr("height", height);
 
-          d3.json("/query?q=" + query, function(error, graph) {
+          d3.json("/query?q=" + query + "&expected=" + expected, function(error, graph) {
             // create a lookup of node id to node index
             var lookupIndex = {};
             for (var i=0;i<graph.nodes.length;i++) {
@@ -227,7 +230,13 @@
                 .attr("class", "link")
                 .style("stroke-width", 5);
 
-                force.charge(-2000)
+                force.charge(function(d) {
+                  if (d.label == 'TestStep' || d.label == 'UserAction') {
+                    return -500;
+                  } else {
+                    return -1000;
+                  }
+                })
                   .linkDistance(120)
                   .start();
 
@@ -285,7 +294,7 @@
           } else if (d.label == 'TestStep') {
             var title;
             if (d.name.length > 15) {
-              title = name.substring(0,15) + '...';
+              title = d.name.substring(0,15) + '...';
             } else {
               title = d.name;
             }
@@ -309,6 +318,31 @@
       function hideDetails() {
         $('#details').css('visibility', 'hidden');
       }
+
+      function renderError(errors) {
+       clearErrors();
+        renderErrorWithoutClear(errors);
+        $('#errorsAndWarnings').fadeIn();
+      }
+
+      function renderErrorWithoutClear(errors) {
+        $.each(errors, function(index, error) {
+          $('#errorsAndWarnings').append('<p class="' + error.type + '"><span></span>' + error.message + '</p>');
+        });
+      }
+
+      function clearErrors() {
+        $('#errorsAndWarnings').html('');
+        $('#errorsAndWarnings').hide();
+      }
+
+      function error(text) {
+        renderError([{type: 'error', message: text}]);
+        setTimeout(function() {
+          clearErrors();
+        }, 7000);
+      }
+
     </script>
   </body>
 </html>

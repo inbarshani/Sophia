@@ -9,7 +9,18 @@ app.use(express.static(__dirname + '/static'));
 
 app.get('/query', function(request, response) {
   var queryString = request.query.q;
-  var query = "match n where n:TestStep AND n.Description =~ '.*" + queryString + ".*' return n";
+  var expectedQueryString = request.query.expected;
+  var descQuery;
+  var wordsArr = queryString.split(' ');
+  if (wordsArr.length == 1) {
+    descQuery = "n.Description =~ '.*" + queryString + ".*'"; 
+  } else {
+    descQuery = "n.Description =~ '.*" + wordsArr[0] + ".*'"; 
+    for (var i = 1; i < wordsArr.length; i++) {
+      descQuery = descQuery + " AND n.Description =~ '.*" + wordsArr[i] + ".*'"; 
+    }
+  }
+  var query = "match n where (n:TestStep AND (" + descQuery + ")) or (n:UserAction AND (" + descQuery + ")) return n";
   console.log(query);
   db.query(query, null, function(err, results) {
     if (err) throw err;
@@ -38,20 +49,53 @@ app.get('/query', function(request, response) {
       nodes.push(node);
       ids.push(id);
     });
-    query =  "START a = node(" + ids + "), b = node("+ ids + ") MATCH a -[r]-> b RETURN r"; 
+
+    // get linked nodes that don't match expected results
+    // query structure: <entity name> <property> <sign> <value>
+    // for example: ServerCPU AVG > 4
+    wordsArr = expectedQueryString.split(" ");
+    query = "START a = node(" + ids + ") MATCH (a)-[r]-(n) where (n:" + wordsArr[0] + " AND n." + wordsArr[1] + " " + wordsArr[2] + " " + wordsArr[3] + ") RETURN n";
     console.log(query);
     db.query(query, null, function(err, results) {
+      if (err) throw err;
       results.map(function (result) {
-        var url = result.r.db.url + "/db/data/node/";
-        var edge = {"source": parseInt(result.r._data.start.replace(url, "")),
-          "target": parseInt(result.r._data.end.replace(url, "")),
-          "value": result.r._data.type,
-          "id": result.r._data.metadata.id            
-        };
-        edges.push(edge);
+        var node = {};
+        var id;
+        var label;
+        var name;
+        id = result.n._data.metadata.id;
+        if (result.n._data.metadata.labels.length > 0) {
+          label = result.n._data.metadata.labels[0];
+        } else {
+          label = "Node";
+        }
+        if (result.n._data.data.Name) {
+          name = result.n._data.data.Name;
+        } else {
+          name = label;
+        }
+        node.name = name;
+        node.label = label;
+        node.id = id;
+        node.properties = result.n._data.data;
+        nodes.push(node);
+        ids.push(id);
       });
-      var obj = {"nodes": nodes, "links": edges}
-      response.send(JSON.stringify(obj));
+      query =  "START a = node(" + ids + "), b = node("+ ids + ") MATCH a -[r]-> b RETURN r"; 
+      console.log(query);
+      db.query(query, null, function(err, results) {
+        results.map(function (result) {
+          var url = result.r.db.url + "/db/data/node/";
+          var edge = {"source": parseInt(result.r._data.start.replace(url, "")),
+            "target": parseInt(result.r._data.end.replace(url, "")),
+            "value": result.r._data.type,
+            "id": result.r._data.metadata.id            
+          };
+          edges.push(edge);
+        });
+        var obj = {"nodes": nodes, "links": edges}
+        response.send(JSON.stringify(obj));
+      });
     });
   });
 });
