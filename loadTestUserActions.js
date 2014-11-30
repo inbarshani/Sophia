@@ -37,6 +37,8 @@ module.exports = {
             var itemData = params.item;
             //console.log("TIME: "+itemData+"\n");
             var date= dateTime.getDateFromFormat(itemData, "MM/dd/yyyy HH:mm:ss");
+            // user actions seems to be offest by one hour, fix
+            date.setHours(date.getHours()-1);
             //console.log("date: "+date+"\n");
             //console.log("date: "+date+" is " + date.getTime() + " ticks\n");
             params.resultRow["TIME"] = date.toString();
