@@ -61,8 +61,10 @@
     }
   </style>
   <body>
-    <input type="Text" name="q" id="q" placeholder="Entre query text">
-    <button id='nfj_query'>Query</button>
+    <form name='query_form' action="#">
+      <input type="Text" name="q" id="q" placeholder="Entre query text">
+      <input type='submit' id='nfj_query' value='Query'></input>
+    </form>
     <div id="graph_container"></div>
     <div id='details'>
     <div class='header'><span></span><a href="#" class="close" onclick="hideDetails();">X</a></div>
@@ -73,6 +75,7 @@
     <script src="js/jquery-2.1.0.js"></script>
     <script>
       var lastNode;
+      var nodeR = 30;
 
       $(document).ready(function() {
         $('#nfj_query').click(function() {
@@ -122,7 +125,7 @@
               .data(graph.nodes)
               .enter().append("circle")
               .attr("class", "node")
-              .attr("r", 40)
+              .attr("r", nodeR)
               .style("fill", function(d) { 
                 return color(d.label); 
               })
@@ -150,39 +153,144 @@
               node.attr("cx", function(d) { return d.x; })
                 .attr("cy", function(d) { return d.y; });
 
-              labels.attr("x", function(d) { return d.x - 15; })
-                .attr("y", function(d) { return d.y + 5; }); 
+              labels.attr("x", function(d) { return d.x + 40; })
+                .attr("y", function(d) { return d.y -15; }); 
             });
 
             svg.selectAll("circle.node").on("click", function(){
-              if (lastNode) {
-                d3.select(lastNode)
-                  .style("stroke","white");
-              }
-              lastNode = this;
-              d3.select(this)
-                .style("stroke","red");
-              var props = this.__data__.properties;
-              if (props != undefined) {
-                var list = '';
-                for(var key in props) {
-                  if(props.hasOwnProperty(key)) {
-                    list += '<tr><td class="key_text">' + key + ' </td><td class="value_text">' + props[key] + '</td></tr>';
-                  }
-                }
-                $('#details > table').html(list);
-                $('#details > div.header > span').text(this.__data__.name);
-                $('#details').css('visibility', 'visible');
-              }
+              nodeOnClick(this, node, link, labels);
             });
           });
+        }
+
+        function nodeOnClick(nodeObj, node, link, labels) {
+          if (typeof lastNode != 'undefined') {
+            d3.select(lastNode)
+              .style("stroke","white");
+            }
+            lastNode = nodeObj;
+            d3.select(nodeObj)
+              .style("stroke","red");
+            var props = nodeObj.__data__.properties;
+            if (props != undefined) {
+              var list = '';
+              for(var key in props) {
+                if(props.hasOwnProperty(key)) {
+                  list += '<tr><td class="key_text">' + key + ' </td><td class="value_text">' + props[key] + '</td></tr>';
+                }
+              }
+              $('#details > table').html(list);
+              $('#details > div.header > span').text(nodeObj.__data__.name);
+              $('#details').css('visibility', 'visible');
+              d3.json("/expand?id=" + nodeObj.__data__.id, function(error, graph) {
+                var nodes = force.nodes();
+                var currIndex = nodes.length;
+                var links = force.links();
+                for (var i=0;i<graph.nodes.length;i++) {
+                  if (findNodeById(nodes, graph.nodes[i].id) == null) {
+                    nodes.push(graph.nodes[i]);
+                  }
+                }
+                node = node.data(nodes);
+                node.enter().insert("circle", ".cursor")
+                .attr("class", "node")
+                .attr("r", nodeR)
+                .style("fill", function(d) { 
+                  return color(d.label); 
+                })      
+                .call(force.drag);
+                
+                node.append("title")
+                  .text(function(d) { return d.name; });
+
+                labels = labels.data(nodes);
+                labels.enter().insert("text", ".node")
+                .attr("class", "node-text")
+                .attr({"x":function(d){ 
+                    return d.x; 
+                  },
+                   "y":function(d){return d.y;}})
+                .text(function(d){return getNodeLabel(d);})
+                .call(force.drag);
+
+                var l;
+                for (i=0;i<graph.links.length;i++) {
+                  l = graph.links[i];
+                  l.source = getNodeIndex(nodes, l.source);
+                  l.target = getNodeIndex(nodes, l.target);
+                  if (findNodeById(graph.links, l.source, l.target) == null) {
+                    links.push(l);
+                  }
+                }
+                link = link.data(links);
+                link.enter().insert("line", ".node")
+                .attr("class", "link")
+                .style("stroke-width", 5);
+
+                force.charge(-2000)
+                  .linkDistance(120)
+                  .start();
+
+                force.on("tick", function() {
+                  link.attr("x1", function(d) { return d.source.x; })
+                    .attr("y1", function(d) { return d.source.y; })
+                    .attr("x2", function(d) { return d.target.x; })
+                    .attr("y2", function(d) { return d.target.y; });
+
+                  node.attr("cx", function(d) { return d.x; })
+                    .attr("cy", function(d) { return d.y; });
+
+                  labels.attr("x", function(d) { return d.x + 40; })
+                  .attr("y", function(d) { return d.y -15; }); 
+                });
+
+                svg.selectAll("circle.node").on("click", function(){
+                  nodeOnClick(this, node, link, labels);
+                });
+              });
+            }
+
+        }
+
+        function findNodeById(nodes, id) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id == id) {
+              return nodes[i];
+            }
+          }
+          return null;
+        }
+
+        function findLinkByIds(links, from, to) {
+          for (var i = 0; i < links.length; i++) {
+            if (links[i].source == from && links[i].target == to) {
+              return links[i];
+            }
+          }
+          return null;
+        }
+
+        function getNodeIndex(nodes, id) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id == id) {
+              return i;
+            }
+          }
+          return null;
         }
 
         function getNodeLabel(d) {
           if (d.label == 'Test') {
             return 'Test ' + d.properties.TestNumber;
           } else if (d.label == 'TestStep') {
-            return d.properties.Status;
+            var title;
+            if (d.name.length > 15) {
+              title = name.substring(0,15) + '...';
+            } else {
+              title = d.name;
+            }
+            title = title +': ' + d.properties.Status;
+            return title;
           } else if (d.label == 'ServerRequest') {
             if (d.properties.HTTP_result == '200') {
               return '200 OK';
