@@ -13,23 +13,19 @@ db.query('MATCH (n) OPTIONAL MATCH (n)-[m]-() DELETE n, m', null, function(err, 
         var loadTestUserActions = require('./loadTestUserActions');
         var loadQTPObjects = require('./loadQTPObjects');
 
-        console.log('call test steps');
+        console.log('load test steps');
         loadTestSteps.read(function() {
-            console.log('call cpu');
+            console.log('load cpu');
             loadMtoursServerCPU.read(function() {
-                console.log('call logs');
+                console.log('load logs');
                 loadMtoursServerLogs.read(function() {
-                    console.log('call memory');
+                    console.log('load memory');
                     loadMtoursServerMemory.read(function() {
-                        console.log('call user actions');
+                        console.log('load user actions');
                         loadTestUserActions.read(function() {
                             console.log('load UI objects');
                             loadQTPObjects.read(function() {
-                                var linkAll = require("./linkAllToTestSteps");
-                                console.log('link all');
-                                linkAll.link(function() {
-                                    console.log('end');
-                                });
+                                console.log('end');
                             });
                         });
                     });

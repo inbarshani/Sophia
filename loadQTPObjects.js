@@ -26,6 +26,7 @@ function processObjectXML(objectXML, parentNodeID) {
     // Wednesday, October 08, 2014 11:32:44
     updateTime = updateTime.split(" ")[4];
     var date = dateTime.getDateFromFormat(updateTime, "HH:mm:ss");
+    date.setHours(date.getHours()-1);
     date.setDate(8);
     date.setMonth(9);
     date.setFullYear(2014);

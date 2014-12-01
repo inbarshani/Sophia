@@ -9,7 +9,7 @@ module.exports = {
             if (err) console.error('neo4j query to order all nodes by TIME_TICKS failed: ' + err + '\n');
             else {
                 //console.log('match all nodes which are not test/steps');
-                //console.log('resuts.length: '+results.length);
+                console.log('Linking '+results.length+' nodes');
                 var prevObj = null;
                 // TODO: handle data with time before first step
                 for (var i = 0; i < results.length; i++) {
@@ -34,10 +34,11 @@ module.exports = {
                     else if (type != "Test") {
                         // define a link to prev obj
                         if (prevObj) {
-                            //console.log("Link, current type: "+type+" prev type "+prevObj.type);
+                            //console.log("Link, prev "+prevObj.id+" "+prevObj.type+" "+ prevObj.time+" to "+id+" "+type+" "+time);
                             var queryLinkObjs = 'MATCH (a),(b) ' +
                                 'WHERE ID(a) = ' + prevObj.id + ' AND ID(b) = ' + id + ' ' +
                                 'CREATE (a)-[:LINK]->(b)\n';
+                            
                             db.query(queryLinkObjs, null, function(err, results) {
                                 if (err) console.error('neo4j query failed: ' + queryLinkObjs + ' err: ' + err + '\n');
                             });
@@ -49,8 +50,11 @@ module.exports = {
                         };
                     }
                 }
+                console.log('Linking '+results.length+' nodes is done');
             }
         });
         if (callback) callback();
     }
 };
+
+module.exports.link();
