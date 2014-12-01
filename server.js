@@ -54,7 +54,13 @@ app.get('/query', function(request, response) {
     // query structure: <entity name> <property> <sign> <value>
     // for example: ServerCPU AVG > 4
     wordsArr = expectedQueryString.split(" ");
-    query = "START a = node(" + ids + ") MATCH (a)-[r]-(n) where (n:" + wordsArr[0] + " AND n." + wordsArr[1] + " " + wordsArr[2] + " " + wordsArr[3] + ") RETURN n";
+
+    // returh full path to results nodes    
+//    query = "START a = node(" + ids + ") MATCH p=(a)-[:LINK*1..500]->(n:" + wordsArr[0] + ") where (n." + wordsArr[1] + " " + wordsArr[2] + " " + wordsArr[3] + ") RETURN nodes(p)";
+
+    // return only results nodes, no path
+    query = "START a = node(" + ids + ") MATCH (a)-[:LINK*1..500]->(n:" + wordsArr[0] + ") where (n." + wordsArr[1] + " " + wordsArr[2] + " " + wordsArr[3] + ") RETURN n";
+
     console.log(query);
     db.query(query, null, function(err, results) {
       if (err) throw err;
