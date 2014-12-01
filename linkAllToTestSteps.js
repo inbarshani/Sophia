@@ -18,7 +18,7 @@ module.exports = {
                     var time = results[i]['n.TIME_TICKS'];
                     var type = results[i]['labels(n)'];
                     //console.log('result id: '+id+' time: '+time+' type: '+type);
-                    if (type === "TestStep")
+                    if (type == "TestStep")
                     {
                         prevObj = {
                             "id": id,
