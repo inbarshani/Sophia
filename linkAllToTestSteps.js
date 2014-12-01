@@ -18,16 +18,25 @@ module.exports = {
                     var time = results[i]['n.TIME_TICKS'];
                     var type = results[i]['labels(n)'];
                     //console.log('result id: '+id+' time: '+time+' type: '+type);
-                    if (type == "TestStep")
+                    if (type === "TestStep")
+                    {
                         prevObj = {
                             "id": id,
-                            "time": time
+                            "time": time,
+                            "type": type
                         };
+                    }
+                    else if (type == "UIObject" && prevObj && prevObj.type == "UIObject")
+                    {
+                        // do nothing
+                        //console.log("UIObject, do nothing");
+                    }
                     else if (type != "Test") {
                         // define a link to prev obj
                         if (prevObj) {
+                            //console.log("Link, current type: "+type+" prev type "+prevObj.type);
                             var queryLinkObjs = 'MATCH (a),(b) ' +
-                                'WHERE ID(a) = ' + id + ' AND ID(b) = ' + prevObj.id + ' ' +
+                                'WHERE ID(a) = ' + prevObj.id + ' AND ID(b) = ' + id + ' ' +
                                 'CREATE (a)-[:LINK]->(b)\n';
                             db.query(queryLinkObjs, null, function(err, results) {
                                 if (err) console.error('neo4j query failed: ' + queryLinkObjs + ' err: ' + err + '\n');
@@ -35,12 +44,13 @@ module.exports = {
                         }
                         prevObj = {
                             "id": id,
-                            "time": time
+                            "time": time,
+                            "type": type
                         };
                     }
                 }
             }
-            if (callback) callback();
         });
+        if (callback) callback();
     }
 };

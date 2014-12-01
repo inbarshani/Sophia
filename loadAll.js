@@ -11,6 +11,7 @@ db.query('MATCH (n) OPTIONAL MATCH (n)-[m]-() DELETE n, m', null, function(err, 
         var loadMtoursServerCPU = require('./loadMtoursServerCPU');
         var loadMtoursServerMemory = require('./loadMtoursServerMemory');
         var loadTestUserActions = require('./loadTestUserActions');
+        var loadQTPObjects = require('./loadQTPObjects');
 
         console.log('call test steps');
         loadTestSteps.read(function() {
@@ -22,10 +23,13 @@ db.query('MATCH (n) OPTIONAL MATCH (n)-[m]-() DELETE n, m', null, function(err, 
                     loadMtoursServerMemory.read(function() {
                         console.log('call user actions');
                         loadTestUserActions.read(function() {
-                            var linkAll = require("./linkAllToTestSteps");
-                            console.log('link all');
-                            linkAll.link(function() {
-                                console.log('end');
+                            console.log('load UI objects');
+                            loadQTPObjects.read(function() {
+                                var linkAll = require("./linkAllToTestSteps");
+                                console.log('link all');
+                                linkAll.link(function() {
+                                    console.log('end');
+                                });
                             });
                         });
                     });

@@ -10,7 +10,7 @@ var parserMgr = require("csvtojson").core.parserMgr;
 
 module.exports = {
 
-    loadParsedResults: function(jsonObj, callback) {
+    loadParsedResults: function(jsonObj) {
         jsonActionLog = jsonObj;
         //console.log(jsonActionLog);
         var queryAction = 'CREATE (n:UserAction {data})\n';
@@ -22,7 +22,6 @@ module.exports = {
             };
             db.query(queryAction, params, function(err, results) {
                 if (err) console.error('neo4j query failed: ' + query + ' params: ' + params + '\n');
-                if (callback) callback();
             });
         }
     },
@@ -55,7 +54,7 @@ module.exports = {
         var jsonActionLog = null;
         //end_parsed will be emitted once parsing finished
         csvActionConverter.on("end_parsed", function(jsonObj){
-            that.loadParsedResults(jsonObj, null);
+            that.loadParsedResults(jsonObj);
         });
 
 
@@ -73,7 +72,8 @@ module.exports = {
         var jsonActionLog = null;
         //end_parsed will be emitted once parsing finished
         csvActionConverter.on("end_parsed", function(jsonObj){
-            that.loadParsedResults(jsonObj, callback);
+            that.loadParsedResults(jsonObj);
+            if (callback) callback();
         });
 
         csvActionLog = "./recording 8-10, 11-00/Test 2 user actions.csv";
