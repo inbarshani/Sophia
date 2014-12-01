@@ -29,6 +29,9 @@ p {
 		font-size: 14px;
 		line-height: 12px;
 }
+p.separator {
+	border-bottom: 1px solid #777;
+}
 .ui-widget {
 	width: 500px;
 	margin-bottom: 10px;
@@ -37,6 +40,7 @@ p {
 	display: table;
 	font-family: 'Segoe', Arial, Helvetica, sans-serif;
 	font-size: 11px;
+	width: 100%;
 }
 .table-row {
 	display: table-row;
@@ -49,19 +53,16 @@ p {
 .table-cell {
 	display: table-cell;
 	vertical-align: middle;
-	border-bottom: 1px solid #cccccc;
+	padding-left: 5px;
 }
 .table-cell.border {
-	height: 3px;
-	border-bottom-color: gray;
-	border-bottom-width: 1px;
-	border-bottom-style: solid;
+	border: 1px solid #777;
 }
 .table-cell.label {
 	width: 170px;
 	text-align: right;
 }
-.table-cell.header {
+.table-cell.border.bold {
 	font-weight: bold;
 }
 .table-cell.main {
