@@ -10,6 +10,7 @@ app.use(express.static(__dirname + '/static'));
 app.get('/query', function(request, response) {
   var queryString = request.query.q;
   var expectedQueryString = request.query.expected;
+  var actionIds = request.query.actionIds;
   var descQuery;
   var wordsArr = queryString.split(' ');
   if (wordsArr.length == 1) {
@@ -26,6 +27,9 @@ app.get('/query', function(request, response) {
     if (err) throw err;
     var nodes = [], edges = [];
     var ids=[];
+    if (actionIds.length > 0) {
+      ids=actionIds.split(',');
+    }
     results.map(function (result) {
       var node = {};
       var id;
