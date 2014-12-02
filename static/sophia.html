@@ -68,6 +68,7 @@
       var nodeR = 30;
       var linkLength = 120;
       var lastStepStatus;
+      var lastStepExpectedCondition;
       var actionIds = [];
 
       $(document).ready(function() {
@@ -106,8 +107,8 @@
             error('Expected results must contain 4 parts:<br>{entity name} {property} {sign} {value}.<br> For example: ServerCPU AVG > 4');
             return false;
           }
+          lastStepExpectedCondition = $('#expected').val();
           runQuery( $('#q').val(), $('#expected').val());
-          addPrevRow();
         });
 
         function runQuery(query, expected) {
@@ -145,7 +146,7 @@
         function queryActions(query, expected) {
           // query by description and expected results
           d3.json("/query?q=" + query + "&expected=" + expected + "&actionIds=" + actionIds, function(error, graph) {
-            addNodes(graph);
+            addNodes(graph, true);
           });
         }
 
@@ -156,7 +157,7 @@
           });
         }
 
-        function addNodes(graph) {
+        function addNodes(graph, isNewStep) {
           for (var i=0;i<graph.nodes.length;i++) {
             var n = graph.nodes[i];
             if (findNodeById(nodes, n.id) == null) {
@@ -168,12 +169,18 @@
           }
 
           var l;
+          var expectedNodeType = lastStepExpectedCondition.split(" ")[0];
+          lastStepStatus = "Passed";
           for (i=0;i<graph.links.length;i++) {
             l = graph.links[i];
             l.source = getNodeIndex(nodes, l.source);
             l.target = getNodeIndex(nodes, l.target);
             if (findLinkByIds(links, l.source, l.target) == null) {
               links.push(l);
+              // currently we only have negative status, i.e. if nodes related to the expected results query were returned
+              if (l.value == "FAR" || l.value == expectedNodeType) {
+                lastStepStatus = "Failed";
+              }
             }
           }
 
@@ -244,6 +251,9 @@
             })
             .linkDistance(linkLength)
             .start();
+            if (isNewStep) {
+              addPrevRow();
+            }
         }
 
         function findNodeById(nodes, id) {
@@ -369,6 +379,10 @@
         td = $('<div>');
         td.addClass('table-cell border');
         td.text($('#expected').val());
+        td.appendTo(tr);
+        td = $('<div>');
+        td.addClass('table-cell border');
+        td.text(lastStepStatus);
         td.appendTo(tr);
         tr.appendTo($('#prevQueries'));
 
