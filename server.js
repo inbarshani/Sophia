@@ -13,11 +13,11 @@ app.get('/query', function(request, response) {
   var descQuery;
   var wordsArr = queryString.split(' ');
   if (wordsArr.length == 1) {
-    descQuery = "n.Description =~ '.*" + queryString + ".*'"; 
+    descQuery = "n.Description =~ '(?i).*" + queryString + ".*'"; 
   } else {
-    descQuery = "n.Description =~ '.*" + wordsArr[0] + ".*'"; 
+    descQuery = "n.Description =~ '(?i).*" + wordsArr[0] + ".*'"; 
     for (var i = 1; i < wordsArr.length; i++) {
-      descQuery = descQuery + " AND n.Description =~ '.*" + wordsArr[i] + ".*'"; 
+      descQuery = descQuery + " AND n.Description =~ '(?i).*" + wordsArr[i] + ".*'"; 
     }
   }
   var query = "match n where (n:TestStep AND (" + descQuery + ")) or (n:UserAction AND (" + descQuery + ")) return n";
