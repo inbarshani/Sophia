@@ -139,7 +139,7 @@
             $('#details').css('visibility', 'visible');
 
             // shows linked nodes
-            getLinkedNodes(nodeObj.__data__.id);
+            //getLinkedNodes(nodeObj.__data__.id);
           }
         }
 
@@ -239,6 +239,10 @@
 
           svg.selectAll("circle.node").on("click", function(){
             nodeOnClick(this, node, link, label);
+          });
+
+          svg.selectAll("circle.node").on("dblclick", function(){
+            getLinkedNodes(this.__data__.id);
           });
 
           force
