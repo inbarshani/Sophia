@@ -210,4 +210,70 @@ app.get('/expand', function(request, response) {
     });
 });
 
+app.get('/search', function(request, response){
+    var actionIds = request.query.actionIds;
+    var searchQueryString = request.query.search;
+    var nodes = [],
+        edges = [];
+
+    // query structure: <entity name> <property> <sign> <value>
+    // for example: ServerCPU AVG > 4
+    if (searchQueryString.length == 0 || actionIds.length == 0) {
+        var obj = {
+            "nodes": nodes,
+            "links": edges
+        }
+        response.send(JSON.stringify(obj));
+    } else {
+        wordsArr = searchQueryString.split(" ");
+        var whereClause = "";
+        if (wordsArr.length == 4)
+          whereClause = "where (n." + wordsArr[1] + " " + wordsArr[2] + " " + wordsArr[3] + ")";
+        var query = "START a = node(" + actionIds + ") MATCH (a)-[r:LINK*1..500]->(n:" + wordsArr[0] + ") "+ whereClause +
+          " RETURN n, ID(a), length(r), type(head(r))";
+        console.log('query: ' + query);
+        db.query(query, null, function(err, results) {
+            if (err) throw err;
+            //console.log('query: ' + query + '\nresults:\n' + JSON.stringify(results));
+            results.map(function(result) {
+                var node = {};
+                var id;
+                var label;
+                var name;
+                id = result.n._data.metadata.id;
+                if (result.n._data.metadata.labels.length > 0) {
+                    label = result.n._data.metadata.labels[0];
+                } else {
+                    label = "Node";
+                }
+                if (result.n._data.data.Name) {
+                    name = result.n._data.data.Name;
+                } else {
+                    name = label;
+                }
+                node.name = name;
+                node.label = label;
+                node.id = id;
+                node.properties = result.n._data.data;
+                nodes.push(node);
+                var edgeType = 'FAR';
+                if (result['length(r)'] == 1)
+                    edgeType = result['type(head(r))'];
+                var edge = {
+                    "source": result['ID(a)'],
+                    "target": id,
+                    "value": edgeType
+                };
+                edges.push(edge);
+            });
+
+            var obj = {
+                "nodes": nodes,
+                "links": edges
+            }
+            response.send(JSON.stringify(obj));
+        });
+    }
+});
+
 app.listen(8080);
