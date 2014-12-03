@@ -32,11 +32,11 @@ app.get('/query', function(request, response) {
         match = "match n";
         returnClause = "return n";
     }
-    var query = match + " where (n:TestStep AND (" + descQuery + ")) or (n:UserAction AND (" + descQuery + ")) "+returnClause;
+    var query = match + " where (n:TestStep AND (" + descQuery + ")) or (n:UserAction AND (" + descQuery + ")) " + returnClause;
     console.log(query);
     db.query(query, null, function(err, results) {
         if (err) throw err;
-        console.log("main nodes results #: "+results.length);
+        console.log("main nodes results #: " + results.length);
         var nodes = [],
             edges = [];
         var ids = [];
@@ -210,7 +210,7 @@ app.get('/expand', function(request, response) {
     });
 });
 
-app.get('/search', function(request, response){
+app.get('/stepresearch', function(request, response) {
     var actionIds = request.query.actionIds;
     var searchQueryString = request.query.search;
     var nodes = [],
@@ -228,9 +228,9 @@ app.get('/search', function(request, response){
         wordsArr = searchQueryString.split(" ");
         var whereClause = "";
         if (wordsArr.length == 4)
-          whereClause = "where (n." + wordsArr[1] + " " + wordsArr[2] + " " + wordsArr[3] + ")";
-        var query = "START a = node(" + actionIds + ") MATCH (a)-[r:LINK*1..500]->(n:" + wordsArr[0] + ") "+ whereClause +
-          " RETURN n, ID(a), length(r), type(head(r))";
+            whereClause = "where (n." + wordsArr[1] + " " + wordsArr[2] + " " + wordsArr[3] + ")";
+        var query = "START a = node(" + actionIds + ") MATCH (a)-[r:LINK*1..500]->(n:" + wordsArr[0] + ") " + whereClause +
+            " RETURN n, ID(a), length(r), type(head(r))";
         console.log('query: ' + query);
         db.query(query, null, function(err, results) {
             if (err) throw err;
