@@ -282,6 +282,19 @@ img.table-icon {
       width: 300px;
       table-layout:fixed;
     }
+
+    #examine {
+      width: 300px;
+      height: 300px;
+      border: 2px solid black;
+      background-color: #fff;
+      color: #000;
+      position: absolute;
+      border-radius: 6px;
+      visibility: hidden;
+      padding: 5px;
+    }
+
     td {
       border-bottom: 1px solid #999;
       vertical-align: text-top;
@@ -307,5 +320,22 @@ img.table-icon {
       font-size: 14px;
       font-weight: 400;
       text-decoration: none;
+    }
+    .close.black {
+      color: #000;
+    }
+    .passed {
+    	color: Green;
+    	font-weight: bold;
+    }
+    .failed {
+    	color: Red;
+    	font-weight: bold;
+    }
+    .small-text {
+    	font-size: 11px;
+    }
+    .small-text.bold {
+		font-weight: bold;
     }
 

@@ -54,9 +54,35 @@
           </div>
         </aside>
         <div id='details'>
-        <div class='header'><span></span><a href="#" class="close" onclick="hideDetails();">X</a></div>
+          <div class='header'><span></span><a href="#" class="close" onclick="hideWin('details');">X</a></div>
           <table id='properties'>
           </table>  
+        </div>
+        <div id='examine'>
+          <div class='header'><span>Step Research</span><a href="#" class="close black" onclick="hideWin('examine');">X</a></div>
+          <div class="table-row">
+            <div class="table-cell small-text">The status of this step is:
+              <span id='exStatus'></span>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell">
+              <span id='exDescName' class="small-text bold"></span>
+              <span id='exDescValue'class="small-text"></span>
+            </div>
+          </div>
+          <p></p>
+          <div class="table-row">
+            <div class="table-cell small-text">To further research the step, enter query description and press "Research"</div>
+          </div>
+          <p></p>
+          <div>
+            <label for="exq">Description:</label>
+            <input type="Text" name="exq" id="exq" placeholder="Enter Query Text" class="ui-widget ui-corner-all" style="width:100%;">
+          </div>
+          <div class="table-row">
+            <button id='exq_query' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' style="width:100px; height: 30px;">Research</button>
+          </div>
         </div>
         <script src="http://d3js.org/d3.v3.min.js"></script>
         <script src="js/jquery-2.1.0.js"></script>
@@ -67,7 +93,7 @@
       var lastNode;
       var nodeR = 30;
       var linkLength = 120;
-      var lastStepStatus;
+      var lastStepStatus = {};
       var lastStepExpectedCondition;
       var actionIds = [];
 
@@ -133,9 +159,6 @@
             $('#details > table').html(list);
             $('#details > div.header > span').text(nodeObj.__data__.name);
             $('#details').css('visibility', 'visible');
-
-            // shows linked nodes
-            //getLinkedNodes(nodeObj.__data__.id);
           }
         }
 
@@ -154,6 +177,12 @@
         }
 
         function addNodes(graph, isNewStep) {
+          if (graph.nodes.length == 0) {
+            // 0 results - fail step and show error
+            lastStepStatus = {"status": "Failed", "reason": "Empty results set"};
+            error('Query returned 0 results');
+            return;
+          }
           for (var i=0;i<graph.nodes.length;i++) {
             var n = graph.nodes[i];
             if (findNodeById(nodes, n.id) == null) {
@@ -166,16 +195,16 @@
 
           var l;
           var expectedNodeType = lastStepExpectedCondition.split(" ")[0];
-          lastStepStatus = "Passed";
+          lastStepStatus = {"status": "Failed", "reason": "Expected conditions were not met", "ids": actionIds};
           for (i=0;i<graph.links.length;i++) {
             l = graph.links[i];
             l.source = getNodeIndex(nodes, l.source);
             l.target = getNodeIndex(nodes, l.target);
             if (findLinkByIds(links, l.source, l.target) == null) {
               links.push(l);
-              // currently we only have negative status, i.e. if nodes related to the expected results query were returned
+              // currently we only have POSITIVE status, i.e. if no nodes related to the expected results query were returned
               if (l.value == "FAR" || l.value == expectedNodeType) {
-                lastStepStatus = "Failed";
+                lastStepStatus = {"status": "Passed", "reason": "", ids: actionIds};
               }
             }
           }
@@ -308,87 +337,126 @@
           }
           return d.label;
         }
-      });
 
-      function hideDetails() {
-        $('#details').css('visibility', 'hidden');
-      }
+        function runExamineQuery(query, ids) {
+          // query by description and expected results
+          d3.json("/stepresearch?search=" + query + "&actionIds=" + ids, function(error, graph) {
+            addNodes(graph, true);
+          });
+        }
 
-      function renderError(errors) {
-       clearErrors();
-        renderErrorWithoutClear(errors);
-        $('#errorsAndWarnings').fadeIn();
-      }
+        function renderError(errors) {
+         clearErrors();
+          renderErrorWithoutClear(errors);
+          $('#errorsAndWarnings').fadeIn();
+        }
 
-      function renderErrorWithoutClear(errors) {
-        $.each(errors, function(index, error) {
-          $('#errorsAndWarnings').append('<p class="' + error.type + '"><span></span>' + error.message + '</p>');
-        });
-      }
+        function renderErrorWithoutClear(errors) {
+          $.each(errors, function(index, error) {
+            $('#errorsAndWarnings').append('<p class="' + error.type + '"><span></span>' + error.message + '</p>');
+          });
+        }
 
-      function clearErrors() {
-        $('#errorsAndWarnings').html('');
-        $('#errorsAndWarnings').hide();
-      }
+        function clearErrors() {
+          $('#errorsAndWarnings').html('');
+          $('#errorsAndWarnings').hide();
+        }
 
-      function error(text) {
-        renderError([{type: 'error', message: text}]);
-        setTimeout(function() {
-          clearErrors();
-        }, 7000);
-      }
+        function error(text) {
+          renderError([{type: 'error', message: text}]);
+          setTimeout(function() {
+            clearErrors();
+          }, 7000);
+        }
 
-      function addPrevRow() {
-        var numRows = $('#prevQueries tr').length;
-        var tr, td;
-        tr = $('<tr>');
-        tr.addClass('table-row');
+        function addPrevRow() {
+          var numRows = $('#prevQueries tr').length;
+          var tr, td, a;
+          tr = $('<tr>');
+          tr.addClass('table-row');
 
-        if (numRows == 0) {
-          numRows = 1;
-          // add header
-          td = $('<td>');
-          td.addClass('table-cell border bold')
-          td.text('Step');
+          if (numRows == 0) {
+            numRows = 1;
+            // add header
+            td = $('<td>');
+            td.addClass('table-cell border bold')
+            td.text('Step');
+            td.appendTo(tr);
+            td = $('<td>');
+            td.addClass('table-cell border bold')
+            td.text('Description');
+            td.appendTo(tr);
+            td = $('<td>');
+            td.addClass('table-cell border bold')
+            td.text('Expected Results');
+            td.appendTo(tr);
+            td = $('<td>');
+            td.addClass('table-cell border bold')
+            td.text('Status');
+            td.appendTo(tr);
+            tr.appendTo($('#prevQueries'));
+          }
+          tr = $('<tr>');
+          tr.addClass('table-row');
+          td = $('<div>');
+          td.addClass('table-cell border');
+          td.text(numRows);
           td.appendTo(tr);
-          td = $('<td>');
-          td.addClass('table-cell border bold')
-          td.text('Description');
+          td = $('<div>');
+          td.addClass('table-cell border');
+          td.text($('#q').val());
           td.appendTo(tr);
-          td = $('<td>');
-          td.addClass('table-cell border bold')
-          td.text('Expected Results');
+          td = $('<div>');
+          td.addClass('table-cell border');
+          td.text($('#expected').val());
           td.appendTo(tr);
-          td = $('<td>');
-          td.addClass('table-cell border bold')
-          td.text('Status');
+          td = $('<div>');
+          td.addClass('table-cell border');
+          a = $('<a>');
+          a.href='#';
+          a.click(function() {
+            showExamine(lastStepStatus, $(this).offset());
+          });
+          a.text(lastStepStatus.status);
+          a.appendTo(td);
           td.appendTo(tr);
           tr.appendTo($('#prevQueries'));
-        }
-        // add index row
-        tr = $('<tr>');
-        tr.addClass('table-row');
-        td = $('<div>');
-        td.addClass('table-cell border');
-        td.text(numRows);
-        td.appendTo(tr);
-        td = $('<div>');
-        td.addClass('table-cell border');
-        td.text($('#q').val());
-        td.appendTo(tr);
-        td = $('<div>');
-        td.addClass('table-cell border');
-        td.text($('#expected').val());
-        td.appendTo(tr);
-        td = $('<div>');
-        td.addClass('table-cell border');
-        td.text(lastStepStatus);
-        td.appendTo(tr);
-        tr.appendTo($('#prevQueries'));
 
-        $('#q').val('');
-        $('#expected').val('');
+          $('#q').val('');
+          $('#expected').val('');
+        }
+
+        function showExamine(statusObj, offset) {
+          showWin('examine', offset);
+          $('#exStatus').text(statusObj.status);
+          if (statusObj.status == 'Passed') {
+            $('#exStatus').addClass('passed');
+          } else {
+            $('#exStatus').addClass('failed');
+            $('#exDescName').text('Failure reason:');
+            $('#exDescValue').text(statusObj.reason);
+          }
+          $('#exq_query').click(function() {
+            if ($('#exq').val().length == 0) {
+              error('Description cannot be empty');
+              return false;
+            }
+            hideWin('examine');
+            runExamineQuery( $('#exq').val(), statusObj.ids);
+          });
+        }
+      });
+
+      function hideWin(id) {
+        $('#' + id).css('visibility', 'hidden');
       }
+
+      function showWin(id, offset) {
+        $('#' + id).css('visibility', 'visible');
+        $('#' + id).css('left', offset.left + 50);
+        $('#' + id).css('top', offset.top - 20);
+      }
+
     </script>
   </body>
 </html>
