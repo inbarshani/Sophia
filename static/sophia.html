@@ -364,7 +364,7 @@
         function runExamineQuery(query, ids) {
           // query by description and expected results
           d3.json("/stepresearch?search=" + query + "&actionIds=" + ids, function(error, graph) {
-            addNodes(graph, true);
+            addNodes(graph, false);
           });
         }
 
