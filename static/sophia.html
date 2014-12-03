@@ -177,12 +177,19 @@
         }
 
         function addNodes(graph, isNewStep) {
-          if (graph.nodes.length == 0 && lastStepExpectedCondition.length > 0) {
+          if (graph.nodes.length == 0) {
             // 0 results - fail step and show error
             lastStepStatus = {"status": "Failed", "reason": "Empty results set"};
             error('Query returned 0 results');
             return;
           }
+
+          actionIds = [];
+          if (lastStepExpectedCondition.length > 0)          
+            lastStepStatus = {"status": "Failed", "reason": "Expected results were not found", "ids": actionIds};
+          else
+            lastStepStatus = {"status": "Passed", "reason": "", ids: actionIds};
+
           for (var i=0;i<graph.nodes.length;i++) {
             var n = graph.nodes[i];
             if (findNodeById(nodes, n.id) == null) {
@@ -190,29 +197,26 @@
               if (n.label == 'TestStep' || n.label == 'UserAction') {
                 actionIds.push(n.id);
               }
+              if ((lastStepStatus.status == "Failed") && n.isCondition) {
+                lastStepStatus = {"status": "Passed", "reason": "", ids: actionIds};
+              }
             }
           }
 
-          if (lastStepExpectedCondition.length > 0)
+          if (lastStepStatus.status == "Failed")
           {
-            var l;          
-            var expectedNodeType = lastStepExpectedCondition.split(" ")[0];
-            lastStepStatus = {"status": "Failed", "reason": "Expected conditions were not met", "ids": actionIds};
-            for (i=0;i<graph.links.length;i++) {
-              l = graph.links[i];
-              l.source = getNodeIndex(nodes, l.source);
-              l.target = getNodeIndex(nodes, l.target);
-              if (findLinkByIds(links, l.source, l.target) == null) {
-                links.push(l);
-                // currently we only have POSITIVE status, i.e. if no nodes related to the expected results query were returned
-                if (l.value == "FAR" || l.value == expectedNodeType) {
-                  lastStepStatus = {"status": "Passed", "reason": "", ids: actionIds};
-                }
-              }
-            }            
+            error(lastStepStatus.reason);
           }
-          else
-            lastStepStatus = {"status": "Passed", "reason": "", ids: actionIds};
+
+          var l;          
+          for (i=0;i<graph.links.length;i++) {
+            l = graph.links[i];
+            l.source = getNodeIndex(nodes, l.source);
+            l.target = getNodeIndex(nodes, l.target);
+            if (findLinkByIds(links, l.source, l.target) == null) {
+              links.push(l);
+            }
+          }
 
           link = link.data(links);
           link.enter().insert("line", ".node")

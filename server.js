@@ -72,6 +72,7 @@ app.get('/query', function(request, response) {
                     "target": id,
                     "value": edgeType
                 };
+                //console.log('edge: '+JSON.stringify(edge));
                 edges.push(edge);
             }
         });
@@ -79,7 +80,7 @@ app.get('/query', function(request, response) {
         // get linked nodes that don't match expected results
         // query structure: <entity name> <property> <sign> <value>
         // for example: ServerCPU AVG > 4
-        if (expectedQueryString.length == 0) {
+        if (expectedQueryString.length == 0 || ids.length == 0) {
             var obj = {
                 "nodes": nodes,
                 "links": edges
@@ -116,6 +117,7 @@ app.get('/query', function(request, response) {
                     node.label = label;
                     node.id = id;
                     node.properties = result.n._data.data;
+                    node.isCondition = true;
                     nodes.push(node);
                     var edgeType = 'FAR';
                     if (result['length(r)'] == 1)
