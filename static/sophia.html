@@ -98,12 +98,8 @@
             error('Step Description cannot be empty');
             return false;
           }
-          if ($('#expected').val().length == 0) {
-            error('Expected Results cannot be empty');
-            return false;
-          }
           var expectedArr = $('#expected').val().split(" ");
-          if (expectedArr.length != 4) {
+          if ($('#expected').val().length > 0 && expectedArr.length != 4) {
             error('Expected results must contain 4 parts:<br>{entity name} {property} {sign} {value}.<br> For example: ServerCPU AVG > 4');
             return false;
           }

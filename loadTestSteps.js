@@ -79,7 +79,7 @@ module.exports = {
                                     'WHERE a.StepNumber = {currentStep} AND a.TestNumber = ' + testNumber + ' ' +
                                     'AND b.StepNumber = {prevStep} AND b.TestNumber = ' + testNumber + ' ' +
                                     'AND c.TestNumber = ' + testNumber + ' ' +
-                                    'CREATE (b)-[:PRCEDE]->(a), (c)-[:INCLUDE]->(a)\n';
+                                    'CREATE (b)-[:PRECEDE]->(a), (c)-[:INCLUDE]->(a)\n';
                             }
                             //console.log(queryLinkSteps + ' ' + JSON.stringify(linkparams));
                             db.query(queryLinkSteps, linkparams, function(err, results) {
