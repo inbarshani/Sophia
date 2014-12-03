@@ -177,7 +177,7 @@
         }
 
         function addNodes(graph, isNewStep) {
-          if (graph.nodes.length == 0) {
+          if (graph.nodes.length == 0 && lastStepExpectedCondition.length > 0) {
             // 0 results - fail step and show error
             lastStepStatus = {"status": "Failed", "reason": "Empty results set"};
             error('Query returned 0 results');
@@ -193,21 +193,26 @@
             }
           }
 
-          var l;
-          var expectedNodeType = lastStepExpectedCondition.split(" ")[0];
-          lastStepStatus = {"status": "Failed", "reason": "Expected conditions were not met", "ids": actionIds};
-          for (i=0;i<graph.links.length;i++) {
-            l = graph.links[i];
-            l.source = getNodeIndex(nodes, l.source);
-            l.target = getNodeIndex(nodes, l.target);
-            if (findLinkByIds(links, l.source, l.target) == null) {
-              links.push(l);
-              // currently we only have POSITIVE status, i.e. if no nodes related to the expected results query were returned
-              if (l.value == "FAR" || l.value == expectedNodeType) {
-                lastStepStatus = {"status": "Passed", "reason": "", ids: actionIds};
+          if (lastStepExpectedCondition.length > 0)
+          {
+            var l;          
+            var expectedNodeType = lastStepExpectedCondition.split(" ")[0];
+            lastStepStatus = {"status": "Failed", "reason": "Expected conditions were not met", "ids": actionIds};
+            for (i=0;i<graph.links.length;i++) {
+              l = graph.links[i];
+              l.source = getNodeIndex(nodes, l.source);
+              l.target = getNodeIndex(nodes, l.target);
+              if (findLinkByIds(links, l.source, l.target) == null) {
+                links.push(l);
+                // currently we only have POSITIVE status, i.e. if no nodes related to the expected results query were returned
+                if (l.value == "FAR" || l.value == expectedNodeType) {
+                  lastStepStatus = {"status": "Passed", "reason": "", ids: actionIds};
+                }
               }
-            }
+            }            
           }
+          else
+            lastStepStatus = {"status": "Passed", "reason": "", ids: actionIds};
 
           link = link.data(links);
           link.enter().insert("line", ".node")
