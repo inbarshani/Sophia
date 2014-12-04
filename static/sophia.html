@@ -91,11 +91,13 @@
         <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
       </div>
     </section>
+    <div id="busy" class="busyindicator"> </div>
     <script>
       var lastNode;
       var lastStepStatus = {};
       var lastStepExpectedCondition;
       var actionIds = [];
+      var isAjaxActive = false;
 
       var d3Settings = {
         width: 1150,
@@ -177,6 +179,7 @@
           d3.json("/query?q=" + query + "&expected=" + expected + "&actionIds=" + actionIds, function(error, graph) {
             addNodes(graph, true);
           });
+          showBusy();
         }
 
         function getLinkedNodes(nodeId) {
@@ -185,9 +188,11 @@
           d3.json("/expand?id=" + nodeId, function(error, graph) {
             addNodes(graph);
           });
+          showBusy();
         }
 
         function addNodes(graph, isNewStep) {
+          hideBusy();
           if (isNewStep) {
             actionIds = [];
           }
@@ -372,6 +377,7 @@
           d3.json("/stepresearch?search=" + query + "&actionIds=" + ids, function(error, graph) {
             addNodes(graph, false);
           });
+          showBusy();
         }
 
         function renderError(errors) {
@@ -487,6 +493,19 @@
         $('#' + id).css('top', offset.top - 20);
       }
 
+      function showBusy() {
+        isAjaxActive = true;
+        setTimeout(function() {
+          if (isAjaxActive) {
+            $( "#busy" ).show();
+          }
+        }, 500);
+      }
+
+      function hideBusy() {
+        isAjaxActive = false;
+        $( "#busy" ).hide();
+      }
     </script>
   </body>
 </html>

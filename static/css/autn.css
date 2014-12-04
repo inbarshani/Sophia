@@ -225,6 +225,7 @@ img.table-icon {
 	height: 32px;
 	background-image: url(../img/download.gif); 
  	z-index: 300;
+ 	display: none;
 }
 .doughnut-legend {
     list-style: none;
