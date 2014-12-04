@@ -22,7 +22,7 @@
               <h3 class="section-title">Test Steps</h3>
               <div class="entry-wrapper">
                 <div id='prevQueries' class='table'></div>
-                <!--form name='query_form' action="#"-->
+                <form name='query_form' action="#">
                   <div>
                     <label for="q">Description:</label>
                     <input type="Text" name="q" id="q" placeholder="Enter Query Text" class="ui-widget ui-corner-all" style="width:100%;">
@@ -32,12 +32,12 @@
                     <input type="Text" name="expected" id="expected" placeholder="Enter Expectd Results" class="ui-widget ui-corner-all" style="width:100%;">
                 </div>
                 <div class="table-row">
-                  <button id='nfj_query' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' style="width:100px; height: 30px;">Submit</button>
+                  <input type="submit" id='nfj_query' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' style="width:100px; height: 30px;"></input>
                 </div>
                 <div class="table-row">
                   <section id="errorsAndWarnings" class="final-details"></section>
                 </div>
-              <!--/form-->
+              </form>
             </article>
           </div>
         </aside>
@@ -65,24 +65,26 @@
               <span id='exStatus'></span>
             </div>
           </div>
-          <div class="table-row">
-            <div class="table-cell">
-              <span id='exDescName' class="small-text bold"></span>
-              <span id='exDescValue'class="small-text"></span>
+          <form name='examine_form' action="#">
+            <div class="table-row">
+              <div class="table-cell">
+                <span id='exDescName' class="small-text bold"></span>
+                <span id='exDescValue'class="small-text"></span>
+              </div>
             </div>
-          </div>
-          <p></p>
-          <div class="table-row">
-            <div class="table-cell small-text">To further research the step, enter query description and press "Research"</div>
-          </div>
-          <p></p>
-          <div>
-            <label for="exq">Description:</label>
-            <input type="Text" name="exq" id="exq" placeholder="Enter Query Text" class="ui-widget ui-corner-all" style="width:100%;">
-          </div>
-          <div class="table-row">
-            <button id='exq_query' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' style="width:100px; height: 30px;">Research</button>
-          </div>
+            <p></p>
+            <div class="table-row">
+              <div class="table-cell small-text">To further research the step, enter query description and press "Research"</div>
+            </div>
+            <p></p>
+            <div>
+              <label for="exq">Description:</label>
+              <input type="Text" name="exq" id="exq" placeholder="Enter Query Text" class="ui-widget ui-corner-all" style="width:100%;">
+            </div>
+            <div class="table-row">
+              <input type="submit" id='exq_query' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' style="width:100px; height: 30px;" value="Research"></input>
+            </div>
+          </form>
         </div>
         <script src="http://d3js.org/d3.v3.min.js"></script>
         <script src="js/jquery-2.1.0.js"></script>
@@ -91,27 +93,34 @@
     </section>
     <script>
       var lastNode;
-      var nodeR = 30;
-      var linkLength = 120;
       var lastStepStatus = {};
       var lastStepExpectedCondition;
       var actionIds = [];
 
+      var d3Settings = {
+        width: 1150,
+        height: $('#graphWrapper').css('height').replace('px', ''),
+        r: 30,
+        linkLength: 150,
+        charge: -3000,
+        gravity: 0.05,
+        friction: 0.3
+      };
+
       $(document).ready(function() {
         // initialize d3
-        var width = 1150,
-            height = $('#graphWrapper').css('height').replace('px', '');
-
         var svg = d3.select("#graph_container").append("svg")
-          .attr("width", width)
-          .attr("height", height);
+          .attr("width", d3Settings.width)
+          .attr("height", d3Settings.height);
 
         var color = d3.scale.category20();
 
         var force = d3.layout.force()
-            .charge(-120)
-            .linkDistance(linkLength)
-            .size([width, height]);
+            .charge(d3Settings.charge)
+            .linkDistance(d3Settings.linkLength)
+            .size([d3Settings.width, d3Settings.height])
+            .friction(d3Settings.friction)
+            .gravity(d3Settings.gravity);
 
         var nodes = force.nodes(),
             links = force.links(),
@@ -131,6 +140,7 @@
           }
           lastStepExpectedCondition = $('#expected').val();
           runQuery( $('#q').val(), $('#expected').val());
+          return false;
         });
 
         function runQuery(query, expected) {
@@ -178,14 +188,12 @@
         }
 
         function addNodes(graph, isNewStep) {
-          if (isNewStep)
-          {
+          if (isNewStep) {
             actionIds = [];
           }
 
           if (graph.nodes.length == 0) {
-            if (isNewStep)
-            {
+            if (isNewStep) {
               // 0 results - fail step and show error
               lastStepStatus.status = "Failed";
               lastStepStatus.reason = "No results";
@@ -194,8 +202,7 @@
             return;
           }
 
-          if (isNewStep)
-          {
+          if (isNewStep) {
             if (lastStepExpectedCondition.length > 0)          
               lastStepStatus = {"status": "Failed", "reason": "Expected results were not found", "ids": []};
             else
@@ -217,8 +224,7 @@
             }
           }
 
-          if (isNewStep && lastStepStatus.status == "Failed")
-          {
+          if (isNewStep && lastStepStatus.status == "Failed") {
             error(lastStepStatus.reason);
           }
 
@@ -253,7 +259,7 @@
           node = node.data(nodes);
           node.enter().insert("circle", ".cursor")
               .attr("class", "node")
-              .attr("r", nodeR)
+              .attr("r", d3Settings.r)
               .style("fill", function(d) { 
                 return color(d.label); 
               })
@@ -296,12 +302,12 @@
           force
             .charge(function(d) {
               if (d.label == 'TestStep' || d.label == 'UserAction') {
-                return -500;
+                return d3Settings.charge;
               } else {
-                return -1000;
+                return d3Settings.charge;
               }
             })
-            .linkDistance(linkLength)
+            .linkDistance(d3Settings.linkLength)
             .start();
             if (isNewStep) {
               addPrevRow();
@@ -466,6 +472,7 @@
             }
             hideWin('examine');
             runExamineQuery( $('#exq').val(), statusObj.ids);
+            return false;
           });
         }
       });
