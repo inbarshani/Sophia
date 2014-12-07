@@ -278,4 +278,12 @@ app.get('/stepresearch', function(request, response) {
     }
 });
 
+app.get('/tests', function(request, response) {
+  var tests = [];
+  var nodes = [];
+  var obj = {"id": 0, "date": new Date(), "description": "Desc", "expected": "exp", "nodes": nodes};
+  tests.push(obj);
+  response.send(JSON.stringify(tests));
+});
+
 app.listen(8080);

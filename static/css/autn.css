@@ -33,7 +33,7 @@ p.separator {
 	border-bottom: 1px solid #777;
 }
 .ui-widget {
-	width: 500px;
+	width: 400px;
 	margin-bottom: 10px;
 }
 .table {
@@ -170,7 +170,7 @@ aside {
 	display: table-cell; 
 }
 .img-logo {
-	margin-left: 150px;
+	margin-left: 30px;
 	margin-top: 10px;
 }
 .section-title {
@@ -245,7 +245,7 @@ img.table-icon {
 .final-details p span { width: 22px; height: 22px; display: block; font-size: 0; line-height: 0; text-indent: -4000px; background: url(images/icons.png) no-repeat -150px 0; position: relative; top: 7px; left: 0; }
 .final-details p.missed span { background-position: -173px 0; }
 
-#errorsAndWarnings.final-details { width: 350px; }
+#errorsAndWarnings.final-details { width: 400px; }
 #errorsAndWarnings.final-details p { padding: 6px; padding-left: 39px; border-radius: 5px; height: 70px; line-height: 16px;}
 #errorsAndWarnings.final-details p span { top: 20px; left: -30px; }
 #errorsAndWarnings.final-details p.error { background-color: #F7E1E1; }
