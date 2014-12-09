@@ -283,8 +283,18 @@ img.table-icon {
       width: 300px;
       table-layout:fixed;
     }
-
     #examine {
+      width: 300px;
+      height: 300px;
+      border: 2px solid black;
+      background-color: #fff;
+      color: #000;
+      position: absolute;
+      border-radius: 6px;
+      visibility: hidden;
+      padding: 5px;
+    }
+    #testName {
       width: 300px;
       height: 300px;
       border: 2px solid black;
@@ -338,5 +348,17 @@ img.table-icon {
     }
     .small-text.bold {
 		font-weight: bold;
+    }
+    span.icon-save {
+    	background-image: url("../img/ic_save_en.png");
+    	width: 32px;
+    	height: 32px;
+		position: absolute;
+    	top: 15%;
+		left: 85%;
+    }
+    span.icon-save.disabled {
+    	background-image: url("../img/ic_save_dis.png");
+    	cursor: default;
     }
 
