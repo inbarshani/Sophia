@@ -378,7 +378,7 @@
             $('#testSaveIcon').removeClass('disabled');
             numRows = 1;
           }
-          appendStepRow($('#prevQueries'), numRows, $('#q').val(), $('#expected').val(), lastStepStatus);
+          appendStepRow($('#prevQueries'), numRows, $('#q').val(), $('#expected').val(), lastStepStatus, 0);
           lastStep = {"id": numRows, "description": $('#q').val(), "expected": $('#expected').val(), "status": lastStepStatus};
           prevSteps.push(lastStep);
 
@@ -386,13 +386,18 @@
           $('#expected').val('');
         }
 
-        function appendStepRow(table, id, description, expected, status) {
+        function appendStepRow(table, id, description, expected, status, cellsBefore) {
           var tr, td, a;
-          tr = $('<tr>');
-          tr.addClass('table-row');
-
           if (id == 1) {
             // add header
+            tr = $('<tr>');
+            tr.addClass('table-row');
+            for (var i = 0; i < cellsBefore; i++) {
+              td = $('<td>');
+              td.addClass('table-cell')
+              td.text('');
+              td.appendTo(tr);
+            }
             td = $('<td>');
             td.addClass('table-cell border bold')
             td.text('Step');
@@ -413,6 +418,12 @@
           }
           tr = $('<tr>');
           tr.addClass('table-row');
+          for (var i = 0; i < cellsBefore; i++) {
+            td = $('<td>');
+            td.addClass('table-cell')
+            td.text('');
+            td.appendTo(tr);
+          }
           td = $('<td>');
           td.addClass('table-cell border');
           td.text(id);
@@ -444,33 +455,35 @@
           tr = $('<tr>');
           tr.addClass('table-row');
           td = $('<td>');
-          td.addClass('table-cell border');
+          td.addClass('table-cell');
           td.attr('title', 'Run');
           img = $("<img>");
           img.attr("src", "./img/icon_run.png");
+          img.css('margin', '5px');
           img.click(function() {
             // re-run test
           })
           img.appendTo(td);
           td.appendTo(tr);
           td = $('<td>');
-          td.addClass('table-cell border');
+          td.addClass('table-cell bold');
           td.text("Test Name:");
           td.appendTo(tr);
           td = $('<td>');
-          td.addClass('table-cell border');
+          td.addClass('table-cell bold');
           td.text(test.name);
           td.appendTo(tr);
           td = $('<td>');
-          td.addClass('table-cell border');
+          td.addClass('table-cell');
           td.text('');
+          td.appendTo(tr);
           td.appendTo(tr);
           tr.appendTo($('#savedTestsTable'));
 
           // add steps          
           var id = 1;
           test.steps.forEach(function(step) {
-            appendStepRow($('#savedTestsTable'), id, step.description, step.expected, step.status);
+            appendStepRow($('#savedTestsTable'), id, step.description, step.expected, step.status, 1);
             id++;
           });
         }
