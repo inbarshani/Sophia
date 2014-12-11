@@ -33,7 +33,6 @@ p.separator {
 	border-bottom: 1px solid #777;
 }
 .ui-widget {
-	width: 400px;
 	margin-bottom: 10px;
 }
 .table {
@@ -194,7 +193,7 @@ aside {
 	background: #fff;
 	border: 1px solid #aaa;
 	border-top: 0;
-	padding: 10px;
+	padding: 5px;
 	border-radius: 0 0 5px 5px;
 	height: 100%;
 }
@@ -360,4 +359,28 @@ img.table-icon {
     	background-image: url("../img/ic_save_dis.png");
     	cursor: default;
     }
-
+    .no-padding {
+    	padding: 0 !important;
+    }
+    #tabs {
+    }
+    #contextMenu {
+   		position: absolute;
+    	left: 0;
+    	top: 0;
+    	background-color: #fff;
+	    border: 1px #ccc solid;
+    	border-radius: 6px;
+    	box-shadow: #333 2px 2px 4px;
+    	padding: 8px;
+    	visibility: hidden;
+    }
+    #cmul {
+    	display: table;
+  		margin: 0;
+  		padding-left: 0;
+  		list-style: none;
+    }
+    #cmul li {
+    	display: table-row;
+    }

@@ -7,22 +7,40 @@
       var actionIds = [];
       var isAjaxActive = false;
       var savedTests = [];
+      var cmNode;
 
       var d3Settings;
 
       $(document).ready(function() {
+        // initialize tabs
+        $( "#tabs" ).tabs();
         // initialize accorion
-        $( "#accordionActions" ).accordion({
+        $( "#accordionTests" ).accordion({
           heightStyle: "content",
           activate: function( event, ui ) {
             $( "#accordionActions" ).accordion( "refresh" );
-            if (ui.newPanel[0].id == "accordionExsecution") {
+            if (ui.newPanel[0].id == "accordionExecution") {
               // do nothing
-            } else if (ui.newPanel[0].id == "accordionTests") {
+            } else if (ui.newPanel[0].id == "accordionSavedTests") {
               loadTests();
             }
           }
         });
+
+        $( "#accordionResearch" ).accordion({
+          heightStyle: "content",
+          activate: function( event, ui ) {
+            $( "#accordionResearch" ).accordion( "refresh" );
+            if (ui.newPanel[0].id == "accordionResearchForm") {
+              // do nothing
+            } else if (ui.newPanel[0].id == "accordionSavedResearch") {
+              loadSavedResearch();
+            }
+          }
+        });
+
+        // fill types list
+        getNodesLabels();
 
         d3Settings = {
           width: 1150,
@@ -54,6 +72,10 @@
             link = svg.selectAll(".link"),
             label = svg.selectAll(".text");
 
+         d3.select("body").on('click',function () {
+            hideWin('contextMenu');
+         });
+
         $('#nfj_query').click(function() {
           if ($('#q').val().length == 0) {
             error('Step Description cannot be empty');
@@ -82,6 +104,27 @@
         $('#testSaveIcon').click(function() {
           showWin('testName', $(this).offset());
         });
+
+        $('#cmRemove').click(function() {
+          var nodeIndex = getNodeIndex(nodes, cmNode.id);
+          nodes.splice(nodeIndex, 1);
+          var linksToRemove = getNodeLinksindexes(nodeIndex);
+          for (var i = 0; i < linksToRemove.length; i++) {
+            links.splice(i, 1);
+          }
+          var actionIdIndex = -1;
+          for (i = 0; i < actionIds.length; i++) {
+            if (actionIds[i] == cmNode.id) {
+              actionIdIndex = i;
+              break;
+            }
+          }
+          if (actionIdIndex > -1) {
+            actionIds.splice(actionIdIndex, 1);
+          }
+          restart();
+        });
+
 
 
         function runQuery(query, expected) {
@@ -181,7 +224,13 @@
               links.push(l);
             }
           }
+          if (isNewStep) {
+            addPrevRow();
+          }
+          restart();
+        }
 
+        function restart() {
           link = link.data(links);
           link.enter().insert("line", ".node")
               .attr("class", "link")
@@ -199,6 +248,7 @@
                 return 5;
               }
             });
+          link.exit().remove();
 
           node = node.data(nodes);
           node.enter().insert("circle", ".cursor")
@@ -208,6 +258,7 @@
                 return color(d.label); 
               })
               .call(force.drag);
+          node.exit().remove();
 
           node.append("title")
             .text(function(d) { return d.name; });
@@ -221,6 +272,7 @@
                     "y":function(d){return d.y;}})
             .text(function(d){return getNodeLabel(d);})
             .call(force.drag);
+          label.exit().remove();
 
           force.on("tick", function() {
             link.attr("x1", function(d) { return d.source.x; })
@@ -243,6 +295,13 @@
             getLinkedNodes(this.__data__.id);
           });
 
+          svg.selectAll("circle.node").on("contextmenu", function(){
+            var d3_target = d3.select(d3.event.target);
+            cmNode = d3_target.datum();
+            showWin('contextMenu', $(this).offset());
+            d3.event.preventDefault();
+          });
+
           force
             .charge(function(d) {
               if (d.label == 'TestStep' || d.label == 'UserAction') {
@@ -253,10 +312,7 @@
             })
             .linkDistance(d3Settings.linkLength)
             .start();
-            if (isNewStep) {
-              addPrevRow();
-            }
-        }
+          }
 
         function findNodeById(nodes, id) {
           for (var i = 0; i < nodes.length; i++) {
@@ -283,6 +339,16 @@
             }
           }
           return null;
+        }
+
+        function getNodeLinksindexes(nodeIndex) {
+          var linksArr = [];
+          for (var i = 0; i < links.length; i++) {
+            if (links[i].source.index == nodeIndex || links[i].target.index == nodeIndex) {
+              linksArr.push(i);
+            }
+          }
+          return linksArr;
         }
 
         function getNodeLabel(d) {
@@ -340,6 +406,10 @@
           }
         }
 
+        function loadSavedResearch() {
+
+        }
+
         function runExamineQuery(query, ids) {
           // query by description and expected results
           d3.json("/stepresearch?search=" + query + "&actionIds=" + ids, function(error, graph) {
@@ -347,6 +417,19 @@
           });
           showBusy();
         }
+
+        function getNodesLabels() {
+          // get all node types
+          d3.json("/nodetypes", function(error, types) {
+            $.each(types, function(key, value){
+              $('#nodeType').append($("<option>", {
+                value: value.label,
+                text: value.label
+              }));
+            });
+          });
+        }
+
 
         function renderError(errors) {
          clearErrors();

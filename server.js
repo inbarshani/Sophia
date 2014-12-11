@@ -286,4 +286,13 @@ app.get('/tests', function(request, response) {
   response.send(JSON.stringify(tests));
 });
 
+app.get('/nodetypes', function(request, response) {
+    var types = [];
+    var query = "START n=node(*) RETURN distinct labels(n) as label";
+    db.query(query, null, function(err, results) {
+        if (err) throw err;
+        response.send(JSON.stringify(results));
+    });
+});
+
 app.listen(8080);
