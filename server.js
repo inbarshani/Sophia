@@ -7,6 +7,17 @@ var app = express();
 
 app.use(express.static(__dirname + '/static'));
 
+var searchFieldByType = {
+    Test: {name: "TestNumber", compare: " = {VALUE} ", type: "number"},
+    TestStep: {name: "Description", compare: " =~ '(?i).* {VALUE} .*' ", type: "text"},
+    UIObject: {name: "name", compare: " =~ '(?i).* {VALUE} .*' ", type: "text"},
+    ServerCPU: {name: "AVG", compare: " >= {VALUE} ", type: "number"},
+    ServerMemory: {name: "VIRTUAL_USED_PRECENT", compare: " >= {VALUE} ", type: "number"},
+    UserAction: {name: "Description", compare: " =~ '(?i).* {VALUE} .*' ", type: "text"},
+    ServerRequest: {name: "HTTP_result", compare: " = '{VALUE}' ", type: "text"},
+    ServerError: {name: "ERROR", compare: " =~ '(?i).* {VALUE} .*' ", type: "text"}
+};
+
 app.get('/query', function(request, response) {
     var queryString = request.query.q;
     var expectedQueryString = request.query.expected;
@@ -294,5 +305,119 @@ app.get('/nodetypes', function(request, response) {
         response.send(JSON.stringify(results));
     });
 });
+
+app.get('/research', function(request, response) {
+    var actionIds = request.query.actionIds;
+    var searchQueryString = request.query.research;
+    var nodeTypesArr = request.query.nodeType.split(';');
+    var nodes = [],
+        edges = [];
+
+    if (searchQueryString.length == 0 || nodeTypesArr.length == 0) {
+        var obj = {
+            "nodes": nodes,
+            "links": edges
+        }
+        response.send(JSON.stringify(obj));
+        return;
+    }
+    var valType = isNaN(searchQueryString) ? "text" : "number";
+    var descQuery = "";
+    var typeQuery = "";
+var OR = "";
+    for (var i = 0; i < nodeTypesArr.length; i++) {
+        if (nodeTypesArr[i].length > 0) {
+            if (searchFieldByType[nodeTypesArr[i]].type == valType) {
+                // only add condition if the value matches the accepted type for this field
+                typeQuery += OR + "n:" + nodeTypesArr[i];
+                descQuery += OR + "n." + searchFieldByType[nodeTypesArr[i]].name + searchFieldByType[nodeTypesArr[i]].compare.replace("{VALUE}", searchQueryString);
+                if (OR.length == 0) {
+                    OR = " OR ";
+                }
+            }
+        }
+    }
+    var query = "match n where (( " + typeQuery + " ) AND ( " + descQuery + " )) return n limit 100";
+    console.log(query);
+    db.query(query, null, function(err, results) {
+        if (err) throw err;
+        console.log("main nodes results #: " + results.length);
+        var nodes = [],
+            edges = [];
+        var ids = [];
+        results.map(function(result) {
+            var node = {};
+            var id;
+            var label;
+            var name;
+            id = result.n._data.metadata.id;
+            if (result.n._data.metadata.labels.length > 0) {
+                label = result.n._data.metadata.labels[0];
+            } else {
+                label = "Node";
+            }
+            if (result.n._data.data.Name) {
+                name = result.n._data.data.Name;
+            } else {
+                name = label;
+            }
+            node.name = name;
+            node.label = label;
+            node.id = id;
+            node.properties = result.n._data.data;
+            nodes.push(node);
+            ids.push(id);
+            if (actionIds && actionIds.length > 0) {
+                // add edges from previous main nodes to new main nodes
+                var edgeType = 'FAR';
+                if (result['length(r)'] == 1)
+                    edgeType = result['type(head(r))'];
+                var edge = {
+                    "source": result['ID(a)'],
+                    "target": id,
+                    "value": edgeType
+                };
+                //console.log('edge: '+JSON.stringify(edge));
+                edges.push(edge);
+            }
+        });
+
+        if (ids.length == 0) {
+            var obj = {
+                "nodes": nodes,
+                "links": edges
+            }
+            response.send(JSON.stringify(obj));
+        } else {
+            query = "START a = node(" + ids + "), b = node(" + ids + ") MATCH a -[r]-> b RETURN r";
+            console.log(query);
+            db.query(query, null, function(err, results) {
+                if (err) {
+                    response.status(500).send(err);
+                    return;
+                }
+                results.map(function(result) {
+                    var url = result.r.db.url + "/db/data/node/";
+                    var edge = {
+                        "source": parseInt(result.r._data.start.replace(url, "")),
+                        "target": parseInt(result.r._data.end.replace(url, "")),
+                        "value": result.r._data.type,
+                        "id": result.r._data.metadata.id
+                    };
+                    edges.push(edge);
+                });
+
+                // TODO: get also all the edges from previous TestStep/UserActions (listed in actionIDs) nodes to new nodes (ids)
+
+                var obj = {
+                    "nodes": nodes,
+                    "links": edges
+                }
+                response.send(JSON.stringify(obj));
+            });
+        }
+    });
+});
+
 
 app.listen(8080);
