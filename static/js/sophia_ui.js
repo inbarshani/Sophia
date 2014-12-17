@@ -63,7 +63,8 @@
           .attr("width", d3Settings.width)
           .attr("height", d3Settings.height);
 
-        var color = d3.scale.category20();
+//        var color = d3.scale.category20();
+          var color = {"Test": "#ff0000", "TestStep": "#00ff00", "ServerCPU": "#0000ff", "ServerMemory": "#ff8800", "UIObject": "#88ff00", "ServerError": "#8800ff", "ServerRequest": "#ff0088", "UserAction": "#0088ff"};
 
         var force = d3.layout.force()
             .charge(d3Settings.charge)
@@ -265,7 +266,7 @@
         }
 
         function restart() {
-          link = link.data(links, function(d) {return d.id});
+          link = link.data(links);
           link.enter().insert("line", ".node")
               .attr("class", "link")
                           .style("stroke-dasharray", function(d) {
@@ -289,7 +290,7 @@
               .attr("class", "node")
               .attr("r", d3Settings.r)
               .style("fill", function(d) { 
-                return color(d.label); 
+                return color[d.label]; 
               })
               .call(force.drag);
           node.exit().remove();
