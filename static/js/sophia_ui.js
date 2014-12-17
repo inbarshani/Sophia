@@ -1,15 +1,21 @@
       var lastNode;
       var prevSteps = [];
+      var prevResearches = [];
       var lastStep = {};
+      var lastResearch = {};
       var savedSteps = [];
       var lastStepStatus = {};
       var lastStepExpectedCondition;
       var actionIds = [];
+      var researchActionIds = [];
       var isAjaxActive = false;
       var savedTests = [];
       var cmNode;
 
       var d3Settings;
+
+      var categories = [{name: "Server", value: "", keywords: ["server"]}, {name: "Network", value: "", keywords: ["network", "net", "request"]}, {name: "Testing", value: "", keywords: ["test", "step"]}, {name: "UI", value: "", keywords: ["action", "ui"]}];
+
 
       $(document).ready(function() {
         // initialize tabs
@@ -76,7 +82,7 @@
             hideWin('contextMenu');
          });
 
-        $('#nfj_query').click(function() {
+        $('#testing_query_button').click(function() {
           if ($('#q').val().length == 0) {
             error('Step Description cannot be empty');
             return false;
@@ -102,15 +108,21 @@
         });
 
         $('#testSaveIcon').click(function() {
-          showWin('testName', $(this).offset());
+          if (!$('#testSaveIcon').hasClass('disabled')) {
+            showWin('testName', $(this).offset());
+          }
         });
 
         $('#cmRemove').click(function() {
           var nodeIndex = getNodeIndex(nodes, cmNode.id);
+          var linkIndex;
           nodes.splice(nodeIndex, 1);
-          var linksToRemove = getNodeLinksindexes(nodeIndex);
-          for (var i = 0; i < linksToRemove.length; i++) {
-            links.splice(i, 1);
+          for (var i = 0; i < links.length; i++) {
+            if (links[i].source.index == nodeIndex || links[i].target.index == nodeIndex) {
+              linkIndex = getNodeIndex(links, links[i].id);
+              links.splice(linkIndex, 1);
+              i--;
+            }
           }
           var actionIdIndex = -1;
           for (i = 0; i < actionIds.length; i++) {
@@ -122,16 +134,30 @@
           if (actionIdIndex > -1) {
             actionIds.splice(actionIdIndex, 1);
           }
+//          label[0].splice(nodeIndex, 1);
           restart();
         });
 
-
+        $('#research_query_button').click(function() {
+          lastStepExpectedCondition = $('#expected').val();
+          if ($('#research').val().length == 0) {
+            error('Search cannot be empty');
+            return false;
+          }
+          lastResearchDesc = $('#research').val();
+          runResearchQuery( $('#research').val(), $('#nodeType').val());
+          return false;
+        });
 
         function runQuery(query, expected) {
           queryActions(query, expected);
         }
 
-        function nodeOnClick(nodeObj, node, link, labels) {
+        function runResearchQuery(query, types) {
+          queryResearch(query, types);
+        }
+
+        function nodeOnClick(nodeObj, node, link) {
           // set node stroke
           if (typeof lastNode != 'undefined') {
             d3.select(lastNode)
@@ -159,7 +185,15 @@
         function queryActions(query, expected) {
           // query by description and expected results
           d3.json("/query?q=" + query + "&expected=" + expected + "&actionIds=" + actionIds, function(error, graph) {
-            addNodes(graph, true);
+            addNodes(graph, true, "testing");
+          });
+          showBusy();
+        }
+
+        function queryResearch(query, types) {
+          // query by description and expected results
+          d3.json("/research?research=" + query + "&nodeType=" + types + "&actionIds=" + researchActionIds, function(error, graph) {
+            addNodes(graph, true, "research");
           });
           showBusy();
         }
@@ -168,12 +202,12 @@
           lastStepExpectedCondition = "";
           // query by Node ID for linked entities
           d3.json("/expand?id=" + nodeId, function(error, graph) {
-            addNodes(graph);
+            addNodes(graph, false, "testing");
           });
           showBusy();
         }
 
-        function addNodes(graph, isNewStep) {
+        function addNodes(graph, isNewStep, type) {
           hideBusy();
           if (isNewStep) {
             actionIds = [];
@@ -220,18 +254,18 @@
             l = graph.links[i];
             l.source = getNodeIndex(nodes, l.source);
             l.target = getNodeIndex(nodes, l.target);
-            if (findLinkByIds(links, l.source, l.target) == null) {
+            if (findLinkByIds(graph.links, l.source, l.target) == null) {
               links.push(l);
             }
           }
           if (isNewStep) {
-            addPrevRow();
+            addPrevRow(type);
           }
           restart();
         }
 
         function restart() {
-          link = link.data(links);
+          link = link.data(links, function(d) {return d.id});
           link.enter().insert("line", ".node")
               .attr("class", "link")
                           .style("stroke-dasharray", function(d) {
@@ -250,7 +284,7 @@
             });
           link.exit().remove();
 
-          node = node.data(nodes);
+          node = node.data(nodes, function(d) {return d.id});
           node.enter().insert("circle", ".cursor")
               .attr("class", "node")
               .attr("r", d3Settings.r)
@@ -263,13 +297,13 @@
           node.append("title")
             .text(function(d) { return d.name; });
 
-          label = label.data(nodes);
+          label = label.data(nodes, function(d) {return d.id});
           label
             .enter()
             .insert("text", ".node")
             .attr("class", "node-text")
             .attr({ "x":function(d){ return d.x; },
-                    "y":function(d){return d.y;}})
+                    "y":function(d){ return d.y;}})
             .text(function(d){return getNodeLabel(d);})
             .call(force.drag);
           label.exit().remove();
@@ -288,7 +322,7 @@
           });
 
           svg.selectAll("circle.node").on("click", function(){
-            nodeOnClick(this, node, link, label);
+            nodeOnClick(this, node, link);
           });
 
           svg.selectAll("circle.node").on("dblclick", function(){
@@ -422,10 +456,26 @@
           // get all node types
           d3.json("/nodetypes", function(error, types) {
             $.each(types, function(key, value){
+              addValueToCategories(value.label[0]);
+            });
+            categories.forEach (function (category) {
               $('#nodeType').append($("<option>", {
-                value: value.label,
-                text: value.label
+                value: category.value,
+                text: category.name
               }));
+
+            });
+          });
+        }
+
+        function addValueToCategories (nodeTypeValue) {
+          // find node type in relevant keywords
+          var ntv = nodeTypeValue.toLowerCase();
+          categories.forEach (function (category) {
+            category.keywords.forEach(function (keyword) {
+              if (ntv.indexOf(keyword) > -1 && category.value.indexOf(nodeTypeValue + ';') == -1) {
+                category.value += nodeTypeValue + ';';
+              }
             });
           });
         }
@@ -455,18 +505,31 @@
           }, 7000);
         }
 
-        function addPrevRow() {
-          var numRows = $('#prevQueries tr').length;
-          if (numRows == 0) {
-            $('#testSaveIcon').removeClass('disabled');
-            numRows = 1;
-          }
-          appendStepRow($('#prevQueries'), numRows, $('#q').val(), $('#expected').val(), lastStepStatus, 0);
-          lastStep = {"id": numRows, "description": $('#q').val(), "expected": $('#expected').val(), "status": lastStepStatus};
-          prevSteps.push(lastStep);
+        function addPrevRow(type) {
+          var numRows;
+          if (type == 'testing') {
+            numRows = $('#prevQueries tr').length;
+            if (numRows == 0) {
+              $('#testSaveIcon').removeClass('disabled');
+              numRows = 1;
+            }
+            appendStepRow($('#prevQueries'), numRows, $('#q').val(), $('#expected').val(), lastStepStatus, 0);
+            lastStep = {"id": numRows, "description": $('#q').val(), "expected": $('#expected').val(), "status": lastStepStatus};
+            prevSteps.push(lastStep);
 
-          $('#q').val('');
-          $('#expected').val('');
+            $('#q').val('');
+            $('#expected').val('');
+          } else if (type == 'research') {
+            numRows = $('#prevResearchQueries tr').length;
+            if (numRows == 0) {
+              $('#researchSaveIcon').removeClass('disabled');
+              numRows = 1;
+            }
+            lastResearch = {"id": numRows, "what": $('#nodeType').find('option:selected').text(), "searchTerm": $('#research').val()};
+            prevResearches.push(lastResearch);
+            appendResearchRow($('#prevResearchQueries'), numRows, lastResearch);
+            $('#research').val('');
+          }
         }
 
         function appendStepRow(table, id, description, expected, status, cellsBefore) {
@@ -569,6 +632,56 @@
             appendStepRow($('#savedTestsTable'), id, step.description, step.expected, step.status, 1);
             id++;
           });
+        }
+
+        function appendResearchRow(table, id, research) {
+          var tr, td, img;
+          if (id == 1) {
+            // add header
+            tr = $('<tr>');
+            tr.addClass('table-row');
+            td = $('<td>');
+            td.addClass('table-cell border bold')
+            td.text('Query');
+            td.appendTo(tr);
+            td = $('<td>');
+            td.addClass('table-cell border bold')
+            td.text('What');
+            td.appendTo(tr);
+            td = $('<td>');
+            td.addClass('table-cell border bold')
+            td.text('Search term');
+            td.appendTo(tr);
+            td = $('<td>');
+            td.addClass('table-cell border bold')
+            td.text('Save');
+            td.appendTo(tr);
+            tr.appendTo(table);
+          }
+          tr = $('<tr>');
+          tr.addClass('table-row');
+          td = $('<td>');
+          td.addClass('table-cell border');
+          td.text(id);
+          td.appendTo(tr);
+          td = $('<td>');
+          td.addClass('table-cell border');
+          td.text(research.what);
+          td.appendTo(tr);
+          td = $('<td>');
+          td.addClass('table-cell border');
+          td.text(research.searchTerm);
+          td.appendTo(tr);
+          td = $('<td>');
+          td.addClass('table-cell border');
+          img = $('<img>');
+          img.attr('src', '/img/ic_save.png');
+          img.click(function() {
+            showSaveResearch(research, $(this).offset());
+          });
+          img.appendTo(td);
+          td.appendTo(tr);
+          tr.appendTo(table);
         }
 
         function showExamine(statusObj, offset) {
