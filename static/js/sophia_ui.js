@@ -49,7 +49,7 @@
         getNodesLabels();
 
         d3Settings = {
-          width: 1150,
+          width: $('#graphWrapper').css('width').replace('px', ''),
           height: $('#graphWrapper').css('height').replace('px', ''),
           r: 30,
           linkLength: 150,
@@ -174,10 +174,10 @@
             var list = '';
             for(var key in props) {
               if(props.hasOwnProperty(key)) {
-                list += '<tr><td class="key_text">' + key + ' </td><td class="value_text">' + props[key] + '</td></tr>';
+                list += '<div class="table-row"><div class="table-cell key_text">' + key + ' </div><div class="table-cell value_text">' + props[key] + '</div></div>';
               }
             }
-            $('#details > table').html(list);
+            $('#details > div.pb').html(list);
             $('#details > div.header > span').text(nodeObj.__data__.name);
             $('#details').css('visibility', 'visible');
           }
@@ -630,7 +630,7 @@
           // add steps          
           var id = 1;
           test.steps.forEach(function(step) {
-            appendStepRow($('#savedTestsTable'), id, step.description, step.expected, step.status, 1);
+            appendStepRow($('#savedTestsTable'), id, step.description, step.expected, step.status, 0);
             id++;
           });
         }

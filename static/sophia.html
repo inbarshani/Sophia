@@ -18,9 +18,9 @@
       <h1 class="main-title">Sophia</h1>
     </header>
 
-    <section style="width: 1600px;">
+    <section style="width: 100%;">
       <div style="margin-left: 10px; margin-top: 0px;">
-        <aside style="width: 400px;">
+        <aside style="width: 20%;">
           <article class="entry widget">  
             <h3 class="section-title">Actions</h3>
             <div class="entry-wrapper">
@@ -34,7 +34,7 @@
                     <div id="accordionTests">
                       <h3 class="section-title" style="margin-top: 15px;">Test Steps<span id="testSaveIcon" class="icon-save disabled" title="Save as test"></span></h3>
                       <div id="accordionExecution">
-                        <div id='prevQueries' class='table'></div>
+                        <table id='prevQueries' class='table'></table>
                         <form name='query_form' action="#">
                           <div>
                             <label for="q">Description:</label>
@@ -53,9 +53,9 @@
                       </div>
                       <h3 class="section-title">Saved Tests</h3>
                       <div id="accordionSavedTests">
-                        <div id='savedTestsTable' class='table'>
+                        <table id='savedTestsTable' class='table'>
                           
-                        </div>
+                        </table>
                       </div>
                     </div>
                   </div>
@@ -65,7 +65,7 @@
                     <div id="accordionResearch">
                       <h3 class="section-title" style="margin-top: 15px;">Problem Research</h3>
                       <div id="accordionResearchForm">
-                        <div id='prevResearchQueries' class='table'></div>
+                        <table id='prevResearchQueries' class='table'></table>
                         <form name='research_query_form' action="#">
                           <div>
                             <label for="nodeType">What:</label>
@@ -84,9 +84,9 @@
                       </div>
                       <h3 class="section-title">Saved Queries</h3>
                       <div id="accordionSavedResearch">
-                        <div id='savedResearchTable' class='table'>
+                        <table id='savedResearchTable' class='table'>
                           
-                        </div>
+                        </table>
                       </div>
                     </div>
                   </div>
@@ -96,12 +96,12 @@
             </div>
           </article>
         </aside>
-        <aside style="width: 1150px; float: right;">
+        <aside style="width: 78%; float: left;">
           <div class="entry-content">
             <article class="entry widget">  
               <h3 class="section-title">Graph Results</h3>
-              <div class="entry-wrapper graph" id='graphWrapper'>
-                <section class="right">
+              <div class="entry-wrapper" id='graphWrapper'>
+                <section>
                   <div id="graph_container"></div>
                 </section>
               </div>
@@ -110,8 +110,8 @@
         </aside>
         <div id='details'>
           <div class='header'><span></span><a href="#" class="close" onclick="hideWin('details');">X</a></div>
-          <table id='properties'>
-          </table>  
+          <div id='properties' class="pb">
+          </div>  
         </div>
         <div id='examine'>
           <div class='header'><span>Step Research</span><a href="#" class="close black" onclick="hideWin('examine');">X</a></div>
