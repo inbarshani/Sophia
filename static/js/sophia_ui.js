@@ -10,6 +10,7 @@
       var researchActionIds = [];
       var isAjaxActive = false;
       var savedTests = [];
+      var savedResearches = [];
       var cmNode;
 
       var d3Settings;
@@ -107,6 +108,17 @@
           hideWin('testName');
           return false;
         });
+
+        $('#researchNameButton').click(function() {
+          if ($('#researchNameText').val().length == 0) {
+            error('Name cannot be empty');
+            return false;
+          }
+          saveResearch( $('#researchNameText').val() );
+          hideWin('researchName');
+          return false;
+        });
+
 
         $('#testSaveIcon').click(function() {
           if (!$('#testSaveIcon').hasClass('disabled')) {
@@ -419,6 +431,13 @@
           savedTests.push(test);
         }
 
+        function saveResearch(name) {
+          var r = {"name": name,
+                      "query": lastResearch
+                    };
+          savedResearches.push(r);
+        }
+
         function loadTests() {
           // query server for saved test executions
           $.ajax({  
@@ -442,7 +461,12 @@
         }
 
         function loadSavedResearch() {
-
+          $('#savedResearchTable').html('');
+          if (savedResearches.length > 0) {
+            savedResearches.forEach(function (r) {
+              addSavedResearch(r);
+            });
+          }
         }
 
         function runExamineQuery(query, ids) {
@@ -528,7 +552,7 @@
             }
             lastResearch = {"id": numRows, "what": $('#nodeType').find('option:selected').text(), "searchTerm": $('#research').val()};
             prevResearches.push(lastResearch);
-            appendResearchRow($('#prevResearchQueries'), numRows, lastResearch);
+            appendResearchRow($('#prevResearchQueries'), numRows, lastResearch, true);
             $('#research').val('');
           }
         }
@@ -635,7 +659,43 @@
           });
         }
 
-        function appendResearchRow(table, id, research) {
+
+        function addSavedResearch(r) {
+          var tr, td, a, img;
+          // add test name
+          tr = $('<tr>');
+          tr.addClass('table-row');
+          td = $('<td>');
+          td.addClass('table-cell');
+          td.attr('title', 'Run');
+          img = $("<img>");
+          img.attr("src", "./img/icon_run.png");
+          img.css('margin', '5px');
+          img.click(function() {
+            // re-run research
+          })
+          img.appendTo(td);
+          td.appendTo(tr);
+          td = $('<td>');
+          td.addClass('table-cell bold');
+          td.text("Name:");
+          td.appendTo(tr);
+          td = $('<td>');
+          td.addClass('table-cell bold');
+          td.text(r.name);
+          td.appendTo(tr);
+          td = $('<td>');
+          td.addClass('table-cell');
+          td.text('');
+          td.appendTo(tr);
+          td.appendTo(tr);
+          tr.appendTo($('#savedResearchTable'));
+
+          // add research          
+          appendResearchRow($('#savedResearchTable'), 1, r.query, false);
+        }
+
+        function appendResearchRow(table, id, research, canSave) {
           var tr, td, img;
           if (id == 1) {
             // add header
@@ -653,10 +713,12 @@
             td.addClass('table-cell border bold')
             td.text('Search term');
             td.appendTo(tr);
-            td = $('<td>');
-            td.addClass('table-cell border bold')
-            td.text('Save');
-            td.appendTo(tr);
+            if (canSave) {
+              td = $('<td>');
+              td.addClass('table-cell border bold')
+              td.text('Save');
+              td.appendTo(tr);
+            }
             tr.appendTo(table);
           }
           tr = $('<tr>');
@@ -673,14 +735,16 @@
           td.addClass('table-cell border');
           td.text(research.searchTerm);
           td.appendTo(tr);
-          td = $('<td>');
-          td.addClass('table-cell border');
-          img = $('<img>');
-          img.attr('src', '/img/ic_save.png');
-          img.click(function() {
-            showSaveResearch(research, $(this).offset());
-          });
-          img.appendTo(td);
+          if (canSave) {
+            td = $('<td>');
+            td.addClass('table-cell border');
+            img = $('<img>');
+            img.attr('src', '/img/ic_save.png');
+            img.click(function() {
+              showSaveResearch(research, $(this).offset());
+            });
+            img.appendTo(td);
+          }
           td.appendTo(tr);
           tr.appendTo(table);
         }
@@ -705,6 +769,11 @@
             return false;
           });
         }
+
+        function showSaveResearch(research, offset) {
+          showWin('researchName', offset);
+        }
+
 
         function findStep(id) {
           var s = null;
