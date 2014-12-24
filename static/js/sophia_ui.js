@@ -205,7 +205,7 @@
 
         function queryResearch(query, types) {
           // query by description and expected results
-          d3.json("/research?research=" + query + "&nodeType=" + types + "&actionIds=" + researchActionIds, function(error, graph) {
+          d3.json("/research?research=" + query + "&nodeType=" + types + "&actionIds=" + actionIds, function(error, graph) {
             addNodes(graph, true, "research");
           });
           showBusy();

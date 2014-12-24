@@ -310,6 +310,8 @@ app.get('/research', function(request, response) {
     var actionIds = request.query.actionIds;
     var searchQueryString = request.query.research;
     var nodeTypesArr = request.query.nodeType.split(';');
+    var match = "";
+    var returnClause = "";
     var nodes = [],
         edges = [];
 
@@ -324,7 +326,7 @@ app.get('/research', function(request, response) {
     var valType = isNaN(searchQueryString) ? "text" : "number";
     var descQuery = "";
     var typeQuery = "";
-var OR = "";
+    var OR = "";
     for (var i = 0; i < nodeTypesArr.length; i++) {
         if (nodeTypesArr[i].length > 0) {
             if (searchFieldByType[nodeTypesArr[i]].type == valType) {
@@ -337,7 +339,15 @@ var OR = "";
             }
         }
     }
-    var query = "match n where (( " + typeQuery + " ) AND ( " + descQuery + " )) return n limit 100";
+
+    if (actionIds && actionIds.length > 0) {
+        match = "start a=node(" + actionIds + ") match a-[r:PRECEDE|LINK*1..100]-n";
+        returnClause = "return n, ID(a), length(r), type(head(r))";
+    } else {
+        match = "match n";
+        returnClause = "return n";
+    }
+    var query = match + " where (( " + typeQuery + " ) AND ( " + descQuery + " )) " + returnClause;
     console.log(query);
     db.query(query, null, function(err, results) {
         if (err) throw err;
