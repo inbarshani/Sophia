@@ -9,13 +9,13 @@ app.use(express.static(__dirname + '/static'));
 
 var searchFieldByType = {
     Test: {name: "TestNumber", compare: " = {VALUE} ", type: "number"},
-    TestStep: {name: "Description", compare: " =~ '(?i).* {VALUE} .*' ", type: "text"},
-    UIObject: {name: "name", compare: " =~ '(?i).* {VALUE} .*' ", type: "text"},
+    TestStep: {name: "Description", compare: " =~ '(?i).*{VALUE}.*' ", type: "text"},
+    UIObject: {name: "name", compare: " =~ '(?i).*{VALUE}.*' ", type: "text"},
     ServerCPU: {name: "AVG", compare: " >= {VALUE} ", type: "number"},
     ServerMemory: {name: "VIRTUAL_USED_PRECENT", compare: " >= {VALUE} ", type: "number"},
-    UserAction: {name: "Description", compare: " =~ '(?i).* {VALUE} .*' ", type: "text"},
+    UserAction: {name: "Description", compare: " =~ '(?i).*{VALUE}.*' ", type: "text"},
     ServerRequest: {name: "HTTP_result", compare: " = '{VALUE}' ", type: "text"},
-    ServerError: {name: "ERROR", compare: " =~ '(?i).* {VALUE} .*' ", type: "text"}
+    ServerError: {name: "ERROR", compare: " =~ '(?i).*{VALUE}.*' ", type: "text"}
 };
 
 app.get('/query', function(request, response) {
