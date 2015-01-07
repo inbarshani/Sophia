@@ -513,6 +513,7 @@
         }
 
         function renderErrorWithoutClear(errors) {
+          $('#errorsAndWarnings').append('<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix ui-draggable-handle" style="padding-left: 6px;">Error</div>');
           $.each(errors, function(index, error) {
             $('#errorsAndWarnings').append('<p class="' + error.type + '"><span></span>' + error.message + '</p>');
           });

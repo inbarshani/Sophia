@@ -244,13 +244,13 @@ img.table-icon {
 }
 
 .final-details p { font-size: 16px; line-height: 24px; color: #000; position: relative; padding-left: 39px; margin-bottom: 15px; display: block; }
-.final-details p span { width: 22px; height: 22px; display: block; font-size: 0; line-height: 0; text-indent: -4000px; background: url(images/icons.png) no-repeat -150px 0; position: relative; top: 7px; left: 0; }
+.final-details p span { width: 22px; height: 22px; display: block; font-size: 0; line-height: 0;  }
 .final-details p.missed span { background-position: -173px 0; }
 
-#errorsAndWarnings.final-details { width: 100%; }
-#errorsAndWarnings.final-details p { padding: 6px; padding-left: 39px; border-radius: 5px; height: 70px; line-height: 16px;}
+#errorsAndWarnings.final-details { display: none; position: absolute; width: 300px; top: 40%; left: 45%; padding: 2px; background-color: #F7E1E1; background: #F7E1E1; }
+#errorsAndWarnings.final-details p { padding: 6px; border-radius: 5px; height: 70px; line-height: 16px; background-color: #F7E1E1;}
 #errorsAndWarnings.final-details p span { top: 20px; left: -30px; }
-#errorsAndWarnings.final-details p.error { background-color: #F7E1E1; }
+#errorsAndWarnings.final-details p.error {  background-color: #F7E1E1;  }
 #errorsAndWarnings.final-details p.warning { background-color: #F7F0D9; }
 #errorsAndWarnings.final-details p.info { background-color: #E8F0F7; }
 #errorsAndWarnings.final-details p.error span { background-position: -173px 0; }
