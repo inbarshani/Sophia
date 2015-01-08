@@ -1,11 +1,16 @@
 var express = require('express');
 var neo4j = require("neo4j");
+var bodyParser = require("body-parser");
+var amqp       = require('amqp');
+
 // connect to neo4j DB
 var db = new neo4j.GraphDatabase('http://localhost:7474');
+var rabbitMq = amqp.createConnection({host: 'localhost'});
 
 var app = express();
 
 app.use(express.static(__dirname + '/static'));
+app.use(bodyParser.json());
 
 var searchFieldByType = {
     Test: {name: "TestNumber", compare: " = {VALUE} ", type: "number"},
@@ -429,5 +434,17 @@ app.get('/research', function(request, response) {
     });
 });
 
+app.post('/data', function(request, response) {
+    console.log(request.body);
+    response.writeHead(200, "OK", {'Content-Type': 'text/plain'});
+    response.end();
+    rabbitMq.publish('sophia', JSON.stringify(request.body));
+    console.log(" [x] Sent %s\n", JSON.stringify(request.body));
+
+});
 
 app.listen(8080);
+
+rabbitMq.on('ready', function(){
+    console.log("RabbitMQ connected!\n");
+});
