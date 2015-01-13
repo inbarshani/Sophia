@@ -11,7 +11,8 @@
     "when": "^3.6.4",
     "xmldom": "0.X.X",
     "xpath": "0.X.X",
-    "amqp": "*"
+    "amqp": "*",
+    "body-parser": "1.10.x"
   },
   "scripts": {
     "start": "node loadAll.js"

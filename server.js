@@ -1,6 +1,6 @@
 var express = require('express');
 var neo4j = require("neo4j");
-var bodyParser = require("body-parser");
+var bodyParser = require('body-parser');
 var amqp       = require('amqp');
 
 // connect to neo4j DB
