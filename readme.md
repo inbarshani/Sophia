@@ -18,12 +18,14 @@ Make sure the service is working
 6. install Node modules:
 In Sophia folder, where package.json exists, run: npm install
 
-B. Jetty log parser
+B. Jetty and MQM log parser
 ====
 1. Download Logstash (current version is 1.4.2) and extract to a folder in ALM server
 2. Extract <Sophia>\agents\jetty\logging\log.conf to \logstash-1.4.2\bin
 3. enable Jetty logging: edit C:\ProgramData\HP\ALM\server\conf\start.ini and enable the relevant logs.
-See <Sophia>\agents\jetty\logging\start.ini for an example. Restart Jetty
+	See <Sophia>\agents\jetty\logging\start.ini for an example. 
+4. copy <Sophia>\agents\jetty\logging\sophia to \logstash-1.4.2\patterns
+5. Restart Jetty
 
 
 Happy Coding! :p
