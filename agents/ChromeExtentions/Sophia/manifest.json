@@ -1,0 +1,39 @@
+{
+  "manifest_version": 2,
+  "name": "Sophia",
+  "description": "Report client data to Sophia server",
+  "version": "1.0",
+  "permissions": [
+    "tabs",
+    "webRequest",
+    "<all_urls>"
+  ],
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [{
+     "matches": ["<all_urls>"],
+     "js": [
+        "jquery-2.1.1.min.js",
+        "EM_Reporter.js",
+        "EM_Reporter_web.js", 
+        "EM_UserActionHandler.js",
+        "EM_Injector.js",
+        "feedback_network_nobridge.js",
+        "feedback_report_bridge.js",
+        "feedback_report_nobridge.js",
+        "EM_Injector.js",
+        "EM_ContextIdentifier.js",
+        "EM_EvAction.js",
+        "sha256.js",
+        "EM_NameGens.js"
+     ],
+     "run_at": "document_start",
+     "all_frames": true
+   }],
+  "background": { 
+    "scripts": ["background.js"],
+    "exclude_globs": ["http://*.google.com/*", "https://*.google.com/*"]
+  }   
+}

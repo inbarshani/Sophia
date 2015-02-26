@@ -4,15 +4,16 @@
   "description": "Sophia",
   "main": "convert.js",
   "dependencies": {
+    "amqp": "*",
+    "body-parser": "1.10.x",
     "csvtojson": "0.X.X",
     "express": "^4.10.3",
+    "multer": "^0.1.8",
     "neo4j": "1.X.X",
     "node-offline-debug": "1.x.x",
     "when": "^3.6.4",
     "xmldom": "0.X.X",
-    "xpath": "0.X.X",
-    "amqp": "*",
-    "body-parser": "1.10.x"
+    "xpath": "0.X.X"
   },
   "scripts": {
     "start": "node loadAll.js"
