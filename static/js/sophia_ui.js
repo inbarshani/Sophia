@@ -15,6 +15,15 @@
 
       var d3Settings;
 
+      // for preventing single click action when doing double click
+      var timer = 0;
+      var delay = 200;
+      var prevent = false;
+      var isMouseDown = false;
+      // for preventing single click action when doing drag
+      var x,y;
+
+
       var categories = [{name: "Server", value: "", keywords: ["server"]}, {name: "Network", value: "", keywords: ["network", "net", "request"]}, {name: "Testing", value: "", keywords: ["test", "step"]}, {name: "UI", value: "", keywords: ["action", "ui"]}];
 
 
@@ -334,12 +343,31 @@
             .attr("y", function(d) { return d.y -15; }); 
           });
 
-          svg.selectAll("circle.node").on("click", function(){
-            nodeOnClick(this, node, link);
+          svg.selectAll("circle.node").on("mouseup", function(){
+            isMouseDown = false;
+            var that = this;
+            timer = setTimeout(function() {
+              if (!prevent) {
+                nodeOnClick(that, node, link);
+              }
+              prevent = false;
+            }, delay);
           });
 
           svg.selectAll("circle.node").on("dblclick", function(){
+            clearTimeout(timer);
+            prevent = true;
             getLinkedNodes(this.__data__.id);
+          });
+
+          svg.selectAll("circle.node").on("mousedown", function(){
+            isMouseDown = true;
+          });
+
+          svg.selectAll("circle.node").on("mousemove", function(){
+            if (isMouseDown) {
+              prevent = true;
+            }
           });
 
           svg.selectAll("circle.node").on("contextmenu", function(){
