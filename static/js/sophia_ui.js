@@ -15,14 +15,11 @@
 
       var d3Settings;
 
-      // for preventing single click action when doing double click
+      // for preventing single click action when doing double click and drag
       var timer = 0;
       var delay = 200;
       var prevent = false;
       var isMouseDown = false;
-      // for preventing single click action when doing drag
-      var x,y;
-
 
       var categories = [{name: "Server", value: "", keywords: ["server"]}, {name: "Network", value: "", keywords: ["network", "net", "request"]}, {name: "Testing", value: "", keywords: ["test", "step"]}, {name: "UI", value: "", keywords: ["action", "ui"]}];
 
