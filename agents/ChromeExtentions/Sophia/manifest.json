@@ -14,13 +14,14 @@
   },
   "content_scripts": [{
      "matches": ["<all_urls>"],
+     "exclude_globs": ["http://127.0.0.1*","http://*.google.com/*", "https://*.google.com/*", "http://*.facebook.com/*", "https://*.facebook.com/*", "http://*.google*.com/*"],
      "js": [
         "jquery-2.1.1.min.js",
         "EM_Reporter.js",
-        "EM_Reporter_web.js", 
-        "EM_UserActionHandler.js",
-        "EM_Injector.js",
-        "feedback_network_nobridge.js",
+//        "EM_Reporter_web.js", 
+//        "EM_UserActionHandler.js",
+        "EM_Injector.js"
+/*        "feedback_network_nobridge.js",
         "feedback_report_bridge.js",
         "feedback_report_nobridge.js",
         "EM_Injector.js",
@@ -28,12 +29,13 @@
         "EM_EvAction.js",
         "sha256.js",
         "EM_NameGens.js"
+*/        
      ],
      "run_at": "document_start",
      "all_frames": true
    }],
   "background": { 
     "scripts": ["background.js"],
-    "exclude_globs": ["http://*.google.com/*", "https://*.google.com/*"]
+    "exclude_globs": ["http://127.0.0.1*","http://*.google.com/*", "https://*.google.com/*"]
   }   
 }

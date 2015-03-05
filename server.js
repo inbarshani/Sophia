@@ -436,18 +436,18 @@ app.get('/research', function(request, response) {
 });
 
 app.post('/data', function(request, response) {
-    var ms = new Date().getMilliseconds();
-    var content = "";
-    request.on("data", function(chunk) {
-      content += chunk;
-    });
-    request.on("end", function() {
-        response.writeHead(200, "OK", {'Content-Type': 'text/plain'});
-        response.write("OK");
-        response.end();
-        rabbitMq.publish('sophia', JSON.stringify(content));
-        console.log(" [x] Sent %s\n", JSON.stringify(content));
-    });
+    if (request._body) {
+        sendToQueue(JSON.stringify(request.body), response);
+    } else {
+        var ms = new Date().getMilliseconds();
+        var content = "";
+        request.on("data", function(chunk) {
+          content += chunk;
+        });
+        request.on("end", function() {
+            sendToQueue(content, response);
+        });
+    }
 });
 
 app.post('/file', function(request, response) {
@@ -457,9 +457,6 @@ app.post('/file', function(request, response) {
     });
     request.on("end", function() {
         var ts = new Date().getTime();
-        response.writeHead(200, "OK", {'Content-Type': 'text/plain'});
-        response.write("OK");
-        response.end();
         var startIndex = content.indexOf('data:image/jpeg;base64,') + 23;
         var endIndex = content.lastIndexOf('\r\n------WebKitFormBoundary');
         var fileContent = content.substring(startIndex, endIndex);
@@ -471,13 +468,12 @@ app.post('/file', function(request, response) {
         });
         wstream.write(buffer);
         wstream.end();
-        rabbitMq.publish('sophia', JSON.stringify(content));
         var data = {
             timestamp: ts,
             type: "SCREEN",
             file: fileName
         };
-        console.log(" [x] Sent %s\n", JSON.stringify(data));
+        sendToQueue(data, response);
     });
 });
 
@@ -488,3 +484,10 @@ app.listen(8080);
 rabbitMq.on('ready', function(){
     console.log("RabbitMQ connected!\n");
 });
+
+function sendToQueue(data, response) {
+    response.writeHead(200, "OK", {'Content-Type': 'text/plain'});
+    response.end();
+    rabbitMq.publish('sophia', data);
+    console.log(" [x] Sent %s\n", data);
+}

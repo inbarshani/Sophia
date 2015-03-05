@@ -1,55 +1,86 @@
-/**
- * Created with IntelliJ IDEA.
- * User: Aviad Israeli
- * Date: 10/12/14
- */
-
-EMLog('d', 'inj', 'LOADING SCRIPT, URL: ' + window.location.href);
-
-//self calling function with guard to not call twice
-(function () {
-    if(window.location.href==='about:blank'){
-        EMLog('d', 'g', 'Current URL is about:blank. Not instrumenting ');
-        return;
-    }
-    EMLog('d', 'inj', "Notify loaded status: __eumReportNotifyLoaded: " + window.__eumReportNotifyLoaded + " __eumReportNotifyLoadedUrl: " + window.__eumReportNotifyLoadedUrl + " hpwebview: " + window.hpwebview);
-    if (!window.__eumReportNotifyLoaded && window.__eumNotifyLoaded) {
-        EMLog('d', 'inj','Notify loaded did not report yet. Calling it again!');
-        window.__eumNotifyLoaded();
-    }
-    EMLog('d', 'inj', "### Loading EM_Injector");
-    if (window.__EMInjector) {
-        EMLog('d', 'inj','Injector not Loaded, already exists, Instrumentation exists ');
-        return;
-    }
-    window.__EMInjector = true;
-
-    window.__eumNotifyLoaded = function () {
-        try {
-            //This is only a safety fuse incase onPageFinished is not fired by the webview
-            EMLog('d', 'inj','Notify loaded was called: document.URL: ' + document.URL);
-            if (!document.URL || document.URL === "" || document.URL === "about:blank") {
-                EMLog('d', 'inj','Can not notify loaded, document url is empty: ' + document.URL);
-            } else {
-                var docUrl = document.URL;
-                EMLog('d', 'inj','Report Notify loaded url: ' + docUrl);
-                var ts = new Date().getTime();
-                var args = {
-                    message: {
-                        url: docUrl
-                    },
-                    type: "UI",
-                    timestamp: ts
-                }
-                window.__eumRumService.jsBridge('notifyLoaded', args);
-                window.__eumReportNotifyLoaded = true;
-                window.__eumReportNotifyLoadedUrl = document.URL;
-            }
-        } catch (e) {
-            EMLog('d', 'inj','Failed to notify loaded: ' + e.toString());
+    $(document).ready(function() {
+        console.log("ready: " + window.location.href);
+        if (!document.URL || document.URL === "" || document.URL === "about:blank") {
+            return;
+        } else {
+            window.__eumRumService.reportToSophia('load', document, event);
         }
-    };
-    window.__eumNotifyLoaded();
+        setTimeout(function() {
+            document.addEventListener("DOMSubtreeModified", listenerFunc, false);
+        }, 2000);
 
-    EMLog('d', 'inj',' Doing EM Instrumentation ');
-})();
+        window.addEventListener("unload", function(event) {
+            console.log("unload");
+            window.removeEventListener("domChangeEvent", listenerFunc);
+        }, false);
+        window.addEventListener("click", function(event) {
+            var elem = event.target;
+            if (hasClickHandler(elem)) {
+                console.log("click on " + elem.tagName + ". Reported - has handlers");
+                window.__eumRumService.reportToSophia('click', document, event);
+            } else {
+                console.log("click on " + elem.tagName + ". Ignored - no handlers");
+            }
+        }, false);
+        window.addEventListener("focusout", function(event) {
+            var elem = event.target;
+            if (hasBlurHandler(elem)) {
+                console.log("blur on " + elem.tagName + ". Reported - has handlers");
+                window.__eumRumService.reportToSophia('blur', document, event);
+            } else {
+                console.log("blur on " + elem.tagName + ". Ignored - no handlers");
+            }
+        }, false);
+    });
+
+    var listenerFunc = function (doc, e) {
+        console.log("listenerfunc");
+        if (!document.URL || document.URL === "" || document.URL === "about:blank") {
+            return;
+        } else {
+            window.__eumRumService.reportToSophia('domChangeEvent', document, event);
+        }
+    }
+
+    var shouldReportClickTag = function(tagName) {
+        var alwaysReportTags = ['a', 'button', 'input', 'select'];
+        tagName = tagName.toLowerCase();
+        for (tag in alwaysReportTags) {
+            if (alwaysReportTags[tag] == tagName) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    var shouldReportBlurTag = function(tagName) {
+        var alwaysReportTags = ['textarea', 'input', 'select'];
+        tagName = tagName.toLowerCase();
+        for (tag in alwaysReportTags) {
+            if (alwaysReportTags[tag] == tagName) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    var hasClickHandler = function(elem) {
+        if (elem.tagName.toLowerCase() == 'body') {
+            return false;
+        } else if (shouldReportClickTag(elem.tagName)) {
+            return true;
+        } else if (elem.onclick != null || elem.onmousedown != null || elem.onmouseup != null) {
+            return true;
+        } else {
+            return hasClickHandler(elem.parentElement);
+        }
+    }
+
+    var hasBlurHandler = function(elem) {
+        if (shouldReportBlurTag(elem.tagName)) {
+            return true;
+        } else if (elem.onblur != null || elem.onfocusout != null) {
+            return true;
+        }
+        return false;
+    }

@@ -7,6 +7,8 @@ var dateTime = require("./dateTime");
 var mqm_log = require("./processors/mqm_log");
 var request = require("./processors/request");
 var jetty_error_log = require("./processors/jetty_error_log");
+var ui = require("./processors/ui");
+var screen = require("./processors/screen");
 
 var connection = amqp.createConnection({host: 'localhost'});
 
@@ -26,6 +28,10 @@ connection.on('ready', function(){
                 data = request.getData(obj);
               } else if (obj.type == 'jetty_error_log') {
                 data = jetty_error_log.getData(obj);
+              } else if (obj.type == 'UI') {
+                data = ui.getData(obj);
+              } else if (obj.type == 'SCREEN') {
+                data = screen.getData(obj);
               }
               var query = 'CREATE (:' + data.type + ' {data} )';
               console.log(" [xx] Query: %s", query);
