@@ -3,9 +3,11 @@
   "name": "Sophia",
   "description": "Report client data to Sophia server",
   "version": "1.0",
+  "options_page": "options.html",
   "permissions": [
     "tabs",
     "webRequest",
+    "storage",
     "<all_urls>"
   ],
   "browser_action": {

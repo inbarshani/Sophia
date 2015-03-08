@@ -1,9 +1,22 @@
-chrome.webRequest.onCompleted.addListener
-(
-    TrackRequest,
-    {urls: ["<all_urls>"]},
-    ["responseHeaders"]
-);
+var baseUrl;
+
+chrome.storage.local.get('baseUrl', function (result) {
+    baseUrl = result.baseUrl;
+    if (baseUrl == undefined) {
+        console.log("Sophia extension Application Base URL not defined");
+        return;
+    }
+    baseUrl += "*";
+    chrome.webRequest.onCompleted.addListener(
+    	TrackRequest,
+    	{
+    		urls: [baseUrl]
+    	},
+    	["responseHeaders"]
+	);
+
+});
+
 
 
 function TrackRequest(info)

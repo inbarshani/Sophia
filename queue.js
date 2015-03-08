@@ -18,7 +18,7 @@ connection.on('ready', function(){
         console.log(' [*] Waiting for messages. To exit press CTRL+C')
 
         queue.subscribe(function(msg){
-            console.log(" [x] Received %s", msg.data.toString('utf-8'));
+////            console.log(" [x] Received %s", msg.data.toString('utf-8'));
             var obj = JSON.parse(msg.data);
             var data;
             if (obj != null) {
@@ -34,13 +34,15 @@ connection.on('ready', function(){
                 data = screen.getData(obj);
               }
               var query = 'CREATE (:' + data.type + ' {data} )';
-              console.log(" [xx] Query: %s", query);
-              console.log(" [xxx] timestamp: %s", data.timestamp);
+////              console.log(" [xx] Query: %s", query);
+////              console.log(" [xxx] timestamp: %s", data.timestamp);
               var params = {
                 data: data
               };
               db.query(query, params, function(err, results) {
-                if (err) console.error('neo4j query failed: ' + query + '\n');
+                if (err) {
+                  console.error('neo4j query failed: ' + query + '\n');
+                }
               });
             }
         });

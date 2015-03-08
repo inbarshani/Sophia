@@ -18,7 +18,7 @@
         if (action == "domChangeEvent" || action == "load") {
             // DOM change - report page source
             var src = DOMtoString (document_root);
-            console.log("Len: " + src.length);
+////            console.log("Len: " + src.length);
             if (src.length == lastSrcLength) {
                 return;
             } else {
@@ -38,7 +38,7 @@
             }
         } 
 
-        console.log("report to Sophia: " + action + " " + url + ": " + args);
+////        console.log("report to Sophia: " + action + " " + url + ": " + args);
         var data =  JSON.stringify(args);
 
         setTimeout(function() {
@@ -48,7 +48,7 @@
                 data: data,
                 dataType: 'json',
                 success: function (doc) {
-                    console.log("data posted: " + doc);
+////                    console.log("data posted: " + doc);
                 }
               });
 
