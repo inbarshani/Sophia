@@ -437,7 +437,7 @@ app.get('/research', function(request, response) {
 
 app.post('/data', function(request, response) {
     if (request._body) {
-        sendToQueue(JSON.stringify(request.body), response);
+        sendToQueue(request.body, response);
     } else {
         var ms = new Date().getMilliseconds();
         var content = "";
@@ -445,7 +445,7 @@ app.post('/data', function(request, response) {
           content += chunk;
         });
         request.on("end", function() {
-            sendToQueue(content, response);
+            sendToQueue(JSON.parse(content), response);
         });
     }
 });
@@ -488,6 +488,10 @@ rabbitMq.on('ready', function(){
 function sendToQueue(data, response) {
     response.writeHead(200, "OK", {'Content-Type': 'text/plain'});
     response.end();
-    rabbitMq.publish('sophia', data);
-    console.log(" [x] Sent %s\n", data);
+    rabbitMq.publish('sophia', JSON.stringify(data));
+    if (data.src != undefined) {
+        console.log(" [x] Sent request data " + data.timestamp + "\n");
+    } else {
+        console.log(" [x] Sent %s\n", JSON.stringify(data));
+    }
 }

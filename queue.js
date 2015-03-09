@@ -18,9 +18,9 @@ connection.on('ready', function(){
         console.log(' [*] Waiting for messages. To exit press CTRL+C')
 
         queue.subscribe(function(msg){
-////            console.log(" [x] Received %s", msg.data.toString('utf-8'));
             var obj = JSON.parse(msg.data);
             var data;
+            console.log(" [x] Received %s", obj.type);
             if (obj != null) {
               if (obj.type == 'mqm_log' || obj.type == 'sa_log') {
                 data = mqm_log.getData(obj);
