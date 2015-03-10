@@ -12,7 +12,35 @@ $(document).ready(function() {
 //            window.__eumRumService.reportToSophia('load', document, event);
             setTimeout(function() {
                 document.addEventListener("DOMSubtreeModified", listenerFunc, false);
+
+                function sophiaErrHandler() {
+                    window.onerror = function(errorMsg, url, lineNumber, column, errorObj) {
+                        console.log("ERRRRRR: " + errorObj);
+                        var errData = {
+                            type: "ClientError",
+                            timestamp: new Date().getTime(),
+                            errorMessage: errorMsg,
+                            url: url,
+                            lineNumber: lineNumber,
+                            column: column
+                        }
+                        if (errorObj) {
+                            errData.stacktrace = errorObj.stack;
+                        }
+                        document.dispatchEvent(new CustomEvent('ErrorToSophia', {detail: errData}));
+                    }
+                }
+
+                var script = document.createElement('script');
+                script.textContent = '(' + sophiaErrHandler + '())';
+                document.head.appendChild(script);
+                script.parentNode.removeChild(script);
             }, 2000);
+
+            document.addEventListener('ErrorToSophia', function(event) {
+                window.__eumRumService.reportErrorToSophia(event.detail);
+            });
+
 
             window.addEventListener("unload", function(event) {
     ////            console.log("unload");
@@ -22,7 +50,7 @@ $(document).ready(function() {
                 var elem = event.target;
                 if (hasClickHandler(elem)) {
                     console.log("click on " + elem.tagName + ". Reported - has handlers");
-                    window.__eumRumService.reportToSophia('click', document, event);
+                    window.__eumRumService.reportEventToSophia('click', document, event);
                 } else {
                     console.log("click on " + elem.tagName + ". Ignored - no handlers");
                 }
@@ -31,7 +59,7 @@ $(document).ready(function() {
                 var elem = event.target;
                 if (hasBlurHandler(elem)) {
                     console.log("blur on " + elem.tagName + ". Reported - has handlers");
-                    window.__eumRumService.reportToSophia('blur', document, event);
+                    window.__eumRumService.reportEventToSophia('blur', document, event);
                 } else {
                     console.log("blur on " + elem.tagName + ". Ignored - no handlers");
                 }
@@ -46,7 +74,7 @@ var listenerFunc = function (doc, e) {
     if (!document.URL || document.URL === "" || document.URL === "about:blank") {
         return;
     } else {
-        window.__eumRumService.reportToSophia('domChangeEvent', document, event);
+        window.__eumRumService.reportEventToSophia('domChangeEvent', document, event);
     }
 }
 

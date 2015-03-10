@@ -1,12 +1,13 @@
 (function () {
+
+    var url = "http://16.60.229.73:8080/data/";
    
     if (window.__eumRumService) return;
     var lastSrcLength;
-    var reportToSophia = function (action, document_root, event) {
+    var reportEventToSophia = function (action, document_root, event) {
         if (event == undefined) {
             console.log ('undefined event');
         }
-        var url = "http://16.60.229.73:8080/data/";
         var docUrl = document_root.URL;
         var ts = new Date().getTime();
         var args = {
@@ -56,6 +57,19 @@
 
     };
 
+    var reportErrorToSophia = function (errObj) {
+        var data =  JSON.stringify(errObj);
+        $.ajax({
+            url: "http://16.60.229.73:8080/data/",
+            type: 'POST',
+            data: data,
+            dataType: 'json',
+            success: function (doc) {
+    ////                    console.log("data posted: " + doc);
+            }
+        });
+    };
+
 
     var DOMtoString = function(document_root) {
         var html = '',
@@ -85,6 +99,7 @@
     }
 
     window.__eumRumService = {
-        reportToSophia: reportToSophia,
+        reportEventToSophia: reportEventToSophia,
+        reportErrorToSophia: reportErrorToSophia,
     };
 })();
