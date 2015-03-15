@@ -480,8 +480,8 @@ app.post('/file', function(request, response) {
 
 app.listen(8080);
 
-var rabbitMqYaron = amqp.createConnection({host: '16.60.229.73'});
-var rabbitMqInbar = amqp.createConnection({host: '16.60.229.2'});
+var rabbitMqYaron = amqp.createConnection({host: 'localhost'});
+var rabbitMqInbar ;//= amqp.createConnection({host: '16.60.229.2'});
 
 
 rabbitMqYaron.on('ready', function(){
@@ -512,10 +512,11 @@ function sendToQueue(data, response) {
     } else {
         console.log(" [x] RabbitMQ Yaron Sent %s\n", data_json);
     }
+    /*
     rabbitMqInbar.publish('sophia', data_json);
     if (data.src != undefined) {
         console.log(" [x] RabbitMQ Inbar Sent request data " + data.timestamp + "\n");
     } else {
         console.log(" [x] RabbitMQ Inbar Sent %s\n", data_json);
-    }
+    }*/
 }
