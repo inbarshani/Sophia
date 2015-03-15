@@ -66,18 +66,20 @@ function linkNewData(node_id, type, timestamp)
   var prev_nodes_qualifier='', next_nodes_qualifier='';
   if (backboneTypes.indexOf(type) >= 0)
   {
-    prev_nodes_qualifier = ' WHERE prev_node.type IN [\''+backboneTypes.join('\',\'')+'\']';
-    next_nodes_qualifier = ' WHERE prev_node.type IN [\''+backboneTypes.join('\',\'')+'\']';
+    prev_nodes_qualifier = ' AND prev_node.type IN [\''+backboneTypes.join('\',\'')+'\']';
+    next_nodes_qualifier = ' AND next_node.type IN [\''+backboneTypes.join('\',\'')+'\']';
   }
   var query = 
     'MATCH new_node WHERE id(new_node)='+node_id+
     ' WITH new_node' +
-    ' MATCH prev_node' + prev_nodes_qualifier +
-    ' AND prev_node.timestamp <= '+ timestamp +
+    ' MATCH prev_node' +
+    ' WHERE prev_node.timestamp <= '+ timestamp +
+    + prev_nodes_qualifier +
     ' WITH prev_node' +
     ' ORDER BY prev_node.timestamp DESC LIMIT 1'+
-    ' MATCH next_node' + next_nodes_qualifier +
-    ' AND next_node.timestamp > '+ timestamp +
+    ' MATCH next_node' +
+    ' WHERE next_node.timestamp > '+ timestamp +
+    + next_nodes_qualifier +
     ' WITH next_node' +
     ' ORDER BY next_node.timestamp LIMIT 1'+
     ' CREATE prev_node-[:LINK]->new_node-[:LINK]->next_node' +
