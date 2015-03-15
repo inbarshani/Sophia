@@ -6,7 +6,8 @@ var fs = require('fs');
 
 // connect to neo4j DB
 var db = new neo4j.GraphDatabase('http://localhost:7474');
-var rabbitMq = amqp.createConnection({host: 'localhost'});
+var rabbitMqYaron = amqp.createConnection({host: '16.60.229.73'});
+var rabbitMqInbar = amqp.createConnection({host: '16.60.229.2'});
 
 var app = express();
 
@@ -481,17 +482,28 @@ app.post('/file', function(request, response) {
 
 app.listen(8080);
 
-rabbitMq.on('ready', function(){
-    console.log("RabbitMQ connected!\n");
+rabbitMqYaron.on('ready', function(){
+    console.log("RabbitMQ Yaron connected!\n");
+});
+
+rabbitMqInbar.on('ready', function(){
+    console.log("RabbitMQ Inbar connected!\n");
 });
 
 function sendToQueue(data, response) {
     response.writeHead(200, "OK", {'Content-Type': 'text/plain'});
     response.end();
-    rabbitMq.publish('sophia', JSON.stringify(data));
+    var data_json = JSON.stringify(data);
+    rabbitMqYaron.publish('sophia', data_json);
     if (data.src != undefined) {
-        console.log(" [x] Sent request data " + data.timestamp + "\n");
+        console.log(" [x] RabbitMQ Yaron Sent request data " + data.timestamp + "\n");
     } else {
-        console.log(" [x] Sent %s\n", JSON.stringify(data));
+        console.log(" [x] RabbitMQ Yaron Sent %s\n", data_json);
+    }
+    rabbitMqInbar.publish('sophia', data_json);
+    if (data.src != undefined) {
+        console.log(" [x] RabbitMQ Inbar Sent request data " + data.timestamp + "\n");
+    } else {
+        console.log(" [x] RabbitMQ Inbar Sent %s\n", data_json);
     }
 }
