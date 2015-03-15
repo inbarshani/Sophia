@@ -6,8 +6,6 @@ var fs = require('fs');
 
 // connect to neo4j DB
 var db = new neo4j.GraphDatabase('http://localhost:7474');
-var rabbitMqYaron = amqp.createConnection({host: '16.60.229.73'});
-var rabbitMqInbar = amqp.createConnection({host: '16.60.229.2'});
 
 var app = express();
 
@@ -482,12 +480,26 @@ app.post('/file', function(request, response) {
 
 app.listen(8080);
 
+var rabbitMqYaron = amqp.createConnection({host: '16.60.229.73'});
+var rabbitMqInbar = amqp.createConnection({host: '16.60.229.2'});
+
+
 rabbitMqYaron.on('ready', function(){
     console.log("RabbitMQ Yaron connected!\n");
 });
 
 rabbitMqInbar.on('ready', function(){
     console.log("RabbitMQ Inbar connected!\n");
+});
+
+rabbitMqYaron.on('error', function(err) {
+  //do something
+  console.log('An error occurred connecting to Yaron RabbitMQ: ' + err);
+});
+
+rabbitMqInbar.on('error', function(err) {
+  //do something
+  console.log('An error occurred connecting to Inbar RabbitMQ: ' + err);
 });
 
 function sendToQueue(data, response) {
