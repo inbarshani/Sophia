@@ -33,7 +33,7 @@ connection.on('ready', function(){
               } else if (obj.type == 'SCREEN') {
                 data = screen.getData(obj);
               }
-              var query = 'CREATE (:' + data.type + ' {data} )';
+              var query = 'CREATE (new_node:' + data.type + ' {data} ) RETURN id(new_node) AS NodeID';
 ////              console.log(" [xx] Query: %s", query);
 ////              console.log(" [xxx] timestamp: %s", data.timestamp);
               var params = {
@@ -43,8 +43,52 @@ connection.on('ready', function(){
                 if (err) {
                   console.error('neo4j query failed: ' + query + '\n');
                 }
+                else if (results[0] && results[0]['NodeID'])
+                  linkNewData(results[0]['NodeID'], data.type, data.timestamp);
               });
             }
         });
     });
 });
+
+var backboneTypes = [];
+
+function linkNewData(node_id, type, timestamp)
+{
+  console.log(' [**] Linking a new node');
+  // link a new node
+  // check the type - if backbone, we need connect only to backbone node
+  //    if not backbone, we need to find the backbone and connect within its chain
+  // check the timestamp and look for immediate previous and immediate next
+  // also, remove existing relation if there is one between immediates
+  // TBD: once we have Test ID associated with all incoming data, it makes sense
+  //    to optimize the searches only on the specific test chain
+  var prev_nodes_qualifier='', next_nodes_qualifier='';
+  if (backboneTypes.indexOf(type) >= 0)
+  {
+    prev_nodes_qualifier = ' WHERE prev_node.type IN [\''+backboneTypes.join('\',\'')+'\']';
+    next_nodes_qualifier = ' WHERE prev_node.type IN [\''+backboneTypes.join('\',\'')+'\']';
+  }
+  var query = 
+    'MATCH new_node WHERE id(new_node)='+node_id+
+    ' WITH new_node' +
+    ' MATCH prev_node' + prev_nodes_qualifier +
+    ' AND prev_node.timestamp <= '+ timestamp +
+    ' WITH prev_node' +
+    ' ORDER BY prev_node.timestamp DESC LIMIT 1'+
+    ' MATCH next_node' + next_nodes_qualifier +
+    ' AND next_node.timestamp > '+ timestamp +
+    ' WITH next_node' +
+    ' ORDER BY next_node.timestamp LIMIT 1'+
+    ' CREATE prev_node-[:LINK]->new_node-[:LINK]->next_node' +
+    ' MATCH prev_node-[old_link:LINK]->next_node DELETE old_link';
+
+  console.log(' [**] Node linking query: '+query);
+
+  db.query(query, null, function(err, results) {
+    if (err) {
+      console.error('neo4j query failed: ' + query + '\n');
+    }
+  });
+
+}
