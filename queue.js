@@ -86,7 +86,7 @@ function linkNewData(node_id, type, timestamp) {
 
     console.log(' [**] Next and previous nodes query: ' + query);
 
-    db.query(query, null, function(err, results) {
+    db.query(nodes_query, null, function(err, results) {
         if (err) {
             console.error('neo4j query failed: ' + query + '\n');
         } else if (results[0]) {
@@ -117,7 +117,7 @@ function linkNewData(node_id, type, timestamp) {
                     ' CREATE new_node-[:LINK]->next_node';
             }
 
-            if (query)
+            if (link_query)
                 db.query(query, null, function(err, results) {
                     if (err) {
                         console.error('neo4j query failed: ' + query + '\n');
