@@ -73,7 +73,7 @@ function linkNewData(node_id, type, timestamp) {
     }
     var nodes_query =
         'MATCH prev_node' +
-        ' WHERE prev_node.timestamp <= ' + timestamp + ' AND id(prev_node)<>id(' + node_id + ')' +
+        ' WHERE prev_node.timestamp <= ' + timestamp + ' AND id(prev_node)<>' + node_id + 
         prev_nodes_qualifier +
         ' WITH prev_node' +
         ' ORDER BY prev_node.timestamp DESC LIMIT 1' +
