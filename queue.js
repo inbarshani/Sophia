@@ -73,7 +73,7 @@ function linkNewData(node_id, type, timestamp) {
     }
     var nodes_query =
         'MATCH prev_node' +
-        ' WHERE prev_node.timestamp <= ' + timestamp + ' AND id(prev_node)<>id(new_node)' +
+        ' WHERE prev_node.timestamp <= ' + timestamp + ' AND id(prev_node)<>id(' + node_id + ')' +
         prev_nodes_qualifier +
         ' WITH prev_node' +
         ' ORDER BY prev_node.timestamp DESC LIMIT 1' +
@@ -84,13 +84,12 @@ function linkNewData(node_id, type, timestamp) {
         ' ORDER BY next_node.timestamp LIMIT 1' +
         ' RETURN id(prev_node) as PrevID, id(next_node) as NextID';
 
-    console.log(' [**] Next and previous nodes query: ' + query);
+    console.log(' [**] Next and previous nodes query: ' + nodes_query);
 
     db.query(nodes_query, null, function(err, results) {
         if (err) {
-            console.error('neo4j query failed: ' + query + '\n');
+            console.error('neo4j query failed: ' + nodes_query + '\n');
         } else if (results[0]) {
-            console.log(' [**] Linking nodes query: ' + query);
 
             var prev_id = results[0]['PrevID'];
             var next_id = results[0]['NextID'];
@@ -117,10 +116,11 @@ function linkNewData(node_id, type, timestamp) {
                     ' CREATE new_node-[:LINK]->next_node';
             }
 
+            console.log(' [**] Linking nodes query: ' + link_query);
             if (link_query)
-                db.query(query, null, function(err, results) {
+                db.query(link_query, null, function(err, results) {
                     if (err) {
-                        console.error('neo4j query failed: ' + query + '\n');
+                        console.error('neo4j query failed: ' + link_query + '\n');
                     }
                 })
 
