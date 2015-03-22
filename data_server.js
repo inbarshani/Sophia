@@ -50,34 +50,24 @@ app.post('/file', function(request, response) {
     });
 });
 
-app.listen(8080);
-
-var rabbitMqYaron = amqp.createConnection({
-    host: 'localhost'
-});
+//app.listen(8080);
 var rabbitMqInbar = amqp.createConnection({
-    host: '16.60.229.2',
-    port: 8080
+    host: '192.168.50.104',
+    login: 'admin',
+    password: 'admin'
+    //host: 'localhost'
 });
 
-rabbitMqYaron.on('ready', function() {
-    console.log("RabbitMQ Yaron connected!\n");
-});
 
 rabbitMqInbar.on('ready', function() {
     console.log("RabbitMQ Inbar connected!\n");
 });
 
-rabbitMqYaron.on('error', function(err) {
-    //do something
-    console.log('An error occurred connecting to Yaron RabbitMQ: ' + err);
-    rabbitMqYaron = null;
-});
 
 rabbitMqInbar.on('error', function(err) {
     //do something
-    console.log('An error occurred connecting to Inbar RabbitMQ: ' + err);
-    rabbitMqInbar = null;
+    console.log('An error occurred connecting to Inbar RabbitMQ:\n' + require('util').inspect(err));
+    //rabbitMqInbar = null;
 });
 
 
