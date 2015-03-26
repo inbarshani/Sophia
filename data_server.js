@@ -50,24 +50,20 @@ app.post('/file', function(request, response) {
     });
 });
 
-//app.listen(8080);
-var rabbitMqInbar = amqp.createConnection({
-    host: '192.168.50.104',
-    login: 'admin',
-    password: 'admin'
-    //host: 'localhost'
+app.listen(8080);
+var rabbitMq = amqp.createConnection({
+    host: 'localhost'
 });
 
 
-rabbitMqInbar.on('ready', function() {
-    console.log("RabbitMQ Inbar connected!\n");
+rabbitMq.on('ready', function() {
+    console.log("RabbitMQ connected!\n");
 });
 
 
-rabbitMqInbar.on('error', function(err) {
+rabbitMq.on('error', function(err) {
     //do something
-    console.log('An error occurred connecting to Inbar RabbitMQ:\n' + require('util').inspect(err));
-    //rabbitMqInbar = null;
+    console.log('An error occurred connecting to RabbitMQ:\n' + require('util').inspect(err));
 });
 
 
@@ -77,20 +73,12 @@ function sendToQueue(data, response) {
     });
     response.end();
     var data_json = JSON.stringify(data);
-    if (rabbitMqYaron) {
-        rabbitMqYaron.publish('sophia', data_json);
+    if (rabbitMq) {
+        rabbitMq.publish('sophia', data_json);
         if (data.src != undefined) {
-            console.log(" [x] RabbitMQ Yaron Sent request data " + data.timestamp + "\n");
+            console.log(" [x] RabbitMQ Sent request data " + data.timestamp + "\n");
         } else {
-            console.log(" [x] RabbitMQ Yaron Sent %s\n", data_json);
-        }
-    }
-    if (rabbitMqInbar) {
-        rabbitMqInbar.publish('sophia', data_json);
-        if (data.src != undefined) {
-            console.log(" [x] RabbitMQ Inbar Sent request data " + data.timestamp + "\n");
-        } else {
-            console.log(" [x] RabbitMQ Inbar Sent %s\n", data_json);
+            console.log(" [x] RabbitMQ Sent %s\n", data_json);
         }
     }
 }
