@@ -68,10 +68,7 @@ rabbitMq.on('error', function(err) {
 
 
 function sendToQueue(data, response) {
-    response.writeHead(200, "OK", {
-        'Content-Type': 'text/plain'
-    });
-    response.end();
+    response.status(200).json({ value: 'OK' });
     var data_json = JSON.stringify(data);
     if (rabbitMq) {
         rabbitMq.publish('sophia', data_json);

@@ -1,5 +1,21 @@
 var dataUrl;
 
+$( document ).ready(function() {
+	chrome.storage.local.get('testGuid', function (result) {
+    	if (result.testGuid == null) {
+    		// test not running
+			$("#endTestBtn").attr("disabled", true);
+			$("#startTestBtn").removeAttr("disabled");
+			$("#instructions").text('Press "Start Test" to begin execution');
+    	} else {
+			$("#startTestBtn").attr("disabled", true);
+			$("#endTestBtn").removeAttr("disabled");
+			$("#instructions").text('Test with GUID ' + result.testGuid + ' running...');
+    	}
+
+    });
+});
+
 $("#startTestBtn").click(function() {
 	$("#startTestBtn").attr("disabled", true);
 	$("#endTestBtn").removeAttr("disabled");
@@ -11,7 +27,7 @@ $("#startTestBtn").click(function() {
     	}
    		var guid = UUID();
         chrome.storage.local.set({'testGuid': guid}, function() {
-          console.log('Test GUID saved');
+          	console.log('Test GUID saved');
         });
 
         var ts = new Date().getTime();
@@ -29,6 +45,7 @@ $("#startTestBtn").click(function() {
 	        data: data,
 	        dataType: 'json',
 	        success: function (doc) {
+				$("#instructions").text('Test with GUID ' + guid + ' running...');
 	        }
 	    });
 	});
@@ -58,8 +75,12 @@ $("#endTestBtn").click(function() {
 	        data: data,
 	        dataType: 'json',
 	        success: function (doc) {
+				$("#instructions").text('Press "Start Test" to begin execution');
 	        }
 	    });
+    	chrome.storage.local.set({'testGuid': null}, function (result) {
+        	console.log("Sophia extension Test GUID removed");
+    	});
 	});
 });
 

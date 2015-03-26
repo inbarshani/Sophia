@@ -1,4 +1,6 @@
 var baseUrl, fileUrl;
+var testGuid = null;
+
 
 chrome.storage.local.get('baseAppUrl', function (result) {
     baseAppUrl = result.baseAppUrl;
@@ -29,10 +31,28 @@ chrome.storage.local.get('fileUrl', function (result) {
     }
 });
 
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+    for (key in changes) {
+        if (namespace == "local" && key == "testGuid") {
+            var storageChange = changes[key];
+            if (storageChange.newValue == testGuid) {
+                return;
+            } else {
+                testGuid = storageChange.newValue;
+            }
+        }
+    }
+});
+
+
 
 
 function TrackRequest(info)
 {
+    if (testGuid == null) {
+        console.log ('Test GUID not defined. Exiting...');
+        return;
+    }
     console.log(info);
     var type = info.type.toLowerCase();
     if (type == 'xmlhttprequest' || type == 'main_frame' || type == 'sub_frame') {

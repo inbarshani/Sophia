@@ -1,14 +1,32 @@
 (function () {
 
     var dataUrl;
+    var testGuid = null;
    
     if (window.__eumRumService) return;
 
     chrome.storage.local.get('dataUrl', function (result) {
         dataUrl = result.dataUrl;
     });
+
+    chrome.storage.onChanged.addListener(function (changes, namespace) {
+        for (key in changes) {
+            if (namespace == "local" && key == "testGuid") {
+                var storageChange = changes[key];
+                if (storageChange.newValue == testGuid) {
+                    return;
+                } else {
+                    testGuid = storageChange.newValue;
+                }
+            }
+        }
+    });
     var lastSrcLength;
     var reportEventToSophia = function (action, document_root, event) {
+        if (testGuid == null) {
+            console.log ('Test GUID not defined. Exiting...');
+            return;
+        }
         if (event == undefined) {
             console.log ('undefined event');
         }
@@ -18,7 +36,8 @@
             type: "UI",
             timestamp: ts,
             url: docUrl,
-            eventType: event.type
+            eventType: event.type,
+            guid: testGuid
         }
         if (action == "domChangeEvent" || action == "load") {
             // DOM change - report page source
@@ -75,6 +94,16 @@
     };
 
 
+
+    var getTestGuid = function () {
+        return testGuid;
+    };
+
+    var setTestGuid = function (guid) {
+        testGuid = guid;
+    }
+
+
     var DOMtoString = function(document_root) {
         var html = '',
             node = document_root.firstChild;
@@ -105,5 +134,7 @@
     window.__eumRumService = {
         reportEventToSophia: reportEventToSophia,
         reportErrorToSophia: reportErrorToSophia,
+        getTestGuid: getTestGuid,
+        setTestGuid: setTestGuid
     };
 })();
