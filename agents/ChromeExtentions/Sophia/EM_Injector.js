@@ -2,13 +2,13 @@ $(document).ready(function() {
 ////        console.log("ready: " + window.location.href);
     // check if the base URL is the one from extension local storage
     var baseUrl;
-    chrome.storage.local.get('baseUrl', function (result) {
-        baseUrl = result.baseUrl;
-        if (baseUrl == undefined) {
+    chrome.storage.local.get('baseAppUrl', function (result) {
+        baseAppUrl = result.baseAppUrl;
+        if (baseAppUrl == undefined) {
             console.log("Sophia extension Application Base URL not defined");
             return;
         }
-        if (document.URL.indexOf(baseUrl) > -1) {
+        if (document.URL.indexOf(baseAppUrl) > -1) {
 //            window.__eumRumService.reportToSophia('load', document, event);
             setTimeout(function() {
                 document.addEventListener("DOMSubtreeModified", listenerFunc, false);

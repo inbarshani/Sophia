@@ -1,12 +1,12 @@
-var baseUrl;
+var baseUrl, fileUrl;
 
-chrome.storage.local.get('baseUrl', function (result) {
-    baseUrl = result.baseUrl;
-    if (baseUrl == undefined) {
+chrome.storage.local.get('baseAppUrl', function (result) {
+    baseAppUrl = result.baseAppUrl;
+    if (baseAppUrl == undefined) {
         console.log("Sophia extension Application Base URL not defined");
         return;
     }
-    var trackUrl = baseUrl;
+    var trackUrl = baseAppUrl;
     if (trackUrl.lastIndexOf("/") != trackUrl.length - 1) {
     	trackUrl += "/";
     }
@@ -21,6 +21,14 @@ chrome.storage.local.get('baseUrl', function (result) {
 
 });
 
+chrome.storage.local.get('fileUrl', function (result) {
+    fileUrl = result.fileUrl;
+    if (fileUrl == undefined) {
+        console.log("Sophia extension File URL not defined");
+        return;
+    }
+});
+
 
 
 function TrackRequest(info)
@@ -29,7 +37,7 @@ function TrackRequest(info)
     var type = info.type.toLowerCase();
     if (type == 'xmlhttprequest' || type == 'main_frame' || type == 'sub_frame') {
     	chrome.tabs.query({active:true}, function(tabs) {
-    		if (tabs[0].url.indexOf(baseUrl) == 0) {
+    		if (tabs[0].url.indexOf(baseAppUrl) == 0) {
 		    	chrome.tabs.captureVisibleTab(function(screenshotUrl) {
 		       		var ts = new Date().getTime();
 		    		console.log(screenshotUrl);
@@ -43,7 +51,7 @@ function TrackRequest(info)
 					formData.append("file", screenshotUrl);
 
 					var request = new XMLHttpRequest();
-					request.open("POST", "http://localhost:8080/file");
+					request.open("POST", fileUrl);
 					request.send(formData);
 				});
 			}

@@ -1,8 +1,12 @@
 (function () {
 
-    var url = "http://16.60.229.73:8080/data/";
+    var dataUrl;
    
     if (window.__eumRumService) return;
+
+    chrome.storage.local.get('dataUrl', function (result) {
+        dataUrl = result.dataUrl;
+    });
     var lastSrcLength;
     var reportEventToSophia = function (action, document_root, event) {
         if (event == undefined) {
@@ -44,7 +48,7 @@
 
         setTimeout(function() {
             $.ajax({
-                url: "http://16.60.229.73:8080/data/",
+                url: dataUrl,
                 type: 'POST',
                 data: data,
                 dataType: 'json',
@@ -60,7 +64,7 @@
     var reportErrorToSophia = function (errObj) {
         var data =  JSON.stringify(errObj);
         $.ajax({
-            url: "http://16.60.229.73:8080/data/",
+            url: dataUrl,
             type: 'POST',
             data: data,
             dataType: 'json',
