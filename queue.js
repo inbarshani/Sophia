@@ -89,7 +89,12 @@ function linkNewData(node_id, type, timestamp) {
     db.query(nodes_query, null, function(err, results) {
         if (err) {
             console.error('neo4j query failed: ' + nodes_query + '\n');
-        } else if (results[0]) {
+        } 
+        if (! results[0])
+        {
+            console.log(' [**] Linking a new node: no prev or next node');            
+        }
+        else if (results[0]) {
 
             var prev_id = results[0]['PrevID'];
             var next_id = results[0]['NextID'];
@@ -101,6 +106,7 @@ function linkNewData(node_id, type, timestamp) {
                     ' AND id(new_node) = ' + node_id +
                     ' AND id(next_node) = ' + next_id +
                     ' CREATE prev_node-[:LINK]->new_node-[:LINK]->next_node' +
+                    ' WITH prev_node, next_node' +
                     ' MATCH prev_node-[old_link:LINK]->next_node DELETE old_link';
             } else if (prev_id) {
                 link_query =
