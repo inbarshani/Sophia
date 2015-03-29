@@ -3,6 +3,7 @@ logs
 log.txt
 err.txt
 npm-debug.log
+results.txt
 
 # Runtime data
 pids
