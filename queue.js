@@ -19,6 +19,11 @@ var connection = amqp.createConnection({
 var current_test_id = null;
 var current_test_node_id = null;
 
+// mutex locking to guartee that neo4j calls of different incoming queue messages
+//  will not conflict (creating an unexpected graph structure)
+var Padlock = require("padlock").Padlock;
+var lock = new Padlock();
+
 connection.on('ready', function() {
     connection.queue('sophia', {
         autoDelete: false
@@ -26,55 +31,69 @@ connection.on('ready', function() {
 
         console.log(' [*] Waiting for messages. To exit press CTRL+C')
 
-        queue.subscribe(function(msg) {
-            var obj = JSON.parse(msg.data);
-            var data;
-            console.log(" [x] Received %s", obj.type);
-            if (obj != null) {
-                if (obj.type == 'mqm_log' || obj.type == 'sa_log') {
-                    data = mqm_log.getData(obj);
-                } else if (obj.type == 'request') {
-                    data = request.getData(obj);
-                } else if (obj.type == 'jetty_error_log') {
-                    data = jetty_error_log.getData(obj);
-                } else if (obj.type == 'UI') {
-                    data = ui.getData(obj);
-                } else if (obj.type == 'SCREEN') {
-                    data = screen.getData(obj);
-                } else if (obj.type == 'Test') {
-                    data = test.getData(obj);
-                    if (data.action.toLowerCase() == "stop") {
-                        // this is the 2nd event of a test, so it is the test END event
-                        current_test_id = null;
-                        current_test_node_id = null;
-                        return;
-                    } else if (!current_test_id)
-                        current_test_id = data.guid;
-                }
-                // for events that don't have built-in test ID, assume we're in context of the current test
-                // this is a workaround which doesn't support multiple tests as the same time, will need to fix
-                if (current_test_id && data.testID == undefined) {
-                    data.testID = current_test_id;
-                }
-                var query = 'CREATE (new_node:' + data.type + ' {data} ) RETURN id(new_node) AS NodeID';
-
-                var params = {
-                    data: data
-                };
-                console.log(" [x] Add new node query: " + query);
-                db.query(query, params, function(err, results) {
-                    if (err) {
-                        console.error('neo4j query failed: ' + query + '\n');
-                    } else if (results[0] && results[0]['NodeID'])
-                        if (data.type == 'Test')
-                            current_test_node_id = results[0]['NodeID'];
-                        else if (current_test_node_id)
-                        linkNewData(results[0]['NodeID'], data.type, data.timestamp, current_test_node_id);
-                });
-            }
-        });
+        queue.subscribe(processQueueMessage);
     });
 });
+
+function processQueueMessage(msg) {
+    var params = [1];
+    params[0] = msg;
+    lock.runwithlock(_processQueueMessage, params);
+}
+
+function _processQueueMessage(msg) {   
+    var obj = JSON.parse(msg.data);
+    var data;
+    console.log(" [x] Received %s", obj.type);
+    if (obj != null) {
+        if (obj.type == 'mqm_log' || obj.type == 'sa_log') {
+            data = mqm_log.getData(obj);
+        } else if (obj.type == 'request') {
+            data = request.getData(obj);
+        } else if (obj.type == 'jetty_error_log') {
+            data = jetty_error_log.getData(obj);
+        } else if (obj.type == 'UI') {
+            data = ui.getData(obj);
+        } else if (obj.type == 'SCREEN') {
+            data = screen.getData(obj);
+        } else if (obj.type == 'Test') {
+            data = test.getData(obj);
+            if (data.action.toLowerCase() == "stop") {
+                // this is the 2nd event of a test, so it is the test END event
+                current_test_id = null;
+                current_test_node_id = null;
+                return;
+            } else if (!current_test_id)
+                current_test_id = data.guid;
+        }
+        // for events that don't have built-in test ID, assume we're in context of the current test
+        // this is a workaround which doesn't support multiple tests as the same time, will need to fix
+        if (current_test_id && data.testID == undefined) {
+            data.testID = current_test_id;
+        }
+        var query = 'CREATE (new_node:' + data.type + ' {data} ) RETURN id(new_node) AS NodeID';
+
+        var params = {
+            data: data
+        };
+        console.log(" [x] Add new node query: " + query);
+        db.query(query, params, function(err, results) {
+            if (err) {
+                console.error('neo4j query failed: ' + query + '\n');
+                lock.release();
+            } else if (results[0] && results[0]['NodeID'])
+                if (data.type == 'Test')
+                {
+                    current_test_node_id = results[0]['NodeID'];
+                    lock.release();
+                }
+                else if (current_test_node_id)
+                {
+                    linkNewData(results[0]['NodeID'], data.type, data.timestamp, current_test_node_id);
+                }
+        });
+    }
+};
 
 var backboneTypes = [];
 
@@ -115,8 +134,9 @@ function findPrevNode(node_id, type, timestamp, test_node_id) {
     db.query(prev_nodes_query, null, function(err, results) {
         if (err) {
             console.error('neo4j query failed: ' + prev_nodes_query + '\nerr: ' + err + '\n');
+            lock.release();
         } else {
-            console.log(' [***] Prev node results: '+require('util').inspect(results));
+            console.log(' [***] Prev node results: ' + require('util').inspect(results));
             var prev_node_id = test_node_id;
             if (results[0]) {
                 prev_node_id = results[0]['PrevID'];
@@ -151,8 +171,9 @@ function findNextNode(node_id, type, timestamp, test_node_id, prev_node_id) {
     db.query(next_nodes_query, null, function(err, results) {
         if (err) {
             console.error('neo4j query failed: ' + next_nodes_query + '\nerr: ' + err + '\n');
+            lock.release();
         } else {
-            console.log(' [***] next node results: '+require('util').inspect(results));
+            console.log(' [***] next node results: ' + require('util').inspect(results));
             var next_node_id = -1;
             if (results[0])
                 next_node_id = results[0]['NextID'];
@@ -162,9 +183,9 @@ function findNextNode(node_id, type, timestamp, test_node_id, prev_node_id) {
 }
 
 /* next_node_id may be -1 to indicate no next node*/
-function linkNode(node_id, prev_node_id, next_node_id ) {
-    console.log(' [**] Linking a new node to prev node ' + prev_node_id + ' and next node '+next_node_id);
-    var link_query='';
+function linkNode(node_id, prev_node_id, next_node_id) {
+    console.log(' [**] Linking a new node to prev node ' + prev_node_id + ' and next node ' + next_node_id);
+    var link_query = '';
     if (next_node_id >= 0) {
         link_query =
             'MATCH prev_node, new_node, next_node' +
@@ -180,16 +201,15 @@ function linkNode(node_id, prev_node_id, next_node_id ) {
             ' WHERE id(prev_node) = ' + prev_node_id +
             ' AND id(new_node) = ' + node_id +
             ' CREATE prev_node-[:LINK]->new_node';
-    } 
+    }
 
     console.log(' [**] Linking nodes query: ' + link_query);
-    if (link_query)
-    {
+    if (link_query) {
         db.query(link_query, null, function(err, results) {
             if (err) {
-                console.error('neo4j query failed: ' + link_query + '\nerr: '+err+'\n');
+                console.error('neo4j query failed: ' + link_query + '\nerr: ' + err + '\n');
             }
+            lock.release();
         });
     }
 }
-
