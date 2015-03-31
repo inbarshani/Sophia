@@ -150,27 +150,26 @@ function findPrevNode(node_id, type, timestamp, test_node_id) {
 
 function findNextNode(node_id, type, timestamp, test_node_id, prev_node_id) {
     console.log(' [**] Find next node');
-    var next_nodes_qualifier = '';
+    var next_node_qualifier = '';
 
     if (backboneTypes.indexOf(type) >= 0) {
-        next_nodes_qualifier = ' AND next_nodes.type IN [\'' + backboneTypes.join('\',\'') + '\']';
+        next_node_qualifier = ' AND next_node.type IN [\'' + backboneTypes.join('\',\'') + '\']';
     }
 
     // now 
 
-    var next_nodes_query =
-        'MATCH pathToNextNode = shortestPath(test_node-[*]->next_nodes) ' +
-        ' WHERE id(test_node)=' + test_node_id +
-        ' AND next_nodes.timestamp > ' + timestamp +
-        next_nodes_qualifier +
-        ' WITH LAST(nodes(pathToNextNode)) AS next_node' +
+    var next_node_query =
+        'MATCH prev_node-->next_node' +
+        ' WHERE id(prev_node)=' + prev_node_id +
+        ' AND next_node.timestamp > ' + timestamp +
+        next_node_qualifier +
         ' RETURN id(next_node) AS NextID';
 
-    console.log(' [**] Next node query: ' + next_nodes_query);
+    console.log(' [**] Next node query: ' + next_node_query);
 
-    db.query(next_nodes_query, null, function(err, results) {
+    db.query(next_node_query, null, function(err, results) {
         if (err) {
-            console.error('neo4j query failed: ' + next_nodes_query + '\nerr: ' + err + '\n');
+            console.error('neo4j query failed: ' + next_node_query + '\nerr: ' + err + '\n');
             lock.release();
         } else {
             console.log(' [***] next node results: ' + require('util').inspect(results));
