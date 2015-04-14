@@ -4,11 +4,13 @@ $( document ).ready(function() {
 	chrome.storage.local.get('testGuid', function (result) {
     	if (result.testGuid == null) {
     		// test not running
+			$("#reportStep").attr("disabled", true);
 			$("#endTestBtn").attr("disabled", true);
 			$("#startTestBtn").removeAttr("disabled");
 			$("#instructions").text('Press "Start Test" to begin execution');
     	} else {
 			$("#startTestBtn").attr("disabled", true);
+			$("#reportStep").removeAttr("disabled");
 			$("#endTestBtn").removeAttr("disabled");
 			$("#instructions").text('Test with GUID ' + result.testGuid + ' running...');
     	}
@@ -18,6 +20,7 @@ $( document ).ready(function() {
 
 $("#startTestBtn").click(function() {
 	$("#startTestBtn").attr("disabled", true);
+	$("#reportStep").removeAttr("disabled");
 	$("#endTestBtn").removeAttr("disabled");
 	chrome.storage.local.get('dataUrl', function (result) {
     	dataUrl = result.dataUrl;
@@ -35,7 +38,8 @@ $("#startTestBtn").click(function() {
             type: "Test",
             timestamp: ts,
             action: "start",
-            guid: guid
+            guid: guid,
+            description: "Manual test"
         }
 
 		var data =  JSON.stringify(args);
@@ -53,6 +57,8 @@ $("#startTestBtn").click(function() {
 
 $("#endTestBtn").click(function() {
 	$("#endTestBtn").attr("disabled", true);
+	$("#reportStep").attr("disabled", true);
+	$("#reportStep").attr("counter", 0);
 	$("#startTestBtn").removeAttr("disabled");
 	chrome.storage.local.get('testGuid', function (result) {
 		var guid;
@@ -66,7 +72,8 @@ $("#endTestBtn").click(function() {
             type: "Test",
             timestamp: ts,
             action: "stop",
-            guid: guid
+            guid: guid,
+            description: "Manual test"
         }
 		var data =  JSON.stringify(args);
 	    $.ajax({
@@ -82,6 +89,38 @@ $("#endTestBtn").click(function() {
         	console.log("Sophia extension Test GUID removed");
     	});
 	});
+});
+
+$("#reportStep").click(function() {
+	var step_counter = 	parseInt($("#reportStep").attr("counter")) + 1;
+	$("#reportStep").attr("counter", step_counter);
+	chrome.storage.local.get('testGuid', function (result) {
+		var guid;
+    	guid = result.testGuid;
+    	if (guid == undefined) {
+        	console.log("Sophia extension GUID not defined");
+        	return;
+    	}
+        var ts = new Date().getTime();
+        var args = {
+            type: "TestStep",
+            timestamp: ts,
+            action: "start",
+            testID: guid,
+            stepNumber: step_counter,
+            description: "Manual test step"
+        }
+		var data =  JSON.stringify(args);
+	    $.ajax({
+	        url: dataUrl,
+	        type: 'POST',
+	        data: data,
+	        dataType: 'json',
+	        success: function (doc) {
+				
+	        }
+	    });
+	});	
 });
 
 function UUID() {
