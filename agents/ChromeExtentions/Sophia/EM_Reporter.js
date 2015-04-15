@@ -1,28 +1,43 @@
 (function () {
 
-    var dataUrl;
+    var dataUrl = null;
     var testGuid = null;
    
     if (window.__eumRumService) return;
 
     chrome.storage.local.get('dataUrl', function (result) {
-        dataUrl = result.dataUrl;
+        window.__eumRumService.dataUrl = result.dataUrl;
+    });
+
+    chrome.storage.local.get('testGuid', function (result) {
+        window.__eumRumService.testGuid = result.testGuid;
     });
 
     chrome.storage.onChanged.addListener(function (changes, namespace) {
         for (key in changes) {
             if (namespace == "local" && key == "testGuid") {
                 var storageChange = changes[key];
-                if (storageChange.newValue == testGuid) {
+                if (storageChange.newValue == window.__eumRumService.testGuid) {
                     return;
                 } else {
-                    testGuid = storageChange.newValue;
+                    window.__eumRumService.testGuid = storageChange.newValue;
+                }
+            }
+            else if (namespace == "local" && key == "dataUrl") {
+                var storageChange = changes[key];
+                if (storageChange.newValue == window.__eumRumService.dataUrl) {
+                    return;
+                } else {
+                    window.__eumRumService.dataUrl = storageChange.newValue;
                 }
             }
         }
     });
     var lastSrcLength;
     var reportEventToSophia = function (action, document_root, event) {
+        var dataUrl = window.__eumRumService.dataUrl;
+        var testGuid = window.__eumRumService.testGuid;
+
         if (testGuid == null) {
             console.log ('Test GUID not defined. Exiting...');
             return;
@@ -66,6 +81,7 @@
         var data =  JSON.stringify(args);
 
         setTimeout(function() {
+            console.log('Reporting to Sophia, dataUrl: '+dataUrl);
             $.ajax({
                 url: dataUrl,
                 type: 'POST',
@@ -92,17 +108,6 @@
             }
         });
     };
-
-
-
-    var getTestGuid = function () {
-        return testGuid;
-    };
-
-    var setTestGuid = function (guid) {
-        testGuid = guid;
-    }
-
 
     var DOMtoString = function(document_root) {
         var html = '',
@@ -134,7 +139,7 @@
     window.__eumRumService = {
         reportEventToSophia: reportEventToSophia,
         reportErrorToSophia: reportErrorToSophia,
-        getTestGuid: getTestGuid,
-        setTestGuid: setTestGuid
+        dataUrl: dataUrl,
+        testGuid: testGuid
     };
 })();
