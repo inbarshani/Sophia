@@ -1,0 +1,183 @@
+<html>
+  <meta charset="utf-8">
+  <head>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="js/jquery-2.1.0.js"></script>
+    <script src="js/sophia_ui.js"></script>
+    <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui.min.css">
+    <link rel="stylesheet" href="css/autn.css">
+  </head>
+  <style>
+  </style>
+  <body>
+    <header class="main-header">
+      <div class="main-logo">
+        <img src="./img/logo.png" class="img-logo">
+      </div>
+    </header>
+
+    <section style="width: 100%;">
+      <div style="margin-left: 10px; margin-top: 0px;">
+        <aside style="width: 20%;">
+          <article class="entry widget">  
+            <h3 class="section-title">Actions</h3>
+            <div class="entry-wrapper">
+              <div id="tabs">
+                <ul>
+                  <li><a href="#tabs-tests">Testing</a></li>
+                  <li><a href="#tabs-research">Research</a></li>
+                </ul>
+                <div id="tabs-tests" class="no-padding">
+                  <div class="entry-content">
+                    <div id="accordionTests">
+                      <h3 class="section-title" style="margin-top: 15px;">Test Steps<span id="testSaveIcon" class="icon-save disabled" title="Save as test"></span></h3>
+                      <div id="accordionExecution">
+                        <table id='prevQueries' class='table'></table>
+                        <form name='query_form' action="#">
+                          <div>
+                            <label for="q">Description:</label>
+                            <input type="Text" name="q" id="q" placeholder="Enter Query Text" class="ui-widget ui-corner-all" style="width:100%;">
+                          </div>
+                          <div>
+                            <label for="dateBiasRange">Expected Results:</label>
+                            <input type="Text" name="expected" id="expected" placeholder="Enter Expectd Results" class="ui-widget ui-corner-all" style="width:100%;">
+                          </div>
+                          <div class="table-row">
+                            <input type="submit" id='testing_query_button' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' style="width:100px; height: 30px;"></input>
+                          </div>
+                          <div class="table-row">
+                          </div>
+                        </form>
+                      </div>
+                      <h3 class="section-title">Saved Tests</h3>
+                      <div id="accordionSavedTests">
+                        <table id='savedTestsTable' class='table'>
+                          
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div id="tabs-research" class="no-padding">
+                  <div class="entry-content">
+                    <div id="accordionResearch">
+                      <h3 class="section-title" style="margin-top: 15px;">Problem Research</h3>
+                      <div id="accordionResearchForm">
+                        <table id='prevResearchQueries' class='table'></table>
+                        <form name='research_query_form' action="#">
+                          <div>
+                            <label for="nodeType">What:</label>
+                            <select name="nodeType" id="nodeType" class="ui-widget ui-corner-all" style="width:100%;"></select>
+                          </div>
+                          <div>
+                            <label for="dateBiasRange">Search:</label>
+                            <input type="Text" name="research" id="research" placeholder="Enter Query Text" class="ui-widget ui-corner-all" style="width:100%;">
+                          </div>
+                          <div class="table-row">
+                            <input type="submit" id='research_query_button' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' style="width:100px; height: 30px;"></input>
+                          </div>
+                          <div class="table-row">
+                          </div>
+                        </form>
+                      </div>
+                      <h3 class="section-title">Saved Queries</h3>
+                      <div id="accordionSavedResearch">
+                        <table id='savedResearchTable' class='table'>
+                          
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </aside>
+        <aside style="width: 78%; float: left;">
+          <div class="entry-content">
+            <article class="entry widget">  
+              <h3 class="section-title">Graph Results</h3>
+              <div class="entry-wrapper" id='graphWrapper'>
+                <section>
+                  <div id="graph_container"></div>
+                </section>
+              </div>
+            </article>
+          </div>
+        </aside>
+        <div id='details'>
+          <div class='header'><span></span><a href="#" class="close" onclick="hideWin('details');">X</a></div>
+          <div id='properties' class="pb">
+          </div>  
+        </div>
+        <div id='examine'>
+          <div class='header'><span>Step Research</span><a href="#" class="close black" onclick="hideWin('examine');">X</a></div>
+          <div class="table-row">
+            <div class="table-cell small-text">The status of this step is:
+              <span id='exStatus'></span>
+            </div>
+          </div>
+          <form name='examine_form' action="#">
+            <div class="table-row">
+              <div class="table-cell">
+                <span id='exDescName' class="small-text bold"></span>
+                <span id='exDescValue'class="small-text"></span>
+              </div>
+            </div>
+            <p></p>
+            <div class="table-row">
+              <div class="table-cell small-text">To further research the step, enter query description and press "Research"</div>
+            </div>
+            <p></p>
+            <div>
+              <label for="exq">Description:</label>
+              <input type="Text" name="exq" id="exq" placeholder="Enter Query Text" class="ui-widget ui-corner-all" style="width:100%;">
+            </div>
+            <div class="table-row">
+              <input type="submit" id='exq_query' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' style="width:100px; height: 30px;" value="Research"></input>
+            </div>
+          </form>
+        </div>
+        <div id='testName'>
+          <div class='header'><span>Save As Test</span><a href="#" class="close black" onclick="hideWin('testName');">X</a></div>
+            <div class='table'></div>
+            <form name='test_name_form' action="#">
+              <div>
+                <label for="q">Test Name:</label>
+                <input type="Text" name="testNameText" id="testNameText" placeholder="Enter Test Name" class="ui-widget ui-corner-all" style="width:100%;">
+              </div>
+              <div class="table-row">
+                <input type="submit" id='testNameButton' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' style="width:100px; height: 30px;"></input>
+              </div>
+              <div class="table-row">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div id='researchName'>
+          <div class='header'><span>Save Research</span><a href="#" class="close black" onclick="hideWin('researchName');">X</a></div>
+            <form name='research_name_form' action="#">
+              <div>
+                <label for="researchNameText">Name:</label>
+                <input type="Text" name="researchNameText" id="researchNameText" placeholder="Enter a Name" class="ui-widget ui-corner-all" style="width:100%;">
+              </div>
+              <div class="table-row">
+                <input type="submit" id='researchNameButton' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' style="width:100px; height: 30px;"></input>
+              </div>
+              <div class="table-row">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div id='contextMenu'>
+          <ul id='cmul'>
+            <li id='cmRemove'>Remove</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <div id="busy" class="busyindicator"> </div>
+    <section id="errorsAndWarnings" class="ui-widget-content ui-corner-all final-details"></section>
+  </body>
+</html>
