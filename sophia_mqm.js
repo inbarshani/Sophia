@@ -14,12 +14,22 @@ app.use(express.static(__dirname + '/static'));
 //app.use(bodyParser.json());
 
 app.use('/querySuggestions', function(request, response) {
-    var currentNodes = request.query.currentNodes;
+    var currentNodes = JSON.parse(request.query.currentNodes);
     //console.log("currentNodes: "+currentNodes);
 
-    var query = "MATCH root-[:" + sophia_consts.backboneLinkType + "*0..2]->a" +
-        " WHERE ANY(label in labels(root) WHERE label IN ['" + sophia_consts.backboneRoot.join('\',\'') + "'])" +
-        " return a.description";
+    var query = "";
+    if (currentNodes.length == 0)
+    {
+        query = "MATCH root-[:" + sophia_consts.backboneLinkType + "*0..2]->a" +
+            " WHERE ANY(label in labels(root) WHERE label IN ['" + sophia_consts.backboneRoot.join('\',\'') + "'])" +
+            " return a.description";
+    }
+    else
+    {
+        query = "MATCH root-[:" + sophia_consts.backboneLinkType + "*1..5]->a" +
+            " WHERE id(root) IN [" + currentNodes.join(',') + "]" +
+            " return a.description";        
+    }
     console.log("Get suggestions query: " + query);
     db.query(query, null, function(err, results) {
         if (err) {

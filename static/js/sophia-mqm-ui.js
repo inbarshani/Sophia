@@ -16,12 +16,12 @@ $(document).ready(function() {
         clearSearch();
     });
 
-    querySuggestions();
+    update();
 });
 
 function search() {
     // TBD: until backend function is ready, manual pushing a node
-    currentNodes.push('1');
+    currentNodes.push('63354');
     // update the logo
     update();
 }
@@ -34,12 +34,13 @@ function clearSearch() {
 }
 
 function update() {
-    switchLogo();
+    updateLogo();
     if (currentNodes.length <= 0)
         clearSearchText();
+    querySuggestions();    
 }
 
-function switchLogo() {
+function updateLogo() {
     if (currentNodes.length > 0) {
         $('#navbar-logo').removeClass('hidden').addClass('visible');
         $('#logo').removeClass('visible').addClass('hidden');
@@ -61,7 +62,9 @@ function querySuggestions()
         //alert('suggestionsArray length: '+suggestionsArray.length+" [0]: "+suggestionsArray[0])
         $('#suggestions-text').text('Try: '+suggestionsArray.join(", "));
       })
-      .fail(function() {
-        alert( "error getting suggestions" );
+      .fail(function(err) {
+        //alert( "error getting suggestions" );
+        console.log("Error getting suggestions: "+err);
+        $('#suggestions-text').html('<i>Suggestions not availbale at this time</i>');
       });    
 }
