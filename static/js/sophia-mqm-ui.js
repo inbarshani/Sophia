@@ -15,6 +15,8 @@ $(document).ready(function() {
     $('#navbar-logo').on('click', function(e) {
         clearSearch();
     });
+
+    querySuggestions();
 });
 
 function search() {
@@ -49,4 +51,17 @@ function switchLogo() {
 
 function clearSearchText() {
     $('#search-text').val('');
+}
+
+function querySuggestions()
+{
+    var jqxhr = $.ajax( "/querySuggestions?currentNodes="+JSON.stringify(currentNodes))
+      .done(function(data) {
+        var suggestionsArray = JSON.parse(data);
+        //alert('suggestionsArray length: '+suggestionsArray.length+" [0]: "+suggestionsArray[0])
+        $('#suggestions-text').text('Try: '+suggestionsArray.join(", "));
+      })
+      .fail(function() {
+        alert( "error getting suggestions" );
+      });    
 }

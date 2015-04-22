@@ -15,6 +15,8 @@ var teststep = require("./processors/test_step");
 
 var Step = require('Step');
 
+var sophia_consts = require('./lib/sophia_consts');
+
 var connection = amqp.createConnection({
     host: 'localhost'
 });
@@ -113,9 +115,6 @@ function _processQueueMessage(msg) {
 
 };
 
-var backboneTypes = ['Test', 'TestStep'];
-var backboneLinkType = 'FOLLOWED_BY';
-var dataLinkType = 'LINKED_TO';
 var no_err = null;
 
 function linkNewData(node_id, type, timestamp, test_node_id) {
@@ -127,7 +126,7 @@ function linkNewData(node_id, type, timestamp, test_node_id) {
     //      - Query by timestamp and links?
     // also, remove existing relation if there is one between immediates
     try {
-        if (backboneTypes.indexOf(type) >= 0) {
+        if (sophia_consts.backboneTypes.indexOf(type) >= 0) {
             console.log(' [***] Linking a new backbone node '+node_id+' to test node ' + test_node_id);
             var prev_backbone_node_id = null,
                 end_prev_chain_node = null;
@@ -313,9 +312,9 @@ function linkNode(isBackbone, node_id, prev_node_id, next_node_id, shouldLinkToP
     var relation_type_qualifier = '';
 
     if (isBackbone)
-        relation_type_qualifier = '[:' + backboneLinkType + ']';
+        relation_type_qualifier = '[:' + sophia_consts.backboneLinkType + ']';
     else
-        relation_type_qualifier = '[:' + dataLinkType + ']';
+        relation_type_qualifier = '[:' + sophia_consts.dataLinkType + ']';
 
     var relation_create_clause = '';
     if (next_node_id && shouldLinkToPrev) {
