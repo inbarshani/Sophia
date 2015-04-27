@@ -1,6 +1,4 @@
 var express = require('express');
-//var neo4j = require("neo4j");
-//var bodyParser = require('body-parser');
 var fs = require('fs');
 
 var sophia_consts = require('./lib/sophia_consts');
@@ -48,5 +46,11 @@ app.use('/querySuggestions', function(request, response) {
         }
     });
 });
+
+app.use('/querySuggestions', function(request, response) {
+    var queryText = request.query.q;
+
+
+)};
 
 app.listen(8080);

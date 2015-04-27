@@ -4,6 +4,7 @@ module.exports = {
 		{
 			obj.guid = obj.testID;
 		}
+        obj.indexable_content = obj.description;
         return obj;
 	}
 };

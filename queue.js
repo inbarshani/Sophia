@@ -1,5 +1,8 @@
 var amqp = require('amqp');
-var neo4j = require("neo4j");
+var neo4j = require('neo4j');
+var http = require('http');
+var jsontoxml = require('jsontoxml');
+
 // connect to neo4j DB, on Yaron's machine and Inbar's machine
 var db = new neo4j.GraphDatabase('http://localhost:7474');
 
@@ -89,22 +92,26 @@ function _processQueueMessage(msg) {
                 // TODO: bind current_test_id by id of node of type Test, if the current is not set
                 // this will recover from disruptions in processing incoming events
             }
-            var query = 'CREATE (new_node:' + data.type + ' {data} ) RETURN id(new_node) AS NodeID';
+            var query = 'CREATE (new_node:' + data.type + ' {attributes} ) RETURN id(new_node) AS NodeID';
 
             var params = {
-                data: data
+                attributes: {
+                    timestamp: data.timestamp
+                }
             };
             //console.log(" [x] Add new node query: " + query);
             db.query(query, params, function(err, results) {
                 if (err) {
                     console.error('neo4j query failed: ' + query + '\n');
                     lock.release();
-                } else if (results[0] && results[0]['NodeID'])
+                } else if (results[0] && results[0]['NodeID']) {
+                    addToIdol(results[0]['NodeID'], data);
                     if (data.type == 'Test') {
                         current_test_node_id = results[0]['NodeID'];
                         lock.release();
                     } else if (current_test_node_id) {
                         linkNewData(results[0]['NodeID'], data.type, data.timestamp, current_test_node_id);
+                    }
                 }
             });
         }
@@ -114,6 +121,64 @@ function _processQueueMessage(msg) {
     }
 
 };
+
+
+function addToIdol(node_id, data) {
+    // add to IDOL via HTTP post to IDOL index
+    //  fields are mapped from the data json to the IDOL format
+    console.log('[!] Adding node #' + node_id + ' to IDOL index');
+    var date = new Date();
+    date.setTime(data.timestamp);
+    var dateFormat = date.toISOString();
+    dateFormat = dateFormat.substring(0,dateFormat.indexOf('T'));
+    console.log('date: ' + dateFormat);
+
+    var post_data = '#DREREFERENCE ' + node_id + '\r\n' +
+        '#DREDATE ' + dateFormat + '\r\n' +
+        '#DRETITLE ' + data.type + '\r\n';
+    Object.keys(data).forEach(function(key) {
+        if (key != 'type' && key != 'indexable_content')
+            post_data = post_data + '#DREFIELD ' + key + '=\"' + data[key].toString().replace(/#|\"/, '') + '\"\r\n';
+    });
+
+    post_data = post_data + '#DRECONTENT\r\n' +
+        data.indexable_content.replace('#', '') + '\r\n' + 
+        '#DREDBNAME Sophia\r\n' +
+        '#DREENDDOC\r\n' +
+        '#DREENDDATAREFERENCE\r\n';
+
+    console.log('POST ' + post_data);
+    
+    var post_options = {
+        host: '16.60.168.105',
+        port: '9001',
+        path: '/DREADDDATA',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain',
+            'Content-Length': post_data.length
+        }
+    };
+
+    // Set up the request
+    var post_req = http.request(post_options, function(res) {
+        //res.setEncoding('utf8');
+        var response_data = "";
+        res.on('data', function(chunk) {
+            if (chunk != null && chunk != "") {
+                response_data += chunk;
+            }
+        });
+        res.on('end', function() {
+            console.log('[!!] IDOL POST for node_id ' + node_id + ' completed: ' +
+                res.statusCode + '\ndata: ' + response_data);
+        });
+    });
+
+    // post the data
+    post_req.write(post_data);
+    post_req.end();
+}
 
 var no_err = null;
 
@@ -127,7 +192,7 @@ function linkNewData(node_id, type, timestamp, test_node_id) {
     // also, remove existing relation if there is one between immediates
     try {
         if (sophia_consts.backboneTypes.indexOf(type) >= 0) {
-            console.log(' [***] Linking a new backbone node '+node_id+' to test node ' + test_node_id);
+            console.log(' [***] Linking a new backbone node ' + node_id + ' to test node ' + test_node_id);
             var prev_backbone_node_id = null,
                 end_prev_chain_node = null;
             var isBackbone = true,
@@ -185,7 +250,7 @@ function linkNewData(node_id, type, timestamp, test_node_id) {
                 }
             );
         } else {
-            console.log(' [***] Linking a new data node '+node_id+' to test node ' + test_node_id);
+            console.log(' [***] Linking a new data node ' + node_id + ' to test node ' + test_node_id);
             var latest_data_node = null,
                 backbone_node_id = null;
             var isBackbone = true,
@@ -238,9 +303,9 @@ function findLatestNode(isBackbone, start_node_id, timestamp, callback) {
     var relation_type_qualifier = '';
 
     if (isBackbone)
-        relation_type_qualifier = '[:' + backboneLinkType + '*]';
+        relation_type_qualifier = '[:' + sophia_consts.backboneLinkType + '*]';
     else
-        relation_type_qualifier = '[:' + dataLinkType + '*]';
+        relation_type_qualifier = '[:' + sophia_consts.dataLinkType + '*]';
 
 
     // now 
@@ -278,9 +343,9 @@ function findNextNode(isBackbone, start_node_id, callback) {
     var relation_type_qualifier = '';
 
     if (isBackbone)
-        relation_type_qualifier = '[:' + backboneLinkType + ']';
+        relation_type_qualifier = '[:' + sophia_consts.backboneLinkType + ']';
     else
-        relation_type_qualifier = '[:' + dataLinkType + ']';
+        relation_type_qualifier = '[:' + sophia_consts.dataLinkType + ']';
 
     // now 
 

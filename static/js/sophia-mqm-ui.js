@@ -20,10 +20,21 @@ $(document).ready(function() {
 });
 
 function search() {
-    // TBD: until backend function is ready, manual pushing a node
+    // TBD: until backend function is ready, manually pushing a known root node
     currentNodes.push('63354');
-    // update the logo
-    update();
+    var jqxhr = $.ajax( "/search?q="+$('#search-text').text())
+      .done(function(data) {
+        var currentNodes = JSON.parse(data);
+        update();
+      })
+      .fail(function(err) {
+        alert( "Unable to complete search at this time, try again later" );
+        console.log("Search failed: "+err);
+
+        // remove all nodes
+        currentNodes.length = 0;
+        update();        
+      });    
 }
 
 function clearSearch() {

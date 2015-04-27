@@ -8,6 +8,7 @@ module.exports = {
 	        logDate.setDate(currDate.getDate());
 		}
         obj.timestamp = logDate.getTime();
+        obj.indexable_content = obj.message;
         return obj;
 	}
 };
