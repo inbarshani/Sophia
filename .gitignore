@@ -4,6 +4,9 @@ log.txt
 err.txt
 npm-debug.log
 results.txt
+results.xml
+result.txt
+result.xml
 
 # Runtime data
 pids
