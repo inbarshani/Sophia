@@ -1,10 +1,8 @@
 var express = require('express');
-var fs = require('fs');
 
 var sophia_consts = require('./lib/sophia_consts');
-var neo4j = require('neo4j');
-// connect to neo4j DB, on Yaron's machine and Inbar's machine
-var db = new neo4j.GraphDatabase('http://localhost:7474');
+var idol_queries = require('./lib/idol_queries');
+var neo4j_queries = require('./lib/neo4j_queries');
 
 var app = express();
 
@@ -14,7 +12,7 @@ app.use(express.static(__dirname + '/static'));
 app.use('/querySuggestions', function(request, response) {
     var currentNodes = JSON.parse(request.query.currentNodes);
     //console.log("currentNodes: "+currentNodes);
-
+    /*
     var query = "";
     if (currentNodes.length == 0)
     {
@@ -44,13 +42,29 @@ app.use('/querySuggestions', function(request, response) {
             });
             response.send(JSON.stringify(suggestions));
         }
-    });
+    });*/
+    response.send('');
 });
 
-app.use('/querySuggestions', function(request, response) {
+app.use('/search', function(request, response) {
     var queryText = request.query.q;
+    var currentNodes = JSON.parse(request.query.currentNodes);
 
-
-)};
+    idol_queries.search(queryText, function(nodes) {
+        // verify that the nodes are connected after existing nodes
+        var potentialNodes=[];
+        nodes.map(function(node){
+            potentialNodes.push(node.graph_node);
+        });
+        if (currentNodes.length > 0)
+        {
+            neo4j_queries.doesPathExit(currentNodes, potentialNodes, function(final_nodes){
+                response.send(JSON.stringify(final_nodes));
+            });
+        }
+        else
+            response.send(JSON.stringify(potentialNodes));
+    });
+});
 
 app.listen(8080);

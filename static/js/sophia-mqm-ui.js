@@ -1,5 +1,11 @@
 var currentNodes = [];
 
+function fixedEncodeURIComponent(str) {
+    return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+        return '%' + c.charCodeAt(0).toString(16);
+    });
+}
+
 $(document).ready(function() {
 
     $('#search-button').on('click', function(e) {
@@ -20,11 +26,12 @@ $(document).ready(function() {
 });
 
 function search() {
-    // TBD: until backend function is ready, manually pushing a known root node
-    currentNodes.push('63354');
-    var jqxhr = $.ajax( "/search?q="+$('#search-text').text())
+
+    var jqxhr = $.ajax("/search?q="+fixedEncodeURIComponent($('#search-text').val())+'&'+
+        'currentNodes='+JSON.stringify(currentNodes))
       .done(function(data) {
-        var currentNodes = JSON.parse(data);
+        console.log("Search returned: "+data);
+        currentNodes = JSON.parse(data);
         update();
       })
       .fail(function(err) {
