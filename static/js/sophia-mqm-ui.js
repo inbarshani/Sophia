@@ -26,12 +26,15 @@ $(document).ready(function() {
 });
 
 function search() {
-
-    var jqxhr = $.ajax("/search?q="+fixedEncodeURIComponent($('#search-text').val())+'&'+
+    var query = $('#search-text').val();
+    var jqxhr = $.ajax("/search?q="+fixedEncodeURIComponent(query)+'&'+
         'currentNodes='+JSON.stringify(currentNodes))
       .done(function(data) {
         console.log("Search returned: "+data);
         currentNodes = JSON.parse(data);
+        // add query and number of results to the list
+        $('#flow-list').append('<li class="list-group-item">'+query+
+            ' <span class="badge">'+currentNodes.length+'</span></li>');
         update();
       })
       .fail(function(err) {
@@ -47,6 +50,8 @@ function search() {
 function clearSearch() {
     // remove all nodes
     currentNodes.length = 0;
+    // clear flow list
+    $('#flow-list').empty();
     // update the logo
     update();
 }
