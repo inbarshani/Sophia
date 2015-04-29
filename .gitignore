@@ -1,6 +1,7 @@
 # Logs
 logs
 log.txt
+*.log
 err.txt
 npm-debug.log
 results.txt

@@ -1,4 +1,5 @@
 var currentNodes = [];
+var reportString = '';
 
 function fixedEncodeURIComponent(str) {
     return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
@@ -29,9 +30,11 @@ function search() {
     if (currentNodes.length == 0) {
         // clear flow list
         $('#flow-list').empty();
+        reportString = '';
     }
 
     var query = $('#search-text').val();
+    reportString = reportString + query + '\n';
     var jqxhr = $.ajax("/search?q=" + fixedEncodeURIComponent(query) + '&' +
             'currentNodes=' + JSON.stringify(currentNodes))
         .done(function(data) {
@@ -40,11 +43,13 @@ function search() {
             // add query and number of results to the list
             $('#flow-list').append('<li class="list-group-item">' + query +
                 ' <span class="badge">' + currentNodes.length + '</span></li>');
+            reportString = reportString + 'result: ' + currentNodes.length + '\n';
             update();
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
             console.log("Search failed: " + err);
+            reportString = reportString + 'result: failed query\n';
 
             // remove all nodes
             currentNodes.length = 0;
@@ -62,6 +67,8 @@ function clearSearch() {
 }
 
 function update() {
+    reportAudit();
+
     updateLogo();
 
     updateSearchBox();
@@ -80,7 +87,7 @@ function updateLogo() {
 }
 
 function updateSearchBox() {
-    // clear last search term    
+    // clear last search term
     $('#search-text').val('');
     // show/hide the flow title
     if ($('#flow-list').has('li').length > 0)
@@ -94,6 +101,8 @@ function updateSearchBox() {
 }
 
 function querySuggestions() {
+    $('#suggestions-text').html('<i>Suggestions not availbale at this time</i>');
+    return;
     var jqxhr = $.ajax("/querySuggestions?currentNodes=" + JSON.stringify(currentNodes))
         .done(function(data) {
             var suggestionsArray = JSON.parse(data);
@@ -105,4 +114,15 @@ function querySuggestions() {
             console.log("Error getting suggestions: " + err);
             $('#suggestions-text').html('<i>Suggestions not availbale at this time</i>');
         });
+}
+
+function reportAudit(){
+    var jqxhr = $.ajax("/report?reportString=" + fixedEncodeURIComponent(reportString))
+        .done(function(data) {
+        })
+        .fail(function(err) {
+            //alert( "error getting suggestions" );
+            console.log("Failed reporting audit log: " + err);
+        });
+
 }

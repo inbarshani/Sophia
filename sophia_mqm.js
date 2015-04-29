@@ -1,4 +1,5 @@
 var express = require('express');
+var fs = require('fs');
 
 var sophia_consts = require('./lib/sophia_consts');
 var idol_queries = require('./lib/idol_queries');
@@ -65,6 +66,17 @@ app.use('/search', function(request, response) {
         else
             response.send(JSON.stringify(potentialNodes));
     });
+});
+
+app.use('/report', function(request, response) {
+    var reportString = new Date().toUTCString() + ' ' +
+        request.connection.remoteAddress + ': '+ request.query.reportString + '\n';
+    // save an audit of the actions done by a user
+    fs.appendFile('audit.log', reportString, function (err) {
+        if (err)
+            console.log('Error saving audit data: '+reportString);
+    });
+    response.send();
 });
 
 app.listen(8080);
