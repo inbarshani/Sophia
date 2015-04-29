@@ -64,6 +64,8 @@ function clearSearch() {
 function update() {
     updateLogo();
 
+    updateSearchBox();
+
     querySuggestions();
 }
 
@@ -77,8 +79,18 @@ function updateLogo() {
     }
 }
 
-function clearSearchText() {
+function updateSearchBox() {
+    // clear last search term    
     $('#search-text').val('');
+    // show/hide the flow title
+    if ($('#flow-list').has('li').length > 0)
+    {
+        $('#flow-title').removeClass('hidden').addClass('visible');
+    }
+    else // no current search
+    {
+        $('#flow-title').removeClass('visible').addClass('hidden');   
+    }
 }
 
 function querySuggestions() {
