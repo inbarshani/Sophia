@@ -41,8 +41,9 @@ function search() {
             console.log("Search returned: " + data);
             currentNodes = JSON.parse(data);
             // add query and number of results to the list
-            $('#flow-list').append('<li class="list-group-item">' + query +
-                ' <span class="badge">' + currentNodes.length + '</span></li>');
+            var currentStepNumber = $('#flow-list').has('li').length + 1;
+            $('#flow-list').append('<li class="list-group-item">Step ' + currentStepNumber + ': ' + 
+                query + ' <span class="badge">' + currentNodes.length + '</span></li>');
             reportString = reportString + 'result: ' + currentNodes.length + '\n';
             update();
         })
