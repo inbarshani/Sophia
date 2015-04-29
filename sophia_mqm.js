@@ -13,38 +13,19 @@ app.use(express.static(__dirname + '/static'));
 app.use('/querySuggestions', function(request, response) {
     var currentNodes = JSON.parse(request.query.currentNodes);
     //console.log("currentNodes: "+currentNodes);
-    /*
-    var query = "";
-    if (currentNodes.length == 0)
-    {
-        query = "MATCH root-[:" + sophia_consts.backboneLinkType + "*0..2]->a" +
-            " WHERE ANY(label in labels(root) WHERE label IN ['" + sophia_consts.backboneRoot.join('\',\'') + "'])" +
-            " return a.description";
-    }
-    else
-    {
-        query = "MATCH root-[:" + sophia_consts.backboneLinkType + "*1..5]->a" +
-            " WHERE id(root) IN [" + currentNodes.join(',') + "]" +
-            " return a.description";        
-    }
-    console.log("Get suggestions query: " + query);
-    db.query(query, null, function(err, results) {
-        if (err) {
-            console.error('neo4j query failed: ' + query + '\n');
-            throw err;
-        } else {
-            //console.log(results);
-            var suggestions=[];
-            results.map(function(result)
-            {
-                var desc = result['a.description'];
-                if (suggestions.indexOf(desc) < 0)
-                    suggestions.push(desc);
+    neo4j_queries.getAllBackboneNodes(currentNodes, function(graphNodes) {
+        if (graphNodes) {
+            idol_queries.getSuggestedTerms(graphNodes, function(terms) {
+                if (terms)
+                    response.send(JSON.stringify(terms));
+                else
+                    response.status(404).send();
             });
-            response.send(JSON.stringify(suggestions));
         }
-    });*/
-    response.send('');
+        else
+            response.status(404).send();
+    });
+
 });
 
 app.use('/search', function(request, response) {

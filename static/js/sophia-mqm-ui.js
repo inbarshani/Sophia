@@ -102,8 +102,6 @@ function updateSearchBox() {
 }
 
 function querySuggestions() {
-    $('#suggestions-text').html('<i>Suggestions not availbale at this time</i>');
-    return;
     var jqxhr = $.ajax("/querySuggestions?currentNodes=" + JSON.stringify(currentNodes))
         .done(function(data) {
             var suggestionsArray = JSON.parse(data);
