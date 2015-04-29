@@ -53,29 +53,29 @@ app.use('/search', function(request, response) {
 
     idol_queries.search(queryText, function(nodes) {
         // verify that the nodes are connected after existing nodes
-        var potentialNodes=[];
-        nodes.map(function(node){
+        var potentialNodes = [];
+        nodes.map(function(node) {
             potentialNodes.push(node.graph_node);
         });
-        if (currentNodes.length > 0)
-        {
-            neo4j_queries.doesPathExit(currentNodes, potentialNodes, function(final_nodes){
+        if (currentNodes.length > 0) {
+            neo4j_queries.doesPathExit(currentNodes, potentialNodes, function(final_nodes) {
                 response.send(JSON.stringify(final_nodes));
             });
-        }
-        else
+        } else
             response.send(JSON.stringify(potentialNodes));
     });
 });
 
 app.use('/report', function(request, response) {
-    var reportString = new Date().toUTCString() + ' ' +
-        request.connection.remoteAddress + ': '+ request.query.reportString + '\n';
-    // save an audit of the actions done by a user
-    fs.appendFile('audit.log', reportString, function (err) {
-        if (err)
-            console.log('Error saving audit data: '+reportString);
-    });
+    if (request.query.reportString.length > 0) {
+        var reportString = new Date().toUTCString() + ' ' +
+            request.connection.remoteAddress + ': ' + request.query.reportString + '\n';
+        // save an audit of the actions done by a user
+        fs.appendFile('audit.log', reportString, function(err) {
+            if (err)
+                console.log('Error saving audit data: ' + reportString);
+        });
+    }
     response.send();
 });
 
