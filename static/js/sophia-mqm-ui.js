@@ -1,5 +1,6 @@
 var currentNodes = [];
 var reportString = '';
+var suggestionsArray = [];
 
 function fixedEncodeURIComponent(str) {
     return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
@@ -34,7 +35,8 @@ function search() {
     }
 
     var query = $('#search-text').val();
-    reportString = reportString + query + '\n';
+    reportString = reportString + 'Suggestions: '+suggestionsArray.join(", ")+'\n';
+    reportString = reportString + 'Search: '+query + '\n';
     var jqxhr = $.ajax("/search?q=" + fixedEncodeURIComponent(query) + '&' +
             'currentNodes=' + JSON.stringify(currentNodes))
         .done(function(data) {
@@ -44,13 +46,13 @@ function search() {
             var currentStepNumber = $('#flow-list').has('li').length + 1;
             $('#flow-list').append('<li class="list-group-item">Step ' + currentStepNumber + ': ' + 
                 query + ' <span class="badge">' + currentNodes.length + '</span></li>');
-            reportString = reportString + 'result: ' + currentNodes.length + '\n';
+            reportString = reportString + 'Results #: ' + currentNodes.length + '\n';
             update();
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
             console.log("Search failed: " + err);
-            reportString = reportString + 'result: failed query\n';
+            reportString = reportString + 'Result: failed query\n';
 
             // remove all nodes
             currentNodes.length = 0;
@@ -104,9 +106,14 @@ function updateSearchBox() {
 function querySuggestions() {
     var jqxhr = $.ajax("/querySuggestions?currentNodes=" + JSON.stringify(currentNodes))
         .done(function(data) {
-            var suggestionsArray = JSON.parse(data);
+            suggestionsArray = JSON.parse(data);
             //alert('suggestionsArray length: '+suggestionsArray.length+" [0]: "+suggestionsArray[0])
-            $('#suggestions-text').text('Try: ' + suggestionsArray.join(", "));
+            if (suggestionsArray.length > 0)
+            {
+                $('#suggestions-text').text('Try: ' + suggestionsArray.join(", "));                
+            }
+            else
+                $('#suggestions-text').html('<i>No suggestions</i>');
         })
         .fail(function(err) {
             //alert( "error getting suggestions" );
