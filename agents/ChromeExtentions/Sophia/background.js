@@ -37,16 +37,17 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
         if (namespace == "local") {
             var storageChange = changes[key];
             if (key == "testGuid") {
-            if (storageChange.newValue == testGuid) {
-                return;
-            } else {
-                testGuid = storageChange.newValue;
-            }
-        } else if (key == "testId") {
-            if (storageChange.newValue == testId) {
-                return;
-            } else {
-                testId = storageChange.newValue;
+                if (storageChange.newValue == testGuid) {
+                    return;
+                } else {
+                    testGuid = storageChange.newValue;
+                }
+            } else if (key == "testId") {
+                if (storageChange.newValue == testId) {
+                    return;
+                } else {
+                    testId = storageChange.newValue;
+                }
             }
         }
     }
