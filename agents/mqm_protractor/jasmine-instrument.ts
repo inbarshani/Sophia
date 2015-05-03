@@ -1,5 +1,9 @@
 var http = require('http');
 
+global.appBaseUrl = "http://myd-vm06983:8081/";
+global.fileUploadUrl = "http://localhost:8080/file";
+global.dataUrl = "http://localhost:8080/data";
+
 function reportToSophia(args) {
     var post_data = JSON.stringify(args);
     // An object of options to indicate where to post to
@@ -14,6 +18,7 @@ function reportToSophia(args) {
             'Content-Length': post_data.length
         }
     };
+
 
     // Set up the request
     var post_req = http.request(post_options); //, function(res) {});

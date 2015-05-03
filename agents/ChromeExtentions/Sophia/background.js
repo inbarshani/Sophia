@@ -1,5 +1,6 @@
 var baseUrl, fileUrl;
 var testGuid = null;
+var testId = 0;
 
 
 chrome.storage.local.get('baseAppUrl', function (result) {
@@ -33,12 +34,19 @@ chrome.storage.local.get('fileUrl', function (result) {
 
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (key in changes) {
-        if (namespace == "local" && key == "testGuid") {
+        if (namespace == "local") {
             var storageChange = changes[key];
+            if (key == "testGuid") {
             if (storageChange.newValue == testGuid) {
                 return;
             } else {
                 testGuid = storageChange.newValue;
+            }
+        } else if (key == "testId") {
+            if (storageChange.newValue == testId) {
+                return;
+            } else {
+                testId = storageChange.newValue;
             }
         }
     }
@@ -49,8 +57,8 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
 
 function TrackRequest(info)
 {
-    if (testGuid == null) {
-        console.log ('Test GUID not defined. Exiting...');
+    if (testGuid == null && testId == 0) {
+        console.log ('Test GUID or ID not defined. Exiting...');
         return;
     }
     console.log(info);
@@ -64,7 +72,9 @@ function TrackRequest(info)
 		//			var blob = screenshotUrl.replace('data:image/jpeg;base64,', '');
 					var data = {
 						timestamps: ts,
-						type: "SCREEN"
+						type: "SCREEN",
+                        guid: testGuid, 
+                        testId: testId
 					};
 					var formData = new FormData();
 		//			formData.append(data, JSON.stringify(data));
