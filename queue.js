@@ -80,8 +80,8 @@ function _processQueueMessage(msg) {
                     lock.release();
                     return;
                 } else if (!current_test_id) {
-                    console.log(' [x] Start test with guid: ' + data.guid);
-                    current_test_id = data.guid;
+                    console.log(' [x] Start test with ID: ' + data.testID);
+                    current_test_id = data.testID;
                 }
             }
             // for events that don't have built-in test ID, assume we're in context of the current test

@@ -1,24 +1,19 @@
-var testId;
-var baseAppUrl;
-var dataUrl;
-var fileUploadUrl;
-
 $(document).ready(function() {
-console.log("1 data url=" + window.__eumRumService.getDataUrl());
+console.log("1 data url=" + window.__eumRumService.dataUrl);
 
-    if (!window.__eumRumService.getDataUrl()) {
+    if (!window.__eumRumService.dataUrl) {
         if (document.getElementById("sophiadataurl")) {
             console.log("2");
             // automated test
-            testId = document.getElementById("sophiatestid").innerText;
-            baseAppUrl = document.getElementById("sophiabaseappurl").innerText;
-            dataUrl = document.getElementById("sophiadataurl").innerText;
-            fileUploadUrl = document.getElementById("sophiafileuploadurl").innerText;
+            var testId = document.getElementById("sophiatestid").innerText;
+            var baseAppUrl = document.getElementById("sophiabaseappurl").innerText;
+            var dataUrl = document.getElementById("sophiadataurl").innerText;
+            var fileUploadUrl = document.getElementById("sophiafileuploadurl").innerText;
 //            window.__eumRumService.reportTestStartToSophia(testId);
-            window.__eumRumService.setTestId(testId);
-            window.__eumRumService.setDataUrl(dataUrl);
-            window.__eumRumService.setFileUploadUrl(fileUploadUrl);
-            window.__eumRumService.setBaseAppUrl(baseAppUrl);
+            window.__eumRumService.testId = testId;
+            window.__eumRumService.dataUrl = dataUrl;
+            window.__eumRumService.fileUploadUrl = fileUploadUrl;
+            window.__eumRumService.baseAppUrl = baseAppUrl;
             addListeners();
             chrome.storage.local.set({'baseAppUrl': baseAppUrl}, function() {
               console.log('App URL Settings saved');
@@ -33,29 +28,9 @@ console.log("1 data url=" + window.__eumRumService.getDataUrl());
               console.log('Test ID saved');
             });
 
-        } /* else {
-            console.log("3");
-            // manual test
-            // check if the base URL is the one from extension local storage
-            chrome.storage.local.get(['baseAppUrl', 'dataUrl', 'fileUrl', 'testId'], function (result) {
-                testId = result.testId;
-                baseAppUrl = result.baseAppUrl;
-                dataUrl = result.dataUrl;
-                fileUploadUrl = result.fileUrl;
-                if (baseAppUrl == undefined) {
-                    console.log("Sophia extension Application Base URL not defined");
-                    return;
-                }
-                window.__eumRumService.setTestId(testId);
-                window.__eumRumService.setDataUrl(dataUrl);
-                window.__eumRumService.setFileUploadUrl(fileUploadUrl);
-
-*/
-/*            });
-        }
-        */
+        } 
     }
-    if (document.URL.indexOf(window.__eumRumService.getBaseAppUrl()) == 0) {
+    if (document.URL.indexOf(window.__eumRumService.baseAppUrl) == 0) {
         console.log("4");
         addListeners();
     }

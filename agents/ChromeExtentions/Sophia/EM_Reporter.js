@@ -1,8 +1,9 @@
 (function () {
     if (window.__eumRumService) return;
 
-    chrome.storage.local.get(['dataUrl', 'testId', 'baseAppUrl', 'fileUploadUrl'], function (result) {
+    chrome.storage.local.get(['dataUrl', 'testId', 'testGuid', 'baseAppUrl', 'fileUploadUrl'], function (result) {
         window.__eumRumService.dataUrl = result.dataUrl;
+        window.__eumRumService.testGuid = result.testGuid;
         window.__eumRumService.testId = result.testId;
         window.__eumRumService.baseAppUrl = result.baseAppUrl;
         window.__eumRumService.fileUploadUrl = result.fileUploadUrl;
@@ -50,11 +51,21 @@
     var reportEventToSophia = function (action, document_root, event) {
         var dataUrl = window.__eumRumService.dataUrl;
         var testGuid = window.__eumRumService.testGuid;
+        var testId = window.__eumRumService.testId;
+        var testIdForReport = 0;
 
-        if (testGuid == null) {
-            console.log ('Test GUID not defined. Exiting...');
+        if (testGuid == null && testId == null) {
+            console.log ('Test GUID and ID are not defined. Exiting...');
             return;
         }
+        else
+        {
+            if (testId) 
+                testIdForReport = testId;
+            else if (testGuid) 
+                testIdForReport = testGuid;
+        }
+            
         if (event == undefined) {
             console.log ('undefined event');
         }
@@ -65,8 +76,7 @@
             timestamp: ts,
             url: docUrl,
             eventType: event.type,
-            guid: testGuid,
-            testId: testId
+            testID: testIdForReport
         }
         if (action == "domChangeEvent" || action == "load") {
             // DOM change - report page source
@@ -129,7 +139,7 @@
             type: "Test",
             timestamp: ts,
             action: "start",
-            testId: testId,
+            testID: testId,
             description: "Automated test"
         }
 
