@@ -1,9 +1,13 @@
 # Logs
 logs
 log.txt
+*.log
 err.txt
 npm-debug.log
 results.txt
+results.xml
+result.txt
+result.xml
 
 # Runtime data
 pids

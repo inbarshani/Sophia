@@ -1,17 +1,11 @@
-var dataUrl;
-var testGuid;
-var testId;
-var baseAppUrl;
-var fileUploadUrl;
-
 (function () {
     if (window.__eumRumService) return;
 
     chrome.storage.local.get(['dataUrl', 'testId', 'baseAppUrl', 'fileUploadUrl'], function (result) {
-        dataUrl = result.dataUrl;
-        testId = result.testId;
-        baseAppUrl = result.baseAppUrl;
-        fileUploadUrl = result.fileUploadUrl;
+        window.__eumRumService.dataUrl = result.dataUrl;
+        window.__eumRumService.testId = result.testId;
+        window.__eumRumService.baseAppUrl = result.baseAppUrl;
+        window.__eumRumService.fileUploadUrl = result.fileUploadUrl;
     });
 
     chrome.storage.onChanged.addListener(function (changes, namespace) {
@@ -19,34 +13,34 @@ var fileUploadUrl;
             if (namespace == "local") {
                 var storageChange = changes[key];
                 if (key == "testGuid") {
-                    if (storageChange.newValue == testGuid) {
+                    if (storageChange.newValue ==  window.__eumRumService.testGuid) {
                         return;
                     } else {
-                        testGuid = storageChange.newValue;
+                         window.__eumRumService.testGuid = storageChange.newValue;
                     }
                 } else if (key == "testId") {
-                    if (storageChange.newValue == testId) {
+                    if (storageChange.newValue == window.__eumRumService.testId) {
                         return;
                     } else {
-                        testId = storageChange.newValue;
+                        window.__eumRumService.testId = storageChange.newValue;
                     }
                 } else if (key == "dataUrl") {
-                    if (storageChange.newValue == dataUrl) {
+                    if (storageChange.newValue == window.__eumRumService.dataUrl) {
                         return;
                     } else {
-                        dataUrl = storageChange.newValue;
+                        window.__eumRumService.dataUrl = storageChange.newValue;
                     }
                 } else if (key == "baseAppUrl") {
-                    if (storageChange.newValue == baseAppUrl) {
+                    if (storageChange.newValue == window.__eumRumService.baseAppUrl) {
                         return;
                     } else {
-                        baseAppUrl = storageChange.newValue;
+                        window.__eumRumService.baseAppUrl = storageChange.newValue;
                     }
                 } else if (key == "fileUploadUrl") {
-                    if (storageChange.newValue == fileUploadUrl) {
+                    if (storageChange.newValue == window.__eumRumService.fileUploadUrl) {
                         return;
                     } else {
-                        fileUploadUrl = storageChange.newValue;
+                        window.__eumRumService.fileUploadUrl = storageChange.newValue;
                     }
                 }
             }
@@ -54,8 +48,11 @@ var fileUploadUrl;
     });
     var lastSrcLength;
     var reportEventToSophia = function (action, document_root, event) {
-        if (testGuid == null && testId == 0) {
-            console.log ('Test GUID or ID not defined. Exiting...');
+        var dataUrl = window.__eumRumService.dataUrl;
+        var testGuid = window.__eumRumService.testGuid;
+
+        if (testGuid == null) {
+            console.log ('Test GUID not defined. Exiting...');
             return;
         }
         if (event == undefined) {
@@ -98,6 +95,7 @@ var fileUploadUrl;
         var data =  JSON.stringify(args);
 
         setTimeout(function() {
+            console.log('Reporting to Sophia, dataUrl: '+dataUrl);
             $.ajax({
                 url: dataUrl,
                 type: 'POST',
@@ -147,47 +145,6 @@ var fileUploadUrl;
         });
     };
 
-
-    var getTestGuid = function () {
-        return testGuid;
-    };
-
-    var setTestGuid = function (guid) {
-        testGuid = guid;
-    }
-
-    var getTestId = function () {
-        return testId;
-    };
-
-    var setTestId = function (id) {
-        testId = id;
-    }
-
-    var getDataUrl = function () {
-        return dataUrl;
-    };
-
-    var setDataUrl = function (url) {
-        dataUrl = url;
-    }
-
-    var getFileUploadUrl = function () {
-        return fileUploadUrl;
-    };
-
-    var setFileUploadUrl = function (url) {
-        fileUploadUrl = url;
-    }
-
-    var getBaseAppUrl = function () {
-        return baseAppUrl;
-    };
-
-    var setBaseAppUrl = function (url) {
-        baseAppUrl = url;
-    }
-
     var DOMtoString = function(document_root) {
         var html = '',
             node = document_root.firstChild;
@@ -218,16 +175,6 @@ var fileUploadUrl;
     window.__eumRumService = {
         reportEventToSophia: reportEventToSophia,
         reportErrorToSophia: reportErrorToSophia,
-        reportTestStartToSophia: reportTestStartToSophia,
-        getTestGuid: getTestGuid,
-        setTestGuid: setTestGuid,
-        getTestId: getTestId,
-        setTestId: setTestId,
-        getDataUrl: getDataUrl,
-        setDataUrl: setDataUrl,
-        getFileUploadUrl: getFileUploadUrl,
-        setFileUploadUrl: setFileUploadUrl,
-        getBaseAppUrl: getBaseAppUrl,
-        setBaseAppUrl: setBaseAppUrl
+        reportTestStartToSophia: reportTestStartToSophia
     };
 })();

@@ -9,7 +9,9 @@ app.use(express.static(__dirname + '/static'));
 app.use(bodyParser.json())
 
 app.post('/data', function(request, response) {
+    //console.log("Got data event");
     if (request._body) {
+        //console.log("Got event with data in _body: "+request._body+" and body: "+request.body);
         sendToQueue(request.body, response);
     } else {
         var ms = new Date().getMilliseconds();
@@ -18,6 +20,8 @@ app.post('/data', function(request, response) {
             content += chunk;
         });
         request.on("end", function() {
+            //if (content.indexOf('TestStep') > 0)
+            //    console.log("Got event with chunked data: "+content.substring(0, 200));
             sendToQueue(JSON.parse(content), response);
         });
     }
@@ -50,7 +54,7 @@ app.post('/file', function(request, response) {
     });
 });
 
-app.listen(8080);
+app.listen(8082);
 var rabbitMq = amqp.createConnection({
     host: 'localhost'
 });
@@ -73,8 +77,9 @@ function sendToQueue(data, response) {
     if (rabbitMq) {
         rabbitMq.publish('sophia', data_json);
         if (data.src != undefined) {
-            console.log(" [x] RabbitMQ Sent request data " + data.timestamp + "\n");
+            console.log(" [x] RabbitMQ Sent request data with timestamp: " + data.timestamp + "\n");
         } else {
+            //if (data_json.indexOf('TestStep')>0)
             console.log(" [x] RabbitMQ Sent %s\n", data_json);
         }
     }

@@ -1,5 +1,8 @@
 var amqp = require('amqp');
-var neo4j = require("neo4j");
+var neo4j = require('neo4j');
+var http = require('http');
+var jsontoxml = require('jsontoxml');
+
 // connect to neo4j DB, on Yaron's machine and Inbar's machine
 var db = new neo4j.GraphDatabase('http://localhost:7474');
 
@@ -14,6 +17,8 @@ var test = require("./processors/test");
 var teststep = require("./processors/test_step");
 
 var Step = require('Step');
+
+var sophia_consts = require('./lib/sophia_consts');
 
 var connection = amqp.createConnection({
     host: 'localhost'
@@ -66,9 +71,7 @@ function _processQueueMessage(msg) {
             } else if (obj_type == 'teststep') {
                 data = teststep.getData(obj);
             } else if (obj_type == 'test') {
-                console.log(' [x] A test event');
                 data = test.getData(obj);
-                console.log(' [x] Read test event');
                 if (data.action.toLowerCase() == "stop") {
                     // this is the 2nd event of a test, so it is the test END event
                     console.log(' [x] Stop test');
@@ -76,37 +79,39 @@ function _processQueueMessage(msg) {
                     current_test_node_id = null;
                     lock.release();
                     return;
-                } else if (!current_test_id)
-                {
-                    console.log(' [x] Start test with guid: '+data.guid);
+                } else if (!current_test_id) {
+                    console.log(' [x] Start test with guid: ' + data.guid);
                     current_test_id = data.guid;
                 }
             }
             // for events that don't have built-in test ID, assume we're in context of the current test
             // this is a workaround which doesn't support multiple tests as the same time, will need to fix
             if (current_test_id != null && data.testID == undefined) {
-                console.log(' [x] Set test id for an event with no test id: '+current_test_id);
                 data.testID = current_test_id;
             } else if (current_test_id == null && data.testID) {
                 // TODO: bind current_test_id by id of node of type Test, if the current is not set
                 // this will recover from disruptions in processing incoming events
             }
-            var query = 'CREATE (new_node:' + data.type + ' {data} ) RETURN id(new_node) AS NodeID';
+            var query = 'CREATE (new_node:' + data.type + ' {attributes} ) RETURN id(new_node) AS NodeID';
 
             var params = {
-                data: data
+                attributes: {
+                    timestamp: data.timestamp
+                }
             };
-            console.log(" [x] Add new node query: " + query);
+            //console.log(" [x] Add new node query: " + query);
             db.query(query, params, function(err, results) {
                 if (err) {
                     console.error('neo4j query failed: ' + query + '\n');
                     lock.release();
-                } else if (results[0] && results[0]['NodeID'])
+                } else if (results[0] && results[0]['NodeID']) {
+                    addToIdol(results[0]['NodeID'], data);
                     if (data.type == 'Test') {
                         current_test_node_id = results[0]['NodeID'];
                         lock.release();
                     } else if (current_test_node_id) {
-                    linkNewData(results[0]['NodeID'], data.type, data.timestamp, current_test_node_id);
+                        linkNewData(results[0]['NodeID'], data.type, data.timestamp, current_test_node_id);
+                    }
                 }
             });
         }
@@ -117,13 +122,67 @@ function _processQueueMessage(msg) {
 
 };
 
-var backboneTypes = ['Test', 'TestStep'];
-var backboneLinkType = 'FOLLOWED_BY';
-var dataLinkType = 'LINKED_TO';
+
+function addToIdol(node_id, data) {
+    // add to IDOL via HTTP post to IDOL index
+    //  fields are mapped from the data json to the IDOL format
+    console.log('[!] Adding node #' + node_id + ' to IDOL index');
+    var date = new Date();
+    date.setTime(data.timestamp);
+    var dateFormat = date.toISOString();
+    dateFormat = dateFormat.substring(0,dateFormat.indexOf('T'));
+    console.log('date: ' + dateFormat);
+
+    var post_data = '#DREREFERENCE ' + node_id + '\r\n' +
+        '#DREDATE ' + dateFormat + '\r\n' +
+        '#DRETITLE ' + data.type + '\r\n';
+    Object.keys(data).forEach(function(key) {
+        if (key != 'type' && key != 'indexable_content')
+            post_data = post_data + '#DREFIELD ' + key + '=\"' + data[key].toString().replace(/#|\"/, '') + '\"\r\n';
+    });
+
+    post_data = post_data + '#DRECONTENT\r\n' +
+        data.indexable_content.replace('#', '') + '\r\n' + 
+        '#DREDBNAME '+sophia_consts.IDOL_DB_NAME+'\r\n' +
+        '#DREENDDOC\r\n' +
+        '#DREENDDATAREFERENCE\r\n';
+
+    console.log('POST ' + post_data);
+    
+    var post_options = {
+        host: '16.60.168.105',
+        port: '9001',
+        path: '/DREADDDATA',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain',
+            'Content-Length': post_data.length
+        }
+    };
+
+    // Set up the request
+    var post_req = http.request(post_options, function(res) {
+        //res.setEncoding('utf8');
+        var response_data = "";
+        res.on('data', function(chunk) {
+            if (chunk != null && chunk != "") {
+                response_data += chunk;
+            }
+        });
+        res.on('end', function() {
+            console.log('[!!] IDOL POST for node_id ' + node_id + ' completed: ' +
+                res.statusCode + '\ndata: ' + response_data);
+        });
+    });
+
+    // post the data
+    post_req.write(post_data);
+    post_req.end();
+}
+
 var no_err = null;
 
 function linkNewData(node_id, type, timestamp, test_node_id) {
-    console.log(' [**] Linking a new node to test node ' + test_node_id);
     // link a new node
     // check the type - if backbone, we need connect only to backbone node
     //    if not backbone, we need to find the backbone and connect within its chain
@@ -132,8 +191,8 @@ function linkNewData(node_id, type, timestamp, test_node_id) {
     //      - Query by timestamp and links?
     // also, remove existing relation if there is one between immediates
     try {
-        if (backboneTypes.indexOf(type) >= 0) {
-            console.log(' [***] Linking a new backbone node to test node ' + test_node_id);
+        if (sophia_consts.backboneTypes.indexOf(type) >= 0) {
+            console.log(' [***] Linking a new backbone node ' + node_id + ' to test node ' + test_node_id);
             var prev_backbone_node_id = null,
                 end_prev_chain_node = null;
             var isBackbone = true,
@@ -191,7 +250,7 @@ function linkNewData(node_id, type, timestamp, test_node_id) {
                 }
             );
         } else {
-            console.log(' [***] Linking a new data node to test node ' + test_node_id);
+            console.log(' [***] Linking a new data node ' + node_id + ' to test node ' + test_node_id);
             var latest_data_node = null,
                 backbone_node_id = null;
             var isBackbone = true,
@@ -240,13 +299,13 @@ function linkNewData(node_id, type, timestamp, test_node_id) {
 }
 
 function findLatestNode(isBackbone, start_node_id, timestamp, callback) {
-    console.log(' [****] Find latest node');
+    //console.log(' [****] Find latest node');
     var relation_type_qualifier = '';
 
     if (isBackbone)
-        relation_type_qualifier = '[:' + backboneLinkType + '*]';
+        relation_type_qualifier = '[:' + sophia_consts.backboneLinkType + '*]';
     else
-        relation_type_qualifier = '[:' + dataLinkType + '*]';
+        relation_type_qualifier = '[:' + sophia_consts.dataLinkType + '*]';
 
 
     // now 
@@ -260,14 +319,14 @@ function findLatestNode(isBackbone, start_node_id, timestamp, callback) {
         ' WITH LAST(nodes(LAST(longestPaths))) AS latest_node ' +
         ' RETURN id(latest_node) AS LatestID';
 
-    console.log(' [****] Latest node query: ' + latest_nodes_query);
+    //console.log(' [****] Latest node query: ' + latest_nodes_query);
 
     db.query(latest_nodes_query, null, function(err, results) {
         if (err) {
             console.error('neo4j query failed: ' + latest_nodes_query + '\nerr: ' + err + '\n');
             throw err;
         } else {
-            console.log(' [*****] Latest node results: ' + require('util').inspect(results));
+            //console.log(' [*****] Latest node results: ' + require('util').inspect(results));
             var latest_node_id = null;
             if (results[0]) {
                 latest_node_id = results[0]['LatestID'];
@@ -280,13 +339,13 @@ function findLatestNode(isBackbone, start_node_id, timestamp, callback) {
 }
 
 function findNextNode(isBackbone, start_node_id, callback) {
-    console.log(' [****] Find next node');
+    //console.log(' [****] Find next node');
     var relation_type_qualifier = '';
 
     if (isBackbone)
-        relation_type_qualifier = '[:' + backboneLinkType + ']';
+        relation_type_qualifier = '[:' + sophia_consts.backboneLinkType + ']';
     else
-        relation_type_qualifier = '[:' + dataLinkType + ']';
+        relation_type_qualifier = '[:' + sophia_consts.dataLinkType + ']';
 
     // now 
 
@@ -295,14 +354,14 @@ function findNextNode(isBackbone, start_node_id, callback) {
         ' WHERE id(start_node)=' + start_node_id +
         ' RETURN id(next_node) AS NextID';
 
-    console.log(' [****] Next node query: ' + next_node_query);
+    //console.log(' [****] Next node query: ' + next_node_query);
 
     db.query(next_node_query, null, function(err, results) {
         if (err) {
             console.error('neo4j query failed: ' + next_node_query + '\nerr: ' + err + '\n');
             throw err;
         } else {
-            console.log(' [*****] next node results: ' + require('util').inspect(results));
+            //console.log(' [*****] next node results: ' + require('util').inspect(results));
             var next_node_id = null;
             if (results[0])
                 next_node_id = results[0]['NextID'];
@@ -313,14 +372,14 @@ function findNextNode(isBackbone, start_node_id, callback) {
 
 /* next_node_id may be null to indicate no next node*/
 function linkNode(isBackbone, node_id, prev_node_id, next_node_id, shouldLinkToPrev, callback) {
-    console.log(' [****] Linking a new node to prev node ' + prev_node_id + ' and next node ' + next_node_id);
+    //console.log(' [****] Linking a new node to prev node ' + prev_node_id + ' and next node ' + next_node_id);
     var link_query = '';
     var relation_type_qualifier = '';
 
     if (isBackbone)
-        relation_type_qualifier = '[:' + backboneLinkType + ']';
+        relation_type_qualifier = '[:' + sophia_consts.backboneLinkType + ']';
     else
-        relation_type_qualifier = '[:' + dataLinkType + ']';
+        relation_type_qualifier = '[:' + sophia_consts.dataLinkType + ']';
 
     var relation_create_clause = '';
     if (next_node_id && shouldLinkToPrev) {
@@ -350,7 +409,7 @@ function linkNode(isBackbone, node_id, prev_node_id, next_node_id, shouldLinkToP
             relation_create_clause;
     }
 
-    console.log(' [****] Linking nodes query: ' + link_query);
+    // console.log(' [****] Linking nodes query: ' + link_query);
     if (link_query) {
         db.query(link_query, null, function(err, results) {
             if (err) {
