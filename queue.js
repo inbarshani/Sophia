@@ -143,7 +143,7 @@ function addToIdol(node_id, data) {
 
     post_data = post_data + '#DRECONTENT\r\n' +
         data.indexable_content.replace('#', '') + '\r\n' + 
-        '#DREDBNAME Sophia\r\n' +
+        '#DREDBNAME '+sophia_consts.IDOL_DB_NAME+'\r\n' +
         '#DREENDDOC\r\n' +
         '#DREENDDATAREFERENCE\r\n';
 
