@@ -54,7 +54,7 @@ app.post('/file', function(request, response) {
     });
 });
 
-app.listen(8080);
+app.listen(8082);
 var rabbitMq = amqp.createConnection({
     host: 'localhost'
 });

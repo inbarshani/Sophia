@@ -8,6 +8,7 @@
     "body-parser": "1.10.x",
     "csvtojson": "0.X.X",
     "express": "^4.10.3",
+    "jsontoxml": "0.0.11",
     "multer": "^0.1.8",
     "neo4j": "1.X.X",
     "node-offline-debug": "1.x.x",
