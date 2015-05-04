@@ -24,7 +24,7 @@ console.log("1 data url=" + window.__eumRumService.dataUrl);
             chrome.storage.local.set({'fileUrl': fileUploadUrl}, function() {
               console.log('File URL Settings saved');
             });
-            chrome.storage.local.set({'testId': testId}, function() {
+            chrome.storage.local.set({'sophiaTestId': testId}, function() {
               console.log('Test ID saved');
             });
 
