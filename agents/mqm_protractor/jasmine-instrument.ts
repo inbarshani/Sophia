@@ -1,16 +1,18 @@
 var http = require('http');
 var uuid = require('./uuid');
 
+var sophia_machine = 'localhost';
+
 global.appBaseUrl = "http://myd-vm06983:8081/";
-global.fileUploadUrl = "http://localhost:8080/file";
-global.dataUrl = "http://localhost:8080/data";
+global.fileUploadUrl = "http://"+sophia_machine+":8082/file";
+global.dataUrl = "http://"+sophia_machine+":8082/data";
 
 function reportToSophia(args) {
     var post_data = JSON.stringify(args);
     // An object of options to indicate where to post to
     // http://16.60.229.2:8082/data
     var post_options = {
-        host: 'localhost',
+        host: sophia_machine,
         port: '8082',
         path: '/data',
         method: 'POST',
