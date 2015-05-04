@@ -1,13 +1,6 @@
 (function () {
     if (window.__eumRumService) return;
 
-    chrome.storage.local.get(['dataUrl', 'testId', 'baseAppUrl', 'fileUploadUrl'], function (result) {
-        window.__eumRumService.dataUrl = result.dataUrl;
-        window.__eumRumService.testId = result.testId;
-        window.__eumRumService.baseAppUrl = result.baseAppUrl;
-        window.__eumRumService.fileUploadUrl = result.fileUploadUrl;
-    });
-
     chrome.storage.onChanged.addListener(function (changes, namespace) {
         for (key in changes) {
             if (namespace == "local") {
@@ -167,4 +160,12 @@
         reportErrorToSophia: reportErrorToSophia,
         reportTestStartToSophia: reportTestStartToSophia
     };
+
+    chrome.storage.local.get(['dataUrl', 'testId', 'baseAppUrl', 'fileUploadUrl'], function (result) {
+        window.__eumRumService.dataUrl = result.dataUrl;
+        window.__eumRumService.testId = result.testId;
+        window.__eumRumService.baseAppUrl = result.baseAppUrl;
+        window.__eumRumService.fileUploadUrl = result.fileUploadUrl;
+    });
+
 })();
