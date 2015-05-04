@@ -27,7 +27,19 @@ var connection = amqp.createConnection({
 var current_test_id = null;
 var current_test_node_id = null;
 
-// mutex locking to guartee that neo4j calls of different incoming queue messages
+var active_tests = [];
+function indexOfTestByID(test_id)
+{
+    for (var i = 0; i < active_tests.length; i++) {
+        console.log('active_tests['+i+' of '+active_tests.length+']: '+JSON.stringify(active_tests[i]));
+        if (active_tests[i].test_id == test_id) {
+            return i;
+        }
+    }
+    return -1;    
+}
+
+// mutex locking to guarntee that neo4j calls of different incoming queue messages
 //  will not conflict (creating an unexpected graph structure)
 var Padlock = require("padlock").Padlock;
 var lock = new Padlock();
@@ -71,26 +83,47 @@ function _processQueueMessage(msg) {
             } else if (obj_type == 'teststep') {
                 data = teststep.getData(obj);
             } else if (obj_type == 'test') {
-                data = test.getData(obj);
+                data = test.getData(obj);                
                 if (data.action.toLowerCase() == "stop") {
                     // this is the 2nd event of a test, so it is the test END event
                     console.log(' [x] Stop test');
-                    current_test_id = null;
-                    current_test_node_id = null;
+                    var indexOfTestInArray = indexOfTestByID(data.testID);
+                    if (indexOfTestInArray >= 0)
+                        active_tests.splice(indexOfTestInArray, 1);
+                    if (current_test_id == data.testID)
+                    {
+                        current_test_id = null;
+                        current_test_node_id = null;
+                    }
                     lock.release();
                     return;
-                } else if (!current_test_id) {
-                    console.log(' [x] Start test with ID: ' + data.testID);
+                } else { 
+                    // got an event to start a test, may or may not stopped the active test (on the other hand, may not have an active test)
+                    if (!current_test_id) {
+                        console.log(' [x] Start test with ID: ' + data.testID);
+                    }
+                    else
+                        console.log(' [x] Switch to test with ID: ' + data.testID);                    
                     current_test_id = data.testID;
+                    current_test_node_id = null;
                 }
             }
             // for events that don't have built-in test ID, assume we're in context of the current test
-            // this is a workaround which doesn't support multiple tests as the same time, will need to fix
+            // this is a workaround which doesn't support multiple tests at the same time, will need to fix
             if (current_test_id != null && data.testID == undefined) {
                 data.testID = current_test_id;
             } else if (current_test_id == null && data.testID) {
                 // TODO: bind current_test_id by id of node of type Test, if the current is not set
                 // this will recover from disruptions in processing incoming events
+                // TODO: the problem - need to get node id as well, which requires a query on neo4j...
+                //          conflicts with the async nature of execution.
+                // Workaround: just work within the current session, i.e. if the process goes down, will not support additional events
+                var indexOfTestInArray = indexOfTestByID(data.testID);
+                if (indexOfTestInArray >= 0)
+                {
+                    current_test_id = active_tests[indexOfTestInArray].test_id;
+                    current_test_node_id = active_tests[indexOfTestInArray].test_node_id;
+                }
             }
             var query = 'CREATE (new_node:' + data.type + ' {attributes} ) RETURN id(new_node) AS NodeID';
 
@@ -108,6 +141,7 @@ function _processQueueMessage(msg) {
                     addToIdol(results[0]['NodeID'], data);
                     if (data.type == 'Test') {
                         current_test_node_id = results[0]['NodeID'];
+                        active_tests.push({test_id: current_test_id, test_node_id: current_test_node_id});
                         lock.release();
                     } else if (current_test_node_id) {
                         linkNewData(results[0]['NodeID'], data.type, data.timestamp, current_test_node_id);
