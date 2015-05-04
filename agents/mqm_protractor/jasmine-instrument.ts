@@ -1,4 +1,5 @@
 var http = require('http');
+var uuid = require('./uuid');
 
 global.appBaseUrl = "http://myd-vm06983:8081/";
 global.fileUploadUrl = "http://localhost:8080/file";
@@ -7,10 +8,10 @@ global.dataUrl = "http://localhost:8080/data";
 function reportToSophia(args) {
     var post_data = JSON.stringify(args);
     // An object of options to indicate where to post to
-    // http://16.60.229.2:8080/data
+    // http://16.60.229.2:8082/data
     var post_options = {
-        host: '16.60.229.2',
-        port: '8080',
+        host: 'localhost',
+        port: '8082',
         path: '/data',
         method: 'POST',
         headers: {
@@ -72,7 +73,7 @@ var SpecReporter = function () {
   this.started = false;
   this.finished = false;
   this.currentSuite = 
-    {description: '', id: -1, done_timestamp: 0};
+    {description: '', id: -1, guid: -1, done_timestamp: 0};
 };
 
 SpecReporter.prototype = {
@@ -106,13 +107,14 @@ SpecReporter.prototype = {
                 type: 'Test',
                 action: 'stop',
                 description: this.currentSuite.description,
-                testID: this.currentSuite.id            
+                testID: this.currentSuite.guid            
             }
 
             reportToSophia(old_test_args);
         }
         this.currentSuite.description = spec.suite.description;
         this.currentSuite.id = spec.suite.id;
+        this.currentSuite.guid = uuid();
         this.currentSuite.done_timestamp = ts;
 
         var new_test_args = {
@@ -120,7 +122,7 @@ SpecReporter.prototype = {
             type: 'Test',
             action: 'start',
             description: this.currentSuite.description,
-            testID: this.currentSuite.id            
+            testID: this.currentSuite.guid            
         }
 
         reportToSophia(new_test_args);
@@ -134,7 +136,7 @@ SpecReporter.prototype = {
         type: 'TestStep',
         action: 'start',
         description: spec.description,
-        testID: spec.suite.id
+        testID: this.currentSuite.guid
     };
 
     reportToSophia(args);
@@ -160,7 +162,7 @@ SpecReporter.prototype = {
         type: 'TestStep',
         action: 'done',
         description: spec.description,
-        testID: spec.suite.id,
+        testID: this.currentSuite.guid,
         status: status
     };
 

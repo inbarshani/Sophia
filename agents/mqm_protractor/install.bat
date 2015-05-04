@@ -3,6 +3,7 @@ IF NOT EXIST %~1\UI\mqm-web-ui\test\tulip\tests\config-file-plugins GOTO EchoUsa
 
 :Install
 xcopy /fy jasmine-instrument.ts %~1\UI\mqm-web-ui\test\tulip\tests\config-file-plugins
+xcopy /fy uuid.ts %~1\UI\mqm-web-ui\test\tulip\tests\config-file-plugins
 echo. >> %~1\UI\mqm-web-ui\test\tulip\tests\conf-file.ts
 echo var jasmineInstrumentation = require('./config-file-plugins/jasmine-instrument'); >> %~1\UI\mqm-web-ui\test\tulip\tests\conf-file.ts
 GOTO End
