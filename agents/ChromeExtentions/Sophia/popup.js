@@ -38,7 +38,7 @@ $("#startTestBtn").click(function() {
             type: "Test",
             timestamp: ts,
             action: "start",
-            guid: guid,
+            testID: guid,
             description: "Manual test"
         }
 
@@ -78,7 +78,7 @@ $("#endTestBtn").click(function() {
                 type: "Test",
                 timestamp: ts,
                 action: "stop",
-                guid: guid,
+                testID: guid,
                 description: "Manual test"
             }
             var data = JSON.stringify(args);
