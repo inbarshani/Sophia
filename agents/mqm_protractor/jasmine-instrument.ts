@@ -3,9 +3,10 @@ var uuid = require('./uuid');
 
 var sophia_machine = 'localhost';
 
-global.appBaseUrl = "http://myd-vm06983:8081/";
+global.appBaseUrl = "http://myd-vm06983.hpswlabs.adapps.hp.com:8081/";
 global.fileUploadUrl = "http://"+sophia_machine+":8082/file";
 global.dataUrl = "http://"+sophia_machine+":8082/data";
+global.sophiaTestID = '';
 
 function reportToSophia(args) {
     var post_data = JSON.stringify(args);
@@ -117,6 +118,7 @@ SpecReporter.prototype = {
         this.currentSuite.description = spec.suite.description;
         this.currentSuite.id = spec.suite.id;
         this.currentSuite.guid = uuid();
+        global.sophiaTestID = this.currentSuite.guid;
         this.currentSuite.done_timestamp = ts;
 
         var new_test_args = {

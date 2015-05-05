@@ -14,7 +14,7 @@ console.log("1 data url=" + window.__eumRumService.dataUrl);
             window.__eumRumService.dataUrl = dataUrl;
             window.__eumRumService.fileUploadUrl = fileUploadUrl;
             window.__eumRumService.baseAppUrl = baseAppUrl;
-            addListeners();
+
             chrome.storage.local.set({'baseAppUrl': baseAppUrl}, function() {
               console.log('App URL Settings saved');
             });
