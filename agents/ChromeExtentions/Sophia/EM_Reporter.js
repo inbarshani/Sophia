@@ -37,10 +37,14 @@
     var reportEventToSophia = function (action, document_root, event) {
         var dataUrl = window.__eumRumService.dataUrl;
         var testId = window.__eumRumService.testId;
-        var testIdForReport = 0;
 
         if (event == undefined) {
             console.log ('undefined event');
+            return;
+        }
+        if (testId == undefined) {
+            console.log ('no active test');
+            return;
         }
         var docUrl = document_root.URL;
         var ts = new Date().getTime();
@@ -74,8 +78,8 @@
             }
         } 
 
-////        console.log("report to Sophia: " + action + " " + url + ": " + args);
         var data =  JSON.stringify(args);
+        console.log("report to Sophia: " + data);
 
         setTimeout(function() {
             console.log('Reporting to Sophia, dataUrl: '+dataUrl);
@@ -161,9 +165,9 @@
         reportTestStartToSophia: reportTestStartToSophia
     };
 
-    chrome.storage.local.get(['dataUrl', 'testId', 'baseAppUrl', 'fileUploadUrl'], function (result) {
+    chrome.storage.local.get(['dataUrl', 'sophiaTestId', 'baseAppUrl', 'fileUploadUrl'], function (result) {
         window.__eumRumService.dataUrl = result.dataUrl;
-        window.__eumRumService.testId = result.testId;
+        window.__eumRumService.testId = result.sophiaTestId;
         window.__eumRumService.baseAppUrl = result.baseAppUrl;
         window.__eumRumService.fileUploadUrl = result.fileUploadUrl;
     });

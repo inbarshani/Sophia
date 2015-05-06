@@ -1,6 +1,6 @@
 $(document).ready(function() {
-    chrome.storage.local.get('testGuid', function(result) {
-        if (result.testGuid == null) {
+    chrome.storage.local.get('sophiaTestId', function(result) {
+        if (result.sophiaTestId == null) {
             // test not running
             $("#reportStep").attr("disabled", true);
             $("#endTestBtn").attr("disabled", true);
@@ -10,7 +10,7 @@ $(document).ready(function() {
             $("#startTestBtn").attr("disabled", true);
             $("#reportStep").removeAttr("disabled");
             $("#endTestBtn").removeAttr("disabled");
-            $("#instructions").text('Test with GUID ' + result.testGuid + ' running...');
+            $("#instructions").text('Test with GUID ' + result.sophiaTestId + ' running...');
         }
 
     });
@@ -29,7 +29,7 @@ $("#startTestBtn").click(function() {
         }
         var guid = UUID();
         chrome.storage.local.set({
-            'testGuid': guid
+            'sophiaTestId': guid
         }, function() {
             console.log('Test GUID saved');
         });
@@ -67,9 +67,9 @@ $("#endTestBtn").click(function() {
             console.log("Sophia extension Data URL not defined");
             return;
         }
-        chrome.storage.local.get('testGuid', function(result) {
+        chrome.storage.local.get('sophiaTestId', function(result) {
             var guid;
-            guid = result.testGuid;
+            guid = result.sophiaTestId;
             if (guid == undefined) {
                 console.log("Sophia extension GUID not defined");
                 return;
@@ -92,7 +92,7 @@ $("#endTestBtn").click(function() {
                 }
             });
             chrome.storage.local.set({
-                'testGuid': null
+                'sophiaTestId': null
             }, function(result) {
                 console.log("Sophia extension Test GUID removed");
             });
@@ -112,9 +112,9 @@ $("#reportStep").click(function() {
             return;
         }
         console.log("TestStep before get guid");
-        chrome.storage.local.get('testGuid', function(result) {
+        chrome.storage.local.get('sophiaTestId', function(result) {
             var guid;
-            guid = result.testGuid;
+            guid = result.sophiaTestId;
             console.log("TestStep has guid: " + guid);
             if (guid == undefined) {
                 console.log("Sophia extension GUID not defined");

@@ -1,6 +1,5 @@
 var baseUrl, fileUrl;
 var testGuid = null;
-var testId = 0;
 
 
 chrome.storage.local.get('baseAppUrl', function (result) {
@@ -32,23 +31,25 @@ chrome.storage.local.get('fileUrl', function (result) {
     }
 });
 
+chrome.storage.local.get('sophiaTestId', function (result) {
+    testGuid = result.sophiaTestId;
+    if (testGuid == undefined) {
+        console.log("testGuid not defined");
+        return;
+    }
+});
+
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (key in changes) {
         if (namespace == "local") {
             var storageChange = changes[key];
-            if (key == "testGuid") {
+            if (key == "sophiaTestId") {
                 if (storageChange.newValue == testGuid) {
                     return;
                 } else {
                     testGuid = storageChange.newValue;
                 }
-            } else if (key == "testId") {
-                if (storageChange.newValue == testId) {
-                    return;
-                } else {
-                    testId = storageChange.newValue;
-                }
-            }
+            } 
         }
     }
 });
@@ -58,8 +59,8 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
 
 function TrackRequest(info)
 {
-    if (testGuid == null && testId == 0) {
-        console.log ('Test GUID or ID not defined. Exiting...');
+    if (testGuid == null) {
+        console.log ('Test GUID not defined. Exiting...');
         return;
     }
     console.log(info);
@@ -74,8 +75,7 @@ function TrackRequest(info)
 					var data = {
 						timestamps: ts,
 						type: "SCREEN",
-                        guid: testGuid, 
-                        testId: testId
+                        testID: testGuid
 					};
 					var formData = new FormData();
 		//			formData.append(data, JSON.stringify(data));
