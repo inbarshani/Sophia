@@ -1,9 +1,9 @@
 $(document).ready(function() {
-console.log("1 data url=" + window.__eumRumService.dataUrl);
+//console.log("1 data url=" + window.__eumRumService.dataUrl);
 
     if (!window.__eumRumService.dataUrl) {
         if (document.getElementById("sophiadataurl")) {
-            console.log("2");
+            //console.log("2");
             // automated test
             var testId = document.getElementById("sophiatestid").innerText;
             var baseAppUrl = document.getElementById("sophiabaseappurl").innerText;
@@ -31,7 +31,7 @@ console.log("1 data url=" + window.__eumRumService.dataUrl);
         } 
     }
     if (document.URL.indexOf(window.__eumRumService.baseAppUrl) == 0) {
-        console.log("4");
+        //console.log("4");
         addListeners();
     }
 });
@@ -131,19 +131,19 @@ var addListeners = function() {
     window.addEventListener("click", function(event) {
         var elem = event.target;
         if (hasClickHandler(elem)) {
-            console.log("click on " + elem.tagName + ". Reported - has handlers");
+            //console.log("click on " + elem.tagName + ". Reported - has handlers");
             window.__eumRumService.reportEventToSophia('click', document, event);
         } else {
-            console.log("click on " + elem.tagName + ". Ignored - no handlers");
+            //console.log("click on " + elem.tagName + ". Ignored - no handlers");
         }
     }, false);
     window.addEventListener("focusout", function(event) {
         var elem = event.target;
         if (hasBlurHandler(elem)) {
-            console.log("blur on " + elem.tagName + ". Reported - has handlers");
+            //console.log("blur on " + elem.tagName + ". Reported - has handlers");
             window.__eumRumService.reportEventToSophia('blur', document, event);
         } else {
-            console.log("blur on " + elem.tagName + ". Ignored - no handlers");
+            //console.log("blur on " + elem.tagName + ". Ignored - no handlers");
         }
     }, false);
 

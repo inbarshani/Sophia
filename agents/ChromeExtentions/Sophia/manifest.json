@@ -39,5 +39,9 @@
   "background": { 
     "scripts": ["background.js"],
     "exclude_globs": ["http://127.0.0.1*","http://*.google.com/*", "https://*.google.com/*"]
-  }   
+  },   
+  "externally_connectable": {
+    "ids": ["*"],
+    "matches": ["https://*.google.com/*","*://*.chromium.org/*","https://*.google.co.il/*","http://*.hp.com/*"]
+  }
 }

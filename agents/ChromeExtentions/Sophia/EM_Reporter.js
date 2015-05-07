@@ -33,6 +33,18 @@
             }
         }
     });
+        
+    chrome.runtime.onMessage.addListener(
+      function(message, sender, sendResponse) {
+          console.log('got message with test Id: '+message);
+            chrome.storage.local.set({
+                'sophiaTestId': message.sophiaTestId
+            }, function() {
+                console.log('New test GUID saved');
+            });
+      });  
+
+    
     var lastSrcLength;
     var reportEventToSophia = function (action, document_root, event) {
         var dataUrl = window.__eumRumService.dataUrl;
@@ -79,10 +91,10 @@
         } 
 
         var data =  JSON.stringify(args);
-        console.log("report to Sophia: " + data);
+        //console.log("report to Sophia: " + data);
 
         setTimeout(function() {
-            console.log('Reporting to Sophia, dataUrl: '+dataUrl);
+            //console.log('Reporting to Sophia, dataUrl: '+dataUrl);
             $.ajax({
                 url: dataUrl,
                 type: 'POST',

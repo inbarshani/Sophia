@@ -23,6 +23,28 @@ chrome.storage.local.get('baseAppUrl', function (result) {
 
 });
 
+
+chrome.runtime.onMessageExternal.addListener(
+  function(message, sender, sendResponse) {
+      console.log('background got external message with test Id: '+message);
+        chrome.storage.local.set({
+            'sophiaTestId': message.sophiaTestId
+        }, function() {
+            console.log('New test GUID saved');
+        });
+  });  
+
+chrome.runtime.onMessage.addListener(
+  function(message, sender, sendResponse) {
+      console.log('background got message with test Id: '+message);
+        chrome.storage.local.set({
+            'sophiaTestId': message.sophiaTestId
+        }, function() {
+            console.log('New test GUID saved');
+        });
+  });  
+
+      
 chrome.storage.local.get('fileUrl', function (result) {
     fileUrl = result.fileUrl;
     if (fileUrl == undefined) {

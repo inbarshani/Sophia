@@ -23,7 +23,6 @@ function reportToSophia(args) {
         }
     };
 
-
     // Set up the request
     var post_req = http.request(post_options); //, function(res) {});
     post_req.on('error', function(e) {
@@ -32,6 +31,40 @@ function reportToSophia(args) {
     // post the data
     post_req.write(post_data);
     post_req.end();
+}
+
+function sendSophiaParamsToBrowser(testID)
+{
+    console.log('\n********** sendSophiaParamsToBrowser ********\n');
+    try
+    {
+        var script =        
+            'try ' +
+            '{ ' +
+            ' if (chrome && chrome.runtime){'+
+            '   console.log("chrome.runtime: "+chrome.runtime);'+
+            '   chrome.runtime.sendMessage('+
+            '        "iojhohbfacfjepmplgkdjleclmafeddm", {sophiaTestId: \"'+testID+'\"},{},'+ 
+            '        function(response)'+ 
+            '        {'+
+            '            console.log("recevied response: "+response);'+
+            '        });'+
+            ' }'+
+            ' else console.log("Sophia failed to communicate with extension");'+
+            '}'+
+            'catch(ex)' +
+            '{' +
+            '    console.log("exception in sendmessage: "+ex);'+
+            '}';
+        console.log('sending script to browser.driver: '+script);
+        global.browser.executeScript(script);    
+    }
+    catch(ex)
+    {
+        console.log('exception in executeScript: '+ex);    
+    }
+    console.log('\n********** sendSophiaParamsToBrowser ********\n');
+    
 }
 /*
 function wrapGlobalFN(globalFN, name) {
@@ -83,6 +116,7 @@ SpecReporter.prototype = {
   reportRunnerStarting: function (runner) {
     this.started = true;
     //console.log('*** Runner started '+require('util').inspect(runner));
+    sendSophiaParamsToBrowser(this.currentSuite.guid);
   },
 
   reportRunnerResults: function (runner) {
@@ -95,7 +129,7 @@ SpecReporter.prototype = {
   },
 
   reportSpecStarting: function (spec) {
-    //console.log('*** Spec start: '+require('util').inspect(spec));
+    //console.log('*** Spec start: '+require('util').inspect(spec));    
     var ts = new Date().getTime();
     if (this.currentSuite.id != spec.suite.id ||
         this.currentSuite.description != spec.suite.description)
@@ -119,6 +153,7 @@ SpecReporter.prototype = {
         this.currentSuite.id = spec.suite.id;
         this.currentSuite.guid = uuid();
         global.sophiaTestID = this.currentSuite.guid;
+        sendSophiaParamsToBrowser(this.currentSuite.guid);
         this.currentSuite.done_timestamp = ts;
 
         var new_test_args = {
