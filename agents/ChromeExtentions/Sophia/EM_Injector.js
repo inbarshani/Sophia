@@ -36,12 +36,12 @@ $(document).ready(function() {
     }
 });
 
-var listenerFunc = function (doc, e) {
+var listenerFunc = function (e) {
 ////        console.log("listenerfunc");
-    if (!doc.URL || doc.URL === "" || doc.URL === "about:blank") {
+    if (!document.URL || document.URL === "" || document.URL === "about:blank") {
         return;
     } else {
-        window.__eumRumService.reportEventToSophia('domChangeEvent', doc, e);
+        window.__eumRumService.reportEventToSophia('domChangeEvent', document, e);
     }
 }
 

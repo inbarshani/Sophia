@@ -125,6 +125,12 @@ function _processQueueMessage(msg) {
                     current_test_node_id = active_tests[indexOfTestInArray].test_node_id;
                 }
             }
+            else if (!current_test_id && !data.testID) {
+            {
+                // no current_test_id, no data.testID - don't create the node
+                lock.release();
+                return;    
+            }
             var query = 'CREATE (new_node:' + data.type + ' {attributes} ) RETURN id(new_node) AS NodeID';
 
             var params = {
