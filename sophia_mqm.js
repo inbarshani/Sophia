@@ -38,12 +38,9 @@ app.use('/search', function(request, response) {
         nodes.map(function(node) {
             potentialNodes.push(node.graph_node);
         });
-        if (currentNodes.length > 0) {
-            neo4j_queries.doesPathExit(currentNodes, potentialNodes, function(final_nodes) {
-                response.send(JSON.stringify(final_nodes));
-            });
-        } else
-            response.send(JSON.stringify(potentialNodes));
+        neo4j_queries.doesPathExit(currentNodes, potentialNodes, function(final_nodes) {
+            response.send(JSON.stringify(final_nodes));
+        });
     });
 });
 
