@@ -60,14 +60,14 @@ connection.on('ready', function() {
 function processQueueMessage(msg) {
     var params = [1];
     params[0] = msg;
+    console.log(" [x] Received new msg at "+new Date());
     lock.runwithlock(_processQueueMessage, params);
 }
 
 function _processQueueMessage(msg) {
     try {
         var obj = JSON.parse(msg.data);
-        var data;
-        console.log(" [x] Received %s", obj.type);
+        var data;        
         var obj_type = obj.type.toLowerCase();
         if (obj != null) {
             if (obj_type == 'mqm_log' || obj_type == 'sa_log') {
@@ -134,18 +134,28 @@ function _processQueueMessage(msg) {
             };
             //console.log(" [x] Add new node query: " + query);
             db.query(query, params, function(err, results) {
-                if (err) {
-                    console.error('neo4j query failed: ' + query + '\n');
-                    lock.release();
-                } else if (results[0] && results[0]['NodeID']) {
-                    addToIdol(results[0]['NodeID'], data);
-                    if (data.type == 'Test') {
-                        current_test_node_id = results[0]['NodeID'];
-                        active_tests.push({test_id: current_test_id, test_node_id: current_test_node_id});
+                try {
+                    if (err) {
+                        console.error('neo4j query failed: ' + query + '\n');
                         lock.release();
-                    } else if (current_test_node_id) {
-                        linkNewData(results[0]['NodeID'], data.type, data.timestamp, current_test_node_id);
+                    } else if (results[0] && results[0]['NodeID']) {
+                        addToIdol(results[0]['NodeID'], data);
+                        if (data.type == 'Test') {
+                            current_test_node_id = results[0]['NodeID'];
+                            active_tests.push({test_id: current_test_id, test_node_id: current_test_node_id});
+                            lock.release();
+                        } else if (current_test_node_id) {
+                            linkNewData(results[0]['NodeID'], data.type, data.timestamp, current_test_node_id);
+                        }
+                        else
+                            lock.release();
+                        
                     }
+                }
+                catch(ex)
+                {
+                    console.log('exception after adding a new node: '+ex);
+                    lock.release();
                 }
             });
         }
