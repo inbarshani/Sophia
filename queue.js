@@ -288,7 +288,7 @@ function linkNewData(node_id, type, timestamp, test_node_id) {
                     if (err) throw err;
 
                     if (end_prev_chain_node != null)
-                        linkNode(isBackbone, node_id, end_prev_chain_node, start_new_chain_node, !shouldLinkToPrev, this);
+                        linkNode(!isBackbone, node_id, end_prev_chain_node, start_new_chain_node, !shouldLinkToPrev, this);
                     else
                         return null;
                 },
