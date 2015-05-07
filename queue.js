@@ -126,7 +126,6 @@ function _processQueueMessage(msg) {
                 }
             }
             else if (!current_test_id && !data.testID) {
-            {
                 // no current_test_id, no data.testID - don't create the node
                 lock.release();
                 return;    
