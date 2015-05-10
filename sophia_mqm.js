@@ -46,8 +46,8 @@ app.use('/search', function(request, response) {
 
 app.use('/report', function(request, response) {
     if (request.query.reportString.length > 0) {
-        var reportString = new Date().toUTCString() + '\n' +
-            'Client IP: ' + request.connection.remoteAddress + '\n' + request.query.reportString + '\n';
+        var reportString = new Date().toUTCString() + ' ' +
+            'Client IP: ' + request.connection.remoteAddress + ' ' + request.query.reportString + '\n';
         // save an audit of the actions done by a user
         fs.appendFile('audit.log', reportString, function(err) {
             if (err)
