@@ -182,107 +182,26 @@ function linkNewData(node_id, type, timestamp, test_node_id) {
     //      - Query by timestamp and links?
     // also, remove existing relation if there is one between immediates
     try {
-        if (sophia_consts.backboneTypes.indexOf(type) >= 0) {
-            console.log(' [***] Linking a new backbone node ' + node_id + ' to test node ' + test_node_id);
-            var prev_backbone_node_id = null,
-                end_prev_chain_node = null;
-            var isBackbone = true,
-                shouldLinkToPrev = true;
-            Step(
-                function findLatestBackboneNode() {
-                    console.log(' [***] findLatestBackboneNode');
-                    neo4j_queries.findLatestNode(isBackbone, test_node_id, timestamp, this);
-                },
-                function findNextBackboneNode(err, _prev_backbone_node_id) {
-                    console.log(' [***] findNextBackboneNode. Err? ' + err);
-                    if (err) throw err;
+        console.log(' [***] Linking a new node ' + node_id + ' to test node ' + test_node_id);
+        var isBackbone = (sophia_consts.backboneTypes.indexOf(type) >= 0);
+        Step(
+            function findNewNodeLocation() {
+                console.log(' [***] findNewNodeLocation');
+                neo4j_queries.getNodeLocationByTimestamp(test_node_id, timestamp, this);
+            },
+            function linkNode(err, prev_backbone_node_id, next_backbone_node_id,
+                prev_data_node_id, next_data_node_id) {
+                console.log(' [***] linkNode. Err? ' + err);
+                if (err) throw err;
 
-                    if (_prev_backbone_node_id != null)
-                        prev_backbone_node_id = _prev_backbone_node_id;
-                    else
-                        prev_backbone_node_id = test_node_id;
-                    neo4j_queries.findNextNode(isBackbone, prev_backbone_node_id, this);
-                },
-                function linkInBackbone(err, next_backbone_node_id) {
-                    console.log(' [***] linkInBackbone. Err? ' + err);
-                    if (err) throw err;
-
-                    neo4j_queries.linkNode(isBackbone, node_id, prev_backbone_node_id, next_backbone_node_id, shouldLinkToPrev, this);
-                },
-                function findEndOfChainOfPrevBackbone(err) {
-                    console.log(' [***] findEndOfChainOfPrevBackbone. Err? ' + err);
-                    if (err) throw err;
-
-                    neo4j_queries.findLatestNode(!isBackbone, prev_backbone_node_id, timestamp, this);
-                },
-                function findStartOfNewBackboneChain(err, _end_prev_chain_node) {
-                    console.log(' [***] findStartOfNewBackboneChain. Err? ' + err + ' _end_prev_chain_node: ' + _end_prev_chain_node);
-                    if (err) throw err;
-
-                    end_prev_chain_node = _end_prev_chain_node;
-                    if (end_prev_chain_node != null)
-                        neo4j_queries.findNextNode(!isBackbone, end_prev_chain_node, this);
-                    else
-                        return null;
-                },
-                function relinkChain(err, start_new_chain_node) {
-                    console.log(' [***] relinkChain. Err? ' + err + ' start_new_chain_node: ' + start_new_chain_node);
-                    if (err) throw err;
-
-                    if (end_prev_chain_node != null)
-                        neo4j_queries.linkNode(!isBackbone, node_id, end_prev_chain_node, start_new_chain_node, !shouldLinkToPrev, this);
-                    else
-                        return null;
-                },
-                function done(err) {
-                    console.log(' [***] done. Err? ' + err);
-
-                    lock.release();
-                }
-            );
-        } else {
-            console.log(' [***] Linking a new data node ' + node_id + ' to test node ' + test_node_id);
-            var latest_data_node = null,
-                backbone_node_id = null;
-            var isBackbone = true,
-                shouldLinkToPrev = true;
-            Step(
-                function findLatestBackboneNode() {
-                    console.log(' [***] findLatestBackboneNode');
-                    neo4j_queries.findLatestNode(isBackbone, test_node_id, timestamp, this);
-                },
-                function findLatestDataNode(err, _backbone_node_id) {
-                    console.log(' [***] findLatestDataNode. Err? ' + err);
-                    if (err) throw err;
-
-                    if (_backbone_node_id != null)
-                        backbone_node_id = _backbone_node_id;
-                    else
-                        backbone_node_id = test_node_id;
-                    neo4j_queries.findLatestNode(!isBackbone, backbone_node_id, timestamp, this);
-                },
-                function findNextDataNode(err, _latest_data_node) {
-                    console.log(' [***] findNextDataNode. Err? ' + err);
-                    if (err) throw err;
-
-                    if (_latest_data_node != null)
-                        latest_data_node = _latest_data_node;
-                    else
-                        latest_data_node = backbone_node_id;
-                    neo4j_queries.findNextNode(!isBackbone, latest_data_node, this);
-                },
-                function relinkChain(err, next_data_node) {
-                    console.log(' [***] relinkChain. Err? ' + err);
-                    if (err) throw err;
-
-                    neo4j_queries.linkNode(!isBackbone, node_id, latest_data_node, next_data_node, shouldLinkToPrev, this);
-                },
-                function done(err) {
-                    console.log(' [***] done. Err? ' + err);
-                    lock.release();
-                }
-            );
-        }
+                neo4j_queries.linkNode(node_id, isBackbone, prev_backbone_node_id, 
+                    next_backbone_node_id, prev_data_node_id, next_data_node_id, this);
+            },
+            function done(err) {
+                console.log(' [***] done. Err? ' + err);
+                lock.release();
+            }
+        );
     } catch (ex) {
         console.log(' [**] Exception in linking new data: ' + ex);
         lock.release();

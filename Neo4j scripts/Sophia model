@@ -1,38 +1,17 @@
-CREATE (Build_50:Build {title: 'Build #50'})
-CREATE (Date_24_2_2014:Date {title: '24/02/2014'})
-CREATE (ChromWin:Environment {title: 'Chrome/Win'})
-CREATE (TestGoogleSearch:Script {title: 'Test Google Search'})
-CREATE (OpenBrowser:Step {title: 'Open Browser'})
-CREATE (NavigateGoogle:Step {title: 'Navigate google.com'})
-CREATE (TypeSearch:Step {title: 'Type search term'})
-CREATE (ClickSearch:Step {title: 'Click search button'})
-CREATE (GoogleSearchRepository:ObjectRepository {title: 'Google Search OR'})
-CREATE (Browser:TestObject {title: 'Chrome', type: 'Browser'})
-CREATE (Page:TestObject {title: 'Google', type: 'WebPage'})
-CREATE (SearchTextBox:TestObject {title: 'Search', type: 'WebTextBox'})
-CREATE (SearchResults:TestObject {title: 'Search results', type: 'WebTable'})
-CREATE (Browser_1:TestObject {title: 'Chrome', type: 'Browser', mode: 'runtime'})
-CREATE (Open:TestObjectMethod {title: 'Open', arg: ''})
-CREATE (CPU:Metric {title: 'CPU', value: '80', unit:'precentage'})
-CREATE (Mem:Metric {title: 'Memory', value: '50', unit:'precentage'})
+MATCH pathToLaterBackbone = start_node-[:FOLLOWED_BY*0..]->prev_b WHERE id(start_node)=66218 AND prev_b.timestamp <= 1531258273128 WITH pathToLaterBackbone ORDER BY LENGTH(pathToLaterBackbone) DESC LIMIT 1 WITH LAST(NODES(pathToLaterBackbone)) AS prev_backbone MATCH prev_backbone-[:FOLLOWED_BY*0..1]->next_backbone WITH prev_backbone, next_backbone ORDER BY next_backbone.timestamp DESC LIMIT 1 MATCH pathToLaterData = prev_backbone-[:LINKED_TO*0..]->prev_data where prev_data.timestamp <= 1531258273128 WITH prev_backbone, next_backbone, pathToLaterData ORDER BY LENGTH(pathToLaterData) DESC LIMIT 1 WITH prev_backbone, next_backbone, LAST(NODES(pathToLaterData)) as prev_data MATCH prev_data-[:LINKED_TO*0..1]->next_data return id(prev_backbone), id(next_backbone), id(prev_data), id(next_data) order by next_data.timestamp DESC LIMIT 1
 
-CREATE
-	(Build_50)-[:CONDITION_OF]->(TestGoogleSearch),
-	(Date_24_2_2014)-[:CONDITION_OF]->(TestGoogleSearch),
-	(ChromWin)-[:CONDITION_OF]->(TestGoogleSearch),
-	(TestGoogleSearch)-[:COMPOSED_OF]->(OpenBrowser),
-	(TestGoogleSearch)-[:COMPOSED_OF]->(NavigateGoogle),
-	(TestGoogleSearch)-[:COMPOSED_OF]->(TypeSearch),
-	(TestGoogleSearch)-[:COMPOSED_OF]->(ClickSearch),
-	(OpenBrowser)-[:PRECEDE]->(NavigateGoogle),
-	(NavigateGoogle)-[:PRECEDE]->(TypeSearch),
-	(TypeSearch)-[:PRECEDE]->(ClickSearch),
-	(TestGoogleSearch)-[:USE]->(GoogleSearchRepository),
-	(GoogleSearchRepository)-[:HAS]->(Browser),
-	(Browser)-[:HAS]->(Page),
-	(Page)-[:HAS]->(SearchTextBox),
-	(Page)-[:HAS]->(SearchResults),
-	(OpenBrowser)-[:USE]->(Browser_1),
-	(Browser_1)-[:WITH]->(Open),
-	(OpenBrowser)-[:MEASURE]->(CPU),
-	(OpenBrowser)-[:MEASURE]->(Mem)
+
+MATCH pathToLaterBackbone = start_node-[:FOLLOWED_BY*0..]->prev_b 
+WHERE id(start_node)=66218 
+AND prev_b.timestamp <= 1531258273128 
+WITH pathToLaterBackbone ORDER BY LENGTH(pathToLaterBackbone) DESC LIMIT 1 
+WITH LAST(NODES(pathToLaterBackbone)) AS prev_backbone 
+MATCH prev_backbone-[:FOLLOWED_BY*0..1]->next_backbone 
+WITH prev_backbone, next_backbone ORDER BY next_backbone.timestamp DESC LIMIT 1 
+MATCH pathToLaterData = prev_backbone-[:LINKED_TO*0..]->prev_data 
+WHERE prev_data.timestamp <= 1531258273128 
+WITH prev_backbone, next_backbone, pathToLaterData ORDER BY LENGTH(pathToLaterData) DESC LIMIT 1 
+WITH prev_backbone, next_backbone, LAST(NODES(pathToLaterData)) as prev_data 
+MATCH prev_data-[:LINKED_TO*0..1]->next_data 
+RETURN id(prev_backbone), id(next_backbone), id(prev_data), id(next_data) 
+ORDER BY next_data.timestamp DESC LIMIT 1

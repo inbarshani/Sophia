@@ -8,13 +8,19 @@ module.exports = {
 		else if (obj.eventType == 'focusout')
 		{
 			obj.type = 'UI_Transition';
-	        obj.indexable_content = obj.tagName + ' ' + obj.eventType +
-	        	' ' + obj.elementId +' ' + obj.value;
+	        obj.indexable_content = obj.tagName + ' ' + obj.eventType;
+			if (obj.elementId) 
+				obj.indexable_content = obj.indexable_content + ' ' + obj.elementId;
+			if (obj.value) 
+				obj.indexable_content = obj.indexable_content + ' ' + obj.value;
 		}
 		else
 		{
-	        obj.indexable_content = obj.tagName + ' ' + obj.eventType +
-	        	' ' + obj.elementId +' ' + obj.value;
+	        obj.indexable_content = obj.tagName + ' ' + obj.eventType;
+			if (obj.elementId) 
+				obj.indexable_content = obj.indexable_content + ' ' + obj.elementId;
+			if (obj.value) 
+				obj.indexable_content = obj.indexable_content + ' ' + obj.value;
 		}
         return obj;
 	}
