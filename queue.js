@@ -62,7 +62,7 @@ connection.on('ready', function() {
 function processQueueMessage(msg) {
     var params = [1];
     params[0] = msg;
-    console.log(" [x] Received new msg at "+new Date());
+    console.log(" [x] Received new msg at "+new Date()+" with active test: "+(current_test_id!=null));
     lock.runwithlock(_processQueueMessage, params);
 }
 
