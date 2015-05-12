@@ -1,14 +1,13 @@
-try 
-{  
-	if (chrome && chrome.runtime)
-	{   
-		console.log("chrome.runtime: "+chrome.runtime);   
-		chrome.runtime.sendMessage("iojhohbfacfjepmplgkdjleclmafeddm", 
-			{"sophiaTestId": ba7d7fda-6f66-4409-b3ba-41de0d479bdf},{},        
-	function(response){            
-	console.log("recevied response: "+response);        
-	}); 
-} else 
-console.log("Sophia failed to communicate with extension");
+var neo4j_q=require('./lib/neo4j_queries');
+
+neo4j_q.getNodeLocationByTimestamp(66218, 1431258273128, lognodes);
+neo4j_q.getNodeLocationByTimestamp(66218, 1531258273128, lognodes);
+neo4j_q.getNodeLocationByTimestamp(66218, 1431258269461, lognodes);
+
+function lognodes(prevbackbone, nextbackbone, prevdata, nextdata)
+{
+	console.log('Prev b: '+prevbackbone);
+	console.log('Next b: '+nextbackbone);
+	console.log('Prev d: '+prevdata);
+	console.log('Next d: '+nextdata);
 }
-catch(ex){    console.log("exception in sendmessage: "+ex);}
