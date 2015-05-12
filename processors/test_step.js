@@ -5,7 +5,7 @@ module.exports = {
 	},
 
 	extractDataFromIDOL: function(idol_document, formatted_result){
-		formatted_result.caption = idol_document['DESCRPTION'][0];
+		formatted_result.caption = idol_document['DESCRIPTION'][0];
 		return formatted_result;		
 	}
 };

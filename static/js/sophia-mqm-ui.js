@@ -1,5 +1,7 @@
-var currentNodes = [];
+var currentPaths = [];
 var reportString = '';
+var currentBackboneNodes = [];
+var currentDataNodes = [];
 var suggestionsArray = [];
 
 function fixedEncodeURIComponent(str) {
@@ -28,7 +30,7 @@ $(document).ready(function() {
 });
 
 function search() {
-    if (currentNodes.length == 0) {
+    if (currentPaths.length == 0) {
         // clear flow list
         $('#flow-list').empty();
         reportString = '';
@@ -38,15 +40,18 @@ function search() {
     reportString = reportString + 'Suggestions: '+suggestionsArray.join(", ")+'\n';
     reportString = reportString + 'Search: '+query + '\n';
     var jqxhr = $.ajax("/search?q=" + fixedEncodeURIComponent(query) + '&' +
-            'currentNodes=' + JSON.stringify(currentNodes))
+            'currentNodes=' + JSON.stringify(currentBackboneNodes))
         .done(function(data) {
             console.log("Search returned: " + data);
-            currentNodes = JSON.parse(data);
+            responseData = JSON.parse(data);
+            currentPaths = responseData.paths_to_nodes;
+            currentBackboneNodes = responseData.last_backbone_nodes;
+            currentDataNodes = responseData.last_data_nodes;
             // add query and number of results to the list
             var currentStepNumber = $('#flow-list li').length + 1;
-            $('#flow-list').append('<li class="list-group-item clickable" onClick="visualize(' + currentNodes + ');">Step ' + currentStepNumber + ': ' + 
-                query + ' <span class="badge">' + currentNodes.length + '</span></li>');
-            reportString = reportString + 'Results #: ' + currentNodes.length + '\n';
+            $('#flow-list').append('<li class="list-group-item clickable" onClick="visualize(' + currentBackboneNodes + ');">Step ' + currentStepNumber + ': ' + 
+                query + ' <span class="badge">' + currentPaths.length + '</span></li>');
+            reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
             update();
         })
         .fail(function(err) {
@@ -55,14 +60,18 @@ function search() {
             reportString = reportString + 'Result: failed query\n';
 
             // remove all nodes
-            currentNodes.length = 0;
+            currentPaths.length = 0;
+            currentBackboneNodes.length = 0;
+            currentDataNodes.length = 0;
             update();
         });
 }
 
 function clearSearch() {
     // remove all nodes
-    currentNodes.length = 0;
+    currentPaths.length = 0;
+    currentBackboneNodes.length = 0;
+    currentDataNodes.length = 0;
     // clear flow list
     $('#flow-list').empty();
     // update the logo
@@ -80,7 +89,7 @@ function update() {
 }
 
 function updateLogo() {
-    if (currentNodes.length > 0) {
+    if (currentPaths.length > 0) {
         $('#navbar-logo').removeClass('hidden').addClass('visible');
         $('#logo').removeClass('visible').addClass('hidden');
     } else {
@@ -106,7 +115,7 @@ function updateSearchBox() {
 }
 
 function querySuggestions() {
-    var jqxhr = $.ajax("/querySuggestions?currentNodes=" + JSON.stringify(currentNodes))
+    var jqxhr = $.ajax("/querySuggestions?currentPaths=" + JSON.stringify(currentBackboneNodes))
         .done(function(data) {
             suggestionsArray = JSON.parse(data);
             //alert('suggestionsArray length: '+suggestionsArray.length+" [0]: "+suggestionsArray[0])
