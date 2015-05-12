@@ -44,7 +44,7 @@ function search() {
             currentNodes = JSON.parse(data);
             // add query and number of results to the list
             var currentStepNumber = $('#flow-list li').length + 1;
-            $('#flow-list').append('<li class="list-group-item">Step ' + currentStepNumber + ': ' + 
+            $('#flow-list').append('<li class="list-group-item clickable" onClick="visualize(' + data + ');">Step ' + currentStepNumber + ': ' + 
                 query + ' <span class="badge">' + currentNodes.length + '</span></li>');
             reportString = reportString + 'Results #: ' + currentNodes.length + '\n';
             update();
@@ -100,6 +100,8 @@ function updateSearchBox() {
     else // no current search
     {
         $('#flow-title').removeClass('visible').addClass('hidden');   
+        $('#vis-title').removeClass('visible').addClass('hidden');   
+        $('#vis-container').removeClass('visible').addClass('hidden');   
     }
 }
 
