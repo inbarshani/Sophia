@@ -114,7 +114,7 @@ function _processQueueMessage(msg) {
             // this is a workaround which doesn't support multiple tests at the same time, will need to fix
             if (current_test_id != null && data.testID == undefined) {
                 data.testID = current_test_id;
-            } else if (current_test_id == null && data.testID) {
+            } else if (data.testID && (current_test_id!=data.testID)) {
                 // TODO: bind current_test_id by id of node of type Test, if the current is not set
                 // this will recover from disruptions in processing incoming events
                 // TODO: the problem - need to get node id as well, which requires a query on neo4j...
