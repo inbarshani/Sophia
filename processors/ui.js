@@ -23,5 +23,20 @@ module.exports = {
 				obj.indexable_content = obj.indexable_content + ' ' + obj.value;
 		}
         return obj;
+	},
+
+	extractDataFromIDOL: function(idol_document, formatted_result){
+		if (formatted_result.type == 'UI_Change'){
+			formatted_result.caption = 'UI change in '+idol_document['URL'][0];
+		}
+		else if (formatted_result.type == 'UI_Transition'){
+			formatted_result.caption = 'UI transition for elemnt '+idol_document['ELEMENTID']+ 
+				' in '+idol_document['URL'][0];
+		}
+		else { // UI
+			formatted_result.caption = idol_document['EVENTTYPE']+' on '+ idol_document['TAGNAME']+
+				' in '+idol_document['URL'][0];
+		}
+		return formatted_result;
 	}
 };
