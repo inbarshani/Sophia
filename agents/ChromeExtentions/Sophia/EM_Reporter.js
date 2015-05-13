@@ -85,7 +85,26 @@
             if (event.target.value) {
                 args.value = event.target.value;
             }
-            if (args.tagName.toLowerCase() == "a") {
+            else
+            {
+                var element = event.target;
+                var innerText = element.innerText.trim();
+                if (innerText.length > 0)
+                    args.value = innerText;   
+                else
+                {
+                    var parent = element.parentElement;
+                    while (parent && !args.value)
+                    {
+                        innerText = parent.innerText.trim();
+                        if (innerText.length>0)
+                            args.value = parent.innerText;
+                        else
+                            parent = parent.parentElement;
+                    }
+                }
+            }
+            if (!args.value && args.tagName.toLowerCase() == "a") {
                 args.value = event.target.href;
             }
         } 
