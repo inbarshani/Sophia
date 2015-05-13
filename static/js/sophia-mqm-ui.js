@@ -40,7 +40,7 @@ function search() {
     reportString = reportString + 'Suggestions: '+suggestionsArray.join(", ")+'\n';
     reportString = reportString + 'Search: '+query + '\n';
     var jqxhr = $.ajax("/search?q=" + fixedEncodeURIComponent(query) + '&' +
-            'currentNodes=' + JSON.stringify(currentBackboneNodes))
+            'currentNodes=' + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)))
         .done(function(data) {
             //console.log("Search returned: " + data);
             responseData = JSON.parse(data);
@@ -116,7 +116,7 @@ function updateSearchResults() {
 }
 
 function querySuggestions() {
-    var jqxhr = $.ajax("/querySuggestions?currentPaths=" + JSON.stringify(currentBackboneNodes))
+    var jqxhr = $.ajax("/querySuggestions?currentPaths=" + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)))
         .done(function(data) {
             suggestionsArray = JSON.parse(data);
             //alert('suggestionsArray length: '+suggestionsArray.length+" [0]: "+suggestionsArray[0])
