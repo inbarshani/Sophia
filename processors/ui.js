@@ -3,24 +3,33 @@ module.exports = {
 		if (obj.eventType == 'DOMSubtreeModified')
 		{
 			obj.type = 'UI_Change';
+        	obj.high_priority_index = ''; // only has low priority content
 	        obj.indexable_content = obj.url + '\r\n' + obj.src;
 		}
 		else if (obj.eventType == 'focusout')
 		{
 			obj.type = 'UI_Transition';
+        	obj.high_priority_index = obj.eventType; 
 	        obj.indexable_content = obj.tagName + ' ' + obj.eventType;
 			if (obj.elementId) 
 				obj.indexable_content = obj.indexable_content + ' ' + obj.elementId;
-			if (obj.value) 
+			if (obj.value)
+			{
 				obj.indexable_content = obj.indexable_content + ' ' + obj.value;
+				obj.high_priority_index = obj.high_priority_index + ' ' + obj.value;
+			}
 		}
 		else
 		{
+        	obj.high_priority_index = obj.eventType; 
 	        obj.indexable_content = obj.tagName + ' ' + obj.eventType;
 			if (obj.elementId) 
 				obj.indexable_content = obj.indexable_content + ' ' + obj.elementId;
 			if (obj.value) 
+			{
 				obj.indexable_content = obj.indexable_content + ' ' + obj.value;
+				obj.high_priority_index = obj.high_priority_index + ' ' + obj.value;
+			}
 		}
         return obj;
 	},

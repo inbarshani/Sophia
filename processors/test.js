@@ -1,6 +1,7 @@
 module.exports = {
 	getData: function (obj) {
-        obj.indexable_content = obj.description;
+        obj.high_priority_index = obj.description;
+        obj.indexable_content = obj.description + ' ' + obj.action;
         return obj;
 	},
 
