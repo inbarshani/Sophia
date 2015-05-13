@@ -118,7 +118,12 @@ function updateSearchResults() {
 function querySuggestions() {
     var jqxhr = $.ajax("/querySuggestions?currentPaths=" + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)))
         .done(function(data) {
-            suggestionsArray = JSON.parse(data);
+            if (data.length > 0) {
+                suggestionsArray = JSON.parse(data);
+            } else {
+                suggestionsArray = [];
+            }
+
             //alert('suggestionsArray length: '+suggestionsArray.length+" [0]: "+suggestionsArray[0])
             if (suggestionsArray.length > 0)
             {

@@ -23,27 +23,38 @@ function visualize() {
     $('#vis-title').removeClass('hidden').addClass('visible');
     $('#vis-container').removeClass('hidden').addClass('visible');
 
+    var nodesToDisplay = new Array();
+    var rowIndex = 0;
+    var colIndex = 0;
+    for (var i = 0; i < currentPaths.length && i < maxPaths; i++) {
+        colIndex = 0;
+        for (var j = 0; j < currentPaths[i].nodes.length; j++) {
+            if (currentPaths[i].nodes[j].data && currentPaths[i].nodes[j].data.caption) {
+                if (colIndex == 0) {
+                    nodesToDisplay[rowIndex] = new Array();    
+                }
+                nodesToDisplay[rowIndex][colIndex] = currentPaths[i].nodes[j];
+                colIndex++;
+            }
+        }
+        if (colIndex > 0) {
+            rowIndex++;
+        }
+    }
+
+
     timer = setInterval(function(){
-    	for (var pathIndex = 0; (pathIndex < maxPaths) && (pathIndex < currentPaths.length); pathIndex++) {
-    		// check if we have a next node on this path to animate, and if we have - animate it
-    		// itemIndex is zero based, so increase by one
-    		var pathItemIndex = itemIndex + 1, nodeIndex = -1; // nodeIndex starts with inc
-    		var nodes = currentPaths[pathIndex].nodes;
-    		while (pathItemIndex > 0 && nodeIndex < (nodes.length -1))
-    		{
-    			nodeIndex++;
-    			if (nodes[nodeIndex].data && nodes[nodeIndex].data.caption)
-    				pathItemIndex--;
-    		}
-    		if (nodeIndex < (nodes.length-1))
-	    		animatePath(itemIndex, pathIndex, nodeIndex);
-		}
-    	itemIndex++;
-		if (itemIndex >= maxItems) {
-			clearInterval(timer);
-				return;
-		}
-	}, speed);
+        for (i = 0; i < rowIndex; i++) {
+            if (nodesToDisplay[i][itemIndex]) {
+                animatePath(i, itemIndex, nodesToDisplay[i][itemIndex]);
+            }
+        }
+        itemIndex++;
+        if (itemIndex >= maxItems) {
+            clearInterval(timer);
+                return;
+        }
+    }, speed);
  }
 
 function animateLine(fromX, toX, y, end, callback) {
@@ -62,7 +73,7 @@ function animateLine(fromX, toX, y, end, callback) {
 	}
 }
 
-function animateCircle(left, top, pathIndex, nodeInPathIndex) {
+function animateCircle(left, top, row, node) {
 	ctx.beginPath();
 	ctx.arc(left, top, radius, 0, 2 * Math.PI, false);
 	ctx.fillStyle = '#5bc0de';
@@ -71,26 +82,26 @@ function animateCircle(left, top, pathIndex, nodeInPathIndex) {
 	ctx.font = '12px "Helvetica Neue", Helvetica, Arial, sans-serif';
 	ctx.textAlign = 'center';
     ctx.fillStyle = '#000';
-    var text = currentPaths[pathIndex].nodes[nodeInPathIndex].data.caption;
+    var text = node.data.caption;
 	ctx.fillText(text.substring(0, 12), left , top - textFromCircle);
 }
 
-function animatePath(itemIndex, pathIndex, nodeInPathIndex) {
-    if (itemIndex == 0) {
+function animatePath(row, col, node) {
+    if (col == 0) {
 		lineX = leftMargin;
     } else {
-		lineX = leftMargin + (itemWidth * itemIndex) - (itemWidth/2) + radius;
+		lineX = leftMargin + (itemWidth * col) - (itemWidth/2) + radius;
 	}
-	lineEnd = leftMargin + (itemWidth * itemIndex) + (itemWidth/2) - radius;
+	lineEnd = leftMargin + (itemWidth * col) + (itemWidth/2) - radius;
 	linePos = lineX + 1;
     ctx.fillStyle = '#000';
 
     animateLine(lineX, lineX + 1, 
-    	(topMarginCircle + (itemHeight * (pathIndex))), lineEnd, 
-    	function(left, top) {
-    		animateCircle(leftMargin + (itemWidth * itemIndex) + (itemWidth/2), 
-    			(topMarginCircle + (itemHeight * (pathIndex))), 
-    			pathIndex, nodeInPathIndex);
+    	(topMarginCircle + (itemHeight * (row))), lineEnd, 
+    	function() {
+    		animateCircle(leftMargin + (itemWidth * col) + (itemWidth/2), 
+    			(topMarginCircle + (itemHeight * (row))), 
+    			row, node);
     	}
     );
 }
