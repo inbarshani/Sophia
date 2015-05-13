@@ -21,8 +21,7 @@ app.use('/querySuggestions', function(request, response) {
                 else
                     response.send();
             });
-        }
-        else
+        } else
             response.send();
     });
 
@@ -34,39 +33,46 @@ app.use('/search', function(request, response) {
 
     idol_queries.search(queryText, function(documents_hash) {
         // verify that the nodes of the documents are connected after existing nodes
-        /*
-        var potentialNodes = [];
-        Object.keys(documents_hash).map(function(value, index) {
-            //console.log('documents_hash key: '+value+ ' value: '+documents_hash[value].graph_node);
-           potentialNodes.push(value);
-        });*/
         //console.log('documents_hash keys: '+require('util').inspect(Object.keys(documents_hash), {depth: 2}));
-        neo4j_queries.doesPathExit(currentNodes, Object.keys(documents_hash), function(paths_to_nodes) {
-            var last_backbone_nodes = [];
-            var last_data_nodes = [];
-            // join paths_to_nodes with data from docuemtns
-            //console.log('documents_hash: '+require('util').inspect(documents_hash, {depth: 2}));
-            paths_to_nodes.map(function(path)
-            {
-                //console.log('mapping path of length: '+path.nodes.length);
-                if (path.last_backbone)
-                    last_backbone_nodes.push(path.last_backbone);
-                if (path.last_data)
-                    last_data_nodes.push(path.last_data);
-                for (var i=0;i<path.nodes.length;i++)
-                {
-                    var node_id = path.nodes[i].id;
-                    var node_doc = documents_hash[''+node_id];
-                    //console.log('document for '+node_id+' is '+node_doc);
-                    path.nodes[i].data = node_doc;
-                }
+        var idolResultNodes = Object.keys(documents_hash);
+        if (idolResultNodes.length > 0) {
+            neo4j_queries.doesPathExit(currentNodes, idolResultNodes, function(paths_to_nodes) {
+                var last_backbone_nodes = [];
+                var last_data_nodes = [];
+                // join paths_to_nodes with data from docuemtns
+                //console.log('documents_hash: '+require('util').inspect(documents_hash, {depth: 2}));
+                paths_to_nodes.map(function(path) {
+                    //console.log('mapping path of length: '+path.nodes.length);
+                    if (path.last_backbone && last_backbone_nodes.indexOf(path.last_backbone) < 0)
+                        last_backbone_nodes.push(path.last_backbone);
+                    if (path.last_data && last_data_nodes.indexOf(path.last_data) < 0)
+                        last_data_nodes.push(path.last_data);
+                    for (var i = 0; i < path.nodes.length; i++) {
+                        var node_id = path.nodes[i].id;
+                        var node_doc = documents_hash['' + node_id];
+                        //console.log('document for '+node_id+' is '+node_doc);
+                        path.nodes[i].data = node_doc;
+                    }
+                });
+                var response_body = {
+                    paths_to_nodes: paths_to_nodes,
+                    last_backbone_nodes: last_backbone_nodes,
+                    last_data_nodes: last_data_nodes
+                };
+                //console.log('paths_to_nodes: '+JSON.stringify(response_body));
+                response.send(JSON.stringify(response_body));
             });
-            var response_body = {paths_to_nodes: paths_to_nodes, 
-                last_backbone_nodes: last_backbone_nodes,
-                last_data_nodes: last_data_nodes};
+        }
+        else // no results from IDOL
+        {
+            var response_body = {
+                paths_to_nodes: [],
+                last_backbone_nodes: [],
+                last_data_nodes: []
+            };
             //console.log('paths_to_nodes: '+JSON.stringify(response_body));
-            response.send(JSON.stringify(response_body));
-        });
+            response.send(JSON.stringify(response_body));            
+        }
     });
 });
 
