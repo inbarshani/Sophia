@@ -42,14 +42,14 @@ function search() {
     var jqxhr = $.ajax("/search?q=" + fixedEncodeURIComponent(query) + '&' +
             'currentNodes=' + JSON.stringify(currentBackboneNodes))
         .done(function(data) {
-            console.log("Search returned: " + data);
+            //console.log("Search returned: " + data);
             responseData = JSON.parse(data);
             currentPaths = responseData.paths_to_nodes;
             currentBackboneNodes = responseData.last_backbone_nodes;
             currentDataNodes = responseData.last_data_nodes;
             // add query and number of results to the list
             var currentStepNumber = $('#flow-list li').length + 1;
-            $('#flow-list').append('<li class="list-group-item clickable" onClick="visualize(' + currentBackboneNodes + ');">Step ' + currentStepNumber + ': ' + 
+            $('#flow-list').append('<li class="list-group-item clickable" onClick="highlight(' + currentBackboneNodes + ');">Step ' + currentStepNumber + ': ' + 
                 query + ' <span class="badge">' + currentPaths.length + '</span></li>');
             reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
             update();
@@ -83,7 +83,7 @@ function update() {
 
     updateLogo();
 
-    updateSearchBox();
+    updateSearchResults();
 
     querySuggestions();
 }
@@ -98,13 +98,14 @@ function updateLogo() {
     }
 }
 
-function updateSearchBox() {
+function updateSearchResults() {
     // clear last search term
     $('#search-text').val('');
-    // show/hide the flow title
+    // show/hide the flow title and paths
     if ($('#flow-list').has('li').length > 0)
     {
         $('#flow-title').removeClass('hidden').addClass('visible');
+        visualize();
     }
     else // no current search
     {
