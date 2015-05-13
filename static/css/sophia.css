@@ -1,3 +1,27 @@
 .clickable {
 	cursor: pointer;
 }
+
+#details {
+	position: absolute;
+	width: 0px;
+	height: 0px;
+	border: 1px solid #5bc0de;
+	background-color: #fff;
+	font-size: 14px;
+	color: #000;
+	z-index: 1001;
+	word-wrap: break-word;
+}
+
+#detailsText {
+	margin-top: 20px;
+}
+
+.closeX {
+	float: right;
+	color: #000;
+	margin-right: 5px;
+	cursor: pointer;
+	height: 10px;
+}

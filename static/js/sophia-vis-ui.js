@@ -8,6 +8,11 @@ var itemHeight = 50;
 var radius = 10;
 var speed = 50;
 
+var detailsWidth = '300px';
+var detailsHeight = '300px';
+
+var clickableAreas = [];
+
 function visualize() {
 	var canvas = document.getElementById('vis-canvas');
 	var itemIndex = 0;
@@ -17,6 +22,7 @@ function visualize() {
 	canvas.height = itemHeight * maxPaths;
 	canvas.width = itemWidth * maxItems;
 	ctx = canvas.getContext('2d');
+    canvas.addEventListener('click', onCanvasClick, false);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -84,6 +90,13 @@ function animateCircle(left, top, row, node) {
     ctx.fillStyle = '#000';
     var text = node.data.caption;
 	ctx.fillText(text.substring(0, 12), left , top - textFromCircle);
+    clickableAreas.push({
+        x: left - radius,
+        y: top - radius,
+        width: radius * 2,
+        height: radius * 2,
+        node: node
+    });
 }
 
 function animatePath(row, col, node) {
@@ -109,4 +122,76 @@ function animatePath(row, col, node) {
 function highlight(nodes)
 {
 	// TODO
+}
+
+function onCanvasClick(event) {
+    var mouseX = event.offsetX;
+    var mouseY = event.offsetY;
+
+    for (var circle in clickableAreas) {
+        if (isClickInside(clickableAreas[circle], mouseX, mouseY)) {
+            animateDetails(event.clientX, event.clientY, clickableAreas[circle].node);
+        }
+    }
+}
+
+function isClickInside(shape, clickX, clickY) {
+    return (clickX >= shape.x) && (clickY >= shape.y) && (clickX <= (shape.x + shape.width)) && (clickY <= (shape.y + shape.height));
+}
+
+function animateDetails(x, y, node) {
+    if (!$('#details').hasClass('hidden')) {
+        hideDetails(function() {
+            showDetails(x, y, node);
+        });
+    } else {
+        showDetails(x, y, node);
+    }
+}
+
+function showDetails(x, y, node) {
+    $('#details').css('left', x);
+    $('#details').css('top', y);
+    $('#details').removeClass('hidden');
+    $("#details").animate({
+        height: detailsHeight,
+        width: detailsWidth
+    });
+    /*
+    data: Object
+    caption: "<some text,,,>"
+    graph_node: "79989"
+    id: "219637"
+    type: "UI_Change"
+    */
+    $('#detailsText').html('');
+    var li = $('<li>');
+    li.addClass('list-group-item');
+    li.text(node.data.type);
+    $('#detailsText').append(li);
+    li = $('<li>');
+    li.addClass('list-group-item');
+    li.text(node.data.caption);
+    $('#detailsText').append(li);
+    li = $('<li>');
+    li.addClass('list-group-item');
+    li.text('Graph node: ' + node.data.graph_node);
+    $('#detailsText').append(li);
+    li = $('<li>');
+    li.addClass('list-group-item');
+    li.text('ID: ' + node.data.id);
+    $('#detailsText').append(li);
+}
+
+function hideDetails(callback) {
+    $("#details").animate({
+        height: '0px',
+        width: '0px'
+    }, function() {
+            $('#details').addClass('hidden');
+            if (callback) {
+                callback();
+            }
+        }
+    );
 }
