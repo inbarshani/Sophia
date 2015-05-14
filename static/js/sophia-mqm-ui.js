@@ -27,6 +27,7 @@ $(document).ready(function() {
     });
 
     update();
+    $('body').click(onDocumentClick);
 });
 
 function updateCurrentPaths(newPaths) {
