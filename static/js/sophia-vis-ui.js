@@ -13,6 +13,8 @@ var detailsHeight = '300px';
 
 var clickableAreas = [];
 
+var highlightStyle = ['#5bc0de', '#00ff00']
+
 function visualize() {
 	var canvas = document.getElementById('vis-canvas');
 	var itemIndex = 0;
@@ -22,7 +24,7 @@ function visualize() {
 	canvas.height = itemHeight * maxPaths;
 	canvas.width = itemWidth * maxItems;
 	ctx = canvas.getContext('2d');
-    canvas.addEventListener('click', onCanvasClick, false);
+    canvas.addEventListener('mouseup', onCanvasClick, false);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -119,11 +121,6 @@ function animatePath(row, col, node) {
     );
 }
 
-function highlight(nodes)
-{
-	// TODO
-}
-
 function onCanvasClick(event) {
     var mouseX = event.offsetX;
     var mouseY = event.offsetY;
@@ -194,4 +191,46 @@ function hideDetails(callback) {
             }
         }
     );
+}
+
+function highlight(li, nodes)
+{
+    if ($(li).hasClass('active')) {
+        $(".list-group-item.clickable.active").removeClass('active');
+        for (var circle in clickableAreas) {
+            if (clickableAreas[circle].highlighted) {
+                clickableAreas[circle].highlighted = false;
+                highlightNode(clickableAreas[circle].x, clickableAreas[circle].y, 0, 0)
+            }
+        }
+
+    } else {
+        $(".list-group-item.clickable.active").removeClass('active');
+        $(li).addClass('active');
+        for (var circle in clickableAreas) {
+            if (clickableAreas[circle].highlighted) {
+                clickableAreas[circle].highlighted = false;
+                highlightNode(clickableAreas[circle].x, clickableAreas[circle].y, 0, 0)
+            }
+            if ($.inArray(clickableAreas[circle].node.id, nodes) > -1) {
+                clickableAreas[circle].highlighted = true;
+                highlightNode(clickableAreas[circle].x, clickableAreas[circle].y, 0, 1);
+            }
+        }
+    }
+}
+
+function highlightNode(x, y, alpha, dir) {
+    ctx.beginPath();
+    ctx.arc(x + radius, y + radius, radius, 0, 2 * Math.PI, false);
+
+    ctx.fillStyle = highlightStyle[dir];;
+    ctx.globalAlpha = alpha;
+    ctx.fill();
+    ctx.closePath();
+    if (alpha < 1) {
+        requestAnimationFrame(function () {
+            highlightNode(x, y, alpha + 0.05, dir);
+        });
+    }
 }

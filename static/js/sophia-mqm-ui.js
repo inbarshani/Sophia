@@ -68,7 +68,7 @@ function search() {
             currentDataNodes = responseData.last_data_nodes;
             // add query and number of results to the list
             var currentStepNumber = $('#flow-list li').length + 1;
-            $('#flow-list').append('<li class="list-group-item clickable" onClick="highlight(' + currentBackboneNodes + ');">Step ' + currentStepNumber + ': ' +
+            $('#flow-list').append('<li class="list-group-item clickable" onClick="highlight(this, function(nodes) { return nodes } ([' + currentBackboneNodes.concat(currentDataNodes) + ']));">Step ' + currentStepNumber + ': ' + 
                 query + ' <span class="badge">' + currentPaths.length + '</span></li>');
             reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
             update();
