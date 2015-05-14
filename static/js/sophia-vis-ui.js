@@ -16,7 +16,6 @@ var clickableAreas = [];
 var highlightStyle = ['#5bc0de', '#00ff00']
 
 function visualize() {
-    clickableAreas = [];
 	var canvas = document.getElementById('vis-canvas');
 	var itemIndex = 0;
 	var maxPaths = 5;
@@ -132,7 +131,6 @@ function onCanvasClick(event) {
             return;
         }
     }
-    hideDetails();
 }
 
 function isClickInside(shape, clickX, clickY) {
