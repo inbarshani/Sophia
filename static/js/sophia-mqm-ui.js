@@ -29,6 +29,25 @@ $(document).ready(function() {
     update();
 });
 
+function updateCurrentPaths(newPaths) {
+    if (currentPaths.length > 0) {
+        // if there are existing paths of preivous queries, we need to combine
+        newPaths.map(function(newPath) {
+            var startNode = newPath.nodes[0].id;            
+            for (var i = 0; i < currentPaths.length; i++) {
+                if (currentPaths[i].last_backbone == startNode ||
+                    currentPaths[i].last_data == startNode) {
+                    // combine newPath with currentPath
+                    newPath.nodes.shift(); // remove the node common to previous and new path
+                    newPath.nodes = currentPaths[i].nodes.concat(newPath.nodes);
+                    break; // don't need to go over all the rest of the paths
+                }
+            }
+        });        
+    }
+    currentPaths = newPaths;
+}
+
 function search() {
     if (currentPaths.length == 0) {
         // clear flow list
@@ -37,19 +56,19 @@ function search() {
     }
 
     var query = $('#search-text').val();
-    reportString = reportString + 'Suggestions: '+suggestionsArray.join(", ")+'\n';
-    reportString = reportString + 'Search: '+query + '\n';
+    reportString = reportString + 'Suggestions: ' + suggestionsArray.join(", ") + '\n';
+    reportString = reportString + 'Search: ' + query + '\n';
     var jqxhr = $.ajax("/search?q=" + fixedEncodeURIComponent(query) + '&' +
             'currentNodes=' + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)))
         .done(function(data) {
             //console.log("Search returned: " + data);
             responseData = JSON.parse(data);
-            currentPaths = responseData.paths_to_nodes;
+            updateCurrentPaths(responseData.paths_to_nodes);
             currentBackboneNodes = responseData.last_backbone_nodes;
             currentDataNodes = responseData.last_data_nodes;
             // add query and number of results to the list
             var currentStepNumber = $('#flow-list li').length + 1;
-            $('#flow-list').append('<li class="list-group-item clickable" onClick="highlight(' + currentBackboneNodes + ');">Step ' + currentStepNumber + ': ' + 
+            $('#flow-list').append('<li class="list-group-item clickable" onClick="highlight(' + currentBackboneNodes + ');">Step ' + currentStepNumber + ': ' +
                 query + ' <span class="badge">' + currentPaths.length + '</span></li>');
             reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
             update();
@@ -102,16 +121,14 @@ function updateSearchResults() {
     // clear last search term
     $('#search-text').val('');
     // show/hide the flow title and paths
-    if ($('#flow-list').has('li').length > 0)
-    {
+    if ($('#flow-list').has('li').length > 0) {
         $('#flow-title').removeClass('hidden').addClass('visible');
         visualize();
-    }
-    else // no current search
+    } else // no current search
     {
-        $('#flow-title').removeClass('visible').addClass('hidden');   
-        $('#vis-title').removeClass('visible').addClass('hidden');   
-        $('#vis-container').removeClass('visible').addClass('hidden');   
+        $('#flow-title').removeClass('visible').addClass('hidden');
+        $('#vis-title').removeClass('visible').addClass('hidden');
+        $('#vis-container').removeClass('visible').addClass('hidden');
     }
 }
 
@@ -125,11 +142,9 @@ function querySuggestions() {
             }
 
             //alert('suggestionsArray length: '+suggestionsArray.length+" [0]: "+suggestionsArray[0])
-            if (suggestionsArray.length > 0)
-            {
-                $('#suggestions-text').text('Try: ' + suggestionsArray.join(", "));                
-            }
-            else
+            if (suggestionsArray.length > 0) {
+                $('#suggestions-text').text('Try: ' + suggestionsArray.join(", "));
+            } else
                 $('#suggestions-text').html('<i>No suggestions</i>');
         })
         .fail(function(err) {
@@ -139,10 +154,9 @@ function querySuggestions() {
         });
 }
 
-function reportAudit(){
+function reportAudit() {
     var jqxhr = $.ajax("/report?reportString=" + fixedEncodeURIComponent(reportString))
-        .done(function(data) {
-        })
+        .done(function(data) {})
         .fail(function(err) {
             //alert( "error getting suggestions" );
             console.log("Failed reporting audit log: " + err);
