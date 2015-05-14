@@ -128,6 +128,7 @@ function onCanvasClick(event) {
     for (var circle in clickableAreas) {
         if (isClickInside(clickableAreas[circle], mouseX, mouseY)) {
             animateDetails(event.clientX, event.clientY, clickableAreas[circle].node);
+            return;
         }
     }
 }
