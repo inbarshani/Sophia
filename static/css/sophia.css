@@ -25,3 +25,30 @@
 	cursor: pointer;
 	height: 10px;
 }
+
+.path {
+	stroke: #000;
+	stroke-width: 1px;
+}
+
+.circle {
+	stroke: none;
+	fill: #5bc0de;
+}
+
+.text {
+	font-size: 12px;
+	text-anchor: middle;
+	fill: #000;
+}
+
+#scrollHoriz {
+	top: 40px;
+  	left: 45%;
+  	position: relative;
+}
+
+#scrollVertical {
+	top: -80px;
+	left: 50px;
+}
