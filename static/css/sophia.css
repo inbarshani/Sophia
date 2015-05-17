@@ -41,3 +41,14 @@
 	text-anchor: middle;
 	fill: #000;
 }
+
+#scrollHoriz {
+	top: 40px;
+  	left: 45%;
+  	position: relative;
+}
+
+#scrollVertical {
+	top: -80px;
+	left: 50px;
+}

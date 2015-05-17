@@ -9,7 +9,7 @@ var radius = 10;
 var speed = 50;
 
 var detailsWidth = '300px';
-var detailsHeight = '300px';
+var detailsHeight = '350px';
 
 var clickableAreas = [];
 
@@ -20,17 +20,16 @@ var timerCircles = [];
 var timerText;
 
 function visualize() {
+
     clickableAreas = [];
 	svg = $('#vis-svg');
+
 	var itemIndex = 0;
 	var maxPaths = 5;
 	var maxItems = 7;
+    var maxCols = 0;
 	svg.attr('height', (itemHeight * maxPaths) + 'px');
 	svg.attr('width', (itemWidth * maxItems) + 'px');
-//	ctx = canvas.getContext('2d');
-//    canvas.addEventListener('mouseup', onCanvasClick, false);
-
-//    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     svg.html('');
 
@@ -40,7 +39,7 @@ function visualize() {
     var nodesToDisplay = new Array();
     var rowIndex = 0;
     var colIndex = 0;
-    for (var i = 0; i < currentPaths.length && i < maxPaths; i++) {
+    for (var i = 0; i < currentPaths.length; i++) {
         colIndex = 0;
         for (var j = 0; j < currentPaths[i].nodes.length; j++) {
             if (currentPaths[i].nodes[j].data && currentPaths[i].nodes[j].data.caption) {
@@ -54,8 +53,10 @@ function visualize() {
         if (colIndex > 0) {
             rowIndex++;
         }
+        if (colIndex > maxCols) {
+            maxCols = colIndex;
+        }
     }
-
 
     timerGlobal = setInterval(function(){
         for (i = 0; i < rowIndex; i++) {
@@ -64,7 +65,7 @@ function visualize() {
             }
         }
         itemIndex++;
-        if (itemIndex >= maxItems) {
+        if (itemIndex > maxCols) {
             clearInterval(timerGlobal);
             clickLastStep();
             return;
@@ -200,6 +201,7 @@ function showDetails(x, y, node) {
     li.addClass('list-group-item');
     li.text('ID: ' + node.data.id);
     $('#detailsText').append(li);
+
     getScreens(node.data.graph_node, function(prevTimestamp, nextTimestamp){
         var li = $('<li>');
         li.addClass('list-group-item');
@@ -278,4 +280,40 @@ function highlightNode(x, y, alpha, dir) {
 
 function clickLastStep() {
     $('#flow-list li').last().click();
+}
+
+function showVisScroll() {
+    $('#scrollVertical').removeClass('hidden');
+    $('#scrollHoriz').removeClass('hidden');
+}
+
+function hideVisScroll() {
+    $('#scrollVertical').addClass('hidden');
+    $('#scrollHoriz').addClass('hidden');
+}
+
+function scrollVis(type) {
+    var x=0;
+    var y = 0;
+    switch (type) {
+        case "up":
+            y-=1;
+            break;
+        case "down":
+            y+=1;
+            break;
+        case "left":
+            x-=1;
+            break;
+        case "right":
+            x+=1;
+            break;
+        default:
+            break;
+    }
+    moveVis(x,y);
+}
+
+function moveVis(x, y) {
+    
 }
