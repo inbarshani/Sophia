@@ -23,7 +23,7 @@
                     } else {
                         window.__eumRumService.baseAppUrl = storageChange.newValue;
                     }
-                } else if (key == "fileUploadUrl") {
+                } else if (key == "fileUrl") {
                     if (storageChange.newValue == window.__eumRumService.fileUploadUrl) {
                         return;
                     } else {

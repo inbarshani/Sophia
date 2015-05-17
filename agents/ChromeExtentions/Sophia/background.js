@@ -73,6 +73,16 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
                 }
             } 
         }
+        else if (namespace == "local") {
+            var storageChange = changes[key];
+            if (key == "fileUrl") {
+                if (storageChange.newValue == fileUrl) {
+                    return;
+                } else {
+                    fileUrl = storageChange.newValue;
+                }
+            } 
+        }
     }
 });
 

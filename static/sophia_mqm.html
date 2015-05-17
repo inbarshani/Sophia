@@ -97,7 +97,16 @@
         <!-- START visualization area -->
           <h4><span id="vis-title" class="legend hidden">MQM results</span></h4>
           <div id="vis-container" class="panel panel-default hidden">
-            <canvas id="vis-canvas"></canvas>
+            <svg id="vis-svg"></svg>
+            <div id="scrollVertical" class="btn-group-vertical" role="group" aria-label="">
+              <button type="button" class="btn btn-default" onclick="scrollVis('up');"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></button>
+              <br>
+              <button type="button" class="btn btn-default onclick="scrollVis('down');""><span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
+            </div>
+            <div id="scrollHoriz" class="btn-toolbar" role="toolbar" aria-label="">
+              <button type="button" class="btn btn-default" onclick="scrollVis('left');"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></button>
+              <button type="button" class="btn btn-default" onclick="scrollVis('right');"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></button>
+            </div>
           </div>
         <!-- END visualization area -->
         </div>

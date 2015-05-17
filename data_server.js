@@ -33,6 +33,7 @@ app.post('/file', function(request, response) {
         content += chunk;
     });
     request.on("end", function() {
+		console.log('Saving file');
         var ts = new Date().getTime();
         var startIndex = content.indexOf('data:image/jpeg;base64,') + 23;
         var endIndex = content.lastIndexOf('\r\n------WebKitFormBoundary');
