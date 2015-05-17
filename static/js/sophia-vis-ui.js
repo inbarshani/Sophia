@@ -94,11 +94,11 @@ function animateCircle(left, top, row, node) {
     var textOpacity = 0;
     var iterations = 0;
     var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    svg.append(circle);
     circle.setAttribute("class", "circle"); //Set path's data
     circle.setAttribute("r", 0); //Set path's data
     circle.setAttribute("cx", left); //Set path's data
     circle.setAttribute("cy", top); //Set path's data
+    svg.append(circle);
     $(circle).click(function(event) {
         animateDetails(event.clientX, event.clientY, node);
     });
@@ -114,6 +114,7 @@ function animateCircle(left, top, row, node) {
     text.setAttribute('class', 'text');
     text.setAttribute('x', left);
     text.setAttribute('y', top - textFromCircle);
+    text.setAttribute('opacity', '0');
     if (node.data.caption.length > 12) {
         textToDisplay = node.data.caption.substring(0, 12);
     } else {
