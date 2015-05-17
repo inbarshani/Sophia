@@ -188,6 +188,25 @@ function showDetails(x, y, node) {
     li.addClass('list-group-item');
     li.text('ID: ' + node.data.id);
     $('#detailsText').append(li);
+    getScreens(node.data.graph_node, function(prevId, nextId){
+        var li = $('<li>');
+        li.addClass('list-group-item');
+        if (prevId && nextId)
+        {
+            li.text('Screens: ' + prevId + ', '+nextId);
+        }
+        else if (prevId)
+        {
+            li.text('Previous screen: ' + prevId);
+        }
+        else if (nextId)
+        {
+            li.text('Next screen: ' + nextId);
+        }
+        else
+            li.text('No screens.');
+        $('#detailsText').append(li);
+    });
 }
 
 function hideDetails(callback) {

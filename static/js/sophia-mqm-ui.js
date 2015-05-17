@@ -87,6 +87,19 @@ function search() {
         });
 }
 
+function getScreens(node_id, callback)
+{
+    var jqxhr = $.ajax("/getScreens?selectedNode=" + node_id)
+    .done(function(data) {
+        //console.log("Search returned: " + data);
+        responseData = JSON.parse(data);
+        callback(responseData.prevScreenID, responseData.nextScreenID);
+    })
+    .fail(function(err) {
+        console.log("getScreens failed: " + err);
+    });
+}
+
 function clearSearch() {
     // remove all nodes
     currentPaths.length = 0;

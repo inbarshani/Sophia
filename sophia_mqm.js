@@ -76,6 +76,19 @@ app.use('/search', function(request, response) {
     });
 });
 
+app.use('/getScreens', function(request, response) {
+    if (request.query.selectedNode) {
+        neo4j_queries.getNearestScreens(request.query.selectedNode, function(prevScreenID, nextScreenID) {
+            var results = {
+                    prevScreenID: prevScreenID, 
+                    nextScreenID:nextScreenID
+            };
+            console.log('getScreens returned: '+JSON.stringify(results));
+            response.send(JSON.stringify(results));
+        });
+    }
+});
+
 app.use('/report', function(request, response) {
     if (request.query.reportString.length > 0) {
         var reportString = new Date().toUTCString() + ' ' +
