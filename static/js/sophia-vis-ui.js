@@ -1,4 +1,4 @@
-var ctx;
+var svg;
 var lineX, lineY, lineEnd, linePos;
 var leftMargin = 10;
 var topMarginCircle = 40;
@@ -15,19 +15,24 @@ var clickableAreas = [];
 
 var highlightStyle = ['#5bc0de', '#00ff00']
 
+var timerGlobal;
+var timerCircles = [];
+var timerText;
+
 function visualize() {
     clickableAreas = [];
-	var canvas = document.getElementById('vis-canvas');
+	svg = $('#vis-svg');
 	var itemIndex = 0;
 	var maxPaths = 5;
 	var maxItems = 7;
-	var timer;
-	canvas.height = itemHeight * maxPaths;
-	canvas.width = itemWidth * maxItems;
-	ctx = canvas.getContext('2d');
-    canvas.addEventListener('mouseup', onCanvasClick, false);
+	svg.attr('height', (itemHeight * maxPaths) + 'px');
+	svg.attr('width', (itemWidth * maxItems) + 'px');
+//	ctx = canvas.getContext('2d');
+//    canvas.addEventListener('mouseup', onCanvasClick, false);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+//    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    svg.html('');
 
     $('#vis-title').removeClass('hidden').addClass('visible');
     $('#vis-container').removeClass('hidden').addClass('visible');
@@ -52,7 +57,7 @@ function visualize() {
     }
 
 
-    timer = setInterval(function(){
+    timerGlobal = setInterval(function(){
         for (i = 0; i < rowIndex; i++) {
             if (nodesToDisplay[i][itemIndex]) {
                 animatePath(i, itemIndex, nodesToDisplay[i][itemIndex]);
@@ -60,47 +65,70 @@ function visualize() {
         }
         itemIndex++;
         if (itemIndex >= maxItems) {
-            clearInterval(timer);
+            clearInterval(timerGlobal);
             clickLastStep();
             return;
         }
     }, speed);
  }
 
-function animateLine(fromX, toX, y, end, callback) {
-	ctx.beginPath();
-  	ctx.moveTo(fromX, y);
-  	ctx.lineTo(toX, y);
-  	ctx.stroke();
-  	ctx.closePath();
-
-  	if (toX < end) {
-	    requestAnimationFrame(function () {
-    		animateLine(toX, toX + 10, y, end, callback);
-		});
-	} else {
-		callback();
-	}
+function animateLine(fromX, toX, y, callback) {
+    var path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    svg.append(path);
+    path.setAttribute("d","M" + fromX + " " + y + " L" + toX + " " + y + " Z"); //Set path's data
+    path.setAttribute("class","path"); //Set path's data
+    var length = path.getTotalLength();
+    path.style.strokeDasharray = length + ' ' + length;
+    path.style.strokeDashoffset = length;
+    path.getBoundingClientRect();
+    path.style.transition = path.style.WebkitTransition = 'stroke-dashoffset ' + speed/100 + 's linear';
+    path.style.strokeDashoffset = length/2;
+    setTimeout(function() {
+        callback();
+    }, speed * 10);
 }
 
 function animateCircle(left, top, row, node) {
-	ctx.beginPath();
-	ctx.arc(left, top, radius, 0, 2 * Math.PI, false);
-	ctx.fillStyle = '#5bc0de';
-	ctx.fill();
-  	ctx.closePath();
-	ctx.font = '12px "Helvetica Neue", Helvetica, Arial, sans-serif';
-	ctx.textAlign = 'center';
-    ctx.fillStyle = '#000';
-    var text = node.data.caption;
-	ctx.fillText(text.substring(0, 12), left , top - textFromCircle);
-    clickableAreas.push({
-        x: left - radius,
-        y: top - radius,
-        width: radius * 2,
-        height: radius * 2,
-        node: node
+    var textToDisplay = '';
+    var currRadius = 0;
+    var textOpacity = 0;
+    var iterations = 0;
+    var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    svg.append(circle);
+    circle.setAttribute("class", "circle"); //Set path's data
+    circle.setAttribute("r", 0); //Set path's data
+    circle.setAttribute("cx", left); //Set path's data
+    circle.setAttribute("cy", top); //Set path's data
+    $(circle).click(function(event) {
+        animateDetails(event.clientX, event.clientY, node);
     });
+    timerCircles[node.id] = setInterval(function(){
+        if (currRadius >= radius) {
+            clearInterval(timerCircles[node.id]);
+            return;
+        }
+        circle.setAttribute("r", ++currRadius); //Set path's data
+    }, speed);
+
+    var text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('class', 'text');
+    text.setAttribute('x', left);
+    text.setAttribute('y', top - textFromCircle);
+    if (node.data.caption.length > 12) {
+        textToDisplay = node.data.caption.substring(0, 12);
+    } else {
+        textToDisplay = node.data.caption;
+    }
+    text.textContent = textToDisplay;
+    svg.append(text);
+    timerText = setInterval(function(){
+        if (textOpacity >= 1) {
+            clearInterval(timerCircles);
+            return;
+        }
+        textOpacity+=0.1;
+        text.setAttribute("opacity", textOpacity); //Set path's data
+    }, speed);
 }
 
 function animatePath(row, col, node) {
@@ -111,10 +139,10 @@ function animatePath(row, col, node) {
 	}
 	lineEnd = leftMargin + (itemWidth * col) + (itemWidth/2) - radius;
 	linePos = lineX + 1;
-    ctx.fillStyle = '#000';
+//    ctx.fillStyle = '#000';
 
-    animateLine(lineX, lineX + 1, 
-    	(topMarginCircle + (itemHeight * (row))), lineEnd, 
+    animateLine(lineX, lineEnd, 
+    	(topMarginCircle + (itemHeight * (row))), 
     	function() {
     		animateCircle(leftMargin + (itemWidth * col) + (itemWidth/2), 
     			(topMarginCircle + (itemHeight * (row))), 
@@ -123,27 +151,10 @@ function animatePath(row, col, node) {
     );
 }
 
-function onCanvasClick(event) {
-    var mouseX = event.offsetX;
-    var mouseY = event.offsetY;
-
-    for (var circle in clickableAreas) {
-        if (isClickInside(clickableAreas[circle], mouseX, mouseY)) {
-            animateDetails(event.clientX, event.clientY, clickableAreas[circle].node);
-            return false;
-        }
-    }
-    hideDetails();
-}
-
 function onDocumentClick(event) {
-    if (event.target.tagName.toLowerCase() != 'canvas') {
+    if (event.target.tagName.toLowerCase() != 'circle') {
         hideDetails();
     }
-}
-
-function isClickInside(shape, clickX, clickY) {
-    return (clickX >= shape.x) && (clickY >= shape.y) && (clickX <= (shape.x + shape.width)) && (clickY <= (shape.y + shape.height));
 }
 
 function animateDetails(x, y, node) {
@@ -223,8 +234,7 @@ function hideDetails(callback) {
     );
 }
 
-function highlight(li, nodes)
-{
+function highlight(li, nodes) {
     if ($(li).hasClass('active')) {
         $(".list-group-item.clickable.active").removeClass('active');
         for (var circle in clickableAreas) {
