@@ -93,7 +93,7 @@ function getScreens(node_id, callback)
     .done(function(data) {
         //console.log("Search returned: " + data);
         responseData = JSON.parse(data);
-        callback(responseData.prevScreenID, responseData.nextScreenID);
+        callback(responseData.prevScreenTimestamp, responseData.nextScreenTimestamp);
     })
     .fail(function(err) {
         console.log("getScreens failed: " + err);

@@ -188,20 +188,21 @@ function showDetails(x, y, node) {
     li.addClass('list-group-item');
     li.text('ID: ' + node.data.id);
     $('#detailsText').append(li);
-    getScreens(node.data.graph_node, function(prevId, nextId){
+    getScreens(node.data.graph_node, function(prevTimestamp, nextTimestamp){
         var li = $('<li>');
         li.addClass('list-group-item');
-        if (prevId && nextId)
+        if (prevTimestamp && nextTimestamp)
         {
-            li.text('Screens: ' + prevId + ', '+nextId);
+            li.html('Screens: <a href="/screen/' + prevTimestamp + '">Before</a>, '+
+                '<a href="/screen/' + nextTimestamp + '">After</a>');
         }
-        else if (prevId)
+        else if (prevTimestamp)
         {
-            li.text('Previous screen: ' + prevId);
+            li.html('Previous screen: <a href="/screen/' + prevTimestamp + '">Before</a>');
         }
-        else if (nextId)
+        else if (nextTimestamp)
         {
-            li.text('Next screen: ' + nextId);
+            li.html('Next screen: <a href="/screen/' + nextTimestamp + '">After</a>');
         }
         else
             li.text('No screens.');

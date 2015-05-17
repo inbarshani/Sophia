@@ -62,8 +62,7 @@ app.use('/search', function(request, response) {
                 //console.log('paths_to_nodes: '+JSON.stringify(response_body));
                 response.send(JSON.stringify(response_body));
             });
-        }
-        else // no results from IDOL
+        } else // no results from IDOL
         {
             var response_body = {
                 paths_to_nodes: [],
@@ -71,23 +70,43 @@ app.use('/search', function(request, response) {
                 last_data_nodes: []
             };
             //console.log('paths_to_nodes: '+JSON.stringify(response_body));
-            response.send(JSON.stringify(response_body));            
+            response.send(JSON.stringify(response_body));
         }
     });
 });
 
 app.use('/getScreens', function(request, response) {
     if (request.query.selectedNode) {
-        neo4j_queries.getNearestScreens(request.query.selectedNode, function(prevScreenID, nextScreenID) {
-            var results = {
-                    prevScreenID: prevScreenID, 
-                    nextScreenID:nextScreenID
-            };
-            console.log('getScreens returned: '+JSON.stringify(results));
-            response.send(JSON.stringify(results));
-        });
+        neo4j_queries.getNearestScreens(request.query.selectedNode,
+            function(prevScreenTimestamp, nextScreenTimestamp) {
+                var results = {
+                    prevScreenTimestamp: prevScreenTimestamp,
+                    nextScreenTimestamp: nextScreenTimestamp
+                };
+                console.log('getScreens returned: ' + JSON.stringify(results));
+                response.send(JSON.stringify(results));
+            });
     }
 });
+
+app.use('/screen/:timestamp', function(request, response) {
+    var timestamp = request.params.timestamp;
+    console.log('Get screen with timestamp: ' + timestamp);
+    if (timestamp) {
+        try {
+            var img = fs.readFileSync('./upload/' + timestamp + '.jpg');
+            response.writeHead(200, {
+                'Content-Type': 'image/JPEG'
+            });
+            response.end(img, 'binary');
+        } catch (ex) {
+            console.log('Failed to load screen with timestamp: ' + timestamp);
+            response.send('Failed to load screen with timestamp: ' + timestamp);
+        }
+    }
+});
+
+
 
 app.use('/report', function(request, response) {
     if (request.query.reportString.length > 0) {
