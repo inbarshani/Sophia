@@ -16,6 +16,7 @@ var clickableAreas = [];
 var highlightStyle = ['#5bc0de', '#00ff00']
 
 function visualize() {
+    clickableAreas = [];
 	var canvas = document.getElementById('vis-canvas');
 	var itemIndex = 0;
 	var maxPaths = 5;
@@ -60,7 +61,8 @@ function visualize() {
         itemIndex++;
         if (itemIndex >= maxItems) {
             clearInterval(timer);
-                return;
+            clickLastStep();
+            return;
         }
     }, speed);
  }
@@ -241,4 +243,8 @@ function highlightNode(x, y, alpha, dir) {
             highlightNode(x, y, alpha + 0.05, dir);
         });
     }
+}
+
+function clickLastStep() {
+    $('#flow-list li').last().click();
 }
