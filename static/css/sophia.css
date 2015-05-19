@@ -36,6 +36,11 @@
 	fill: #5bc0de;
 }
 
+.circle.highlighted {
+	stroke: none;
+	fill: #00ff00;
+}
+
 .text {
 	font-size: 12px;
 	text-anchor: middle;

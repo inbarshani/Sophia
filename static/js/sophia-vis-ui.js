@@ -11,17 +11,29 @@ var speed = 50;
 var detailsWidth = '300px';
 var detailsHeight = '350px';
 
-var clickableAreas = [];
+var allCircles = [];
 
-var highlightStyle = ['#5bc0de', '#00ff00']
+SVGElement.prototype.hasClass = function (className) {
+    return new RegExp('(\\s|^)' + className + '(\\s|$)').test(this.getAttribute('class'));
+};
 
-var timerGlobal;
-var timerCircles = [];
-var timerText;
+SVGElement.prototype.addClass = function (className) { 
+    if (!this.hasClass(className)) {
+        this.setAttribute('class', this.getAttribute('class') + ' ' + className);
+    }
+};
+
+SVGElement.prototype.removeClass = function (className) {
+    var removedClass = this.getAttribute('class').replace(new RegExp('(\\s|^)' + className + '(\\s|$)', 'g'), '$2');
+    if (this.hasClass(className)) {
+        this.setAttribute('class', removedClass);
+    }
+};
+
 
 function visualize() {
 
-    clickableAreas = [];
+    allCircles = [];
 	svg = $('#vis-svg');
 
 	var itemIndex = 0;
@@ -58,22 +70,38 @@ function visualize() {
         }
     }
 
-    timerGlobal = setInterval(function(){
+    (function drawLine(){
         for (i = 0; i < rowIndex; i++) {
             if (nodesToDisplay[i][itemIndex]) {
-                animatePath(i, itemIndex, nodesToDisplay[i][itemIndex]);
+                if (itemIndex == 0) {
+                    lineX = leftMargin;
+                } else {
+                    lineX = leftMargin + (itemWidth * itemIndex) - (itemWidth/2) + radius;
+                }
+                lineEnd = leftMargin + (itemWidth * itemIndex) + (itemWidth/2) - radius;
+                linePos = lineX + 1;
+
+                animateLine(lineX, lineEnd, (topMarginCircle + (itemHeight * (i))));
+                setTimeout(function(row, col){
+                    animateCircle(leftMargin + (itemWidth * col) + (itemWidth/2), 
+                        (topMarginCircle + (itemHeight * (row))), 
+                        row, nodesToDisplay[row][col]);
+                }, speed * 2, i, itemIndex);
             }
         }
         itemIndex++;
-        if (itemIndex > maxCols) {
-            clearInterval(timerGlobal);
-            clickLastStep();
-            return;
+        if (itemIndex <= maxCols) {
+            setTimeout( drawLine, speed );
         }
-    }, speed);
- }
+    })();
 
-function animateLine(fromX, toX, y, callback) {
+    setTimeout(function() {
+        clickLastStep();
+    }, (maxCols + 2) * speed);
+
+}
+
+function animateLine(fromX, toX, y) {
     var path = document.createElementNS('http://www.w3.org/2000/svg','path');
     svg.append(path);
     path.setAttribute("d","M" + fromX + " " + y + " L" + toX + " " + y + " Z"); //Set path's data
@@ -84,9 +112,6 @@ function animateLine(fromX, toX, y, callback) {
     path.getBoundingClientRect();
     path.style.transition = path.style.WebkitTransition = 'stroke-dashoffset ' + speed/100 + 's linear';
     path.style.strokeDashoffset = length/2;
-    setTimeout(function() {
-        callback();
-    }, speed * 10);
 }
 
 function animateCircle(left, top, row, node) {
@@ -103,13 +128,19 @@ function animateCircle(left, top, row, node) {
     $(circle).click(function(event) {
         animateDetails(event.clientX, event.clientY, node);
     });
-    timerCircles[node.id] = setInterval(function(){
-        if (currRadius >= radius) {
-            clearInterval(timerCircles[node.id]);
-            return;
+
+    allCircles.push({
+        circle: circle,
+        node: node,
+        highlighted: false
+    });
+
+    (function drawCircle(){
+        if( ++currRadius <= radius ) {
+            circle.setAttribute("r", currRadius); //Set path's data
+            setTimeout( drawCircle, speed );
         }
-        circle.setAttribute("r", ++currRadius); //Set path's data
-    }, speed);
+    })();
 
     var text = document.createElementNS('http://www.w3.org/2000/svg','text');
     text.setAttribute('class', 'text');
@@ -123,34 +154,14 @@ function animateCircle(left, top, row, node) {
     }
     text.textContent = textToDisplay;
     svg.append(text);
-    timerText = setInterval(function(){
-        if (textOpacity >= 1) {
-            clearInterval(timerCircles);
-            return;
+
+    (function drawText(){
+        if (textOpacity < 1) {
+            textOpacity+=0.1;
+            text.setAttribute("opacity", textOpacity); //Set path's data
+            setTimeout( drawText, speed );
         }
-        textOpacity+=0.1;
-        text.setAttribute("opacity", textOpacity); //Set path's data
-    }, speed);
-}
-
-function animatePath(row, col, node) {
-    if (col == 0) {
-		lineX = leftMargin;
-    } else {
-		lineX = leftMargin + (itemWidth * col) - (itemWidth/2) + radius;
-	}
-	lineEnd = leftMargin + (itemWidth * col) + (itemWidth/2) - radius;
-	linePos = lineX + 1;
-//    ctx.fillStyle = '#000';
-
-    animateLine(lineX, lineEnd, 
-    	(topMarginCircle + (itemHeight * (row))), 
-    	function() {
-    		animateCircle(leftMargin + (itemWidth * col) + (itemWidth/2), 
-    			(topMarginCircle + (itemHeight * (row))), 
-    			row, node);
-    	}
-    );
+    })();
 }
 
 function onDocumentClick(event) {
@@ -240,41 +251,34 @@ function hideDetails(callback) {
 function highlight(li, nodes) {
     if ($(li).hasClass('active')) {
         $(".list-group-item.clickable.active").removeClass('active');
-        for (var circle in clickableAreas) {
-            if (clickableAreas[circle].highlighted) {
-                clickableAreas[circle].highlighted = false;
-                highlightNode(clickableAreas[circle].x, clickableAreas[circle].y, 0, 0)
+        for (var circle in allCircles) {
+            if (allCircles[circle].highlighted) {
+                allCircles[circle].highlighted = false;
+                highlightNode(allCircles[circle], 0, 0)
             }
         }
 
     } else {
         $(".list-group-item.clickable.active").removeClass('active');
         $(li).addClass('active');
-        for (var circle in clickableAreas) {
-            if (clickableAreas[circle].highlighted) {
-                clickableAreas[circle].highlighted = false;
-                highlightNode(clickableAreas[circle].x, clickableAreas[circle].y, 0, 0)
+        for (var circle in allCircles) {
+            if (allCircles[circle].highlighted) {
+                allCircles[circle].highlighted = false;
+                highlightNode(allCircles[circle], 0, 0)
             }
-            if ($.inArray(clickableAreas[circle].node.id, nodes) > -1) {
-                clickableAreas[circle].highlighted = true;
-                highlightNode(clickableAreas[circle].x, clickableAreas[circle].y, 0, 1);
+            if ($.inArray(allCircles[circle].node.id, nodes) > -1) {
+                allCircles[circle].highlighted = true;
+                highlightNode(allCircles[circle], 0, 1);
             }
         }
     }
 }
 
-function highlightNode(x, y, alpha, dir) {
-    ctx.beginPath();
-    ctx.arc(x + radius, y + radius, radius, 0, 2 * Math.PI, false);
-
-    ctx.fillStyle = highlightStyle[dir];;
-    ctx.globalAlpha = alpha;
-    ctx.fill();
-    ctx.closePath();
-    if (alpha < 1) {
-        requestAnimationFrame(function () {
-            highlightNode(x, y, alpha + 0.05, dir);
-        });
+function highlightNode(circle, alpha, highlight) {
+    if (highlight) {
+        circle.circle.addClass('highlighted');
+    } else {
+        circle.circle.removeClass('highlighted');
     }
 }
 
@@ -315,5 +319,6 @@ function scrollVis(type) {
 }
 
 function moveVis(x, y) {
-    
+
 }
+
