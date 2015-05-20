@@ -1,0 +1,27 @@
+<html>
+<head>
+</head>
+<body>
+	<div id="sophiatestid"></div>
+	<div id="sophiabaseappurl"></div>
+	<div id="sophiadataurl"></div>
+	<div id="sophiafileuploadurl"></div>
+</body>
+	<script>
+	function getParameterByName(name) {
+	    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+	    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+	        results = regex.exec(location.search);
+	    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	}
+
+    var testId = getParameterByName('testId');
+    document.getElementById("sophiatestid").innerText = testId;
+    var baseAppUrl = getParameterByName('baseAppUrl');
+    document.getElementById("sophiabaseappurl").innerText = baseAppUrl;
+    var dataUrl = getParameterByName('dataUrl');
+    document.getElementById("sophiadataurl").innerText = dataUrl;
+    var fileUploadUrl = getParameterByName('fileUploadUrl');
+    document.getElementById("sophiafileuploadurl").innerText = fileUploadUrl;
+	</script>
+</html>

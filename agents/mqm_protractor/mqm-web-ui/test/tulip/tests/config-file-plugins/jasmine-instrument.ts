@@ -1,9 +1,12 @@
 var http = require('http');
 var uuid = require('./uuid');
+var init = require('../../core/runner/initialize-runner-script.js');
+init();
 
-var sophia_machine = 'localhost';
+var sophia_machine = 'myd-vm00366.hpswlabs.adapps.hp.com';
+//var sophia_machine = 'localhost';
 
-global.appBaseUrl = "http://myd-vm06983.hpswlabs.adapps.hp.com:8081/";
+global.appBaseUrl = "http://myd-vm06983.hpswlabs.adapps.hp.com:8082/";
 global.fileUploadUrl = "http://"+sophia_machine+":8082/file";
 global.dataUrl = "http://"+sophia_machine+":8082/data";
 global.sophiaTestID = '';
@@ -56,8 +59,8 @@ function sendSophiaParamsToBrowser(testID)
             '{' +
             '    console.log("exception in sendmessage: "+ex);'+
             '}';
-        console.log('sending script to browser.driver: '+script);
-        global.browser.executeScript(script);    
+        console.log('updating browser with new test ID: '+testID);
+        browser.executeScript(script);    
     }
     catch(ex)
     {
@@ -219,4 +222,7 @@ if (global.jasmine != undefined)
     global.jasmine.getEnv().addReporter(new SpecReporter());
 }
 else
+{
     console.log('jasmine not defined');
+    //console.log('globals:\n'+require('util').inspect(global, {depth: 4}));
+}
