@@ -1,4 +1,5 @@
 var svg;
+var g;
 var lineX, lineY, lineEnd, linePos;
 var leftMargin = 10;
 var topMarginCircle = 40;
@@ -12,6 +13,11 @@ var detailsWidth = '300px';
 var detailsHeight = '350px';
 
 var allCircles = [];
+
+var gx = 0;
+var gy = 0;
+var maxCols = 0;
+
 
 SVGElement.prototype.hasClass = function (className) {
     return new RegExp('(\\s|^)' + className + '(\\s|$)').test(this.getAttribute('class'));
@@ -32,18 +38,17 @@ SVGElement.prototype.removeClass = function (className) {
 
 
 function visualize() {
-
     allCircles = [];
+    gx = 0;
+    gy = 0;
 	svg = $('#vis-svg');
+    g = $('#g');
 
 	var itemIndex = 0;
-	var maxPaths = 5;
+	var maxPaths = 8;
 	var maxItems = 7;
-    var maxCols = 0;
-	svg.attr('height', (itemHeight * maxPaths) + 'px');
-	svg.attr('width', (itemWidth * maxItems) + 'px');
 
-    svg.html('');
+    g.html('');
 
     $('#vis-title').removeClass('hidden').addClass('visible');
     $('#vis-container').removeClass('hidden').addClass('visible');
@@ -70,6 +75,13 @@ function visualize() {
         }
     }
 
+    svg.attr('height', (itemHeight * currentPaths.length) + 'px');
+    svg.attr('width', (itemWidth * maxItems) - 25 + 'px');
+    $('#vis-container').css('height', (itemHeight * maxPaths) + 'px');
+    $('#vis-container').css('width', (itemWidth * maxItems) + 'px');
+/*    $('#scrollVertical').removeClass('hidden');
+    $('#scrollHoriz').removeClass('hidden');
+*/
     (function drawLine(){
         for (i = 0; i < rowIndex; i++) {
             if (nodesToDisplay[i][itemIndex]) {
@@ -103,7 +115,7 @@ function visualize() {
 
 function animateLine(fromX, toX, y) {
     var path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    svg.append(path);
+    g.append(path);
     path.setAttribute("d","M" + fromX + " " + y + " L" + toX + " " + y + " Z"); //Set path's data
     path.setAttribute("class","path"); //Set path's data
     var length = path.getTotalLength();
@@ -124,7 +136,7 @@ function animateCircle(left, top, row, node) {
     circle.setAttribute("r", 0); //Set path's data
     circle.setAttribute("cx", left); //Set path's data
     circle.setAttribute("cy", top); //Set path's data
-    svg.append(circle);
+    g.append(circle);
     $(circle).click(function(event) {
         animateDetails(event.clientX, event.clientY, node);
     });
@@ -153,7 +165,7 @@ function animateCircle(left, top, row, node) {
         textToDisplay = node.data.caption;
     }
     text.textContent = textToDisplay;
-    svg.append(text);
+    g.append(text);
 
     (function drawText(){
         if (textOpacity < 1) {
@@ -297,28 +309,45 @@ function hideVisScroll() {
 }
 
 function scrollVis(type) {
-    var x=0;
-    var y = 0;
+/*    
+    var max = 0;
+    var containerHeight = parseInt($('#vis-container').css('height'));
+    var containerWidth = parseInt($('#vis-container').css('width'));
     switch (type) {
         case "up":
-            y-=1;
+            if (gy >= 0) {
+                return;
+            }
+            gy+=itemHeight;
             break;
         case "down":
-            y+=1;
+            max = (currentPaths.length * itemHeight) - containerHeight;
+            if (gy <= -max || max <= containerHeight) {
+                return;
+            }
+            gy-=itemHeight;
             break;
         case "left":
-            x-=1;
+            max = maxCols * itemWidth;
+            if (gx <= -max || max <= containerWidth) {
+                return;
+            }
+            gx-=itemWidth;
             break;
         case "right":
-            x+=1;
+            if (gx >= 0) {
+                return;
+            }
+            gx+=itemWidth;
             break;
         default:
             break;
     }
-    moveVis(x,y);
+    moveVis();
+*/    
 }
 
 function moveVis(x, y) {
-
+    g.attr("transform", "translate(" + gx + "," + gy + ")"); 
 }
 
