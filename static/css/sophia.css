@@ -36,6 +36,11 @@
 	fill: #5bc0de;
 }
 
+.circle.highlighted {
+	stroke: none;
+	fill: #00ff00;
+}
+
 .text {
 	font-size: 12px;
 	text-anchor: middle;
@@ -43,12 +48,32 @@
 }
 
 #scrollHoriz {
-	top: 40px;
-  	left: 45%;
-  	position: relative;
-}
+	float: left;
+  	margin-left: 40%;
+  	margin-right: auto;}
 
 #scrollVertical {
-	top: -80px;
-	left: 50px;
+  	margin-top: -35%;
+  	margin-bottom: auto;  	
+  	position: relative;
+  	float: right;
+}
+
+#vis-container {
+	overflow: hidden;
+}
+#vis-container:hover {
+	overflow: auto;
+}
+
+#vis-container::-webkit-scrollbar
+{
+	width: 20px;
+}
+
+#vis-container::-webkit-scrollbar-thumb
+{
+	background-color: #5bc0de;
+	border-radius: 10px;
+	border: 6px solid rgba(255, 255, 255, 1);
 }
