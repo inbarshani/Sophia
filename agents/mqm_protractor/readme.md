@@ -1,14 +1,16 @@
 mqm unit tests use protractor and jasmine under the hood
-the agent is a jasmine reporter (and possibly method wrapper)
-it is installed by adding a ts (typescript) file to a known folder in mqm tests folders
-and adding a reference to that ts in the main mqm config file
+the Sophia agent is a jasmine reporter (for Jasmine 1.3)
 
-Sophia data server settings are coded in the agent, so may need to change on deployment
+to install, copy the folder structure under this folder
+to %MQM_ROOT%\UI\mqm-web-ui
+For all files that have an existing destination, DO NOT
+COPY OVER, instead merge the files
 
-Target folder:
-mqm\UI\mqm-web-ui\test\tulip\tests\config-file-plugins
+Copy sop.html to the root of the c: folder
 
-Conf file:
-mqm\UI\mqm-web-ui\test\tulip\tests\conf-file.ts
-Add instruction:
-var jasmineInstrumentation = require('./config-file-plugins/jasmine-instrument');
+Sophia data server settings are coded in jasmine-instrument.ts
+
+Make sure the chrome extension is also up-to-date (Chrome.crx, 
+created by the Chrome Extensions page 'pack extension' feature)
+
+To run tests, you can use run-test.bat at the root of mqm-web-ui
