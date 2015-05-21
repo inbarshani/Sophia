@@ -76,9 +76,9 @@ function visualize() {
     }
 
     svg.attr('height', (itemHeight * currentPaths.length) + 'px');
-    svg.attr('width', (itemWidth * maxItems) - 25 + 'px');
+    svg.attr('width', (itemWidth * maxCols) + 'px');
     $('#vis-container').css('height', (itemHeight * maxPaths) + 'px');
-    $('#vis-container').css('width', (itemWidth * maxItems) + 'px');
+    $('#vis-container').css('width', 25 + (itemWidth * maxItems) + 'px');
 /*    $('#scrollVertical').removeClass('hidden');
     $('#scrollHoriz').removeClass('hidden');
 */

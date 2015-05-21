@@ -112,8 +112,16 @@ app.use('/report', function(request, response) {
     if (request.query.reportString.length > 0) {
         var reportString = new Date().toUTCString() + ' ' +
             'Client IP: ' + request.connection.remoteAddress + ' ' + request.query.reportString + '\n';
+        var username = request.query.user;
+        // create audit folder
+        try {
+            fs.mkdirSync('audit');
+        } catch (e) {
+            if (e.code != 'EEXIST') throw e;
+        }
+
         // save an audit of the actions done by a user
-        fs.appendFile('audit.log', reportString, function(err) {
+        fs.appendFile('./audit/'+username+'.log', reportString, function(err) {
             if (err)
                 console.log('Error saving audit data: ' + reportString);
         });

@@ -3,6 +3,8 @@ var reportString = '';
 var currentBackboneNodes = [];
 var currentDataNodes = [];
 var suggestionsArray = [];
+var isAjaxActive = false;
+var user;
 
 function fixedEncodeURIComponent(str) {
     return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
@@ -11,6 +13,9 @@ function fixedEncodeURIComponent(str) {
 }
 
 $(document).ready(function() {
+    user =  localStorage.getItem("user");
+    if (!user)
+        window.location.href = './login.html';
 
     $('#search-button').on('click', function(e) {
         search();
@@ -28,6 +33,22 @@ $(document).ready(function() {
 
     update();
     $('body').click(onDocumentClick);
+});
+
+$( document ).ajaxStart(function() {
+    if (!user) {
+        window.location.href = './login.html';
+    }
+    isAjaxActive = true;
+    setTimeout(function() {
+        if (isAjaxActive) {
+            $( "#busy" ).show();
+        }
+    }, 500);
+});
+$( document ).ajaxComplete(function() {
+    isAjaxActive = false;
+    $( "#busy" ).hide();
 });
 
 function updateCurrentPaths(newPaths) {
@@ -169,7 +190,8 @@ function querySuggestions() {
 }
 
 function reportAudit() {
-    var jqxhr = $.ajax("/report?reportString=" + fixedEncodeURIComponent(reportString))
+    var jqxhr = $.ajax("/report?reportString=" + fixedEncodeURIComponent(reportString)+
+        "&user="+user)
         .done(function(data) {})
         .fail(function(err) {
             //alert( "error getting suggestions" );
