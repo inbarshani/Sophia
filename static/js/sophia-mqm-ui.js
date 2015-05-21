@@ -3,6 +3,8 @@ var reportString = '';
 var currentBackboneNodes = [];
 var currentDataNodes = [];
 var suggestionsArray = [];
+var isAjaxActive = false;
+var user;
 
 function fixedEncodeURIComponent(str) {
     return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
@@ -26,8 +28,26 @@ $(document).ready(function() {
         clearSearch();
     });
 
+    user =  localStorage.getItem("user");
+
     update();
     $('body').click(onDocumentClick);
+});
+
+$( document ).ajaxStart(function() {
+    if (!user) {
+        window.location.href = './login.html';
+    }
+    isAjaxActive = true;
+    setTimeout(function() {
+        if (isAjaxActive) {
+            $( "#busy" ).show();
+        }
+    }, 500);
+});
+$( document ).ajaxComplete(function() {
+    isAjaxActive = false;
+    $( "#busy" ).hide();
 });
 
 function updateCurrentPaths(newPaths) {
