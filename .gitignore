@@ -9,6 +9,9 @@ results.xml
 result.txt
 result.xml
 
+# Audit information from Sophia
+audit/*
+
 # Runtime data
 pids
 *.pid

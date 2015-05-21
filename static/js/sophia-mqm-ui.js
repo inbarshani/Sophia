@@ -13,6 +13,9 @@ function fixedEncodeURIComponent(str) {
 }
 
 $(document).ready(function() {
+    user =  localStorage.getItem("user");
+    if (!user)
+        window.location.href = './login.html';
 
     $('#search-button').on('click', function(e) {
         search();
@@ -27,8 +30,6 @@ $(document).ready(function() {
     $('#navbar-logo').on('click', function(e) {
         clearSearch();
     });
-
-    user =  localStorage.getItem("user");
 
     update();
     $('body').click(onDocumentClick);
@@ -189,7 +190,8 @@ function querySuggestions() {
 }
 
 function reportAudit() {
-    var jqxhr = $.ajax("/report?reportString=" + fixedEncodeURIComponent(reportString))
+    var jqxhr = $.ajax("/report?reportString=" + fixedEncodeURIComponent(reportString)+
+        "&user="+user)
         .done(function(data) {})
         .fail(function(err) {
             //alert( "error getting suggestions" );
