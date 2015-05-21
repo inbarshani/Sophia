@@ -76,7 +76,7 @@ function visualize() {
     }
 
     svg.attr('height', (itemHeight * currentPaths.length) + 'px');
-    svg.attr('width', (itemWidth * maxItems) - 25 + 'px');
+    svg.attr('width', (itemWidth * maxCols) - 25 + 'px');
     $('#vis-container').css('height', (itemHeight * maxPaths) + 'px');
     $('#vis-container').css('width', (itemWidth * maxItems) + 'px');
 /*    $('#scrollVertical').removeClass('hidden');
