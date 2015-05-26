@@ -100,7 +100,7 @@ app.use('/searchScreens', function(request, response) {
                         var node_id = path.nodes[i].id;
                         var node_doc = documents_hash['' + node_id];
                         //console.log('document for '+node_id+' is '+node_doc);
-                        path.nodes[i].screens = ;
+                        path.nodes[i].data = node_doc;
                     }
                 });
                 var response_body = {
