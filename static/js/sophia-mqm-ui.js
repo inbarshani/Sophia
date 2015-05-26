@@ -135,20 +135,24 @@ function clearSearch() {
 function update() {
     reportAudit();
 
-    updateLogo();
+    updateNavigation();
 
     updateSearchResults();
 
     querySuggestions();
 }
 
-function updateLogo() {
+function updateNavigation() {
     if (currentPaths.length > 0) {
-        $('#navbar-logo').removeClass('hidden').addClass('visible');
-        $('#logo').removeClass('visible').addClass('hidden');
+        $('#navbar-logo').removeClass('hidden').addClass('show');
+        $('#search-options').removeClass('hidden').addClass('show');
+        $('#search-options-divider').removeClass('hidden').addClass('show');
+        $('#logo').removeClass('show').addClass('hidden');
     } else {
-        $('#logo').removeClass('hidden').addClass('visible');
-        $('#navbar-logo').removeClass('visible').addClass('hidden');
+        $('#logo').removeClass('hidden').addClass('show');
+        $('#search-options').removeClass('show').addClass('hidden');
+        $('#search-options-divider').removeClass('show').addClass('hidden');
+        $('#navbar-logo').removeClass('show').addClass('hidden');
     }
 }
 
@@ -157,17 +161,18 @@ function updateSearchResults() {
     $('#search-text').val('');
     // show/hide the flow title and paths
     if ($('#flow-list').has('li').length > 0) {
-        $('#flow-title').removeClass('hidden').addClass('visible');
+        $('#flow-title').removeClass('hidden').addClass('show');
         visualize();
     } else // no current search
     {
-        $('#flow-title').removeClass('visible').addClass('hidden');
-        $('#vis-title').removeClass('visible').addClass('hidden');
-        $('#vis-container').removeClass('visible').addClass('hidden');
+        $('#flow-title').removeClass('show').addClass('hidden');
+        $('#vis-title').removeClass('show').addClass('hidden');
+        $('#vis-container').removeClass('show').addClass('hidden');
     }
 }
 
 function querySuggestions() {
+    $('#suggestions-text').text('Loading...');
     var jqxhr = $.ajax("/querySuggestions?currentPaths=" + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)))
         .done(function(data) {
             if (data.length > 0) {
