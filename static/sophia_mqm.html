@@ -91,9 +91,15 @@
         <div class="col-md-8">
           <div class="container">
             <ul class="nav nav-pills">
-              <li role="presentation" class="selected_search"><a href="#Flows">Flows</a></li>
-              <li role="presentation" class="search"><a href="#Images">Images</a></li>
-              <li role="presentation" class="search"><a href="#Issues">Issues</a></li>
+              <li role="presentation" class="selected_search" id="search-flows">
+                <a href="#" onclick="switchSearch(searchTypes.FLOWS);">Flows</a>
+              </li>
+              <li role="presentation" class="search" id="search-screens">
+                <a href="#" onclick="switchSearch(searchTypes.SCREENS);">Screens</a>
+              </li>
+              <li role="presentation" class="search" id="search-flows">
+                <a href="#" onclick="switchSearch(searchTypes.ISSUES);">Issues</a>
+              </li>
             </ul>
           </div>
         </div>
@@ -102,10 +108,11 @@
       </div>
     </div> <!-- container of search area -->
       <!-- END the search area -->
+
     <hr id="search-options-divider" class="hidden"/>
 
-    <div class="container">
       <!-- START results area -->
+    <div class="container">
       <div class="row">
         <div class="col-md-4">
           <h4><span id="flow-title" class="legend hidden">MQM flow</span></h4>
