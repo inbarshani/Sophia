@@ -40,7 +40,7 @@
         </div>
         <div id="topbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><h4><span class="label label-info">v0.0.6</span></h4></li>
+            <li><h4><span class="label label-info">v0.0.65</span></h4></li>
           </ul>
         </div>
       </div>
@@ -52,7 +52,7 @@
         <div class="col-md-4">
         </div>
         <div class="col-md-4">
-          <img class="img-responsive center-block visible" id="logo"
+          <img class="img-responsive center-block show" id="logo"
           src="img/logo.png">
         </div>
         <div class="col-md-4">
@@ -62,8 +62,19 @@
         <div class="col-md-2">
         </div>
         <div class="col-md-8">
+          <div class="well well-sm" style="background-color: rgba(245, 245, 245, 0.4); border: 0px;min-height: 70px;">
+            <p class="text-center" id="suggestions-text"></p>
+          </div>
+        </div>
+        <div class="col-md-2">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8">
           <div class="input-group input-group-lg">
-            <input type="text" autofocus="autofocus" autocomplete="off" placeholder="Search MQM flow" name="search" class="form-control" id="search-text">
+            <input type="text" autofocus="autofocus" autocomplete="off" placeholder="Search MQM" name="search" class="form-control" id="search-text">
             <span class="input-group-btn">
               <button class="btn btn-info" id="search-button">
               <span class="glyphicon glyphicon-search"></span>
@@ -74,18 +85,26 @@
         <div class="col-md-2">
         </div>
       </div>
-      <div class="row">
+      <div class="row hidden" role="navigation" id="search-options">
         <div class="col-md-2">
         </div>
         <div class="col-md-8">
-          <div class="well well-sm" style="background-color: rgba(245, 245, 245, 0.4); border: 0px;">
-            <p class="text-center" id="suggestions-text"></p>
+          <div class="container">
+            <ul class="nav nav-pills">
+              <li role="presentation" class="selected_search"><a href="#Flows">Flows</a></li>
+              <li role="presentation" class="search"><a href="#Images">Images</a></li>
+              <li role="presentation" class="search"><a href="#Issues">Issues</a></li>
+            </ul>
           </div>
         </div>
         <div class="col-md-2">
         </div>
       </div>
+    </div> <!-- container of search area -->
       <!-- END the search area -->
+    <hr id="search-options-divider" class="hidden"/>
+
+    <div class="container">
       <!-- START results area -->
       <div class="row">
         <div class="col-md-4">

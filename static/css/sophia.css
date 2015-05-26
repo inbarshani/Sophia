@@ -100,3 +100,25 @@
     border-width: 5px;
     box-shadow:0 1px 0 #cfcfcf;
 }
+
+.nav-pills > li.selected_search {
+  color: red;
+  border-bottom: 4px solid red;
+  font-weight: bold;
+}
+
+.nav-pills > li.selected_search > a {
+  color: red;	
+  background-color: #fff;
+}
+
+.nav-pills > li.search > a {
+  color: gray;
+}
+
+
+.nav-pills > li.search > a:focus,
+.nav-pills > li.search > a:hover {
+  color: black;
+  background-color: #fff;
+}
