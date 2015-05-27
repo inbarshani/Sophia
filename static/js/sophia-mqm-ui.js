@@ -44,17 +44,17 @@ $(document).ajaxStart(function() {
     if (!user) {
         window.location.href = './login.html';
     }
-    console.log('ajaxStart, before increment, isAjaxActive: '+isAjaxActive);
+    //console.log('ajaxStart, before increment, isAjaxActive: '+isAjaxActive);
     isAjaxActive = isAjaxActive+2;
     setTimeout(function() {
-        console.log('in timeout function, isAjaxActive: '+isAjaxActive);
+        //console.log('in timeout function, isAjaxActive: '+isAjaxActive);
         if (isAjaxActive > 0) {
             $("#busy").show();
         }
     }, 500);
 });
 $(document).ajaxComplete(function() {
-    console.log('ajaxComplete, before decrease, isAjaxActive: '+isAjaxActive);
+    //console.log('ajaxComplete, before decrease, isAjaxActive: '+isAjaxActive);
     if (isAjaxActive > 0) isAjaxActive--;
     if (isAjaxActive == 0) {
         $("#busy").hide();
@@ -83,7 +83,22 @@ function updateCurrentPaths(newPaths) {
 function switchSearch(newSearchType) {
     if (searchType == newSearchType)
         return false; // false = no click
+    // change results status
+    if (searchType == searchTypes.SCREENS)
+        $('#screens_results').removeClass('show').addClass('hidden');
+    else if (searchType == searchTypes.FLOWS)
+    {       
+        currentPaths.length = 0;
+        currentBackboneNodes.length = 0;
+        currentDataNodes.length = 0;
+        $('#flow-list').empty();
+        $('#flow_results').removeClass('show').addClass('hidden');
+    }
+
+    // update searchType
     searchType = newSearchType;
+
+    // update search options
     var id_of_li = "";
     if (searchType == searchTypes.FLOWS)
         id_of_li = "#search-flows";
@@ -103,19 +118,10 @@ function switchSearch(newSearchType) {
 function search(query){
     if (searchType == searchTypes.FLOWS)
     {
-        $('#screens_results').removeClass('show').addClass('hidden');
         searchFlows(query);
     }
     else if (searchType == searchTypes.SCREENS)
     {
-        if (currentPaths.length > 0)
-        {       
-            currentPaths.length = 0;
-            currentBackboneNodes.length = 0;
-            currentDataNodes.length = 0;
-            $('#flow-list').empty();
-            $('#flow_results').removeClass('show').addClass('hidden');
-        }
         searchScreens(query);
     }
 }
@@ -186,18 +192,28 @@ function searchScreens(query) {
         .done(function(data) {
             //console.log("Search returned: " + data);
             var timestampsArray = JSON.parse(data);
-            // create list of screens
-            // <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
-            //  <img src="timestamp"/>
-            // </li>            
-            timestampsArray.forEach(function(timestamp){
+            if (timestampsArray.length > 0)
+            {
+                // create list of screens
+                // <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+                //  <img src="timestamp"/>
+                // </li>            
+                timestampsArray.forEach(function(timestamp){
+                    screens_results_row.append(
+                            '<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">'+
+                            '  <img onclick="showModal(\'/screen/'+timestamp+'\');"'+
+                            '       src="/screen/'+timestamp+'"/>'+
+                            '</li>'
+                        );
+                });
+            }
+            else {
                 screens_results_row.append(
-                        '<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">'+
-                        '  <img onclick="showModal(\'/screen/'+timestamp+'\');"'+
-                        '       src="/screen/'+timestamp+'"/>'+
+                        '<li class="">'+
+                        ' No screens found.'+
                         '</li>'
-                    );
-            });
+                    );                
+            }
 
             update();
         })
