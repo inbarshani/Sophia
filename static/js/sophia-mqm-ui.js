@@ -3,7 +3,7 @@ var reportString = '';
 var currentBackboneNodes = [];
 var currentDataNodes = [];
 var suggestionsArray = [];
-var isAjaxActive = false;
+var isAjaxActive = 0;
 var searchTypes = {FLOWS: 0, 
     SCREENS: 1,
     ISSUES: 2};
@@ -44,16 +44,21 @@ $(document).ajaxStart(function() {
     if (!user) {
         window.location.href = './login.html';
     }
-    isAjaxActive = true;
+    console.log('ajaxStart, before increment, isAjaxActive: '+isAjaxActive);
+    isAjaxActive = isAjaxActive+2;
     setTimeout(function() {
-        if (isAjaxActive) {
+        console.log('in timeout function, isAjaxActive: '+isAjaxActive);
+        if (isAjaxActive > 0) {
             $("#busy").show();
         }
     }, 500);
 });
 $(document).ajaxComplete(function() {
-    isAjaxActive = false;
-    $("#busy").hide();
+    console.log('ajaxComplete, before decrease, isAjaxActive: '+isAjaxActive);
+    if (isAjaxActive > 0) isAjaxActive--;
+    if (isAjaxActive == 0) {
+        $("#busy").hide();
+    }
 });
 
 function updateCurrentPaths(newPaths) {
@@ -97,7 +102,10 @@ function switchSearch(newSearchType) {
 
 function search(query){
     if (searchType == searchTypes.FLOWS)
+    {
+        $('#screens_results').removeClass('show').addClass('hidden');
         searchFlows(query);
+    }
     else if (searchType == searchTypes.SCREENS)
     {
         if (currentPaths.length > 0)
@@ -106,6 +114,7 @@ function search(query){
             currentBackboneNodes.length = 0;
             currentDataNodes.length = 0;
             $('#flow-list').empty();
+            $('#flow_results').removeClass('show').addClass('hidden');
         }
         searchScreens(query);
     }
@@ -160,6 +169,8 @@ function searchScreens(query) {
     // change UI to show list of images instead of flows
     //  clear top level vars
     reportString = '';
+    var screens_results_row = $('#screens_results_row');
+    screens_results_row.empty();
 
     if (!query || query.length==0)
         query = $('#search-text').val();
@@ -178,8 +189,7 @@ function searchScreens(query) {
             // create list of screens
             // <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
             //  <img src="timestamp"/>
-            // </li>
-            var screens_results_row = $('#screens_results_row');
+            // </li>            
             timestampsArray.forEach(function(timestamp){
                 screens_results_row.append(
                         '<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">'+
