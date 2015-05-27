@@ -137,7 +137,8 @@ app.use('/screen/:timestamp', function(request, response) {
 app.use('/report', function(request, response) {
     if (request.query.reportString.length > 0) {
         var reportString = new Date().toUTCString() + ' ' +
-            'Client IP: ' + request.connection.remoteAddress + ' ' + request.query.reportString + '\n';
+            'Client IP: ' + request.connection.remoteAddress + '\n' + 
+            request.query.reportString + '\n';
         var username = request.query.user;
         // create audit folder
         try {

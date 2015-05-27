@@ -130,7 +130,7 @@ function searchFlows(query) {
     if (currentPaths.length == 0) {
         // clear flow list
         $('#flow-list').empty();
-        reportString = 'FLOWS\n';
+        reportString = 'Type: FLOWS\n';
     }
 
     if (!query || query.length==0)
@@ -174,7 +174,7 @@ function searchFlows(query) {
 function searchScreens(query) {
     // change UI to show list of images instead of flows
     //  clear top level vars
-    reportString = 'SCREENS\n';
+    reportString = 'Type: SCREENS\n';
     var screens_results_row = $('#screens_results_row');
     screens_results_row.empty();
 
