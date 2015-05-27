@@ -122,3 +122,25 @@
   color: black;
   background-color: #fff;
 }
+
+#screens_results ul {         
+  padding:0 0 0 0;
+  margin:0 0 0 0;
+}
+#screens_results ul li {     
+  list-style:none;
+  margin-bottom:25px;           
+}
+#screens_results ul li img {
+  cursor: pointer;
+  border-style: solid;
+  border-width: 1px;
+  height: 150px;
+  width: 150px;
+}
+
+.modal-content {
+    height: 632px;
+    width: 1120px;
+    margin-left: -260px;
+}

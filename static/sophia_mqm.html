@@ -40,7 +40,7 @@
         </div>
         <div id="topbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><h4><span class="label label-info">v0.0.65</span></h4></li>
+            <li><h4><span class="label label-info">v0.0.7</span></h4></li>
           </ul>
         </div>
       </div>
@@ -112,35 +112,51 @@
     <hr id="search-options-divider" class="hidden"/>
 
       <!-- START results area -->
-    <div class="container">
+    <div class="container hidden" id="flow_results">
       <div class="row">
         <div class="col-md-4">
-          <h4><span id="flow-title" class="legend hidden">MQM flow</span></h4>
+          <h4><span id="flow-title" class="legend">MQM flow</span></h4>
           <ul class="list-group" id="flow-list">
           </ul>
         </div>
         <div class="col-md-8">
         <!-- START visualization area -->
-          <h4><span id="vis-title" class="legend hidden">MQM results</span></h4>
-          <div id="vis-container" class="panel panel-default hidden">
+          <h4><span id="vis-title" class="legend">MQM results</span></h4>
+          <div id="vis-container" class="panel panel-default">
             <svg id="vis-svg">
               <g id='g' />
             </svg>
           </div>
-          <div id="scrollVertical" class="btn-group-vertical hidden" role="group" aria-label="">
+          <!-- remove
+          <div id="scrollVertical" class="btn-group-vertical" role="group" aria-label="">
             <button type="button" class="btn btn-default" onclick="scrollVis('up');"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></button>
             <br>
             <button type="button" class="btn btn-default" onclick="scrollVis('down');"><span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
           </div>
-          <div id="scrollHoriz" class="btn-toolbar hidden" role="toolbar" aria-label="">
+          <div id="scrollHoriz" class="btn-toolbar" role="toolbar" aria-label="">
             <button type="button" class="btn btn-default" onclick="scrollVis('left');"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></button>
             <button type="button" class="btn btn-default" onclick="scrollVis('right');"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></button>
-          </div>
+          </div> -->
         <!-- END visualization area -->
         </div>
       </div>
-      <!-- END results area -->
-    </div>
+    </div> <!-- end flow results -->
+
+    <div class="container" id="screens_results" class="hidden">
+      <ul class="row" id="screens_results_row">
+      </ul>
+    </div> <!-- end screens results -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">         
+          <div class="modal-body">                
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- END results area -->
+
     <div id="details" class="panel panel-default hidden">
       <div class="closeX" onclick="hideDetails();"><span>X</span></div>
       <ul id="detailsText" class="list-group"></ul>
