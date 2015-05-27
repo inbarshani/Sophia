@@ -76,12 +76,29 @@ app.use('/searchFlows', function(request, response) {
 });
 
 app.use('/searchScreens', function(request, response) {
-    response.send(JSON.stringify('OK'));
+    var queryText = request.query.q;
+
+    idol_queries.search(queryText, function(documents_hash) {
+        var idolResultNodes = Object.keys(documents_hash);
+        if (idolResultNodes.length > 0) {
+            neo4j_queries.getNearestScreens(idolResultNodes,
+                function(prevScreenTimestamps, nextScreenTimestamps) {
+                    var allTimestamps = prevScreenTimestamps.concat(nextScreenTimestamps);
+                    response.send(JSON.stringify(allTimestamps));
+                });
+        }
+        else
+        {
+            response.send(JSON.stringify([]));            
+        }
+    });
 });
 
 app.use('/getScreens', function(request, response) {
     if (request.query.selectedNode) {
-        neo4j_queries.getNearestScreens(request.query.selectedNode,
+        var selectedNodeArray = [];
+        selectedNodeArray.push(request.query.selectedNode);
+        neo4j_queries.getNearestScreens(selectedNodeArray,
             function(prevScreenTimestamps, nextScreenTimestamps) {
                 var prevScreenTimestamp = null, nextScreenTimestamp = null;
                 if (prevScreenTimestamps.length > 0)
@@ -100,7 +117,7 @@ app.use('/getScreens', function(request, response) {
 
 app.use('/screen/:timestamp', function(request, response) {
     var timestamp = request.params.timestamp;
-    console.log('Get screen with timestamp: ' + timestamp);
+    //console.log('Get screen with timestamp: ' + timestamp);
     if (timestamp) {
         try {
             var img = fs.readFileSync('./upload/' + timestamp + '.jpg');
@@ -109,7 +126,7 @@ app.use('/screen/:timestamp', function(request, response) {
             });
             response.end(img, 'binary');
         } catch (ex) {
-            console.log('Failed to load screen with timestamp: ' + timestamp);
+            //console.log('Failed to load screen with timestamp: ' + timestamp);
             response.send('Failed to load screen with timestamp: ' + timestamp);
         }
     }

@@ -99,7 +99,16 @@ function search(query){
     if (searchType == searchTypes.FLOWS)
         searchFlows(query);
     else if (searchType == searchTypes.SCREENS)
+    {
+        if (currentPaths.length > 0)
+        {       
+            currentPaths.length = 0;
+            currentBackboneNodes.length = 0;
+            currentDataNodes.length = 0;
+            $('#flow-list').empty();
+        }
         searchScreens(query);
+    }
 }
 
 function searchFlows(query) {
@@ -123,7 +132,7 @@ function searchFlows(query) {
             'currentNodes=' + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)))
         .done(function(data) {
             //console.log("Search returned: " + data);
-            responseData = JSON.parse(data);
+            var responseData = JSON.parse(data);
             updateCurrentPaths(responseData.paths_to_nodes);
             currentBackboneNodes = responseData.last_backbone_nodes;
             currentDataNodes = responseData.last_data_nodes;
@@ -148,11 +157,9 @@ function searchFlows(query) {
 }
 
 function searchScreens(query) {
-    if (currentPaths.length == 0) {
-        // clear flow list
-        $('#flow-list').empty();
-        reportString = '';
-    }
+    // change UI to show list of images instead of flows
+    //  clear top level vars
+    reportString = '';
 
     if (!query || query.length==0)
         query = $('#search-text').val();
@@ -164,19 +171,24 @@ function searchScreens(query) {
     lastQuery = query;
     reportString = reportString + 'Suggestions: ' + suggestionsArray.join(", ") + '\n';
     reportString = reportString + 'Search: ' + query + '\n';
-    var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query) + '&' +
-            'currentNodes=' + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)))
+    var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query))
         .done(function(data) {
             //console.log("Search returned: " + data);
-            responseData = JSON.parse(data);
-            updateCurrentPaths(responseData.paths_to_nodes);
-            currentBackboneNodes = responseData.last_backbone_nodes;
-            currentDataNodes = responseData.last_data_nodes;
-            // add query and number of results to the list
-            var currentStepNumber = $('#flow-list li').length + 1;
-            $('#flow-list').append('<li class="list-group-item clickable" onClick="highlight(this, function(nodes) { return nodes } ([' + currentBackboneNodes.concat(currentDataNodes) + ']));">Step ' + currentStepNumber + ': ' +
-                query + ' <span class="badge">' + currentPaths.length + '</span></li>');
-            reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
+            var timestampsArray = JSON.parse(data);
+            // create list of screens
+            // <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+            //  <img src="timestamp"/>
+            // </li>
+            var screens_results_row = $('#screens_results_row');
+            timestampsArray.forEach(function(timestamp){
+                screens_results_row.append(
+                        '<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">'+
+                        '  <img onclick="showModal(\'/screen/'+timestamp+'\');"'+
+                        '       src="/screen/'+timestamp+'"/>'+
+                        '</li>'
+                    );
+            });
+
             update();
         })
         .fail(function(err) {
@@ -184,10 +196,6 @@ function searchScreens(query) {
             console.log("Search failed: " + err);
             reportString = reportString + 'Result: failed query\n';
 
-            // remove all nodes
-            currentPaths.length = 0;
-            currentBackboneNodes.length = 0;
-            currentDataNodes.length = 0;
             update();
         });
 }
@@ -197,7 +205,7 @@ function getScreens(node_id, callback) {
     var jqxhr = $.ajax("/getScreens?selectedNode=" + node_id)
         .done(function(data) {
             //console.log("Search returned: " + data);
-            responseData = JSON.parse(data);
+            var responseData = JSON.parse(data);
             callback(responseData.prevScreenTimestamp, responseData.nextScreenTimestamp);
         })
         .fail(function(err) {
@@ -226,8 +234,8 @@ function update() {
     querySuggestions();
 }
 
-function updateNavigation() {
-    if (currentPaths.length > 0) {
+function updateNavigation() {    
+    if (lastQuery.length > 0) {
         $('#navbar-logo').removeClass('hidden').addClass('show');
         $('#search-options').removeClass('hidden').addClass('show');
         $('#search-options-divider').removeClass('hidden').addClass('show');
@@ -242,18 +250,38 @@ function updateNavigation() {
 
 function updateSearchResults() {
     // clear last search term
-    $('#search-text').val('');
-    // show/hide the flow title and paths
-    if ($('#flow-list').has('li').length > 0) {
-        $('#flow-title').removeClass('hidden').addClass('show');
-        visualize();
-    } else // no current search
+    //$('#search-text').val('');
+    if (searchType == searchTypes.FLOWS && ($('#flow-list').has('li').length > 0))
     {
-        $('#flow-title').removeClass('show').addClass('hidden');
-        $('#vis-title').removeClass('show').addClass('hidden');
-        $('#vis-container').removeClass('show').addClass('hidden');
+        $('#flow_results').removeClass('hidden').addClass('show');
+        visualize();
+    }
+    else // no current flows search
+    {
+        $('#flow_results').removeClass('show').addClass('hidden');
+    }
+    if (searchType == searchTypes.SCREENS && ($('#screens_results_row').has('li').length > 0))
+    {
+        $('#screens_results').removeClass('hidden').addClass('show');
+    }
+    else
+    {
+        $('#screens_results').removeClass('show').addClass('hidden');        
     }
 }
+
+function showModal(src)
+{
+    var img = '<img src="' + src + '" class="img-responsive"/>';
+    $('#myModal').modal();
+    $('#myModal').on('shown.bs.modal', function(){
+        $('#myModal .modal-body').html(img);
+    });
+    $('#myModal').on('hidden.bs.modal', function(){
+        $('#myModal .modal-body').html('');
+    });
+}
+
 
 function querySuggestions() {
     $('#suggestions-text').text('Loading...');
