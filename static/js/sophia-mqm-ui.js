@@ -206,6 +206,7 @@ function searchScreens(query) {
                             '</li>'
                         );
                 });
+                reportString = reportString + 'Results #: ' + timestampsArray.length + '\n';
             }
             else {
                 screens_results_row.append(
