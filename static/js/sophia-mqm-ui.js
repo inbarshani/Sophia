@@ -40,21 +40,24 @@ $(document).ready(function() {
     $('body').click(onDocumentClick);
 });
 
-$(document).ajaxStart(function() {
+$(document).ajaxSend(function(event, xhr, settings ) {
     if (!user) {
         window.location.href = './login.html';
     }
-    //console.log('ajaxStart, before increment, isAjaxActive: '+isAjaxActive);
-    isAjaxActive = isAjaxActive+2;
-    setTimeout(function() {
-        //console.log('in timeout function, isAjaxActive: '+isAjaxActive);
-        if (isAjaxActive > 0) {
-            $("#busy").show();
-        }
-    }, 500);
+    else
+    {
+        console.log('ajaxStart for: '+settings.url+', before increment, isAjaxActive: '+isAjaxActive);
+        isAjaxActive++;
+        setTimeout(function() {
+            console.log('in timeout function for: '+settings.url+', isAjaxActive: '+isAjaxActive);
+            if (isAjaxActive > 0) {
+                $("#busy").show();
+            }
+        }, 500);
+    }
 });
-$(document).ajaxComplete(function() {
-    //console.log('ajaxComplete, before decrease, isAjaxActive: '+isAjaxActive);
+$(document).ajaxComplete(function( event, xhr, settings ) {
+    console.log('ajaxComplete for: '+settings.url+', before decrease, isAjaxActive: '+isAjaxActive);
     if (isAjaxActive > 0) isAjaxActive--;
     if (isAjaxActive == 0) {
         $("#busy").hide();
@@ -336,7 +339,6 @@ function querySuggestions() {
 function reportAudit() {
     var jqxhr = $.ajax("/report?reportString=" + fixedEncodeURIComponent(reportString) +
             "&user=" + user)
-        .done(function(data) {})
         .fail(function(err) {
             //alert( "error getting suggestions" );
             console.log("Failed reporting audit log: " + err);
