@@ -37,6 +37,7 @@ $(document).ready(function() {
     });
 
     update();
+    
     $('body').click(onDocumentClick);
 });
 
@@ -144,7 +145,6 @@ function searchFlows(query) {
     }
 
     lastQuery = query;
-    reportString = reportString + 'Suggestions: ' + suggestionsArray.join(", ") + '\n';
     reportString = reportString + 'Search: ' + query + '\n';
     var jqxhr = $.ajax("/searchFlows?q=" + fixedEncodeURIComponent(query) + '&' +
             'currentNodes=' + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)))
@@ -189,7 +189,6 @@ function searchScreens(query) {
     }
 
     lastQuery = query;
-    reportString = reportString + 'Suggestions: ' + suggestionsArray.join(", ") + '\n';
     reportString = reportString + 'Search: ' + query + '\n';
     var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query))
         .done(function(data) {
@@ -267,18 +266,17 @@ function update() {
 
     updateSearchResults();
 
-    querySuggestions();
 }
 
 function updateNavigation() {    
     if (lastQuery.length > 0) {
         $('#navbar-logo').removeClass('hidden').addClass('show');
-        $('#search-options').removeClass('hidden').addClass('show');
+        //$('#search-options').removeClass('hidden').addClass('show');
         $('#search-options-divider').removeClass('hidden').addClass('show');
         $('#logo').removeClass('show').addClass('hidden');
     } else {
         $('#logo').removeClass('hidden').addClass('show');
-        $('#search-options').removeClass('show').addClass('hidden');
+        //$('#search-options').removeClass('show').addClass('hidden');
         $('#search-options-divider').removeClass('show').addClass('hidden');
         $('#navbar-logo').removeClass('show').addClass('hidden');
     }
