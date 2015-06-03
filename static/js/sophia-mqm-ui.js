@@ -3,6 +3,8 @@ var reportString = '';
 var currentBackboneNodes = [];
 var currentDataNodes = [];
 var suggestionsArray = [];
+var availableTopicsArray = [];
+var selectedTopicsArray = [];
 var isAjaxActive = 0;
 var searchTypes = {FLOWS: 0, 
     SCREENS: 1,
@@ -48,10 +50,10 @@ $(document).ajaxSend(function(event, xhr, settings ) {
     }
     else
     {
-        console.log('ajaxStart for: '+settings.url+', before increment, isAjaxActive: '+isAjaxActive);
+        //console.log('ajaxStart for: '+settings.url+', before increment, isAjaxActive: '+isAjaxActive);
         isAjaxActive++;
         setTimeout(function() {
-            console.log('in timeout function for: '+settings.url+', isAjaxActive: '+isAjaxActive);
+            //console.log('in timeout function for: '+settings.url+', isAjaxActive: '+isAjaxActive);
             if (isAjaxActive > 0) {
                 $("#busy").show();
             }
@@ -59,7 +61,7 @@ $(document).ajaxSend(function(event, xhr, settings ) {
     }
 });
 $(document).ajaxComplete(function( event, xhr, settings ) {
-    console.log('ajaxComplete for: '+settings.url+', before decrease, isAjaxActive: '+isAjaxActive);
+    //console.log('ajaxComplete for: '+settings.url+', before decrease, isAjaxActive: '+isAjaxActive);
     if (isAjaxActive > 0) isAjaxActive--;
     if (isAjaxActive == 0) {
         $("#busy").hide();
@@ -240,8 +242,8 @@ function searchTopics(query) {
     // change UI to show list of images instead of flows
     //  clear top level vars
     reportString = 'Type: TOPICS\n';
-    var available_topics_results = $('#availbale_topics');
-    available_topics_results.empty();
+    var availbale_topics_list = $('#availbale_topics_list');
+    availbale_topics_list.empty();
 
     if (!query || query.length==0)
         query = $('#search-text').val();
@@ -255,36 +257,31 @@ function searchTopics(query) {
     var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]")
         .done(function(data) {
             //console.log("Search returned: " + data);
-            var topicsArray = JSON.parse(data);
-            if (topicsArray.length > 0)
+            availableTopicsArray = JSON.parse(data);
+            if (availableTopicsArray.length > 0)
             {
                 // create list of topics
-                reportString = reportString + 'Results #: ' + topicsArray.length + '\n';
-                /*
-                  <div data-toggle="buttons" class="btn-group bizmoduleselect">
-                      <label class="btn btn-default">
-                          <div class="bizcontent">
-                              <input type="checkbox" name="var_id[]" autocomplete="off" value="">
-                              <h5>Tea</h5>
-                          </div>
-                      </label>
-                  </div>
-                */
-                topicsArray.forEach(function(topic){
-                    available_topics_results.append(
-                    '<div data-toggle="buttons" class="btn-group bizmoduleselect">'+
-                    '  <label class="btn btn-default">'+
-                    '      <div class="bizcontent">'+
-                    '          <input type="checkbox" autocomplete="off" value="">'+
-                    '          <h5>'+topic.name+'</h5>'+
-                    '          <span class="badge">'+topic.occurances+'</span>'+
-                    '      </div>'+
-                    '  </label>'+
-                    '</div>');
+                reportString = reportString + 'Results #: ' + availableTopicsArray.length + '\n';
+                availableTopicsArray.forEach(function(topic, index){
+                    var new_topic = $('<li data-toggle="buttons" class="btn-group bizmoduleselect" available_topic_id="'+index+'">'+
+                        '  <label class="btn btn-default">'+
+                        '      <div class="bizcontent">'+
+                        '          <h5>'+topic.name+'</h5>'+
+                        '          <span class="badge">'+topic.occurances+'</span>'+
+                        '      </div>'+
+                        '  </label>'+
+                        '</li>'
+                        ).on('click', function(e){
+                            //console.log('tagName: '+$(this).prop('tagName'));
+                            var available_topic_id = parseInt($(this).attr('available_topic_id'));
+                            toggleTopic(available_topic_id);
+                        });
+
+                    availbale_topics_list.append(new_topic);
                 });
             }
             else {
-                topics_results_row.append(
+                availbale_topics_list.append(
                         '<li class="">'+
                         ' No topics found.'+
                         '</li>'
@@ -300,6 +297,79 @@ function searchTopics(query) {
 
             update();
         });
+}
+
+function toggleTopic(availbale_topic_id)
+{
+    if (!availableTopicsArray[availbale_topic_id].selected)
+    {
+        if (selectedTopicsArray.length == 4)
+            showTopicsModal();
+        else
+        {
+            availableTopicsArray[availbale_topic_id].selected = true;
+            selectedTopicsArray.push(availableTopicsArray[availbale_topic_id]);
+        }
+    }
+    else
+    {
+        availableTopicsArray[availbale_topic_id].selected = false;
+        for(var i=0;i<selectedTopicsArray.length;i++)
+        {
+            if (selectedTopicsArray[i].name == availableTopicsArray[availbale_topic_id].name)
+                break;
+        }
+        if (i < selectedTopicsArray.length)
+            selectedTopicsArray.splice(i, 1);
+    }
+    updateSelectedTopics();
+}
+
+function updateSelectedTopics()
+{
+    for (var i=1;i<=12;i++)
+    {
+        var container = $('#topics_flow #'+i);
+        container.html('<label class="btn btn-disabled disabled">'+
+            '      <div class="bizcontent">'+
+            '          <h5></h5>'+
+            '      </div>'+
+            '  </label>');
+    }
+
+    switch(selectedTopicsArray.length)
+    {
+        case 4:
+            $('#topics_flow #12').html('<label class="btn btn-default">'+
+            '      <div class="bizcontent">'+
+            '          <h5>'+selectedTopicsArray[3].name+'</h5>'+
+            '          <span class="badge">'+selectedTopicsArray[3].occurances+'</span>'+
+            '      </div>'+
+            '  </label>');
+        case 3:
+            $('#topics_flow #9').html('<label class="btn btn-default">'+
+            '      <div class="bizcontent">'+
+            '          <h5>'+selectedTopicsArray[2].name+'</h5>'+
+            '          <span class="badge">'+selectedTopicsArray[2].occurances+'</span>'+
+            '      </div>'+
+            '  </label>');
+        case 2:
+            $('#topics_flow #4').html('<label class="btn btn-default">'+
+            '      <div class="bizcontent">'+
+            '          <h5>'+selectedTopicsArray[1].name+'</h5>'+
+            '          <span class="badge">'+selectedTopicsArray[1].occurances+'</span>'+
+            '      </div>'+
+            '  </label>');
+        case 1:
+            $('#topics_flow #1').html('<label class="btn btn-default">'+
+            '      <div class="bizcontent">'+
+            '          <h5>'+selectedTopicsArray[0].name+'</h5>'+
+            '          <span class="badge">'+selectedTopicsArray[0].occurances+'</span>'+
+            '      </div>'+
+            '  </label>');
+        break;
+    }
+
 }
 
 function getScreens(node_id, callback) {
@@ -390,13 +460,18 @@ function updateSearchResults() {
 function showModal(src)
 {
     var img = '<img src="' + src + '" class="img-responsive"/>';
-    $('#myModal').modal();
-    $('#myModal').on('shown.bs.modal', function(){
-        $('#myModal .modal-body').html(img);
+    $('#screenModal').modal();
+    $('#screenModal').on('shown.bs.modal', function(){
+        $('#screenModal .modal-body').html(img);
     });
-    $('#myModal').on('hidden.bs.modal', function(){
-        $('#myModal .modal-body').html('');
+    $('#screenModal').on('hidden.bs.modal', function(){
+        $('#screenModal .modal-body').html('');
     });
+}
+
+function showTopicsModal()
+{
+    $('#topicsModal').modal();    
 }
 
 

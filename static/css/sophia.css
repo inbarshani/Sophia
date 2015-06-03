@@ -159,3 +159,7 @@
 	white-space: normal;
 	background-color:#87CEFA;
 }
+
+#topics_results .btn-disabled {
+	background-color:#FFF;
+}
