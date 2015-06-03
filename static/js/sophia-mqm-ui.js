@@ -25,6 +25,12 @@ $(document).ready(function() {
     if (!user)
         window.location.href = './login.html';
 
+    // restore last search type
+    searchType = localStorage.getItem("sophiaSearchType");
+    if (!searchType)
+        searchType = searchTypes.FLOWS;
+    updateSearchNavigation();
+
     $('#search-button').on('click', function(e) {
         search();
     });
@@ -101,10 +107,27 @@ function switchSearch(newSearchType) {
         $('#flow-list').empty();
         $('#flow_results').removeClass('show').addClass('hidden');
     }
+    else if (searchType == searchTypes.TOPICS)
+    {       
+        availableTopicsArray.length = 0;
+        selectedTopicsArray.length = 0;
+        $('#availbale_topics_list').empty();
+        updateSelectedTopics();
+        $('#topics_results_row').removeClass('show').addClass('hidden');
+    }
 
     // update searchType
     searchType = newSearchType;
+    localStorage.setItem("sophiaSearchType", searchType);
 
+    updateSearchNavigation();
+
+    // invoke search with last search term
+    search(lastQuery);
+}
+
+function updateSearchNavigation()
+{
     // update search options
     var id_of_li = "";
     if (searchType == searchTypes.FLOWS)
@@ -118,10 +141,7 @@ function switchSearch(newSearchType) {
     var search_type_li = $(id_of_li);
     search_type_li.removeClass('search').addClass('selected_search');
     // change siblings style
-    search_type_li.siblings().removeClass('selected_search').addClass('search');
-
-    // invoke search with last search term
-    search(lastQuery);
+    search_type_li.siblings().removeClass('selected_search').addClass('search');    
 }
 
 function search(query){
@@ -146,7 +166,7 @@ function searchFlows(query) {
         reportString = 'Type: FLOWS\n';
     }
 
-    if (!query || query.length==0)
+    if ($('#search-text').val().length > 0)
         query = $('#search-text').val();
     if (!query || query.length==0){
         // don't run without any query string
@@ -190,7 +210,7 @@ function searchScreens(query) {
     var screens_results_row = $('#screens_results_row');
     screens_results_row.empty();
 
-    if (!query || query.length==0)
+    if ($('#search-text').val().length > 0)
         query = $('#search-text').val();
     if (!query || query.length==0){
         // don't run without any query string
@@ -245,7 +265,7 @@ function searchTopics(query) {
     var availbale_topics_list = $('#availbale_topics_list');
     availbale_topics_list.empty();
 
-    if (!query || query.length==0)
+    if ($('#search-text').val().length > 0)
         query = $('#search-text').val();
     if (!query || query.length==0){
         // don't run without any query string
@@ -258,7 +278,7 @@ function searchTopics(query) {
         .done(function(data) {
             //console.log("Search returned: " + data);
             availableTopicsArray = JSON.parse(data);
-            if (availableTopicsArray.length > 0)
+            if (availableTopicsArray && availableTopicsArray.length > 0)
             {
                 // create list of topics
                 reportString = reportString + 'Results #: ' + availableTopicsArray.length + '\n';
@@ -274,7 +294,7 @@ function searchTopics(query) {
                         ).on('click', function(e){
                             //console.log('tagName: '+$(this).prop('tagName'));
                             var available_topic_id = parseInt($(this).attr('available_topic_id'));
-                            toggleTopic(available_topic_id);
+                            return toggleTopic(available_topic_id);
                         });
 
                     availbale_topics_list.append(new_topic);
@@ -304,7 +324,10 @@ function toggleTopic(availbale_topic_id)
     if (!availableTopicsArray[availbale_topic_id].selected)
     {
         if (selectedTopicsArray.length == 4)
+        {
             showTopicsModal();
+            return false;
+        }
         else
         {
             availableTopicsArray[availbale_topic_id].selected = true;
@@ -323,6 +346,7 @@ function toggleTopic(availbale_topic_id)
             selectedTopicsArray.splice(i, 1);
     }
     updateSelectedTopics();
+    return true;
 }
 
 function updateSelectedTopics()
