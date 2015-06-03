@@ -10,21 +10,25 @@ var app = express();
 app.use(express.static(__dirname + '/static'));
 //app.use(bodyParser.json());
 
-app.use('/querySuggestions', function(request, response) {
-    var currentPaths = JSON.parse(request.query.currentPaths);
-    //console.log("currentPaths: "+currentPaths);
-    neo4j_queries.getAllBackboneNodes(currentPaths, function(graphNodes) {
-        if (graphNodes) {
-            idol_queries.getSuggestedTerms(graphNodes, function(terms) {
-                if (terms)
-                    response.send(JSON.stringify(terms));
-                else
-                    response.send();
-            });
-        } else
+app.use('/getTopics', function(request, response) {
+    var query = request.query.q;
+    console.log("getTopics query: "+query);
+    idol_queries.getTopics(query, null, function(topics) {
+        if (topics)
+            response.send(JSON.stringify(topics));
+        else
             response.send();
     });
+});
 
+app.use('/getTopicsLinks', function(request, response) {
+    var topicNodesA = JSON.parse(request.query.topicNodesA);
+    var topicNodesB = JSON.parse(request.query.topicNodesB);
+    console.log("getTopicsLinks query");
+
+    neo4j_queries.countPaths(topicNodesA, topicNodesB, function(numOfPaths) {
+        response.send(JSON.stringify(numOfPaths));
+    });
 });
 
 app.use('/searchFlows', function(request, response) {

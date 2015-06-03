@@ -40,7 +40,7 @@
         </div>
         <div id="topbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><h4><span class="label label-info">v0.0.7</span></h4></li>
+            <li><h4><span class="label label-info">v0.0.9</span></h4></li>
           </ul>
         </div>
       </div>
@@ -62,17 +62,6 @@
         <div class="col-md-2">
         </div>
         <div class="col-md-8">
-          <div class="well well-sm" style="background-color: #ECF7FE; border: 0px;min-height: 70px;">
-            <p class="text-center" id="suggestions-text"></p>
-          </div>
-        </div>
-        <div class="col-md-2">
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-2">
-        </div>
-        <div class="col-md-8">
           <div class="input-group input-group-lg">
             <input type="text" autofocus="autofocus" autocomplete="off" placeholder="Search MQM" name="search" class="form-control" id="search-text">
             <span class="input-group-btn">
@@ -85,20 +74,23 @@
         <div class="col-md-2">
         </div>
       </div>
-      <div class="row hidden" role="navigation" id="search-options">
+      <div class="row" role="navigation" id="search-options">
         <div class="col-md-2">
         </div>
         <div class="col-md-8">
           <div class="container">
             <ul class="nav nav-pills">
-              <li role="presentation" class="selected_search" id="search-flows">
+              <li role="presentation" class="search" id="search-flows">
                 <a href="#" onclick="switchSearch(searchTypes.FLOWS);">Flows</a>
               </li>
               <li role="presentation" class="search" id="search-screens">
                 <a href="#" onclick="switchSearch(searchTypes.SCREENS);">Screens</a>
               </li>
-              <li role="presentation" class="search" id="search-flows">
+              <li role="presentation" class="search" id="search-issues">
                 <a href="#" onclick="switchSearch(searchTypes.ISSUES);">Issues</a>
+              </li>
+              <li role="presentation" class="search" id="search-topics">
+                <a href="#" onclick="switchSearch(searchTypes.TOPICS);">Topics</a>
               </li>
             </ul>
           </div>
@@ -146,7 +138,7 @@
       <ul class="row" id="screens_results_row">
       </ul>
     </div> <!-- end screens results -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="screenModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">         
           <div class="modal-body">                
@@ -155,6 +147,60 @@
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
+    <div class="container" id="topics_results" class="hidden">
+      <div class="row hidden" id="topics_results_row">
+        <div class="col-md-2 text-center" id="availbale_topics">
+          <h4><span class="legend">Available Topics</span></h4>
+          <ul class="list-group" id="availbale_topics_list">
+          </ul>
+        </div>
+        <div class="col-md-8 text-center" id="topics_flow">
+          <h4><span class="legend">Selected Topics</span></h4>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-2" id="1">
+              </div>
+              <div class="col-md-2" id="2">
+              </div>
+              <div class="col-md-2" id="3">
+              </div>
+              <div class="col-md-2" id="4">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-2" id="5">
+              </div>
+              <div class="col-md-2" id="6">
+              </div>
+              <div class="col-md-2" id="7">
+              </div>
+              <div class="col-md-2" id="8">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-2" id="9">
+              </div>
+              <div class="col-md-2" id="10">
+              </div>
+              <div class="col-md-2" id="11">
+              </div>
+              <div class="col-md-2" id="12">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2 text-center" id="topic_details">
+          <h4><span class="legend">Topic Details</span></h4>
+        </div>
+      </div>
+    </div> <!-- end screens results -->
+    <div class="modal fade" id="topicsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-body">
+          <div class="alert alert-danger" role="alert"><h4>Selected Topics are full</h4></div>
+        </div>
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
     <!-- END results area -->
 
     <div id="details" class="panel panel-default hidden">
