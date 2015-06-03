@@ -12,20 +12,23 @@ app.use(express.static(__dirname + '/static'));
 
 app.use('/getTopics', function(request, response) {
     var query = request.query.q;
-    var currentPaths = JSON.parse(request.query.currentPaths);
     console.log("getTopics query: "+query);
-    //neo4j_queries.getAllBackboneNodes(currentPaths, function(graphNodes) {
-    //    if (graphNodes) {
-            idol_queries.getTopics(query, null, function(topics) {
-                if (topics)
-                    response.send(JSON.stringify(topics));
-                else
-                    response.send();
-            });
-    //    } else
-    //        response.send();
-    //});
+    idol_queries.getTopics(query, null, function(topics) {
+        if (topics)
+            response.send(JSON.stringify(topics));
+        else
+            response.send();
+    });
+});
 
+app.use('/getTopicsLinks', function(request, response) {
+    var topicNodesA = JSON.parse(request.query.topicNodesA);
+    var topicNodesB = JSON.parse(request.query.topicNodesB);
+    console.log("getTopicsLinks query");
+
+    neo4j_queries.countPaths(topicNodesA, topicNodesB, function(numOfPaths) {
+        response.send(JSON.stringify(numOfPaths));
+    });
 });
 
 app.use('/searchFlows', function(request, response) {

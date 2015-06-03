@@ -162,4 +162,7 @@
 
 #topics_results .btn-disabled {
 	background-color:#FFF;
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
 }

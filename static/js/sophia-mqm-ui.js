@@ -370,6 +370,45 @@ function updateSelectedTopics()
             '          <span class="badge">'+selectedTopicsArray[3].occurances+'</span>'+
             '      </div>'+
             '  </label>');
+            var jqxhr = $.ajax("/getTopicsLinks?topicNodesA=" + JSON.stringify(selectedTopicsArray[3].ids) +
+                "&topicNodesB="+ JSON.stringify(selectedTopicsArray[2].ids))
+                .done(function(data) {
+                    //console.log("getTopicsLinks returned: " + data);
+                    $('#topics_flow #11').html('<label class="btn btn-disabled text-center">'+
+                    '      <div class="bizcontent" >'+
+                    '          <span class="badge">'+data+'</span>'+
+                    '      </div>'+
+                    '  </label>');
+                })
+                .fail(function(err) {
+                    console.log("getTopicsLinks failed: " + err);
+                });
+            var jqxhr = $.ajax("/getTopicsLinks?topicNodesA=" + JSON.stringify(selectedTopicsArray[3].ids) +
+                "&topicNodesB="+ JSON.stringify(selectedTopicsArray[1].ids))
+                .done(function(data) {
+                    //console.log("getTopicsLinks returned: " + data);
+                    $('#topics_flow #8').html('<label class="btn btn-disabled text-center">'+
+                    '      <div class="bizcontent" >'+
+                    '          <span class="badge">'+data+'</span>'+
+                    '      </div>'+
+                    '  </label>');
+                })
+                .fail(function(err) {
+                    console.log("getTopicsLinks failed: " + err);
+                });
+            var jqxhr = $.ajax("/getTopicsLinks?topicNodesA=" + JSON.stringify(selectedTopicsArray[3].ids) +
+                "&topicNodesB="+ JSON.stringify(selectedTopicsArray[0].ids))
+                .done(function(data) {
+                    //console.log("getTopicsLinks returned: " + data);
+                    $('#topics_flow #7').html('<label class="btn btn-disabled text-center">'+
+                    '      <div class="bizcontent" >'+
+                    '          <span class="badge">'+data+'</span>'+
+                    '      </div>'+
+                    '  </label>');
+                })
+                .fail(function(err) {
+                    console.log("getTopicsLinks failed: " + err);
+                });
         case 3:
             $('#topics_flow #9').html('<label class="btn btn-default">'+
             '      <div class="bizcontent">'+
@@ -377,6 +416,32 @@ function updateSelectedTopics()
             '          <span class="badge">'+selectedTopicsArray[2].occurances+'</span>'+
             '      </div>'+
             '  </label>');
+            var jqxhr = $.ajax("/getTopicsLinks?topicNodesA=" + JSON.stringify(selectedTopicsArray[2].ids) +
+                "&topicNodesB="+ JSON.stringify(selectedTopicsArray[1].ids))
+                .done(function(data) {
+                    //console.log("getTopicsLinks returned: " + data);
+                    $('#topics_flow #6').html('<label class="btn btn-disabled text-center">'+
+                    '      <div class="bizcontent" >'+
+                    '          <span class="badge">'+data+'</span>'+
+                    '      </div>'+
+                    '  </label>');
+                })
+                .fail(function(err) {
+                    console.log("getTopicsLinks failed: " + err);
+                });
+            var jqxhr = $.ajax("/getTopicsLinks?topicNodesA=" + JSON.stringify(selectedTopicsArray[2].ids) +
+                "&topicNodesB="+ JSON.stringify(selectedTopicsArray[0].ids))
+                .done(function(data) {
+                    //console.log("getTopicsLinks returned: " + data);
+                    $('#topics_flow #5').html('<label class="btn btn-disabled text-center">'+
+                    '      <div class="bizcontent" >'+
+                    '          <span class="badge">'+data+'</span>'+
+                    '      </div>'+
+                    '  </label>');
+                })
+                .fail(function(err) {
+                    console.log("getTopicsLinks failed: " + err);
+                });
         case 2:
             $('#topics_flow #4').html('<label class="btn btn-default">'+
             '      <div class="bizcontent">'+
@@ -384,6 +449,20 @@ function updateSelectedTopics()
             '          <span class="badge">'+selectedTopicsArray[1].occurances+'</span>'+
             '      </div>'+
             '  </label>');
+            // get count of links to topic #4
+            var jqxhr = $.ajax("/getTopicsLinks?topicNodesA=" + JSON.stringify(selectedTopicsArray[1].ids) +
+                "&topicNodesB="+ JSON.stringify(selectedTopicsArray[0].ids))
+                .done(function(data) {
+                    //console.log("getTopicsLinks returned: " + data);
+                    $('#topics_flow #2').html('<label class="btn btn-disabled text-center">'+
+                    '      <div class="bizcontent" >'+
+                    '          <span class="badge">'+data+'</span>'+
+                    '      </div>'+
+                    '  </label>');
+                })
+                .fail(function(err) {
+                    console.log("getTopicsLinks failed: " + err);
+                });
         case 1:
             $('#topics_flow #1').html('<label class="btn btn-default">'+
             '      <div class="bizcontent">'+
