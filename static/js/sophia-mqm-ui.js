@@ -6,7 +6,8 @@ var suggestionsArray = [];
 var isAjaxActive = 0;
 var searchTypes = {FLOWS: 0, 
     SCREENS: 1,
-    ISSUES: 2};
+    ISSUES: 2,
+    TOPICS: 3};
 var searchType = searchTypes.FLOWS;
 var user;
 var lastQuery = "";
@@ -110,6 +111,8 @@ function switchSearch(newSearchType) {
         id_of_li = "#search-screens";
     else if (searchType == searchTypes.ISSUES)
         id_of_li = "#search-issues";
+    else if (searchType == searchTypes.TOPICS)
+        id_of_li = "#search-topics";
     var search_type_li = $(id_of_li);
     search_type_li.removeClass('search').addClass('selected_search');
     // change siblings style
@@ -127,6 +130,10 @@ function search(query){
     else if (searchType == searchTypes.SCREENS)
     {
         searchScreens(query);
+    }
+    else if (searchType == searchTypes.TOPICS)
+    {
+        searchTopics(query);
     }
 }
 
@@ -229,6 +236,71 @@ function searchScreens(query) {
         });
 }
 
+function searchTopics(query) {
+    // change UI to show list of images instead of flows
+    //  clear top level vars
+    reportString = 'Type: TOPICS\n';
+    var available_topics_results = $('#availbale_topics');
+    available_topics_results.empty();
+
+    if (!query || query.length==0)
+        query = $('#search-text').val();
+    if (!query || query.length==0){
+        // don't run without any query string
+        return false;
+    }
+
+    lastQuery = query;
+    reportString = reportString + 'Search: ' + query + '\n';
+    var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]")
+        .done(function(data) {
+            //console.log("Search returned: " + data);
+            var topicsArray = JSON.parse(data);
+            if (topicsArray.length > 0)
+            {
+                // create list of topics
+                reportString = reportString + 'Results #: ' + topicsArray.length + '\n';
+                /*
+                  <div data-toggle="buttons" class="btn-group bizmoduleselect">
+                      <label class="btn btn-default">
+                          <div class="bizcontent">
+                              <input type="checkbox" name="var_id[]" autocomplete="off" value="">
+                              <h5>Tea</h5>
+                          </div>
+                      </label>
+                  </div>
+                */
+                topicsArray.forEach(function(topic){
+                    available_topics_results.append(
+                    '<div data-toggle="buttons" class="btn-group bizmoduleselect">'+
+                    '  <label class="btn btn-default">'+
+                    '      <div class="bizcontent">'+
+                    '          <input type="checkbox" autocomplete="off" value="">'+
+                    '          <h5>'+topic.name+'</h5>'+
+                    '          <span class="badge">'+topic.occurances+'</span>'+
+                    '      </div>'+
+                    '  </label>'+
+                    '</div>');
+                });
+            }
+            else {
+                topics_results_row.append(
+                        '<li class="">'+
+                        ' No topics found.'+
+                        '</li>'
+                    );                
+            }
+
+            update();
+        })
+        .fail(function(err) {
+            alert("Unable to complete search at this time, try again later");
+            console.log("Search failed: " + err);
+            reportString = reportString + 'Result: failed query\n';
+
+            update();
+        });
+}
 
 function getScreens(node_id, callback) {
     var jqxhr = $.ajax("/getScreens?selectedNode=" + node_id)
@@ -294,6 +366,7 @@ function updateSearchResults() {
     {
         $('#flow_results').removeClass('show').addClass('hidden');
     }
+
     if (searchType == searchTypes.SCREENS && ($('#screens_results_row').has('li').length > 0))
     {
         $('#screens_results').removeClass('hidden').addClass('show');
@@ -302,6 +375,16 @@ function updateSearchResults() {
     {
         $('#screens_results').removeClass('show').addClass('hidden');        
     }
+
+    if (searchType == searchTypes.TOPICS && ($('#availbale_topics').has('div').length > 0))
+    {
+        $('#topics_results_row').removeClass('hidden').addClass('show');
+    }
+    else
+    {
+        $('#topics_results_row').removeClass('show').addClass('hidden');        
+    }
+
 }
 
 function showModal(src)
@@ -316,29 +399,6 @@ function showModal(src)
     });
 }
 
-
-function querySuggestions() {
-    $('#suggestions-text').text('Loading...');
-    var jqxhr = $.ajax("/querySuggestions?currentPaths=" + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)))
-        .done(function(data) {
-            if (data.length > 0) {
-                suggestionsArray = JSON.parse(data);
-            } else {
-                suggestionsArray = [];
-            }
-
-            //alert('suggestionsArray length: '+suggestionsArray.length+" [0]: "+suggestionsArray[0])
-            if (suggestionsArray.length > 0) {
-                $('#suggestions-text').text('Try: ' + suggestionsArray.join(", "));
-            } else
-                $('#suggestions-text').html('<i>No suggestions</i>');
-        })
-        .fail(function(err) {
-            //alert( "error getting suggestions" );
-            console.log("Error getting suggestions: " + err);
-            $('#suggestions-text').html('<i>Suggestions not availbale at this time</i>');
-        });
-}
 
 function reportAudit() {
     var jqxhr = $.ajax("/report?reportString=" + fixedEncodeURIComponent(reportString) +

@@ -40,7 +40,7 @@
         </div>
         <div id="topbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><h4><span class="label label-info">v0.0.7</span></h4></li>
+            <li><h4><span class="label label-info">v0.0.8</span></h4></li>
           </ul>
         </div>
       </div>
@@ -86,8 +86,11 @@
               <li role="presentation" class="search" id="search-screens">
                 <a href="#" onclick="switchSearch(searchTypes.SCREENS);">Screens</a>
               </li>
-              <li role="presentation" class="search" id="search-flows">
+              <li role="presentation" class="search" id="search-issues">
                 <a href="#" onclick="switchSearch(searchTypes.ISSUES);">Issues</a>
+              </li>
+              <li role="presentation" class="search" id="search-topics">
+                <a href="#" onclick="switchSearch(searchTypes.TOPICS);">Topics</a>
               </li>
             </ul>
           </div>
@@ -144,6 +147,16 @@
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
+    <div class="container" id="topics_results" class="hidden">
+      <div class="row hidden" id="topics_results_row">
+        <div class="col-md-2" id="availbale_topics">
+        </div>
+        <div class="col-md-8" id="topics_flow">
+        </div>
+        <div class="col-md-2">
+        </div>
+      </div>
+    </div> <!-- end screens results -->
     <!-- END results area -->
 
     <div id="details" class="panel panel-default hidden">

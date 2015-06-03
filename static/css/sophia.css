@@ -144,3 +144,18 @@
     width: 1120px;
     margin-left: -260px;
 }
+
+#topics_results label.btn-default.active{background-color:#1E90FF;color:#FFF}
+#topics_results label.btn-default{width:90%;border:1px solid #efefef;margin:5px; box-shadow:5px 8px 8px 0 #ccc;}
+#topics_results label .bizcontent{width:100%;}
+#topics_results .btn-group{width:90%}
+#topics_results .btn span.glyphicon{
+    opacity: 0;
+}
+#topics_results .btn.active span.glyphicon {
+    opacity: 1;
+}
+#topics_results .btn {
+	white-space: normal;
+	background-color:#87CEFA;
+}
