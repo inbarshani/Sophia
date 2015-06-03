@@ -244,6 +244,10 @@ function getScreens(node_id, callback) {
 }
 
 function clearSearch() {
+    $('#search-text').val('');
+    reportString = '';
+    lastQuery = '';
+    searchType = searchTypes.FLOWS;
     // remove all nodes
     currentPaths.length = 0;
     currentBackboneNodes.length = 0;
@@ -252,6 +256,8 @@ function clearSearch() {
     $('#flow-list').empty();
     // update the logo
     update();
+
+    $('#search-text').focus();
 }
 
 function update() {
