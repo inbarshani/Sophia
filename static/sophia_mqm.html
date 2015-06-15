@@ -13,6 +13,7 @@
     <link href="bootstrap-3.3.4-dist/css/bootstrap.css" rel="stylesheet">
     <link href="bootstrap-3.3.4-dist/css/dashboard.css" rel="stylesheet">
     <link href="/css/sophia.css" rel="stylesheet">
+    <link href="/css/sophia-topics.css" rel="stylesheet">
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
     <!--script src="../../assets/js/ie-emulation-modes-warning.js"></script-->
@@ -40,7 +41,7 @@
         </div>
         <div id="topbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><h4><span class="label label-info">v0.0.9</span></h4></li>
+            <li><h4><span class="label label-info">v0.1.0</span></h4></li>
           </ul>
         </div>
       </div>
@@ -156,37 +157,7 @@
         </div>
         <div class="col-md-8 text-center" id="topics_flow">
           <h4><span class="legend">Selected Topics</span></h4>
-          <div class="container">
-            <div class="row">
-              <div class="col-md-2" id="1">
-              </div>
-              <div class="col-md-2" id="2">
-              </div>
-              <div class="col-md-2" id="3">
-              </div>
-              <div class="col-md-2" id="4">
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-2" id="5">
-              </div>
-              <div class="col-md-2" id="6">
-              </div>
-              <div class="col-md-2" id="7">
-              </div>
-              <div class="col-md-2" id="8">
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-2" id="9">
-              </div>
-              <div class="col-md-2" id="10">
-              </div>
-              <div class="col-md-2" id="11">
-              </div>
-              <div class="col-md-2" id="12">
-              </div>
-            </div>
+          <div id="topics-vis-container" class="panel panel-default">
           </div>
         </div>
         <div class="col-md-2 text-center" id="topic_details">
@@ -194,13 +165,6 @@
         </div>
       </div>
     </div> <!-- end screens results -->
-    <div class="modal fade" id="topicsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-body">
-          <div class="alert alert-danger" role="alert"><h4>Selected Topics are full</h4></div>
-        </div>
-      </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
     <!-- END results area -->
 
     <div id="details" class="panel panel-default hidden">
@@ -212,8 +176,10 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="bootstrap-3.3.4-dist/js/bootstrap.min.js"></script>
     <script src="js/sophia-mqm-ui.js"></script>
     <script src="js/sophia-vis-ui.js"></script>
+    <script src="js/sophia-vis-topics.js"></script>
   </body>
 </html>
