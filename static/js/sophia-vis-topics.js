@@ -68,7 +68,9 @@ var d3Topics = {
     g = this.svg.selectAll(".chord")
         .data(chord.chords)
       .enter().append("g")
-        .attr("class", "group");
+        .attr("class", "group")
+        .on("mouseover", this.fadeTopic(.1))
+        .on("mouseout", this.fadeTopic(1));
 
     g.append("path")
         .attr("class", "chord")
@@ -80,7 +82,8 @@ var d3Topics = {
         .each(function(d) { 
           d.angle = (d.source.startAngle + d.source.endAngle) / 2; })
         .attr("dy", ".35em")
-        .attr("transform", function(d) {console.log('transform text, d='+JSON.stringify(d));
+        .attr("class", "chord")
+        .attr("transform", function(d) {
           return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
               + "translate(" + (innerRadius - 26) + ")"
               + (d.angle > Math.PI ? "rotate(180)" : "");
@@ -94,7 +97,8 @@ var d3Topics = {
         .each(function(d) { 
           d.angle = (d.target.startAngle + d.target.endAngle) / 2; })
         .attr("dy", ".35em")
-        .attr("transform", function(d) {console.log('transform text, d='+JSON.stringify(d));
+        .attr("class", "chord")
+        .attr("transform", function(d) {
           return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
               + "translate(" + (innerRadius - 26) + ")"
               + (d.angle > Math.PI ? "rotate(180)" : "");
@@ -139,8 +143,10 @@ var d3Topics = {
   fadeTopic: function(opacity) {
     var svg = this.svg;
     return function(g, i) {
-      svg.selectAll(".chord path")
-          .filter(function(d) { return d.source.index != i && d.target.index != i; })
+      svg.selectAll(".chord")
+          .filter(function(d) { 
+            return d.source.index != i && d.target.index != i; 
+          })
         .transition()
           .style("opacity", opacity);
     };
