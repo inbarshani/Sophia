@@ -1,0 +1,6 @@
+#topics-vis-container svg {
+}
+
+#topics-vis-container .chord {
+  fill-opacity: .67;
+}
