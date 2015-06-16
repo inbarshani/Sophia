@@ -1,28 +1,30 @@
 var testScripts = {};
-
-var xhr = new XMLHttpRequest();
-xhr.open('GET', chrome.extension.getURL('tests.json'), true);
-xhr.onreadystatechange = function()
-{
-    if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200)
-    {
-        testScripts = JSON.parse(xhr.responseText);
-        console.log('loaded tests from extension json file.');
-        // load list of tests
-        var tests = Object.keys(testScripts);
-        for(var i=0;i<tests.length;i++)
-        {
-           $("#testsSelect").append('<option value="'+i+'">'+tests[i]+'</option>'); 
-        }
-    }
-};
-xhr.send();
-
 var currentTest = -1;
 var currentStep = -1;
 
 $(document).ready(function() {
-    chrome.storage.local.get(['sophiaTestId','sophiaCurrentTest', 'sophiaCurrentStep', 'sophiaTests'], 
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', chrome.extension.getURL('tests.json'), true);
+    xhr.onreadystatechange = function()
+    {
+        if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200)
+        {
+            testScripts = JSON.parse(xhr.responseText);
+            console.log('loaded tests from extension json file.');
+            //chrome.storage.local.set({'sophiaTests', testScripts}, function() {
+            //   console.log('Sophia extension Test tests saved');
+            //});
+            // load list of tests
+            var tests = Object.keys(testScripts);
+            for(var i=0;i<tests.length;i++)
+            {
+               $("#testsSelect").append('<option value="'+i+'">'+tests[i]+'</option>'); 
+            }
+        }
+    };
+    xhr.send();
+
+    chrome.storage.local.get(['sophiaTestId','sophiaCurrentTest', 'sophiaCurrentStep'], 
         function(result) {
             if (result.sophiaTestId == null) {
                 // test not running
@@ -37,7 +39,6 @@ $(document).ready(function() {
                 $("#startTestBtn").attr("disabled", true);
                 $("#reportStep").removeAttr("disabled");
                 $("#endTestBtn").removeAttr("disabled");
-                testScripts = result.sophiaTests;
                 currentTest = parseInt(result.sophiaCurrentTest);
                 currentStep = parseInt(result.sophiaCurrentStep);
                 var test_desc = 'Manual test';
@@ -102,13 +103,36 @@ $("#startTestBtn").click(function() {
             data: data,
             dataType: 'json',
             success: function(doc) {
+                // setup first step, and report it as well
                 $("#instructions").text('Test '+description+' with GUID ' + guid + ' running...');
+                var step_desc = '';
                 if (currentTest >= 0){
                     var test = Object.keys(testScripts)[currentTest];
-                    $("#currentStep").text(testScripts[test][currentStep]);
+                    step_desc = testScripts[test][currentStep];
                 }
                 else
-                    $("#currentStep").text('Manual step '+currentStep);
+                    step_desc ='Manual step '+currentStep;
+
+                $("#currentStep").text(step_desc);
+
+                args = {
+                    type: "TestStep",
+                    timestamp: ts,
+                    action: "start",
+                    testID: guid,
+                    stepNumber: currentStep,
+                    description: step_desc
+                }
+                var data = JSON.stringify(args);
+                $.ajax({
+                    url: dataUrl,
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    success: function(doc) {
+                        console.log("TestStep start reported");
+                    }
+                });
             }
         });
     });
@@ -123,6 +147,13 @@ $("#endTestBtn").click(function() {
     var description = "Manual test";
     if (currentTest >= 0)
         description = Object.keys(testScripts)[currentTest];
+    var step_desc = '';
+    if (currentTest >= 0){
+        step_desc = testScripts[description][currentStep];
+    }
+    else
+        step_desc ='Manual step '+currentStep;
+    // clear variables
     currentTest = -1; 
     currentStep = -1;
     var ts = new Date().getTime();
@@ -139,6 +170,25 @@ $("#endTestBtn").click(function() {
                 console.log("Sophia extension GUID not defined");
                 return;
             }
+            // report both step end and test end
+            var step_args = {
+                type: "TestStep",
+                timestamp: ts,
+                action: "stop",
+                testID: guid,
+                stepNumber: currentStep,
+                description: step_desc
+            }
+            var step_data = JSON.stringify(step_args);
+            $.ajax({
+                url: dataUrl,
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function(doc) {
+                    console.log("TestStep stop reported");
+                }
+            });
             var args = {
                 type: "Test",
                 timestamp: ts,
@@ -198,7 +248,7 @@ $("#reportStep").click(function() {
             var args = {
                 type: "TestStep",
                 timestamp: ts,
-                action: "start",
+                action: "stop",
                 testID: guid,
                 stepNumber: currentStep,
                 description: step_desc
@@ -226,6 +276,26 @@ $("#reportStep").click(function() {
                     else
                         step_desc = 'Manual step '+currentStep;
                     $("#currentStep").text(step_desc);
+
+                    var step_args = {
+                        type: "TestStep",
+                        timestamp: ts,
+                        action: "start",
+                        testID: guid,
+                        stepNumber: currentStep,
+                        description: step_desc
+                    }
+                    var step_data = JSON.stringify(step_args);
+                    $.ajax({
+                        url: dataUrl,
+                        type: 'POST',
+                        data: data,
+                        dataType: 'json',
+                        success: function(doc) {
+                            console.log("TestStep start reported");
+                        }
+                    });
+
                     chrome.storage.local.set({
                         'sophiaCurrentStep': currentStep
                     }, function() {
