@@ -1,18 +1,28 @@
-var testScripts = {
-    'Test1': {
-        1: 'Step1',
-        2: 'Step2'
-    },
-    'Test2': {
-        1: 'Test2Step1'       
+var testScripts = {};
+
+var xhr = new XMLHttpRequest();
+xhr.open('GET', chrome.extension.getURL('tests.json'), true);
+xhr.onreadystatechange = function()
+{
+    if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200)
+    {
+        testScripts = JSON.parse(xhr.responseText);
+        console.log('loaded tests from extension json file.');
+        // load list of tests
+        var tests = Object.keys(testScripts);
+        for(var i=0;i<tests.length;i++)
+        {
+           $("#testsSelect").append('<option value="'+i+'">'+tests[i]+'</option>'); 
+        }
     }
 };
+xhr.send();
 
 var currentTest = -1;
 var currentStep = -1;
 
 $(document).ready(function() {
-    chrome.storage.local.get(['sophiaTestId','sophiaCurrentTest', 'sophiaCurrentStep'], 
+    chrome.storage.local.get(['sophiaTestId','sophiaCurrentTest', 'sophiaCurrentStep', 'sophiaTests'], 
         function(result) {
             if (result.sophiaTestId == null) {
                 // test not running
@@ -27,6 +37,7 @@ $(document).ready(function() {
                 $("#startTestBtn").attr("disabled", true);
                 $("#reportStep").removeAttr("disabled");
                 $("#endTestBtn").removeAttr("disabled");
+                testScripts = result.sophiaTests;
                 currentTest = parseInt(result.sophiaCurrentTest);
                 currentStep = parseInt(result.sophiaCurrentStep);
                 var test_desc = 'Manual test';
@@ -45,12 +56,6 @@ $(document).ready(function() {
                 $("#currentStep").text(step_desc);
             }
     });
-    // load list of tests
-    var tests = Object.keys(testScripts);
-    for(var i=0;i<tests.length;i++)
-    {
-       $("#testsSelect").append('<option value="'+i+'">'+tests[i]+'</option>'); 
-    }
 });
 
 $("#startTestBtn").click(function() {

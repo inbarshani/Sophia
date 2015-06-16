@@ -43,5 +43,8 @@
   "externally_connectable": {
     "ids": ["*"],
     "matches": ["https://*.google.com/*","*://*.chromium.org/*","https://*.google.co.il/*","http://*.hp.com/*"]
-  }
+  },
+  "web_accessible_resources": [
+    "tests.json"
+  ]
 }
