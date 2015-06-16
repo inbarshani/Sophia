@@ -12,23 +12,38 @@ var currentTest = -1;
 var currentStep = -1;
 
 $(document).ready(function() {
-    chrome.storage.local.get('sophiaTestId', function(result) {
-        if (result.sophiaTestId == null) {
-            // test not running
-            $("#reportStep").attr("disabled", true);
-            $("#endTestBtn").attr("disabled", true);
-            $("#startTestBtn").removeAttr("disabled");
-            $("#testsSelect").removeAttr("disabled");
-            $("#instructions").text('Press "Start Test" to begin execution');
-            $("#currentStep").text('');
-        } else {
-            $("#testsSelect").attr("disabled", true);
-            $("#startTestBtn").attr("disabled", true);
-            $("#reportStep").removeAttr("disabled");
-            $("#endTestBtn").removeAttr("disabled");
-            $("#instructions").text('Test with GUID ' + result.sophiaTestId + ' running...');
-        }
-
+    chrome.storage.local.get(['sophiaTestId','sophiaCurrentTest', 'sophiaCurrentStep'], 
+        function(result) {
+            if (result.sophiaTestId == null) {
+                // test not running
+                $("#reportStep").attr("disabled", true);
+                $("#endTestBtn").attr("disabled", true);
+                $("#startTestBtn").removeAttr("disabled");
+                $("#testsSelect").removeAttr("disabled");
+                $("#instructions").text('Press "Start Test" to begin execution');
+                $("#currentStep").text('');
+            } else {
+                $("#testsSelect").attr("disabled", true);
+                $("#startTestBtn").attr("disabled", true);
+                $("#reportStep").removeAttr("disabled");
+                $("#endTestBtn").removeAttr("disabled");
+                currentTest = parseInt(result.sophiaCurrentTest);
+                currentStep = parseInt(result.sophiaCurrentStep);
+                var test_desc = 'Manual test';
+                var step_desc = 'Manual step '+currentStep;
+                if (currentTest >= 0)
+                {
+                    test_desc = Object.keys(testScripts)[currentTest];
+                    step_desc = testScripts[test_desc][currentStep];
+                }
+                $("#instructions").text('Test '+test_desc+' with GUID ' + result.sophiaTestId + ' running...');
+                if (!step_desc)
+                {
+                    step_desc = '<<test done>>';
+                    $("#reportStep").attr("disabled", true);
+                }                        
+                $("#currentStep").text(step_desc);
+            }
     });
     // load list of tests
     var tests = Object.keys(testScripts);
@@ -58,9 +73,11 @@ $("#startTestBtn").click(function() {
         }
         var guid = UUID();
         chrome.storage.local.set({
-            'sophiaTestId': guid
+            'sophiaTestId': guid,
+            'sophiaCurrentTest': currentTest,
+            'sophiaCurrentStep': currentStep
         }, function() {
-            console.log('Test GUID saved');
+            console.log('Sophia extension Test params saved');
         });
         var description = "Manual test";
         if (currentTest >= 0)
@@ -135,9 +152,11 @@ $("#endTestBtn").click(function() {
                 }
             });
             chrome.storage.local.set({
-                'sophiaTestId': null
-            }, function(result) {
-                console.log("Sophia extension Test GUID removed");
+                'sophiaTestId': null,
+                'sophiaCurrentTest': currentTest,
+                'sophiaCurrentStep': currentStep
+            }, function() {
+                console.log('Sophia extension Test params cleared');
             });
         });
     });
@@ -202,6 +221,11 @@ $("#reportStep").click(function() {
                     else
                         step_desc = 'Manual step '+currentStep;
                     $("#currentStep").text(step_desc);
+                    chrome.storage.local.set({
+                        'sophiaCurrentStep': currentStep
+                    }, function() {
+                        console.log('Sophia extension Test currentStep param updated');
+                    });
                 },
                 error: function(obj, textStatus, errorThrown) {
                     console.log("TestStep error: " + textStatus + " Error: " + errorThrown);
