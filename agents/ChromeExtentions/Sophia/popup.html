@@ -45,8 +45,15 @@
   </head>
   <body>
     <div id="instructions"></div>
+    <select id="testsSelect">
+      <option value="new">New test</option>
+      <option disabled>--------</option>
+    </select>
+    <br/>
     <button id="startTestBtn">Start Test</button>
-    <button id="reportStep" counter="0">Report Step</button>
+    <div id="currentStep"></div>
+    <br/>
+    <button id="reportStep">Report Step</button>
     <button id="endTestBtn">End Test</button>
     <script src="jquery-2.1.1.min.js"></script>
     <script src="popup.js"></script>

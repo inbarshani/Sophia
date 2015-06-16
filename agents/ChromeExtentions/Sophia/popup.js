@@ -1,3 +1,16 @@
+var testScripts = {
+    'Test1': {
+        1: 'Step1',
+        2: 'Step2'
+    },
+    'Test2': {
+        1: 'Test2Step1'       
+    }
+};
+
+var currentTest = -1;
+var currentStep = -1;
+
 $(document).ready(function() {
     chrome.storage.local.get('sophiaTestId', function(result) {
         if (result.sophiaTestId == null) {
@@ -5,8 +18,11 @@ $(document).ready(function() {
             $("#reportStep").attr("disabled", true);
             $("#endTestBtn").attr("disabled", true);
             $("#startTestBtn").removeAttr("disabled");
+            $("#testsSelect").removeAttr("disabled");
             $("#instructions").text('Press "Start Test" to begin execution');
+            $("#currentStep").text('');
         } else {
+            $("#testsSelect").attr("disabled", true);
             $("#startTestBtn").attr("disabled", true);
             $("#reportStep").removeAttr("disabled");
             $("#endTestBtn").removeAttr("disabled");
@@ -14,10 +30,23 @@ $(document).ready(function() {
         }
 
     });
+    // load list of tests
+    var tests = Object.keys(testScripts);
+    for(var i=0;i<tests.length;i++)
+    {
+       $("#testsSelect").append('<option value="'+i+'">'+tests[i]+'</option>'); 
+    }
 });
 
 $("#startTestBtn").click(function() {
     $("#startTestBtn").attr("disabled", true);
+    $("#testsSelect").attr("disabled", true);
+    var selectedTest = $("#testsSelect").val();
+    if (selectedTest != 'new')
+    {
+        currentTest = parseInt(selectedTest);
+    }
+    currentStep = 1;
     $("#reportStep").removeAttr("disabled");
     $("#endTestBtn").removeAttr("disabled");
     var ts = new Date().getTime();
@@ -33,13 +62,15 @@ $("#startTestBtn").click(function() {
         }, function() {
             console.log('Test GUID saved');
         });
-
+        var description = "Manual test";
+        if (currentTest >= 0)
+            description = Object.keys(testScripts)[currentTest];
         var args = {
             type: "Test",
             timestamp: ts,
             action: "start",
             testID: guid,
-            description: "Manual test"
+            description: description
         }
 
         var data = JSON.stringify(args);
@@ -49,7 +80,13 @@ $("#startTestBtn").click(function() {
             data: data,
             dataType: 'json',
             success: function(doc) {
-                $("#instructions").text('Test with GUID ' + guid + ' running...');
+                $("#instructions").text('Test '+description+' with GUID ' + guid + ' running...');
+                if (currentTest >= 0){
+                    var test = Object.keys(testScripts)[currentTest];
+                    $("#currentStep").text(testScripts[test][currentStep]);
+                }
+                else
+                    $("#currentStep").text('Manual step '+currentStep);
             }
         });
     });
@@ -58,8 +95,14 @@ $("#startTestBtn").click(function() {
 $("#endTestBtn").click(function() {
     $("#endTestBtn").attr("disabled", true);
     $("#reportStep").attr("disabled", true);
-    $("#reportStep").attr("counter", 0);
     $("#startTestBtn").removeAttr("disabled");
+    $("#testsSelect").removeAttr("disabled");
+    $("#currentStep").text('');
+    var description = "Manual test";
+    if (currentTest >= 0)
+        description = Object.keys(testScripts)[currentTest];
+    currentTest = -1; 
+    currentStep = -1;
     var ts = new Date().getTime();
     chrome.storage.local.get('dataUrl', function(result) {
         var dataUrl = result.dataUrl;
@@ -79,7 +122,7 @@ $("#endTestBtn").click(function() {
                 timestamp: ts,
                 action: "stop",
                 testID: guid,
-                description: "Manual test"
+                description: description
             }
             var data = JSON.stringify(args);
             $.ajax({
@@ -103,8 +146,16 @@ $("#endTestBtn").click(function() {
 $("#reportStep").click(function() {
     console.log("TestStep event");
     var ts = new Date().getTime();
-    var step_counter = parseInt($("#reportStep").attr("counter")) + 1;
-    $("#reportStep").attr("counter", step_counter);
+    var step_desc = '';
+    if (currentTest >= 0)
+    {
+        var test = Object.keys(testScripts)[currentTest];
+        step_desc = testScripts[test][currentStep];
+    }
+    else
+    {
+        step_desc = 'Manual step '+currentStep;
+    }
     chrome.storage.local.get('dataUrl', function(result) {
         var dataUrl = result.dataUrl;
         if (dataUrl == undefined) {
@@ -125,8 +176,8 @@ $("#reportStep").click(function() {
                 timestamp: ts,
                 action: "start",
                 testID: guid,
-                stepNumber: step_counter,
-                description: "Manual test step"
+                stepNumber: currentStep,
+                description: step_desc
             }
             var data = JSON.stringify(args);
             console.log("TestStep before ajax: " + data);
@@ -137,6 +188,20 @@ $("#reportStep").click(function() {
                 dataType: 'json',
                 success: function(doc) {
                     console.log("TestStep reported");
+                    currentStep++;
+                    if (currentTest >= 0)
+                    {
+                        var test = Object.keys(testScripts)[currentTest];
+                        step_desc = testScripts[test][currentStep];
+                        if (!step_desc)
+                        {
+                            step_desc = '<<test done>>';
+                            $("#reportStep").attr("disabled", true);
+                        }                        
+                    }
+                    else
+                        step_desc = 'Manual step '+currentStep;
+                    $("#currentStep").text(step_desc);
                 },
                 error: function(obj, textStatus, errorThrown) {
                     console.log("TestStep error: " + textStatus + " Error: " + errorThrown);
