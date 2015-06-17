@@ -153,9 +153,6 @@ $("#endTestBtn").click(function() {
     }
     else
         step_desc ='Manual step '+currentStep;
-    // clear variables
-    currentTest = -1; 
-    currentStep = -1;
     var ts = new Date().getTime();
     chrome.storage.local.get('dataUrl', function(result) {
         var dataUrl = result.dataUrl;
@@ -183,7 +180,7 @@ $("#endTestBtn").click(function() {
             $.ajax({
                 url: dataUrl,
                 type: 'POST',
-                data: data,
+                data: step_data,
                 dataType: 'json',
                 success: function(doc) {
                     console.log("TestStep stop reported");
@@ -206,6 +203,9 @@ $("#endTestBtn").click(function() {
                     $("#instructions").text('Press "Start Test" to begin execution');
                 }
             });
+            // clear variables
+            currentTest = -1; 
+            currentStep = -1;
             chrome.storage.local.set({
                 'sophiaTestId': null,
                 'sophiaCurrentTest': currentTest,
@@ -289,7 +289,7 @@ $("#reportStep").click(function() {
                     $.ajax({
                         url: dataUrl,
                         type: 'POST',
-                        data: data,
+                        data: step_data,
                         dataType: 'json',
                         success: function(doc) {
                             console.log("TestStep start reported");
