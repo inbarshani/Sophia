@@ -171,7 +171,8 @@ $("#endTestBtn").click(function() {
             var step_args = {
                 type: "TestStep",
                 timestamp: ts,
-                action: "stop",
+                action: "done",
+                status: 'failed',
                 testID: guid,
                 stepNumber: currentStep,
                 description: step_desc
@@ -217,7 +218,15 @@ $("#endTestBtn").click(function() {
     });
 });
 
-$("#reportStep").click(function() {
+$("#reportStepPass").click(function(){
+    reportStep('passed');
+});
+
+$("#reportStepFail").click(function(){
+    reportStep('failed');
+});
+
+function reportStep(status) {
     console.log("TestStep event");
     var ts = new Date().getTime();
     var step_desc = '';
@@ -248,8 +257,9 @@ $("#reportStep").click(function() {
             var args = {
                 type: "TestStep",
                 timestamp: ts,
-                action: "stop",
+                action: "done",
                 testID: guid,
+                status: status,
                 stepNumber: currentStep,
                 description: step_desc
             }
@@ -308,7 +318,7 @@ $("#reportStep").click(function() {
             });
         });
     });
-});
+}
 
 function UUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
