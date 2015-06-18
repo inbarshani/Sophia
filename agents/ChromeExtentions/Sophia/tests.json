@@ -1,0 +1,72 @@
+{
+    "01 QA Manager": {
+        "1": "Step 1 - Quality management: Go to 'Quality management' tab, review Manual and Automated tests by their assigned Backlogs items.",
+		"2": "Step 2 Verify Backlog Coverge by tests, use also multi value reference field.",
+		"3": "Step 3 Verify Backlog Coverge by product areas and use also multi value reference field. ",
+		"4": "Step 4 Verify coverage by cross filter over traceability.",
+		"5": "Step 5 - Defercts Navigate to 'Defects' tab and filter defects by different Backlogs items levels",
+		"6": "Step 6 Edit defects status and save",
+		"7": "Step 7 - Dashboard Navigate to 'Dashboard' tab and view Defects Summary graph per Product area",
+		"8": "Step 8 View Defects Summary graph per Backlog items",
+		"9": "Step 9 View Defects summary graph grouped by defect field (for example severity)"
+    },
+    "02 Manual Tester": {
+		"1": "step 1 - Quality Management Login to Quality Management tab and open the Release quality view.",
+		"2": "step 2 Filter the view by the relevant release.",
+		"3": "step 3 From the backlog tree, select a user story (Backlog item) which is mapped to product areas",
+		"4": "step 4 Go to 'Tests' tab and from the upper toolbar click '+' and add a new test to the test grid",
+		"5": "step 5 Login to Test details and view test Details: Product area, Runs, Traceability.",
+		"6": "step 6 Assign the test to the relevant Backlog item and product area.",
+		"7": "Step 7 Update test fields such as: test type, description etc.",
+		"8": "Step 8 Add an attachments to test.",
+		"9": "Step 9 View the product area field and update it.",
+		"10": "Step 10 Go to 'Design' tab and add 5 more steps to test",
+		"11": "Step 11 Add Validation steps as well.",
+		"12": "Step 12 Go back to the test grid and view the right filter pane. Filter the grid by the workflow category (Ready, Review, Draft...)",   
+		"13": "Step 13 Select the test you have created and Run it. Make sure the validation steps are not running.",
+		"14": "Step 14 Report a defect during the run related to one of the steps.",
+		"15": "Step 15 - Dashboard Navigate to 'Dashboard' tab and view tests status per product area, and sub-area.",
+		"16": "Step 16 View tests status per Release",
+		"17": "Step 17 - Defects Switch to Defects module and filter grid by Product tree and product sub-tree.",
+		"18": "Step 18 Select a defect and Edit it: Add text, update field values, add attachment and linkage."
+    },
+    "03 PMO Release Manager": {
+		"1": "Step 1 -Quality Management From 'Release Quality' create few new Backlogs items",
+		"2": "Step 2 Select an existing Backlog item and edit its details (for example: description, priority, target release)",
+		"3": "Step 3 Assign Backlog item to test and Product area.",
+		"4": "Step 4 By using the cross filter, check if there are: 1. Orphan tests  2. Baclogs items with test coverage.",
+		"5": "Step 5 Filter features (Backlog items level) by Release (context filtering)",
+		"6": "Step 6 - Customization From Customization mode->  under specific Workspace,  define workspace defects process under 'workflow'",
+		"7": "Step 7 Go to 'Entities' tab -> Rules. Create new Business Rule for the existing entities types.",
+		"8": "Step 8 Verify Rules are implemented while working with the defined entitiy",
+		"9": "Step 9 - Defects Switch to Defects module and filter the defects grid by Feature/Theme (Backlog items)",
+		"10": "Step 10 Link defect to Product area and Backlog item."
+    },
+    "04 Product Owner": {
+		"1": "Step 1 Quality Managment Navigate to Product Overview and add few product areas to the tree.",
+		"2": "Step 2 Assign Baclog item to specific Product Area.",
+		"3": "Step 3 Filter the Product tree by specific release ",
+		"4": "Step 4 View Product area to track problematic areas in different levels (Number of defects, failed tests etc.)"
+	},
+    "05 Automation Pipeline Owner": {
+		"1": "Step 1 - Prerequisite Verify Jenkins is connected and Jobs are running at the backround.",
+		"2": "Step 2 - Customization Go to Customization mode and navigate to 'CI Server' tab. Configure connection to Jenkins and save. ",
+		"3": "Step 3 - Pipelines Logout customization mode and navigate to 'Pipelines' from main menu. Define new pipeline for specific release and build ",
+		"4": "Step 4 Review pipelines structure (graphical visualization) and Customize Jobs: Edit Name Add classifications Add user tags?",
+		"5": "Step 5 View live execution to view Job progress (graphical view; for running pipeline, progress is shown) ",
+		"6": "Step 6 - Customization From Customization mode-> Exceuter tab add a new executor with Parametes coming from Jenkins job. "
+    },
+    "06 Automation Tester": {
+		"1": "Step 1 - Quality management From 'Quality management' review Pipeline test results once Job is finished (filter by automatic test type) ",
+		"2": "Step 2 Submit a new defect to one of the Job tests (automatic test)",
+		"3": "Step 3 Assign Automated tests to Product area and Backlog items. ",
+		"4": "Step 4 Verify all Tests are covered and no test is left without Product area/Backlog item assigned",
+		"5": "Step 5 Select one of the automated tests and Run it with the Executer defined"
+    },
+    "Site Administrator": {
+		"1": "Step 1 Login to MQM with sa user.",
+		"2": "Step 2 - Workspace creation Switch to Customization mode-> 'Workspaces' tab. Go to 'workspaces' lower tab and create 2 workspaces: Add a name and a description for each and save.",
+		"3": "Step 3 - Users View At Workspace level, view the assigned users. View users at sharedspcae level as well.",
+		"4": "Step 4 - Release creation Go to 'Workspaces' tab -> 'Releases' tab and create a new release."
+    }
+}

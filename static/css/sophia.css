@@ -18,7 +18,7 @@
 	margin-top: 20px;
 }
 
-.closeX {
+#flow_results .closeX {
 	float: right;
 	color: #000;
 	margin-right: 5px;
@@ -26,22 +26,22 @@
 	height: 10px;
 }
 
-.path {
+#flow_results .path {
 	stroke: #000;
 	stroke-width: 1px;
 }
 
-.circle {
+#flow_results .circle {
 	stroke: none;
 	fill: #5bc0de;
 }
 
-.circle.highlighted {
+#flow_results .circle.highlighted {
 	stroke: none;
 	fill: #00ff00;
 }
 
-.text {
+#flow_results .text {
 	font-size: 12px;
 	text-anchor: middle;
 	fill: #000;
