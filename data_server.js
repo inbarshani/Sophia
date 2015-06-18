@@ -39,8 +39,8 @@ app.post('/file', function(request, response) {
         var endIndex = content.lastIndexOf('\r\n------WebKitFormBoundary');
         var fileContent = content.substring(startIndex, endIndex);
         var buffer = new Buffer(fileContent, 'base64');
-        var fileName = '\\\\16.60.168.105\\share\\sophia\\' + ts + '.jpg';
-        var wstream = fs.createWriteStream(fileName, {
+        var fileName = ts + '.jpg';
+        var wstream = fs.createWriteStream('./upload/' + fileName, {
             flags: 'w',
             encoding: 'base64'
         });
@@ -51,13 +51,8 @@ app.post('/file', function(request, response) {
                 type: "SCREEN",
                 file: fileName
             };
-/*            var absPath = fs.realpathSync('./upload/');
+            var absPath = fs.realpathSync('./upload/');
             idol_queries.analyzeImage(absPath + '/' + fileName, function(text) {
-                data.text = text;
-                sendToQueue(data, response);
-            });
-*/            
-            idol_queries.analyzeImage(fileName, function(text) {
                 data.text = text;
                 sendToQueue(data, response);
             });
