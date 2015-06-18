@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var amqp = require('amqp');
 var fs = require('fs');
+var idol_queries = require('./lib/idol_queries');
 
 var app = express();
 
@@ -38,19 +39,29 @@ app.post('/file', function(request, response) {
         var endIndex = content.lastIndexOf('\r\n------WebKitFormBoundary');
         var fileContent = content.substring(startIndex, endIndex);
         var buffer = new Buffer(fileContent, 'base64');
-        var fileName = ts + '.jpg';
-        var wstream = fs.createWriteStream('./upload/' + fileName, {
+        var fileName = '\\\\16.60.168.105\\share\\sophia\\' + ts + '.jpg';
+        var wstream = fs.createWriteStream(fileName, {
             flags: 'w',
             encoding: 'base64'
         });
-        wstream.write(buffer);
-        wstream.end();
-        var data = {
-            timestamp: ts,
-            type: "SCREEN",
-            file: fileName
-        };
-        sendToQueue(data, response);
+//        wstream.write(buffer);
+        wstream.end(buffer, "UTF-8", function() {
+            var data = {
+                timestamp: ts,
+                type: "SCREEN",
+                file: fileName
+            };
+/*            var absPath = fs.realpathSync('./upload/');
+            idol_queries.analyzeImage(absPath + '/' + fileName, function(text) {
+                data.text = text;
+                sendToQueue(data, response);
+            });
+*/            
+            idol_queries.analyzeImage(fileName, function(text) {
+                data.text = text;
+                sendToQueue(data, response);
+            });
+        });
     });
 });
 
