@@ -71,6 +71,7 @@ function _processQueueMessage(msg) {
         var obj = JSON.parse(msg.data);
         var data;        
         var obj_type = obj.type.toLowerCase();
+        console.log(" [x] New msg type is: " + obj_type);
         if (obj != null) {
             if (obj_type == 'mqm_log' || obj_type == 'sa_log') {
                 data = mqm_log.getData(obj);
@@ -82,6 +83,7 @@ function _processQueueMessage(msg) {
                 data = ui.getData(obj);
             } else if (obj_type == 'screen') {
                 data = screen.getData(obj);
+               console.log(" [x] SCREEN data: " + JSON.stringify(data));
             } else if (obj_type == 'teststep') {
                 data = teststep.getData(obj);
             } else if (obj_type == 'test') {
@@ -130,6 +132,7 @@ function _processQueueMessage(msg) {
             else if (!current_test_id && !data.testID) {
                 // no current_test_id, no data.testID - don't create the node
                 lock.release();
+                console.log(" [x] No test ID. Skipping...");
                 return;    
             }
             var query = 'CREATE (new_node:' + data.type + ' {attributes} ) RETURN id(new_node) AS NodeID';
@@ -139,7 +142,7 @@ function _processQueueMessage(msg) {
                     timestamp: data.timestamp
                 }
             };
-            //console.log(" [x] Add new node query: " + query);
+            console.log(" [x] Add new node query: " + query);
             db.query(query, params, function(err, results) {
                 try {
                     if (err) {
