@@ -13,6 +13,7 @@ var searchTypes = {FLOWS: 0,
 var searchType = searchTypes.FLOWS;
 var user;
 var lastQuery = "";
+var selectedTestID;
 
 function fixedEncodeURIComponent(str) {
     return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
@@ -48,6 +49,22 @@ $(document).ready(function() {
     update();
     
     $('body').click(onDocumentClick);
+
+    $('#load-test').on('click', function(e) {
+        openLoadTestDialog();
+    });
+    $('#save-test').on('click', function(e) {
+        openSaveTestDialog();
+    });
+    $('#flow-test-type-radio').on('change', function(e) {
+        showTests('flow');
+    });
+    $('#topic-test-type-radio').on('change', function(e) {
+        showTests('topic');
+    });
+    $('#load-test-btn').on('click', function(e) {
+        loadTest();
+    });
 });
 
 $(document).ajaxSend(function(event, xhr, settings ) {
@@ -159,13 +176,13 @@ function search(query){
     }
 }
 
-function searchFlows(query) {
-    if (currentPaths.length == 0) {
+function searchFlows(query, callback) {
+/*    if (currentPaths.length == 0) {
         // clear flow list
         $('#flow-list').empty();
         reportString = 'Type: FLOWS\n';
     }
-
+*/
     if ($('#search-text').val().length > 0)
         query = $('#search-text').val();
     if (!query || query.length==0){
@@ -189,6 +206,9 @@ function searchFlows(query) {
                 query + ' <span class="badge">' + currentPaths.length + '</span></li>');
             reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
             update();
+            if (callback) {
+                callback();
+            }
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
@@ -495,4 +515,89 @@ function reportAudit() {
             console.log("Failed reporting audit log: " + err);
         });
 
+}
+
+function openLoadTestDialog() {
+    $('#loadTestModal').modal('show');
+}
+
+function showTests(type) {
+    $('#tests-list').empty();
+    var jqxhr = $.ajax("/tests/type/" + type)
+        .done(function(tests) {
+            //console.log("getTopicsLinks returned: " + data);
+            var li;
+            for (var i = 0; i < tests.length; i++) {
+                li = $('<li>', {
+                    class: 'list-group-item clickable',
+                    text: tests[i].name,
+                    click: (function(test) {
+                        return function() {
+                            selectTest(this, test);
+                        };
+                    }(tests[i]))
+                });
+                $('#tests-list').append(li);
+           }
+        })
+        .fail(function(err) {
+            console.log("getTopicsLinks failed: " + err);
+        });           
+
+}
+
+function selectTest(li, test) {
+    selectedTestID = test.id;
+    $("ul > li").removeClass('active');
+    $(li).addClass('active');
+    $('#test-details').html('');
+    var p = $('<p>', {
+        html: '<strong>Name:</strong>'
+    });
+    $('#test-details').append(p)
+    p = $('<p>', {
+        text: test.name
+    });
+    $('#test-details').append(p)
+    p = $('<p>', {
+        html: '<strong>Created:</strong>'
+    });
+    $('#test-details').append(p)
+    p = $('<p>', {
+        text: test.created
+    });
+    $('#test-details').append(p)
+}
+
+function loadTest() {
+    if (!selectedTestID) {
+        console.log("No test selected");
+        return;
+    }
+    $('#loadTestModal').modal('hide');
+    $('#search-text').val('');
+    clearSearch();
+    // navigate to Flows or Topics based on type
+
+    var jqxhr = $.ajax("/tests/id/" + selectedTestID)
+        .done(function(test) {
+            var ul;
+            var type = test.type;
+            if (type == 'flow') {
+                ul = $('#flow-list');
+            } else if (type == 'topic') {
+                ul = $('#availbale_topics_list');
+            }
+            ul.empty();
+            var f = [];
+            for (var i = test.queries.length - 1; i >= 0; i--) {
+                f[i] = (function(query, func) {
+                    return function() { searchFlows(query, func) };
+                }(test.queries[i].query, f[i+1]));
+            }
+            f[0]();
+        })
+        .fail(function(err) {
+            console.log("getTopicsLinks failed: " + err);
+        });           
 }

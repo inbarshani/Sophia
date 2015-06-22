@@ -224,14 +224,14 @@ app.use('/tests/id/:id', function(request, response) {
                     test.created = row.CREATED;
                     test.user = row.USER;
                     test.type = row.TYPE;
-                    test.steps = [];
+                    test.queries = [];
                     db.all("SELECT ID, QUERY_TEXT FROM SOP_QUERY WHERE TEST_ID=? ORDER BY POSITION", id, function(err, rows) {
                         if (err) {
                             response.send(err);
                             return;
                         } else {
                             for (var i = 0; i < rows.length; i++) {
-                                test.steps.push({id: rows[i].ID, query: rows[i].QUERY_TEXT});
+                                test.queries.push({id: rows[i].ID, query: rows[i].QUERY_TEXT});
                             }
                         }
                         response.send(test);

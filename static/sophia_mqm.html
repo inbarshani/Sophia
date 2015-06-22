@@ -67,8 +67,13 @@
             <input type="text" autofocus="autofocus" autocomplete="off" placeholder="Search MQM" name="search" class="form-control" id="search-text">
             <span class="input-group-btn">
               <button class="btn btn-info" id="search-button">
-              <span class="glyphicon glyphicon-search"></span>
+                <span class="glyphicon glyphicon-search"></span>
               </button>
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+              <ul class="dropdown-menu dropdown-menu-right">
+                <li><a href="#" id="load-test">Load Test</a></li>
+                <li class="disabled" id="save-test"><a href="#">Save Test</a></li>
+              </ul>
             </span>
           </div>
         </div>
@@ -172,6 +177,55 @@
       <ul id="detailsText" class="list-group"></ul>
     </div>
     <div id="busy" class="busyindicator"> </div>
+    <!-- Modal -->
+    <div class="modal fade" id="loadTestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Load Saved Test</h4>
+          </div>
+          <div class="modal-body">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-md-2">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">Test Type</div>
+                    <div class="panel-body">
+                      <div class="radio">
+                        <label><input type="radio" name="testType" id="flow-test-type-radio" aria-label="Flows" value="flow">Flows</label>
+                      </div>
+                      <div class="radio">
+                        <label><input type="radio" name="testType" id="topic-test-type-radio" aria-label="Topics" value="topic">Topics</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">Available Tests</div>
+                    <div class="panel-body">
+                      <ul class="list-group" id="tests-list"></ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">Test Details</div>
+                    <div class="panel-body" id='test-details'></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" id="load-test-btn" class="btn btn-primary">Load</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
