@@ -17,6 +17,25 @@ Make sure the service is working
 5. Checkout code
 6. install Node modules:
 In Sophia folder, where package.json exists, run: npm install
+7. Save tests DB: install SQLite DB on Sophia server: https://www.sqlite.org/download.html
+(to browse DB on windows you can install "DB Browser for SQLite": https://github.com/sqlitebrowser/sqlitebrowser/releases)
+8. SQLite DB is <Sophia root floder>/Sophia.db
+9. to create the DB tables, run:
+CREATE TABLE `SOP_TEST` (
+	`ID`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	`NAME`	TEXT NOT NULL UNIQUE,
+	`TYPE`	TEXT,
+	`CREATED`	TEXT,
+	`USER`	TEXT
+);
+
+CREATE TABLE `SOP_QUERY` (
+	`ID`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	`QUERY_TEXT`	TEXT,
+	`TEST_ID`	INTEGER,
+	`POSITION`	INTEGER
+);
+ 
 
 B. Jetty and MQM log parser
 ====
