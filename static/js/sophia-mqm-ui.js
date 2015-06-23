@@ -14,6 +14,7 @@ var searchType = searchTypes.FLOWS;
 var user;
 var lastQuery = "";
 var selectedTestID;
+var queries = [];
 
 function fixedEncodeURIComponent(str) {
     return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
@@ -57,13 +58,28 @@ $(document).ready(function() {
         openSaveTestDialog();
     });
     $('#flow-test-type-radio').on('change', function(e) {
-        showTests('flow');
+        showTests(searchTypes.FLOWS);
     });
     $('#topic-test-type-radio').on('change', function(e) {
-        showTests('topic');
+        showTests(searchTypes.TOPICS);
     });
     $('#load-test-btn').on('click', function(e) {
         loadTest();
+    });
+    $('#save-test-btn').on('click', function(e) {
+        saveTest();
+    });
+
+    $('#test-name-field').keyup(function(e) {
+        if ($(this).val().length > 0) {
+            $('#save-test-btn').removeClass('disabled');
+        } else {
+            $('#save-test-btn').addClass('disabled');
+            return;
+        }
+        if (e.keyCode == 13) {
+            saveTest();
+        }
     });
 });
 
@@ -162,6 +178,14 @@ function updateSearchNavigation()
 }
 
 function search(query){
+    $('#save-test').removeClass('disabled');
+    if ($('#search-text').val().length > 0)
+        query = $('#search-text').val();
+    if (!query || query.length==0){
+        // don't run without any query string
+        return false;
+    }
+    queries.push(query);
     if (searchType == searchTypes.FLOWS)
     {
         searchFlows(query);
@@ -177,19 +201,11 @@ function search(query){
 }
 
 function searchFlows(query, callback) {
-/*    if (currentPaths.length == 0) {
+    if (currentPaths.length == 0) {
         // clear flow list
-        $('#flow-list').empty();
+        // $('#flow-list').empty();
         reportString = 'Type: FLOWS\n';
     }
-*/
-    if ($('#search-text').val().length > 0)
-        query = $('#search-text').val();
-    if (!query || query.length==0){
-        // don't run without any query string
-        return false;
-    }
-
     lastQuery = query;
     reportString = reportString + 'Search: ' + query + '\n';
     var jqxhr = $.ajax("/searchFlows?q=" + fixedEncodeURIComponent(query) + '&' +
@@ -229,14 +245,6 @@ function searchScreens(query) {
     reportString = 'Type: SCREENS\n';
     var screens_results_row = $('#screens_results_row');
     screens_results_row.empty();
-
-    if ($('#search-text').val().length > 0)
-        query = $('#search-text').val();
-    if (!query || query.length==0){
-        // don't run without any query string
-        return false;
-    }
-
     lastQuery = query;
     reportString = reportString + 'Search: ' + query + '\n';
     var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query))
@@ -284,14 +292,6 @@ function searchTopics(query) {
     reportString = 'Type: TOPICS\n';
     var availbale_topics_list = $('#availbale_topics_list');
     availbale_topics_list.empty();
-
-    if ($('#search-text').val().length > 0)
-        query = $('#search-text').val();
-    if (!query || query.length==0){
-        // don't run without any query string
-        return false;
-    }
-
     lastQuery = query;
     reportString = reportString + 'Search: ' + query + '\n';
     var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]")
@@ -417,6 +417,8 @@ function getScreens(node_id, callback) {
 }
 
 function clearSearch() {
+    queries = [];
+    $('#save-test').addClass('disabled');
     $('#search-text').val('');
     reportString = '';
     lastQuery = '';
@@ -521,6 +523,10 @@ function openLoadTestDialog() {
     $('#loadTestModal').modal('show');
 }
 
+function openSaveTestDialog() {
+    $('#saveTestModal').modal('show');
+}
+
 function showTests(type) {
     $('#tests-list').empty();
     var jqxhr = $.ajax("/tests/type/" + type)
@@ -541,7 +547,7 @@ function showTests(type) {
            }
         })
         .fail(function(err) {
-            console.log("getTopicsLinks failed: " + err);
+            console.log("showTests failed: " + err);
         });           
 
 }
@@ -581,23 +587,77 @@ function loadTest() {
 
     var jqxhr = $.ajax("/tests/id/" + selectedTestID)
         .done(function(test) {
+            queries = [];
             var ul;
             var type = test.type;
-            if (type == 'flow') {
+            if (type == searchTypes.FLOWS) {
                 ul = $('#flow-list');
-            } else if (type == 'topic') {
+            } else if (type == searchTypes.TOPICS) {
                 ul = $('#availbale_topics_list');
             }
             ul.empty();
             var f = [];
             for (var i = test.queries.length - 1; i >= 0; i--) {
                 f[i] = (function(query, func) {
-                    return function() { searchFlows(query, func) };
+                    return function() {
+                        queries.push(query);
+                        searchFlows(query, func);
+                    };
                 }(test.queries[i].query, f[i+1]));
             }
             f[0]();
         })
         .fail(function(err) {
-            console.log("getTopicsLinks failed: " + err);
+            console.log("loadTest failed: " + err);
         });           
+}
+
+function saveTest() {
+    var testName = $('#test-name-field').val();
+    var params = {
+        'user': user,
+        'type': searchType,
+        'name': testName,
+        'queries': queries
+    };
+    $.ajax({  
+        type: 'POST',  
+        url: '/saveTest/',
+        cache: false,
+        data: JSON.stringify(params),
+        headers: { "Content-Type": "application/json"  }, 
+        success: function(data){
+            if (data != 'OK') {
+                $('#save-test-error').text('Error ' + data.errno + ': ' + data.code);
+                $('#save-test-error').addClass('alert-danger');
+                $('#save-test-error').removeClass('hidden');
+                setTimeout(function() {
+                    $('#save-test-error').text('');
+                    $('#save-test-error').removeClass('alert-danger');
+                    $('#save-test-error').addClass('hidden');
+                }, 5000);
+            } else {
+                $('#save-test-error').text('Test saved successfully');
+                $('#save-test-error').addClass('alert-success');
+                $('#save-test-error').removeClass('hidden');
+                setTimeout(function() {
+                    $('#save-test-error').text('');
+                    $('#save-test-error').removeClass('alert-success');
+                    $('#save-test-error').addClass('hidden');
+                    $('#saveTestModal').modal('hide');
+                }, 3000);
+
+            }
+        },
+        error: function (textStatus, errorThrown){
+            $('#save-test-error').text(textStatus);
+            $('#save-test-error').addClass('alert-danger');
+            $('#save-test-error').removeClass('hidden');
+            setTimeout(function() {
+                $('#save-test-error').text('');
+                $('#save-test-error').removeClass('alert-danger');
+                $('#save-test-error').addClass('hidden');
+            }, 5000);
+        }
+    });  
 }

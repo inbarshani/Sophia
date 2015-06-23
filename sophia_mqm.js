@@ -168,7 +168,7 @@ app.use('/report', function(request, response) {
 app.post('/saveTest', function(request, response) {
     if (request._body) {
         var error = null;
-        var created = request.body.created;
+        var created = new Date().toUTCString();
         var user = request.body.user;
         var name = request.body.name;
         var type = request.body.type;
