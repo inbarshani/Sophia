@@ -286,7 +286,7 @@ function searchScreens(query) {
         });
 }
 
-function searchTopics(query) {
+function searchTopics(query, callback) {
     // change UI to show list of images instead of flows
     //  clear top level vars
     reportString = 'Type: TOPICS\n';
@@ -329,6 +329,10 @@ function searchTopics(query) {
             }
 
             update();
+            if (callback) {
+                callback();
+            }
+
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
@@ -416,7 +420,7 @@ function getScreens(node_id, callback) {
         });
 }
 
-function clearSearch() {
+function clearSearch(searchType) {
     queries = [];
     $('#save-test').addClass('disabled');
     $('#search-text').val('');
@@ -428,9 +432,11 @@ function clearSearch() {
     currentBackboneNodes.length = 0;
     currentDataNodes.length = 0;
     // clear flow list
-    $('#flow-list').empty();
-    // update the logo
+    $('#availbale_topics_list').empty();    // update the logo
     update();
+    if (searchType != undefined) {
+        switchSearch(searchType);
+    }
 
     $('#search-text').focus();
 }
@@ -445,7 +451,7 @@ function update() {
 }
 
 function updateNavigation() {    
-    if (lastQuery.length > 0) {
+    if (lastQuery && lastQuery.length > 0) {
         $('#navbar-logo').removeClass('hidden').addClass('show');
         //$('#search-options').removeClass('hidden').addClass('show');
         $('#search-options-divider').removeClass('hidden').addClass('show');
@@ -521,6 +527,8 @@ function reportAudit() {
 
 function openLoadTestDialog() {
     $('#loadTestModal').modal('show');
+    $('#flow-test-type-radio').attr('checked', topics_results_row);
+    showTests(searchTypes.FLOWS);
 }
 
 function openSaveTestDialog() {
@@ -582,7 +590,6 @@ function loadTest() {
     }
     $('#loadTestModal').modal('hide');
     $('#search-text').val('');
-    clearSearch();
     // navigate to Flows or Topics based on type
 
     var jqxhr = $.ajax("/tests/id/" + selectedTestID)
@@ -590,6 +597,7 @@ function loadTest() {
             queries = [];
             var ul;
             var type = test.type;
+            clearSearch(type);
             if (type == searchTypes.FLOWS) {
                 ul = $('#flow-list');
             } else if (type == searchTypes.TOPICS) {
@@ -601,7 +609,11 @@ function loadTest() {
                 f[i] = (function(query, func) {
                     return function() {
                         queries.push(query);
-                        searchFlows(query, func);
+                        if (type == searchTypes.FLOWS) {
+                            searchFlows(query, func);
+                        } else if (type == searchTypes.TOPICS) {
+                            searchTopics(query, func);
+                        }
                     };
                 }(test.queries[i].query, f[i+1]));
             }
