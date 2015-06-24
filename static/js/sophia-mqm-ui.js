@@ -426,17 +426,17 @@ function clearSearch(searchType) {
     $('#search-text').val('');
     reportString = '';
     lastQuery = '';
-    searchType = searchTypes.FLOWS;
+    if (!searchType) {
+        searchType = searchTypes.FLOWS;
+    }
     // remove all nodes
     currentPaths.length = 0;
     currentBackboneNodes.length = 0;
     currentDataNodes.length = 0;
     // clear flow list
     $('#availbale_topics_list').empty();    // update the logo
+    switchSearch(searchType);
     update();
-    if (searchType != undefined) {
-        switchSearch(searchType);
-    }
 
     $('#search-text').focus();
 }
