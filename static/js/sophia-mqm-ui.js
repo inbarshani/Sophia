@@ -286,7 +286,7 @@ function searchScreens(query) {
         });
 }
 
-function searchTopics(query, callback) {
+function searchTopics(query, autoSelect, callback) {
     // change UI to show list of images instead of flows
     //  clear top level vars
     reportString = 'Type: TOPICS\n';
@@ -319,11 +319,20 @@ function searchTopics(query, callback) {
 
                     availbale_topics_list.append(new_topic);
                 });
+                if (autoSelect) {
+                    for (var i = 0; i < availableTopicsArray.length; i++) {
+                        if (availableTopicsArray[i].name == query) {
+                            selectedTopicsArray.push(availableTopicsArray[i]);
+                            updateSelectedTopics();
+                            break;                            
+                        }
+                    }
+                }
             }
             else {
                 availbale_topics_list.append(
-                        '<li class="">'+
-                        ' No topics found.'+
+                        '<li class="">'+ query + 
+                        ': No topics found.'+
                         '</li>'
                     );                
             }
@@ -436,13 +445,15 @@ function clearSearch(searchType) {
     // clear flow list
     $('#availbale_topics_list').empty();
     $('#flow-list').empty();
+    $('#topics-vis-container').html('');
+    d3Topics.svg = null;
     switchSearch(searchType);
     update();
 
     $('#search-text').focus();
 }
 
-function update() {
+function update(isTest) {
     reportAudit();
 
     updateNavigation();
@@ -487,7 +498,7 @@ function updateSearchResults() {
         $('#screens_results').removeClass('show').addClass('hidden');        
     }
 
-    if (searchType == searchTypes.TOPICS && ($('#availbale_topics').has('div').length > 0))
+    if (searchType == searchTypes.TOPICS && ($('#availbale_topics').has('div').length > 0 || selectedTopicsArray.length > 0))
     {
         $('#topics_results_row').removeClass('hidden').addClass('show');
     }
@@ -528,8 +539,14 @@ function reportAudit() {
 
 function openLoadTestDialog() {
     $('#loadTestModal').modal('show');
-    $('#flow-test-type-radio').attr('checked', topics_results_row);
-    showTests(searchTypes.FLOWS);
+    if ($('#flow-test-type-radio').prop('checked')) {
+        showTests(searchTypes.FLOWS);
+    } else if ($('#topic-test-type-radio').prop('checked')) {
+        showTests(searchTypes.TOPICS);
+    } else {
+        $('#flow-test-type-radio').prop('checked', true);
+        showTests(searchTypes.FLOWS);
+    }
 }
 
 function openSaveTestDialog() {
@@ -592,6 +609,8 @@ function loadTest() {
     $('#loadTestModal').modal('hide');
     $('#search-text').val('');
     // navigate to Flows or Topics based on type
+    availableTopicsArray = [];
+    selectedTopicsArray = [];
 
     var jqxhr = $.ajax("/tests/id/" + selectedTestID)
         .done(function(test) {
@@ -613,7 +632,7 @@ function loadTest() {
                         if (type == searchTypes.FLOWS) {
                             searchFlows(query, func);
                         } else if (type == searchTypes.TOPICS) {
-                            searchTopics(query, func);
+                            searchTopics(query, true, func);
                         }
                     };
                 }(test.queries[i].query, f[i+1]));
@@ -627,11 +646,19 @@ function loadTest() {
 
 function saveTest() {
     var testName = $('#test-name-field').val();
+    var queryList = [];
+    if (searchType == searchTypes.FLOWS) {
+        queryList = queries;
+    } else if (searchType == searchTypes.TOPICS) {
+        for (var i = 0; i < selectedTopicsArray.length; i++) {
+            queryList.push(selectedTopicsArray[i].name);
+        }
+    }
     var params = {
         'user': user,
         'type': searchType,
         'name': testName,
-        'queries': queries
+        'queries': queryList
     };
     $.ajax({  
         type: 'POST',  
