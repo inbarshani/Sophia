@@ -434,7 +434,8 @@ function clearSearch(searchType) {
     currentBackboneNodes.length = 0;
     currentDataNodes.length = 0;
     // clear flow list
-    $('#availbale_topics_list').empty();    // update the logo
+    $('#availbale_topics_list').empty();
+    $('#flow-list').empty();
     switchSearch(searchType);
     update();
 
