@@ -5,6 +5,8 @@ var currentDataNodes = [];
 var suggestionsArray = [];
 var availableTopicsArray = [];
 var selectedTopicsArray = [];
+var testQueryTypes = {QUERY: 0, 
+    TOPIC: 1};
 var isAjaxActive = 0;
 var searchTypes = {FLOWS: 0, 
     SCREENS: 1,
@@ -127,6 +129,7 @@ function updateCurrentPaths(newPaths) {
 }
 
 function switchSearch(newSearchType) {
+    queries = [];
     if (searchType == newSearchType)
         return false; // false = no click
     // change results status
@@ -185,7 +188,7 @@ function search(query){
         // don't run without any query string
         return false;
     }
-    queries.push(query);
+    queries.push({query:query, type: testQueryTypes.QUERY});
     if (searchType == searchTypes.FLOWS)
     {
         searchFlows(query);
@@ -286,7 +289,7 @@ function searchScreens(query) {
         });
 }
 
-function searchTopics(query, autoSelect, callback) {
+function searchTopics(query, queryType, autoSelect, callback) {
     // change UI to show list of images instead of flows
     //  clear top level vars
     reportString = 'Type: TOPICS\n';
@@ -294,49 +297,52 @@ function searchTopics(query, autoSelect, callback) {
     availbale_topics_list.empty();
     lastQuery = query;
     reportString = reportString + 'Search: ' + query + '\n';
-    var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]")
-        .done(function(data) {
-            //console.log("Search returned: " + data);
-            availableTopicsArray = JSON.parse(data);
-            if (availableTopicsArray && availableTopicsArray.length > 0)
-            {
-                // create list of topics
-                reportString = reportString + 'Results #: ' + availableTopicsArray.length + '\n';
-                availableTopicsArray.forEach(function(topic, index){
-                    var new_topic = $('<li data-toggle="buttons" class="btn-group bizmoduleselect" available_topic_id="'+index+'">'+
-                        '  <label class="btn btn-default">'+
-                        '      <div class="bizcontent">'+
-                        '          <h5>'+topic.name+'</h5>'+
-                        '          <span class="badge">'+topic.occurances+'</span>'+
-                        '      </div>'+
-                        '  </label>'+
-                        '</li>'
-                        ).on('click', function(e){
-                            //console.log('tagName: '+$(this).prop('tagName'));
-                            var available_topic_id = parseInt($(this).attr('available_topic_id'));
-                            return toggleTopic(available_topic_id);
-                        });
-
-                    availbale_topics_list.append(new_topic);
-                });
-                if (autoSelect) {
-                    for (var i = 0; i < availableTopicsArray.length; i++) {
-                        if (availableTopicsArray[i].name == query) {
-                            selectedTopicsArray.push(availableTopicsArray[i]);
-                            updateSelectedTopics();
-                            break;                            
-                        }
-                    }
+    if (queryType && queryType==testQueryTypes.TOPIC) {
+        for (var i = 0; i < availableTopicsArray.length; i++) {
+            if (availableTopicsArray[i].name == query) {
+                selectedTopicsArray.push(availableTopicsArray[i]);
+                updateSelectedTopics();
+                break;                            
+            }
+        }
+        if (callback) {
+            callback();
+        }
+    } else {
+        var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]")
+            .done(function(data) {
+                //console.log("Search returned: " + data);
+                availableTopicsArray = JSON.parse(data);
+                if (availableTopicsArray && availableTopicsArray.length > 0)
+                {
+                    // create list of topics
+                    reportString = reportString + 'Results #: ' + availableTopicsArray.length + '\n';
+                    availableTopicsArray.forEach(function(topic, index){
+                        var new_topic = $('<li data-toggle="buttons" class="btn-group bizmoduleselect" available_topic_id="'+index+'">'+
+                            '  <label class="btn btn-default">'+
+                            '      <div class="bizcontent">'+
+                            '          <h5>'+topic.name+'</h5>'+
+                            '          <span class="badge">'+topic.occurances+'</span>'+
+                            '      </div>'+
+                            '  </label>'+
+                            '</li>'
+                            ).on('click', function(e, name, i){
+                                return function() {
+                                    //console.log('tagName: '+$(this).prop('tagName'));
+                                    queries.push({query: name, type: testQueryTypes.TOPIC})
+                                    return toggleTopic(i);
+                                };
+                            }(this, topic.name, index));
+                        availbale_topics_list.append(new_topic);
+                    });
                 }
-            }
-            else {
-                availbale_topics_list.append(
-                        '<li class="">'+ query + 
-                        ': No topics found.'+
-                        '</li>'
-                    );                
-            }
-
+                else {
+                    availbale_topics_list.append(
+                            '<li class="">'+ query + 
+                            ': No topics found.'+
+                            '</li>'
+                        );                
+                }
             update();
             if (callback) {
                 callback();
@@ -350,6 +356,7 @@ function searchTopics(query, autoSelect, callback) {
 
             update();
         });
+    }
 }
 
 function toggleTopic(availbale_topic_id)
@@ -630,12 +637,12 @@ function loadTest() {
                     return function() {
                         queries.push(query);
                         if (type == searchTypes.FLOWS) {
-                            searchFlows(query, func);
+                            searchFlows(query.query, func);
                         } else if (type == searchTypes.TOPICS) {
-                            searchTopics(query, true, func);
+                            searchTopics(query.query, query.type, true, func);
                         }
                     };
-                }(test.queries[i].query, f[i+1]));
+                }(test.queries[i], f[i+1]));
             }
             f[0]();
         })
@@ -646,19 +653,11 @@ function loadTest() {
 
 function saveTest() {
     var testName = $('#test-name-field').val();
-    var queryList = [];
-    if (searchType == searchTypes.FLOWS) {
-        queryList = queries;
-    } else if (searchType == searchTypes.TOPICS) {
-        for (var i = 0; i < selectedTopicsArray.length; i++) {
-            queryList.push(selectedTopicsArray[i].name);
-        }
-    }
     var params = {
         'user': user,
         'type': searchType,
         'name': testName,
-        'queries': queryList
+        'queries': queries
     };
     $.ajax({  
         type: 'POST',  
