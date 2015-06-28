@@ -5,6 +5,8 @@ var currentDataNodes = [];
 var suggestionsArray = [];
 var availableTopicsArray = [];
 var selectedTopicsArray = [];
+var testQueryTypes = {QUERY: 0, 
+    TOPIC: 1};
 var isAjaxActive = 0;
 var searchTypes = {FLOWS: 0, 
     SCREENS: 1,
@@ -127,6 +129,7 @@ function updateCurrentPaths(newPaths) {
 }
 
 function switchSearch(newSearchType) {
+    queries = [];
     if (searchType == newSearchType)
         return false; // false = no click
     // change results status
@@ -185,7 +188,7 @@ function search(query){
         // don't run without any query string
         return false;
     }
-    queries.push(query);
+    queries.push({query:query, type: testQueryTypes.QUERY});
     if (searchType == searchTypes.FLOWS)
     {
         searchFlows(query);
@@ -286,7 +289,7 @@ function searchScreens(query) {
         });
 }
 
-function searchTopics(query, callback) {
+function searchTopics(query, queryType, autoSelect, callback) {
     // change UI to show list of images instead of flows
     //  clear top level vars
     reportString = 'Type: TOPICS\n';
@@ -294,40 +297,52 @@ function searchTopics(query, callback) {
     availbale_topics_list.empty();
     lastQuery = query;
     reportString = reportString + 'Search: ' + query + '\n';
-    var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]")
-        .done(function(data) {
-            //console.log("Search returned: " + data);
-            availableTopicsArray = JSON.parse(data);
-            if (availableTopicsArray && availableTopicsArray.length > 0)
-            {
-                // create list of topics
-                reportString = reportString + 'Results #: ' + availableTopicsArray.length + '\n';
-                availableTopicsArray.forEach(function(topic, index){
-                    var new_topic = $('<li data-toggle="buttons" class="btn-group bizmoduleselect" available_topic_id="'+index+'">'+
-                        '  <label class="btn btn-default">'+
-                        '      <div class="bizcontent">'+
-                        '          <h5>'+topic.name+'</h5>'+
-                        '          <span class="badge">'+topic.occurances+'</span>'+
-                        '      </div>'+
-                        '  </label>'+
-                        '</li>'
-                        ).on('click', function(e){
-                            //console.log('tagName: '+$(this).prop('tagName'));
-                            var available_topic_id = parseInt($(this).attr('available_topic_id'));
-                            return toggleTopic(available_topic_id);
-                        });
-
-                    availbale_topics_list.append(new_topic);
-                });
+    if (queryType && queryType==testQueryTypes.TOPIC) {
+        for (var i = 0; i < availableTopicsArray.length; i++) {
+            if (availableTopicsArray[i].name == query) {
+                selectedTopicsArray.push(availableTopicsArray[i]);
+                updateSelectedTopics();
+                break;                            
             }
-            else {
-                availbale_topics_list.append(
-                        '<li class="">'+
-                        ' No topics found.'+
-                        '</li>'
-                    );                
-            }
-
+        }
+        if (callback) {
+            callback();
+        }
+    } else {
+        var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]")
+            .done(function(data) {
+                //console.log("Search returned: " + data);
+                availableTopicsArray = JSON.parse(data);
+                if (availableTopicsArray && availableTopicsArray.length > 0)
+                {
+                    // create list of topics
+                    reportString = reportString + 'Results #: ' + availableTopicsArray.length + '\n';
+                    availableTopicsArray.forEach(function(topic, index){
+                        var new_topic = $('<li data-toggle="buttons" class="btn-group bizmoduleselect" available_topic_id="'+index+'">'+
+                            '  <label class="btn btn-default">'+
+                            '      <div class="bizcontent">'+
+                            '          <h5>'+topic.name+'</h5>'+
+                            '          <span class="badge">'+topic.occurances+'</span>'+
+                            '      </div>'+
+                            '  </label>'+
+                            '</li>'
+                            ).on('click', function(e, name, i){
+                                return function() {
+                                    //console.log('tagName: '+$(this).prop('tagName'));
+                                    queries.push({query: name, type: testQueryTypes.TOPIC})
+                                    return toggleTopic(i);
+                                };
+                            }(this, topic.name, index));
+                        availbale_topics_list.append(new_topic);
+                    });
+                }
+                else {
+                    availbale_topics_list.append(
+                            '<li class="">'+ query + 
+                            ': No topics found.'+
+                            '</li>'
+                        );                
+                }
             update();
             if (callback) {
                 callback();
@@ -341,6 +356,7 @@ function searchTopics(query, callback) {
 
             update();
         });
+    }
 }
 
 function toggleTopic(availbale_topic_id)
@@ -434,14 +450,17 @@ function clearSearch(searchType) {
     currentBackboneNodes.length = 0;
     currentDataNodes.length = 0;
     // clear flow list
-    $('#availbale_topics_list').empty();    // update the logo
+    $('#availbale_topics_list').empty();
+    $('#flow-list').empty();
+    $('#topics-vis-container').html('');
+    d3Topics.svg = null;
     switchSearch(searchType);
     update();
 
     $('#search-text').focus();
 }
 
-function update() {
+function update(isTest) {
     reportAudit();
 
     updateNavigation();
@@ -486,7 +505,7 @@ function updateSearchResults() {
         $('#screens_results').removeClass('show').addClass('hidden');        
     }
 
-    if (searchType == searchTypes.TOPICS && ($('#availbale_topics').has('div').length > 0))
+    if (searchType == searchTypes.TOPICS && ($('#availbale_topics').has('div').length > 0 || selectedTopicsArray.length > 0))
     {
         $('#topics_results_row').removeClass('hidden').addClass('show');
     }
@@ -527,8 +546,14 @@ function reportAudit() {
 
 function openLoadTestDialog() {
     $('#loadTestModal').modal('show');
-    $('#flow-test-type-radio').attr('checked', topics_results_row);
-    showTests(searchTypes.FLOWS);
+    if ($('#flow-test-type-radio').prop('checked')) {
+        showTests(searchTypes.FLOWS);
+    } else if ($('#topic-test-type-radio').prop('checked')) {
+        showTests(searchTypes.TOPICS);
+    } else {
+        $('#flow-test-type-radio').prop('checked', true);
+        showTests(searchTypes.FLOWS);
+    }
 }
 
 function openSaveTestDialog() {
@@ -591,6 +616,8 @@ function loadTest() {
     $('#loadTestModal').modal('hide');
     $('#search-text').val('');
     // navigate to Flows or Topics based on type
+    availableTopicsArray = [];
+    selectedTopicsArray = [];
 
     var jqxhr = $.ajax("/tests/id/" + selectedTestID)
         .done(function(test) {
@@ -610,12 +637,12 @@ function loadTest() {
                     return function() {
                         queries.push(query);
                         if (type == searchTypes.FLOWS) {
-                            searchFlows(query, func);
+                            searchFlows(query.query, func);
                         } else if (type == searchTypes.TOPICS) {
-                            searchTopics(query, func);
+                            searchTopics(query.query, query.type, true, func);
                         }
                     };
-                }(test.queries[i].query, f[i+1]));
+                }(test.queries[i], f[i+1]));
             }
             f[0]();
         })
