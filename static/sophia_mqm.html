@@ -7,7 +7,6 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
     <title>Sophia</title>
     <!-- Bootstrap core CSS -->
     <link href="bootstrap-3.3.4-dist/css/bootstrap.css" rel="stylesheet">
@@ -41,7 +40,7 @@
         </div>
         <div id="topbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><h4><span class="label label-info">v0.1.0</span></h4></li>
+            <li><h4><span class="label label-info">v0.1.1</span></h4></li>
           </ul>
         </div>
       </div>
@@ -67,8 +66,13 @@
             <input type="text" autofocus="autofocus" autocomplete="off" placeholder="Search MQM" name="search" class="form-control" id="search-text">
             <span class="input-group-btn">
               <button class="btn btn-info" id="search-button">
-              <span class="glyphicon glyphicon-search"></span>
+                <span class="glyphicon glyphicon-search"></span>
               </button>
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+              <ul class="dropdown-menu dropdown-menu-right">
+                <li><a href="#" id="load-test">Load Test</a></li>
+                <li class="disabled" id="save-test"><a href="#">Save Test</a></li>
+              </ul>
             </span>
           </div>
         </div>
@@ -139,7 +143,7 @@
       <ul class="row" id="screens_results_row">
       </ul>
     </div> <!-- end screens results -->
-    <div class="modal fade" id="screenModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="screenModal" tabindex="-1" role="dialog" aria-labelledby="screenModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">         
           <div class="modal-body">                
@@ -172,6 +176,84 @@
       <ul id="detailsText" class="list-group"></ul>
     </div>
     <div id="busy" class="busyindicator"> </div>
+    <!-- Modal load test-->
+    <div class="modal fade" id="loadTestModal" tabindex="-1" role="dialog" aria-labelledby="loadModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="loadModalLabel">Load Saved Test</h4>
+          </div>
+          <div class="modal-body">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-md-2">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">Test Type</div>
+                    <div class="panel-body">
+                      <div class="radio">
+                        <label><input type="radio" name="testType" id="flow-test-type-radio" aria-label="Flows" value="flow">Flows</label>
+                      </div>
+                      <div class="radio">
+                        <label><input type="radio" name="testType" id="topic-test-type-radio" aria-label="Topics" value="topic">Topics</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">Available Tests</div>
+                    <div class="panel-body">
+                      <ul class="list-group" id="tests-list"></ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">Test Details</div>
+                    <div class="panel-body" id='test-details'></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="load-test-btn" class="btn btn-primary">Load</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal load test-->
+    <!-- Modal save test-->
+    <div class="modal fade" id="saveTestModal" tabindex="-1" role="dialog" aria-labelledby="saveModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="saveModalLabel">Save Test</h4>
+          </div>
+          <div class="modal-body">
+            <div class="container-fluid">
+              <div class="panel panel-default">
+                <div class="panel-heading">Test Name</div>
+                <div class="panel-body">
+                  <p>Note: Test name must be unique!</p>
+                  <input type="text" autofocus="autofocus" autocomplete="off" placeholder="Test Name" name="test-name-field" class="form-control" id="test-name-field">
+                </div>
+              </div>
+              <div class="alert hidden" id='save-test-error' role="alert"></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="save-test-btn" class="btn btn-primary disabled">Save</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal save test-->
+
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->

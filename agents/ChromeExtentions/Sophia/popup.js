@@ -1,23 +1,73 @@
-$(document).ready(function() {
-    chrome.storage.local.get('sophiaTestId', function(result) {
-        if (result.sophiaTestId == null) {
-            // test not running
-            $("#reportStep").attr("disabled", true);
-            $("#endTestBtn").attr("disabled", true);
-            $("#startTestBtn").removeAttr("disabled");
-            $("#instructions").text('Press "Start Test" to begin execution');
-        } else {
-            $("#startTestBtn").attr("disabled", true);
-            $("#reportStep").removeAttr("disabled");
-            $("#endTestBtn").removeAttr("disabled");
-            $("#instructions").text('Test with GUID ' + result.sophiaTestId + ' running...');
-        }
+var testScripts = {};
+var currentTest = -1;
+var currentStep = -1;
 
+$(document).ready(function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', chrome.extension.getURL('tests.json'), true);
+    xhr.onreadystatechange = function()
+    {
+        if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200)
+        {
+            testScripts = JSON.parse(xhr.responseText);
+            console.log('loaded tests from extension json file.');
+            //chrome.storage.local.set({'sophiaTests', testScripts}, function() {
+            //   console.log('Sophia extension Test tests saved');
+            //});
+            // load list of tests
+            var tests = Object.keys(testScripts);
+            for(var i=0;i<tests.length;i++)
+            {
+               $("#testsSelect").append('<option value="'+i+'">'+tests[i]+'</option>'); 
+            }
+        }
+    };
+    xhr.send();
+
+    chrome.storage.local.get(['sophiaTestId','sophiaCurrentTest', 'sophiaCurrentStep'], 
+        function(result) {
+            if (result.sophiaTestId == null) {
+                // test not running
+                $("#reportStep").attr("disabled", true);
+                $("#endTestBtn").attr("disabled", true);
+                $("#startTestBtn").removeAttr("disabled");
+                $("#testsSelect").removeAttr("disabled");
+                $("#instructions").text('Press "Start Test" to begin execution');
+                $("#currentStep").text('');
+            } else {
+                $("#testsSelect").attr("disabled", true);
+                $("#startTestBtn").attr("disabled", true);
+                $("#reportStep").removeAttr("disabled");
+                $("#endTestBtn").removeAttr("disabled");
+                currentTest = parseInt(result.sophiaCurrentTest);
+                currentStep = parseInt(result.sophiaCurrentStep);
+                var test_desc = 'Manual test';
+                var step_desc = 'Manual step '+currentStep;
+                if (currentTest >= 0)
+                {
+                    test_desc = Object.keys(testScripts)[currentTest];
+                    step_desc = testScripts[test_desc][currentStep];
+                }
+                $("#instructions").text('Test '+test_desc+' with GUID ' + result.sophiaTestId + ' running...');
+                if (!step_desc)
+                {
+                    step_desc = '<<test done>>';
+                    $("#reportStep").attr("disabled", true);
+                }                        
+                $("#currentStep").text(step_desc);
+            }
     });
 });
 
 $("#startTestBtn").click(function() {
     $("#startTestBtn").attr("disabled", true);
+    $("#testsSelect").attr("disabled", true);
+    var selectedTest = $("#testsSelect").val();
+    if (selectedTest != 'new')
+    {
+        currentTest = parseInt(selectedTest);
+    }
+    currentStep = 1;
     $("#reportStep").removeAttr("disabled");
     $("#endTestBtn").removeAttr("disabled");
     var ts = new Date().getTime();
@@ -29,17 +79,21 @@ $("#startTestBtn").click(function() {
         }
         var guid = UUID();
         chrome.storage.local.set({
-            'sophiaTestId': guid
+            'sophiaTestId': guid,
+            'sophiaCurrentTest': currentTest,
+            'sophiaCurrentStep': currentStep
         }, function() {
-            console.log('Test GUID saved');
+            console.log('Sophia extension Test params saved');
         });
-
+        var description = "Manual test";
+        if (currentTest >= 0)
+            description = Object.keys(testScripts)[currentTest];
         var args = {
             type: "Test",
             timestamp: ts,
             action: "start",
             testID: guid,
-            description: "Manual test"
+            description: description
         }
 
         var data = JSON.stringify(args);
@@ -49,7 +103,36 @@ $("#startTestBtn").click(function() {
             data: data,
             dataType: 'json',
             success: function(doc) {
-                $("#instructions").text('Test with GUID ' + guid + ' running...');
+                // setup first step, and report it as well
+                $("#instructions").text('Test '+description+' with GUID ' + guid + ' running...');
+                var step_desc = '';
+                if (currentTest >= 0){
+                    var test = Object.keys(testScripts)[currentTest];
+                    step_desc = testScripts[test][currentStep];
+                }
+                else
+                    step_desc ='Manual step '+currentStep;
+
+                $("#currentStep").text(step_desc);
+
+                args = {
+                    type: "TestStep",
+                    timestamp: ts,
+                    action: "start",
+                    testID: guid,
+                    stepNumber: currentStep,
+                    description: step_desc
+                }
+                var data = JSON.stringify(args);
+                $.ajax({
+                    url: dataUrl,
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    success: function(doc) {
+                        console.log("TestStep start reported");
+                    }
+                });
             }
         });
     });
@@ -58,8 +141,18 @@ $("#startTestBtn").click(function() {
 $("#endTestBtn").click(function() {
     $("#endTestBtn").attr("disabled", true);
     $("#reportStep").attr("disabled", true);
-    $("#reportStep").attr("counter", 0);
     $("#startTestBtn").removeAttr("disabled");
+    $("#testsSelect").removeAttr("disabled");
+    $("#currentStep").text('');
+    var description = "Manual test";
+    if (currentTest >= 0)
+        description = Object.keys(testScripts)[currentTest];
+    var step_desc = '';
+    if (currentTest >= 0){
+        step_desc = testScripts[description][currentStep];
+    }
+    else
+        step_desc ='Manual step '+currentStep;
     var ts = new Date().getTime();
     chrome.storage.local.get('dataUrl', function(result) {
         var dataUrl = result.dataUrl;
@@ -74,12 +167,32 @@ $("#endTestBtn").click(function() {
                 console.log("Sophia extension GUID not defined");
                 return;
             }
+            // report both step end and test end
+            var step_args = {
+                type: "TestStep",
+                timestamp: ts,
+                action: "done",
+                status: 'failed',
+                testID: guid,
+                stepNumber: currentStep,
+                description: step_desc
+            }
+            var step_data = JSON.stringify(step_args);
+            $.ajax({
+                url: dataUrl,
+                type: 'POST',
+                data: step_data,
+                dataType: 'json',
+                success: function(doc) {
+                    console.log("TestStep stop reported");
+                }
+            });
             var args = {
                 type: "Test",
                 timestamp: ts,
                 action: "stop",
                 testID: guid,
-                description: "Manual test"
+                description: description
             }
             var data = JSON.stringify(args);
             $.ajax({
@@ -91,20 +204,41 @@ $("#endTestBtn").click(function() {
                     $("#instructions").text('Press "Start Test" to begin execution');
                 }
             });
+            // clear variables
+            currentTest = -1; 
+            currentStep = -1;
             chrome.storage.local.set({
-                'sophiaTestId': null
-            }, function(result) {
-                console.log("Sophia extension Test GUID removed");
+                'sophiaTestId': null,
+                'sophiaCurrentTest': currentTest,
+                'sophiaCurrentStep': currentStep
+            }, function() {
+                console.log('Sophia extension Test params cleared');
             });
         });
     });
 });
 
-$("#reportStep").click(function() {
+$("#reportStepPass").click(function(){
+    reportStep('passed');
+});
+
+$("#reportStepFail").click(function(){
+    reportStep('failed');
+});
+
+function reportStep(status) {
     console.log("TestStep event");
     var ts = new Date().getTime();
-    var step_counter = parseInt($("#reportStep").attr("counter")) + 1;
-    $("#reportStep").attr("counter", step_counter);
+    var step_desc = '';
+    if (currentTest >= 0)
+    {
+        var test = Object.keys(testScripts)[currentTest];
+        step_desc = testScripts[test][currentStep];
+    }
+    else
+    {
+        step_desc = 'Manual step '+currentStep;
+    }
     chrome.storage.local.get('dataUrl', function(result) {
         var dataUrl = result.dataUrl;
         if (dataUrl == undefined) {
@@ -123,10 +257,11 @@ $("#reportStep").click(function() {
             var args = {
                 type: "TestStep",
                 timestamp: ts,
-                action: "start",
+                action: "done",
                 testID: guid,
-                stepNumber: step_counter,
-                description: "Manual test step"
+                status: status,
+                stepNumber: currentStep,
+                description: step_desc
             }
             var data = JSON.stringify(args);
             console.log("TestStep before ajax: " + data);
@@ -137,6 +272,45 @@ $("#reportStep").click(function() {
                 dataType: 'json',
                 success: function(doc) {
                     console.log("TestStep reported");
+                    currentStep++;
+                    if (currentTest >= 0)
+                    {
+                        var test = Object.keys(testScripts)[currentTest];
+                        step_desc = testScripts[test][currentStep];
+                        if (!step_desc)
+                        {
+                            step_desc = '<<test done>>';
+                            $("#reportStep").attr("disabled", true);
+                        }                        
+                    }
+                    else
+                        step_desc = 'Manual step '+currentStep;
+                    $("#currentStep").text(step_desc);
+
+                    var step_args = {
+                        type: "TestStep",
+                        timestamp: ts,
+                        action: "start",
+                        testID: guid,
+                        stepNumber: currentStep,
+                        description: step_desc
+                    }
+                    var step_data = JSON.stringify(step_args);
+                    $.ajax({
+                        url: dataUrl,
+                        type: 'POST',
+                        data: step_data,
+                        dataType: 'json',
+                        success: function(doc) {
+                            console.log("TestStep start reported");
+                        }
+                    });
+
+                    chrome.storage.local.set({
+                        'sophiaCurrentStep': currentStep
+                    }, function() {
+                        console.log('Sophia extension Test currentStep param updated');
+                    });
                 },
                 error: function(obj, textStatus, errorThrown) {
                     console.log("TestStep error: " + textStatus + " Error: " + errorThrown);
@@ -144,7 +318,7 @@ $("#reportStep").click(function() {
             });
         });
     });
-});
+}
 
 function UUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {

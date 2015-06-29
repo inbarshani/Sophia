@@ -1,8 +1,7 @@
 module.exports = {
 	getData: function (obj) {
-		obj.dontStore = true;
         obj.high_priority_index = '';
-        obj.indexable_content = ''; // TBD: OCR the screen?
+        obj.indexable_content = obj.text; // TBD: OCR the screen?
         return obj;
 	},
 

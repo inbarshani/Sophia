@@ -61,7 +61,7 @@ exports.config= {
         password: '',
 //        commented this because current code will fail the test if BR existing
         domain: 'DEFAULT',
-        project: 'Sophia'
+        project: 'Sophia1'
     },
 
     database: {

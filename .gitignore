@@ -47,3 +47,4 @@ node_modules/csvtojson/libs/core/*
 
 # Users Environment Variables
 .lock-wscript
+agents/ChromeExtentions/Sophia.crx
