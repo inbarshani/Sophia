@@ -186,10 +186,11 @@ app.post('/saveTest', function(request, response) {
                 var executed = 1;
                 db.serialize(function() {
                     for (var i = 0; i < request.body.queries.length; i++) {
-                        db.run("INSERT INTO SOP_QUERY (QUERY_TEXT, TEST_ID, POSITION) VALUES ($query, $test, $position)", {
-                            $query: request.body.queries[i], 
+                        db.run("INSERT INTO SOP_QUERY (QUERY_TEXT, TEST_ID, POSITION, QUERY_TYPE) VALUES ($query, $test, $position, $query_type)", {
+                            $query: request.body.queries[i].query, 
                             $test: testId, 
-                            $position: i
+                            $position: i,
+                            $query_type: request.body.queries[i].type
                         }, function(err) {
                             if (err) {
                                 error = err;
@@ -225,13 +226,13 @@ app.use('/tests/id/:id', function(request, response) {
                     test.user = row.USER;
                     test.type = row.TYPE;
                     test.queries = [];
-                    db.all("SELECT ID, QUERY_TEXT FROM SOP_QUERY WHERE TEST_ID=? ORDER BY POSITION", id, function(err, rows) {
+                    db.all("SELECT ID, QUERY_TEXT, QUERY_TYPE FROM SOP_QUERY WHERE TEST_ID=? ORDER BY POSITION", id, function(err, rows) {
                         if (err) {
                             response.send(err);
                             return;
                         } else {
                             for (var i = 0; i < rows.length; i++) {
-                                test.queries.push({id: rows[i].ID, query: rows[i].QUERY_TEXT});
+                                test.queries.push({id: rows[i].ID, query: rows[i].QUERY_TEXT, type:rows[i].QUERY_TYPE});
                             }
                         }
                         response.send(test);
