@@ -17,6 +17,7 @@ var allCircles = [];
 var gx = 0;
 var gy = 0;
 var maxCols = 0;
+var completeVisualize = false;
 
 
 SVGElement.prototype.hasClass = function (className) {
@@ -38,6 +39,7 @@ SVGElement.prototype.removeClass = function (className) {
 
 
 function visualize() {
+    completeVisualize = false;
     allCircles = [];
     gx = 0;
     gy = 0;
@@ -104,6 +106,8 @@ function visualize() {
         itemIndex++;
         if (itemIndex <= maxCols) {
             setTimeout( drawLine, speed );
+        } else {
+            completeVisualize = true;
         }
     })();
 
