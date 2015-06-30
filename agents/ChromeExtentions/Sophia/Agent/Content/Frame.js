@@ -1413,7 +1413,7 @@ Frame.prototype = {
         micclass = micclass.toLowerCase(); // MicClasses in obj identification props are received in lower case
 
         Util.assert(this._objIdentificationProps, "getObjIdentificationProps: Object identification properties object is empty !", this._logger);
-
+        
         return this._objIdentificationProps[micclass];
     },
 

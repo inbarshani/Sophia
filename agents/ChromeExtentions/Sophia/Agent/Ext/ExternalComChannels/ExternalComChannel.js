@@ -142,6 +142,7 @@ ExternalComChannel.prototype = {
 
     _initInnerChannel: function() {
         this._logger.trace("_initInnerChannel: called");
+        this._innerChannel.init();
         this._innerChannel.addListener(InnerChannelEvent.MESSAGE, this.onMessage.bind(this));
         this._innerChannel.addListener(InnerChannelEvent.OPEN, this.onOpen.bind(this));
         this._innerChannel.addListener(InnerChannelEvent.CLOSE, this.onClose.bind(this));

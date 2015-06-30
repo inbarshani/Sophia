@@ -4,7 +4,7 @@ function ChromeNativeMessagingStrategy() {
 ChromeNativeMessagingStrategy.prototype = {
     
      _createInnerChannel: function(){
-      return new NativeMessagingComChannel();  
+      return new SophiaMessagingChannel();  
     }
 };
 
