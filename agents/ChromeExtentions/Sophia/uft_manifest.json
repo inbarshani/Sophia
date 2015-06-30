@@ -1,0 +1,79 @@
+{
+  "name": "HP Functional Testing Agent",
+  "version": "12.50.3730.0",
+  "description": "Test Web Applications Using Google Chrome",
+  "icons": {
+    "16": "Agent/Resources/QTP_16.png",
+    "32": "Agent/Resources/QTP_32.png",
+    "48": "Agent/Resources/QTP_48.png",
+    "128": "Agent/Resources/QTP_128.png"
+  },
+  "manifest_version": 2,
+  "background": {
+    "page": "Agent/Ext/bg-loader.html"
+  },
+  "options_page": "Agent/Resources/options.html",
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "match_about_blank": true,
+      "js": [
+        "Agent/ThirdParty/log4javascript_uncompressed.js",
+        "Agent/Common/LoggerUtil.js",
+        "Agent/Common/common.js",
+        "Agent/Common/SpecialObject.js",
+        "Agent/Common/DescriptionUtil.js",
+        "Agent/Common/ComChannels/ChromeComChannel.js",
+        "Agent/Common/AsyncCommunicationHelper.js",
+        "Agent/Common/EventDispatcher.js",
+        "Agent/Content/ContentUtils.js",
+        "Agent/Content/GestureDetector.js",
+        "Agent/Content/Recorder.js",
+        "Agent/Content/FrameCommunicationChannel.js",
+        "Agent/Content/BrowserInterfaces/ChromeContentServices.js",
+        "Agent/Content/ContentDispatcher.js",
+        "Agent/Content/DotObj.js",
+        "Agent/Content/DomRequestSubscriber.js",
+        "Agent/Content/BrowserContentHelper.js",
+        "Agent/Content/ElementInspector.js",
+        "Agent/Content/FrameInHTMLContext.js",
+        "Agent/Content/Frame.js",
+        "Agent/Content/KitsManager.js",
+        "Agent/Content/AO.js",
+        "Agent/Content/WebKit.js",
+        "Agent/Content/inject.js",
+        "Agent/Content/AutoXPath.js",
+        "Agent/Content/WebExtKit.js",
+        "Agent/Content/Extensibility/ToolkitManager.js",
+        "Agent/Content/Extensibility/Toolkit.js",
+        "Agent/Content/Extensibility/Control.js",
+        "Agent/Content/Extensibility/Condition.js",
+        "Agent/Content/Extensibility/WebExtAO.js",
+        "Agent/Content/Extensibility/SectionHandler.js",
+        "Agent/Content/Extensibility/QTPUtil.js",
+        "Agent/Content/Extensibility/PageProxy.js",
+        "Agent/Content/contentLoader.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "permissions": [
+    "nativeMessaging",
+    "webNavigation",
+    "tabs",
+    "cookies",
+    "browsingData",
+    "debugger",
+    "<all_urls>",
+    "notifications",
+    "unlimited_storage"
+  ],
+  "web_accessible_resources": [
+    "Agent/Resources/QTP_48.png"
+  ],
+  "plugins": [],
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs9RrgK0qnARIBrHzVwtNglE8F7TTGTx4p47jrkIhyiN9rRpUf8HtXM1oySDpXw0MSC7IIf9eiUkv3yWDbIRW1elwsU/jMn+Hft6f6bVi4ImKEQhVNz0N0Odzafrej2vrZ5/tzAAv2ZfKnprihRJagZSFvz0R+GKrz7CpEoLwAz3c3vQxfPde9aUokQi/js/M11+AgS9c/wfJZ+LMb6XvMzOO2ZghGSWjhbqgDTEYFh3O2iXFqndH1U5XQV/AUiJ60Wb1ew5B+8aofkj2esLRLQWjcXQDBWG+ug5are63Ty/Grt2+FMsujKHewzMC3iJTK8aKBdravbpBv70iHbjM2wIDAQAB"
+}

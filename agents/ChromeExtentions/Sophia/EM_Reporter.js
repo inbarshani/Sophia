@@ -61,7 +61,7 @@
         var docUrl = document_root.URL;
         var ts = new Date().getTime();
         var args = {
-            type: "UI",
+            type: "UI_raw",
             timestamp: ts,
             url: docUrl,
             eventType: event.type,
@@ -88,7 +88,9 @@
             else
             {
                 var element = event.target;
-                var innerText = element.innerText.trim();
+                var innerText = '';
+                if (element.innerText)
+                    innerText = element.innerText.trim();
                 if (innerText.length > 0)
                     args.value = innerText;   
                 else
@@ -96,7 +98,8 @@
                     var parent = element.parentElement;
                     while (parent && !args.value)
                     {
-                        innerText = parent.innerText.trim();
+                        if (parent.innerText)
+                            innerText = parent.innerText.trim();
                         if (innerText.length>0)
                             args.value = parent.innerText;
                         else

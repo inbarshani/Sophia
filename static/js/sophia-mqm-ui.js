@@ -225,6 +225,7 @@ function searchFlows(query, callback) {
                 query + ' <span class="badge">' + currentPaths.length + '</span></li>');
             reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
             update();
+            addRemoveLast();
             if (callback) {
                 callback();
             }
@@ -699,4 +700,47 @@ function saveTest() {
             }, 5000);
         }
     });  
+}
+
+function addRemoveLast() {
+    var lis = $('#flow-list > li');
+    for (var i = 0; i < lis.length; i++) {
+        if($(lis[i]).find('span').length > 1) {
+            $($(lis[i]).find('span')[1]).remove();
+        }
+    }
+    var span = $('<span>');
+    span.attr('title', "Delete Last");
+    span.addClass('glyphicon glyphicon-trash delete-flow');
+    span.on('click', function() {
+        $(lis[lis.length - 1]).remove();
+        reQueryFlows();
+    });
+    $(lis[lis.length - 1]).append(span);
+}
+
+function reQueryFlows() {
+    var tempQueries = queries;
+    tempQueries.pop();
+    clearSearch(searchTypes.FLOWS);
+    var ul = $('#flow-list');
+    ul.empty();
+    var f = [];
+    var timer;
+    for (var i = tempQueries.length - 1; i >= 0; i--) {
+        f[i] = (function(query, func) {
+            return function() {
+                queries.push(query);
+                timer = setInterval(function(){
+                    if (completeVisualize == true) {
+                        clearInterval(timer);
+                        searchFlows(query.query, func);
+                    }
+                }, 100);
+            };
+        }(tempQueries[i], f[i+1]));
+    }
+    if (f.length > 0) {
+        f[0]();
+    }
 }

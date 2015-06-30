@@ -93,7 +93,7 @@ var hasBlurHandler = function(elem) {
 
 var addListeners = function() {
     setTimeout(function() {
-        document.addEventListener("DOMSubtreeModified", listenerFunc, false);
+        //document.addEventListener("DOMSubtreeModified", listenerFunc, false);
 
         function sophiaErrHandler() {
             window.onerror = function(errorMsg, url, lineNumber, column, errorObj) {
@@ -128,6 +128,7 @@ var addListeners = function() {
     ////            console.log("unload");
         window.removeEventListener("domChangeEvent", listenerFunc);
     }, false);
+    
     window.addEventListener("click", function(event) {
         var elem = event.target;
         if (hasClickHandler(elem)) {
@@ -146,6 +147,6 @@ var addListeners = function() {
             //console.log("blur on " + elem.tagName + ". Ignored - no handlers");
         }
     }, false);
-
+    
 }
 

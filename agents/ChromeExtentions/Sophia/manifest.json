@@ -7,8 +7,14 @@
   "permissions": [
     "tabs",
     "webRequest",
+    "webNavigation",
+    "debugger",
     "storage",
-    "<all_urls>"
+    "<all_urls>",
+    "cookies",
+    "browsingData",
+    "notifications",
+    "unlimited_storage"
   ],
   "browser_action": {
     "default_icon": "icon.png",
@@ -20,24 +26,82 @@
      "js": [
         "jquery-2.1.1.min.js",
         "EM_Reporter.js",
-//        "EM_Reporter_web.js", 
-//        "EM_UserActionHandler.js",
-        "EM_Injector.js"
-/*        "feedback_network_nobridge.js",
-        "feedback_report_bridge.js",
-        "feedback_report_nobridge.js",
         "EM_Injector.js",
-        "EM_ContextIdentifier.js",
-        "EM_EvAction.js",
-        "sha256.js",
-        "EM_NameGens.js"
-*/        
+        "Agent/ThirdParty/log4javascript_uncompressed.js",
+        "Agent/Common/LoggerUtil.js",
+        "Agent/Common/common.js",
+        "Agent/Common/SpecialObject.js",
+        "Agent/Common/DescriptionUtil.js",
+        "Agent/Common/ComChannels/ChromeComChannel.js",
+        "Agent/Common/AsyncCommunicationHelper.js",
+        "Agent/Common/EventDispatcher.js",
+        "Agent/Content/ContentUtils.js",
+        "Agent/Content/GestureDetector.js",
+        "Agent/Content/Recorder.js",
+        "Agent/Content/FrameCommunicationChannel.js",
+        "Agent/Content/BrowserInterfaces/ChromeContentServices.js",
+        "Agent/Content/ContentDispatcher.js",
+        "Agent/Content/DotObj.js",
+        "Agent/Content/DomRequestSubscriber.js",
+        "Agent/Content/BrowserContentHelper.js",
+        "Agent/Content/ElementInspector.js",
+        "Agent/Content/FrameInHTMLContext.js",
+        "Agent/Content/Frame.js",
+        "Agent/Content/KitsManager.js",
+        "Agent/Content/AO.js",
+        "Agent/Content/WebKit.js",
+        "Agent/Content/inject.js",
+        "Agent/Content/AutoXPath.js",
+        "Agent/Content/WebExtKit.js",
+        "Agent/Content/Extensibility/ToolkitManager.js",
+        "Agent/Content/Extensibility/Toolkit.js",
+        "Agent/Content/Extensibility/Control.js",
+        "Agent/Content/Extensibility/Condition.js",
+        "Agent/Content/Extensibility/WebExtAO.js",
+        "Agent/Content/Extensibility/SectionHandler.js",
+        "Agent/Content/Extensibility/QTPUtil.js",
+        "Agent/Content/Extensibility/PageProxy.js",
+        "Agent/Content/contentLoader.js"        
      ],
      "run_at": "document_start",
      "all_frames": true
    }],
   "background": { 
-    "scripts": ["background.js"],
+    "scripts": [
+      "jquery-2.1.1.min.js",
+      "background.js",
+      "Agent/ThirdParty/log4javascript_uncompressed.js",
+      "Agent/ThirdParty/xml2json.js",
+      "Agent/Common/LoggerUtil.js",
+      "Agent/Common/common.js",
+      "Agent/Common/SpecialObject.js",
+      "Agent/Common/DescriptionUtil.js",
+      "Agent/Common/containers.js",
+      "Agent/Common/AsyncCommunicationHelper.js",
+      "Agent/Common/EventDispatcher.js",
+      "Agent/Common/SophiaMessagingChannel.js",
+      "Agent/Ext/BrowserInterfaces/ChromeHistoryTracker.js",
+      "Agent/Ext/BrowserInterfaces/ChromeDialogHandler.js",
+      "Agent/Ext/BrowserInterfaces/ChromeInterface.js",
+      "Agent/Ext/BrowserInterfaces/SafariInterface.js",
+      "Agent/Common/ComChannels/SafariComChannel.js",
+      "Agent/Common/ComChannels/ChromeComChannel.js",
+      "Agent/Ext/ExternalComChannels/ExtComChannelUtils.js",
+      "Agent/Ext/ExternalComChannels/ExternalChannelStrategy/LocalComChannelStrategy.js",
+      "Agent/Ext/ExternalComChannels/ExternalChannelStrategy/RemoteComChannelStrategy.js",
+      "Agent/Ext/ExternalComChannels/ExternalChannelStrategy/ChromeNativeMessagingStrategy.js",
+      "Agent/Ext/ExternalComChannels/NativeComChannel.js",
+      "Agent/Ext/ExternalComChannels/WebSocketComChannel.js",
+      "Agent/Ext/ExternalComChannels/NativeMessagingComChannel.js",
+      "Agent/Ext/ExternalComChannels/ExternalComChannel.js",
+      "Agent/Ext/Browser.js",
+      "Agent/Ext/FrameTree.js",
+      "Agent/Ext/Page.js",
+      "Agent/Ext/BrowserRecorder.js",
+      "Agent/Ext/Agent.js",
+      "Agent/Ext/ExtDispatcher.js",
+      "Agent/Ext/ExtensionLoader.js"
+    ],
     "exclude_globs": ["http://127.0.0.1*","http://*.google.com/*", "https://*.google.com/*"]
   },   
   "externally_connectable": {
@@ -45,6 +109,7 @@
     "matches": ["https://*.google.com/*","*://*.chromium.org/*","https://*.google.co.il/*","http://*.hp.com/*"]
   },
   "web_accessible_resources": [
-    "tests.json"
+    "tests.json",
+    "Agent/Resources/QTP_48.png"    
   ]
 }
