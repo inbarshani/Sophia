@@ -134,14 +134,16 @@ function switchSearch(newSearchType) {
         return false; // false = no click
     // change results status
     if (searchType == searchTypes.SCREENS)
-        $('#screens_results').removeClass('show').addClass('hidden');
+       // $('#screens_results').removeClass('show').addClass('hidden');
+        $( "#all_results" ).load( "html/screens.html" );
     else if (searchType == searchTypes.FLOWS)
     {       
         currentPaths.length = 0;
         currentBackboneNodes.length = 0;
         currentDataNodes.length = 0;
         $('#flow-list').empty();
-        $('#flow_results').removeClass('show').addClass('hidden');
+       // $('#flow_results').removeClass('show').addClass('hidden');
+        $( "#all_results" ).load( "html/flows.html" );
     }
     else if (searchType == searchTypes.TOPICS)
     {       
@@ -149,9 +151,9 @@ function switchSearch(newSearchType) {
         selectedTopicsArray.length = 0;
         $('#availbale_topics_list').empty();
         updateSelectedTopics();
-        $('#topics_results_row').removeClass('show').addClass('hidden');
+      //  $('#topics_results_row').removeClass('show').addClass('hidden');
+        $( "#all_results" ).load( "html/topics.html" );
     }
-
     // update searchType
     searchType = newSearchType;
     localStorage.setItem("sophiaSearchType", searchType);
@@ -221,14 +223,17 @@ function searchFlows(query, callback) {
             currentDataNodes = responseData.last_data_nodes;
             // add query and number of results to the list
             var currentStepNumber = $('#flow-list li').length + 1;
-            $('#flow-list').append('<li class="list-group-item clickable" onClick="highlight(this, function(nodes) { return nodes } ([' + currentBackboneNodes.concat(currentDataNodes) + ']));">Step ' + currentStepNumber + ': ' +
-                query + ' <span class="badge">' + currentPaths.length + '</span></li>');
-            reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
-            update();
-            addRemoveLast();
-            if (callback) {
-                callback();
-            }
+            $( "#all_results" ).load( "html/flows.html"
+                , function(){
+                    $('#flow-list').append('<li class="list-group-item clickable" onClick="highlight(this, function(nodes) { return nodes } ([' + currentBackboneNodes.concat(currentDataNodes) + ']));">Step ' + currentStepNumber + ': ' +
+                    query + ' <span class="badge">' + currentPaths.length + '</span></li>');
+                    reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
+                    update();
+                    addRemoveLast();
+                    if (callback) {
+                        callback();
+                    }
+            });
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
@@ -247,39 +252,43 @@ function searchScreens(query) {
     // change UI to show list of images instead of flows
     //  clear top level vars
     reportString = 'Type: SCREENS\n';
-    var screens_results_row = $('#screens_results_row');
-    screens_results_row.empty();
-    lastQuery = query;
-    reportString = reportString + 'Search: ' + query + '\n';
-    var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query))
-        .done(function(data) {
-            //console.log("Search returned: " + data);
-            var timestampsArray = JSON.parse(data);
-            if (timestampsArray.length > 0)
-            {
-                // create list of screens
-                // <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
-                //  <img src="timestamp"/>
-                // </li>            
-                timestampsArray.forEach(function(timestamp){
-                    screens_results_row.append(
+
+        var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query))
+            .done(function(data) {
+                $( "#all_results" ).load( "html/screens.html" ,function(){
+                    var screens_results_row = $('#screens_results_row');
+                    screens_results_row.empty();
+                    lastQuery = query;
+                    reportString = reportString + 'Search: ' + query + '\n';
+                //console.log("Search returned: " + data);
+                var timestampsArray = JSON.parse(data);
+                if (timestampsArray.length > 0)
+                {
+                    // create list of screens
+                    // <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+                    //  <img src="timestamp"/>
+                    // </li>
+                    timestampsArray.forEach(function(timestamp){
+                        screens_results_row.append(
                             '<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">'+
                             '  <img onclick="showModal(\'/screen/'+timestamp+'\');"'+
                             '       src="/screen/'+timestamp+'"/>'+
                             '</li>'
                         );
-                });
-                reportString = reportString + 'Results #: ' + timestampsArray.length + '\n';
-            }
-            else {
-                screens_results_row.append(
+                    });
+                    reportString = reportString + 'Results #: ' + timestampsArray.length + '\n';
+                }
+                else {
+                    screens_results_row.append(
                         '<li class="">'+
                         ' No screens found.'+
                         '</li>'
-                    );                
-            }
+                    );
+                }
 
-            update();
+                update();
+    });
+
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
@@ -294,8 +303,8 @@ function searchTopics(query, queryType, autoSelect, callback) {
     // change UI to show list of images instead of flows
     //  clear top level vars
     reportString = 'Type: TOPICS\n';
-    var availbale_topics_list = $('#availbale_topics_list');
-    availbale_topics_list.empty();
+   // var availbale_topics_list = $('#availbale_topics_list');
+   // availbale_topics_list.empty();
     lastQuery = query;
     reportString = reportString + 'Search: ' + query + '\n';
     if (queryType && queryType==testQueryTypes.TOPIC) {
@@ -312,44 +321,47 @@ function searchTopics(query, queryType, autoSelect, callback) {
     } else {
         var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]")
             .done(function(data) {
-                //console.log("Search returned: " + data);
-                availableTopicsArray = JSON.parse(data);
-                if (availableTopicsArray && availableTopicsArray.length > 0)
-                {
-                    // create list of topics
-                    reportString = reportString + 'Results #: ' + availableTopicsArray.length + '\n';
-                    availableTopicsArray.forEach(function(topic, index){
-                        var new_topic = $('<li data-toggle="buttons" class="btn-group bizmoduleselect" available_topic_id="'+index+'">'+
-                            '  <label class="btn btn-default">'+
-                            '      <div class="bizcontent">'+
-                            '          <h5>'+topic.name+'</h5>'+
-                            '          <span class="badge">'+topic.occurances+'</span>'+
-                            '      </div>'+
-                            '  </label>'+
+                $("#all_results").load("html/topics.html", function () {
+                    var availbale_topics_list = $('#availbale_topics_list');
+                    availbale_topics_list.empty();
+                    //console.log("Search returned: " + data);
+                    availableTopicsArray = JSON.parse(data);
+                    if (availableTopicsArray && availableTopicsArray.length > 0) {
+                        // create list of topics
+                        reportString = reportString + 'Results #: ' + availableTopicsArray.length + '\n';
+                        availableTopicsArray.forEach(function (topic, index) {
+                            var new_topic = $('<li data-toggle="buttons" class="btn-group bizmoduleselect" available_topic_id="' + index + '">' +
+                                '  <label class="btn btn-default">' +
+                                '      <div class="bizcontent">' +
+                                '          <h5>' + topic.name + '</h5>' +
+                                '          <span class="badge">' + topic.occurances + '</span>' +
+                                '      </div>' +
+                                '  </label>' +
+                                '</li>'
+                            ).on('click', function (e, name, i) {
+                                    return function () {
+                                        //console.log('tagName: '+$(this).prop('tagName'));
+                                        queries.push({query: name, type: testQueryTypes.TOPIC})
+                                        return toggleTopic(i);
+                                    };
+                                }(this, topic.name, index));
+                            availbale_topics_list.append(new_topic);
+                        });
+                    }
+                    else {
+                        availbale_topics_list.append(
+                            '<li class="">' + query +
+                            ': No topics found.' +
                             '</li>'
-                            ).on('click', function(e, name, i){
-                                return function() {
-                                    //console.log('tagName: '+$(this).prop('tagName'));
-                                    queries.push({query: name, type: testQueryTypes.TOPIC})
-                                    return toggleTopic(i);
-                                };
-                            }(this, topic.name, index));
-                        availbale_topics_list.append(new_topic);
-                    });
-                }
-                else {
-                    availbale_topics_list.append(
-                            '<li class="">'+ query + 
-                            ': No topics found.'+
-                            '</li>'
-                        );                
-                }
-            update();
-            if (callback) {
-                callback();
-            }
+                        );
+                    }
+                    update();
+                    if (callback) {
+                        callback();
+                    }
 
-        })
+                })
+            })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
             console.log("Search failed: " + err);
