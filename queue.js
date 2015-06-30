@@ -4,14 +4,16 @@ var http = require('http');
 var jsontoxml = require('jsontoxml');
 
 // connect to neo4j DB, on Yaron's machine and Inbar's machine
-var db = new neo4j.GraphDatabase('http://localhost:7474');
+//var db = new neo4j.GraphDatabase('http://localhost:7474');
+var db = new neo4j.GraphDatabase('http://16.60.168.105:7474');
 
 var dateTime = require("./dateTime");
 
 var mqm_log = require("./processors/mqm_log");
 var request = require("./processors/request");
 var jetty_error_log = require("./processors/jetty_error_log");
-var ui = require("./processors/ui");
+var ui_raw = require("./processors/ui_raw");
+var ui_logical = require("./processors/ui_logical");
 var screen = require("./processors/screen");
 var test = require("./processors/test");
 var teststep = require("./processors/test_step");
@@ -79,11 +81,12 @@ function _processQueueMessage(msg) {
                 data = request.getData(obj);
             } else if (obj_type == 'jetty_error_log') {
                 data = jetty_error_log.getData(obj);
-            } else if (obj_type == 'ui') {
-                data = ui.getData(obj);
+            } else if (obj_type == 'ui_raw') {
+                data = ui_raw.getData(obj);
+            } else if (obj_type == 'ui_logical') {
+                data = ui_logical.getData(obj);
             } else if (obj_type == 'screen') {
                 data = screen.getData(obj);
-               console.log(" [x] SCREEN data: " + JSON.stringify(data));
             } else if (obj_type == 'teststep') {
                 data = teststep.getData(obj);
             } else if (obj_type == 'test') {

@@ -152,7 +152,7 @@ Util.inherit(SophiaMessagingChannel, EventDispatcher, {
             {
                 var ts = new Date().getTime();
                 var args = {
-                    type: "UI",
+                    type: "UI_logical",
                     timestamp: ts,
                     //url: docUrl,
                     testID: this._sophiaTestId,

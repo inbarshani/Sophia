@@ -61,7 +61,7 @@
         var docUrl = document_root.URL;
         var ts = new Date().getTime();
         var args = {
-            type: "UI",
+            type: "UI_raw",
             timestamp: ts,
             url: docUrl,
             eventType: event.type,

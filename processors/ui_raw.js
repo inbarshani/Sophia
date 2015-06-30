@@ -21,6 +21,7 @@ module.exports = {
 		}
 		else
 		{
+			obj.type = 'UI_Event';
         	obj.high_priority_index = obj.eventType; 
 	        obj.indexable_content = obj.tagName + ' ' + obj.eventType;
 			if (obj.elementId) 
@@ -42,7 +43,7 @@ module.exports = {
 			formatted_result.caption = 'UI transition for elemnt '+idol_document['ELEMENTID']+ 
 				' in '+idol_document['URL'][0];
 		}
-		else { // UI
+		else { // UI_Event
 			formatted_result.caption = idol_document['EVENTTYPE']+' on '+ idol_document['TAGNAME']+
 				' in '+idol_document['URL'][0];
 		}
