@@ -38,6 +38,7 @@ app.use('/getTopicsLinks', function(request, response) {
 
 app.use('/searchFlows', function(request, response) {
     var queryText = request.query.q;
+    var isFirstQuery = request.query.isFirstQuery;
     var currentNodes = JSON.parse(request.query.currentNodes);
 
     idol_queries.search(queryText, function(documents_hash) {
@@ -45,7 +46,7 @@ app.use('/searchFlows', function(request, response) {
         //console.log('documents_hash keys: '+require('util').inspect(Object.keys(documents_hash), {depth: 2}));
         var idolResultNodes = Object.keys(documents_hash);
         if (idolResultNodes.length > 0) {
-            neo4j_queries.doesPathExit(currentNodes, idolResultNodes, function(paths_to_nodes) {
+            neo4j_queries.doesPathExists(currentNodes, idolResultNodes, isFirstQuery, function(paths_to_nodes) {
                 var last_backbone_nodes = [];
                 var last_data_nodes = [];
                 // join paths_to_nodes with data from docuemtns
