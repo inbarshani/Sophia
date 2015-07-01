@@ -19,7 +19,7 @@ var selectedTestID;
 var queries = [];
 //var loaded = false;
 
-var loadedTopics = false;
+//var loadedTopics = false;
 function fixedEncodeURIComponent(str) {
     return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
         return '%' + c.charCodeAt(0).toString(16);
@@ -339,8 +339,8 @@ function searchTopics(query, queryType, autoSelect, callback) {
     } else {
         var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]")
             .done(function(data) {
-                //var loaded =
-                if (loadedTopics) {
+                var loadedTopics =  $('#availbale_topics_list');
+                if (loadedTopics.length>0) {
                     var availbale_topics_list = $('#availbale_topics_list');
                     availbale_topics_list.empty();
                     //console.log("Search returned: " + data);
@@ -367,11 +367,21 @@ function searchTopics(query, queryType, autoSelect, callback) {
                             availbale_topics_list.append(new_topic);
                         });
                     }
+                    else {
+                        availbale_topics_list.append(
+                            '<li class="">' + query +
+                            ': No topics found.' +
+                            '</li>'
+                        );
+                    }
+                    update();
+                    if (callback) {
+                        callback();
+                    }
                 }
                 else {
                     $("#all_results").load("html/topics.html", function () {
-
-                        loadedTopics  = true;
+                        
                         var availbale_topics_list = $('#availbale_topics_list');
                         availbale_topics_list.empty();
                         //console.log("Search returned: " + data);
