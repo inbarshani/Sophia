@@ -205,14 +205,17 @@ function search(query){
 
 function searchFlows(query, callback) {
     if (currentPaths.length == 0) {
-        // clear flow list
-        // $('#flow-list').empty();
         reportString = 'Type: FLOWS\n';
+    }
+    var isFirstQuery = '';
+    if ($('#flow-list > li').length == 0) {
+        isFirstQuery = '&isFirstQuery=true';
     }
     lastQuery = query;
     reportString = reportString + 'Search: ' + query + '\n';
-    var jqxhr = $.ajax("/searchFlows?q=" + fixedEncodeURIComponent(query) + '&' +
-            'currentNodes=' + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)))
+    var jqxhr = $.ajax("/searchFlows?q=" + fixedEncodeURIComponent(query) + 
+        '&currentNodes=' + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)) +
+        isFirstQuery)
         .done(function(data) {
             //console.log("Search returned: " + data);
             var responseData = JSON.parse(data);
