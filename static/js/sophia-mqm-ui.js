@@ -381,7 +381,7 @@ function searchTopics(query, queryType, autoSelect, callback) {
                 }
                 else {
                     $("#all_results").load("html/topics.html", function () {
-                        
+
                         var availbale_topics_list = $('#availbale_topics_list');
                         availbale_topics_list.empty();
                         //console.log("Search returned: " + data);
