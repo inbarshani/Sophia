@@ -1,34 +1,4 @@
-MATCH (tom:Person {name: "Tom Hanks"})-[:ACTED_IN]->(tomHanksMovies) RETURN tom,tomHanksMovies
+match n where ANY(l IN labels(n) WHERE l='Test') return n
 
-START person = node({personId})
-MATCH person-[:PARENT | CHILD | COUPLE*]-(relatedPeople:Person)
-WITH relatedPeople, person
-MATCH p = allShortestPaths(person-[:PARENT|CHILD|COUPLE]-(relatedPeople))
-WITH [n in nodes(p) WHERE not(has(n.type))] AS people, last([n in nodes(p) WHERE has(n.type) | id(n)]) AS relationship, [r in rels(p) | TYPE(r)] AS rels
-WITH relationship, rels, last(people) AS destination, [p in people | id(p)] AS source
-MATCH destination-[:NAME]->(name), destination-[:GENDER]->gender
-RETURN source, id(destination), relationship, rels, collect(name), gender
-
-MATCH (n:TestObject {type: "Browser", mode: "runtime"})-[*1..4]-(open:TestObjectMethod {title: "Open"}) RETURN n, open
-
-MATCH (nodes)-[*0..2]-(browser:TestObject {type: "Browser", mode: "runtime"})
-RETURN nodes
-
-MATCH (nodes:Step)-[:USE]->(browser:TestObject)-[:WITH]->(method:TestObjectMethod)
-WHERE browser.type='Browser' AND browser.mode='runtime' AND method.title ='Open'
-RETURN nodes
-
-MATCH (nodes:Step)-[:USE]->(browser:TestObject)-[:WITH]->(method1:TestObjectMethod), (stepType:Step), (stepClick:Step), searchTxtBox, searchButton, method2, method3
-WHERE 
-	browser.type='Browser' AND browser.mode='runtime' AND method1.title ='Open' 
-  AND
-    nodes-[*]->(stepType)-[:USE]->(searchTxtBox:TestObject {type: 'WebTextBox', title: 'Search'})-[:WITH]->(method2:TestObjectMethod {title: 'Type'}) 
-  AND
-  	nodes-[*]->(stepClick)-[:USE]->(searchButton:TestObject {type: 'WebButton', title: 'Search'})-[:WITH]->(method3:TestObjectMethod {title: 'Click'})
-RETURN nodes
-
-
-MATCH (nodes)-[*]-(browser)
-WITH browser
-MATCH (browser:TestObject {type: "Browser", mode: "runtime"})-[*1..4]-(open:TestObjectMethod {title: "Open"})
-RETURN nodes
+IDOL:
+action=Query&fieldtext=MATCH%7BUI%7D%3ASophiaType&databasematch=Sophia&maxresults=100

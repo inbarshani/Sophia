@@ -109,67 +109,8 @@
     <hr id="search-options-divider" class="hidden"/>
 
       <!-- START results area -->
-    <div class="container hidden" id="flow_results">
-      <div class="row">
-        <div class="col-md-4">
-          <h4><span id="flow-title" class="legend">MQM flow</span></h4>
-          <ul class="list-group" id="flow-list">
-          </ul>
-        </div>
-        <div class="col-md-8">
-        <!-- START visualization area -->
-          <h4><span id="vis-title" class="legend">MQM results</span></h4>
-          <div id="vis-container" class="panel panel-default">
-            <svg id="vis-svg">
-              <g id='g' />
-            </svg>
-          </div>
-          <!-- remove
-          <div id="scrollVertical" class="btn-group-vertical" role="group" aria-label="">
-            <button type="button" class="btn btn-default" onclick="scrollVis('up');"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></button>
-            <br>
-            <button type="button" class="btn btn-default" onclick="scrollVis('down');"><span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
-          </div>
-          <div id="scrollHoriz" class="btn-toolbar" role="toolbar" aria-label="">
-            <button type="button" class="btn btn-default" onclick="scrollVis('left');"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></button>
-            <button type="button" class="btn btn-default" onclick="scrollVis('right');"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></button>
-          </div> -->
-        <!-- END visualization area -->
-        </div>
-      </div>
-    </div> <!-- end flow results -->
-
-    <div class="container" id="screens_results" class="hidden">
-      <ul class="row" id="screens_results_row">
-      </ul>
-    </div> <!-- end screens results -->
-    <div class="modal fade" id="screenModal" tabindex="-1" role="dialog" aria-labelledby="screenModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">         
-          <div class="modal-body">                
-          </div>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
-    <div class="container" id="topics_results" class="hidden">
-      <div class="row hidden" id="topics_results_row">
-        <div class="col-md-2 text-center" id="availbale_topics">
-          <h4><span class="legend">Available Topics</span></h4>
-          <ul class="list-group" id="availbale_topics_list">
-          </ul>
-        </div>
-        <div class="col-md-8 text-center" id="topics_flow">
-          <h4><span class="legend">Selected Topics</span></h4>
-          <div id="topics-vis-container" class="panel panel-default">
-          </div>
-        </div>
-        <div class="col-md-2 text-center" id="topic_details">
-          <h4><span class="legend">Topic Details</span></h4>
-        </div>
-      </div>
-    </div> <!-- end screens results -->
-    <!-- END results area -->
+    <div id = "all_results">
+    </div>
 
     <div id="details" class="panel panel-default hidden">
       <div class="closeX" onclick="hideDetails();"><span>X</span></div>
