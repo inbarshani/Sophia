@@ -53,10 +53,18 @@ app.post('/file', function(request, response) {
                 file: fileName
             };
             var absPath = fs.realpathSync('./upload/');
-            idol_queries.analyzeImage(absPath + '/' + fileName, function(text) {
-                data.text = text;
-                sendToQueue(data, response);
-            });
+            try
+            {
+                idol_queries.analyzeImage(absPath + '/' + fileName, function(text) {
+                    data.text = text;
+                    sendToQueue(data, response);
+                });
+            }
+            catch(ex)
+            {
+                console.log('Failed to analyze image: '+
+                    absPath + '/' + fileName + ' due to exception:\n'+ex);
+            }
         });
     });
 });
