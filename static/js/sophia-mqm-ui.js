@@ -357,7 +357,7 @@ function searchTopics(query, queryType, autoSelect, callback) {
             callback();
         }
     } else {
-        var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]")
+        var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]&dateCondition=" + JSON.stringify(dateCondition))
             .done(function(data) {
                 var loadedTopics =  $('#availbale_topics_list');
                 if (loadedTopics.length>0) {
