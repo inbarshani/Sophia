@@ -17,6 +17,7 @@ var user;
 var lastQuery = "";
 var selectedTestID;
 var queries = [];
+var dateCondition = {from: null, to: null};
 //var loaded = false;
 
 //var loadedTopics = false;
@@ -55,6 +56,9 @@ $(document).ready(function() {
     
     $('body').click(onDocumentClick);
 
+    $('#date-cond').on('click', function(e) {
+        openDateDialog();
+    });
     $('#load-test').on('click', function(e) {
         openLoadTestDialog();
     });
@@ -84,6 +88,21 @@ $(document).ready(function() {
         if (e.keyCode == 13) {
             saveTest();
         }
+    });
+    $('#fromDate').datetimepicker()
+        .on('dp.change', function(){
+            $('#fromDate').data("DateTimePicker").hide();
+        });
+    $('#toDate').datetimepicker()
+        .on('dp.change', function(){
+            $('#toDate').data("DateTimePicker").hide();
+        });
+
+    $('#date-cond-btn-submit').on('click', function(e) {
+        setDateCondition();
+    });
+    $('#date-cond-btn-remove').on('click', function(e) {
+        removeDateCondition();
     });
 });
 
@@ -219,6 +238,7 @@ function searchFlows(query, callback) {
     reportString = reportString + 'Search: ' + query + '\n';
     var jqxhr = $.ajax("/searchFlows?q=" + fixedEncodeURIComponent(query) + 
         '&currentNodes=' + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)) +
+        '&dateCondition=' + JSON.stringify(dateCondition) + 
         isFirstQuery)
         .done(function(data) {
             //console.log("Search returned: " + data);
@@ -531,7 +551,7 @@ function clearSearch(searchType) {
     d3Topics.svg = null;
     switchSearch(searchType);
     update();
-
+    dateCondition = {from: null, to: null};
     $('#search-text').focus();
 }
 
@@ -617,6 +637,10 @@ function reportAudit() {
             console.log("Failed reporting audit log: " + err);
         });
 
+}
+
+function openDateDialog() {
+    $('#dateModal').modal('show');
 }
 
 function openLoadTestDialog() {
@@ -817,4 +841,34 @@ function reQueryFlows() {
     if (f.length > 0) {
         f[0]();
     }
+}
+
+function setDateCondition() {
+    if ($('#fromDate').data('DateTimePicker').date()) {
+        dateCondition.from = $('#fromDate').data('DateTimePicker').date().unix() * 1000;
+    } else {
+        dateCondition.from = null;
+    }
+    if ($('#toDate').data('DateTimePicker').date()) {
+        dateCondition.to = $('#toDate').data('DateTimePicker').date().unix() * 1000;
+    } else {
+        dateCondition.to = null;
+    }
+    $('#dateModal').modal('hide');
+    if (dateCondition.from || dateCondition.to) {
+        $('#dateCondIndicator').removeClass('hidden');
+        $('#dateCondIndicator').tooltip({title: 'Date condition exists'});
+   } else {
+        $('#dateCondIndicator').addClass('hidden');
+    }
+}
+
+function removeDateCondition() {
+    dateCondition = {from: null, to: null};
+    $('#fromDate').data('DateTimePicker').date(null);
+    $('#toDate').data('DateTimePicker').date(null);
+    $('#dateModal').modal('hide');
+    $('#dateCondIndicator').addClass('hidden');
+    $('#dateCondIndicator').tooltip('destroy');
+
 }

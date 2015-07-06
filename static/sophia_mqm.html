@@ -13,6 +13,7 @@
     <link href="bootstrap-3.3.4-dist/css/dashboard.css" rel="stylesheet">
     <link href="/css/sophia.css" rel="stylesheet">
     <link href="/css/sophia-topics.css" rel="stylesheet">
+    <link href="/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
     <!--script src="../../assets/js/ie-emulation-modes-warning.js"></script-->
@@ -68,14 +69,16 @@
               <button class="btn btn-info" id="search-button">
                 <span class="glyphicon glyphicon-search"></span>
               </button>
-              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Options <span class="caret"></span></button>
               <ul class="dropdown-menu dropdown-menu-right">
+                <li><a href="#" id="date-cond">Date Condition</a></li>
                 <li><a href="#" id="load-test">Load Test</a></li>
                 <li class="disabled" id="save-test"><a href="#">Save Test</a></li>
               </ul>
             </span>
           </div>
         </div>
+        <span id="dateCondIndicator" class="glyphicon glyphicon-filter hidden" aria-hidden="true" data-toggle="tooltip" data-placement="right"></span>
         <div class="col-md-2">
         </div>
       </div>
@@ -117,10 +120,47 @@
       <ul id="detailsText" class="list-group"></ul>
     </div>
     <div id="busy" class="busyindicator"> </div>
+    <!-- Modal date condition -->
+    <div class="modal fade" id="dateModal" tabindex="-1" role="dialog" aria-labelledby="dateModalLabel">
+      <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="dateModalLabel">Limit to date</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="startDate">From Date</label>
+              <div class='input-group date' id='fromDate'>
+                <input type='text' class="form-control" />
+                <span class="input-group-addon">
+                  <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+              </div>            
+            </div>
+            <div class="form-group">
+              <label for="startDate">To Date</label>
+              <div class='input-group date' id='toDate'>
+                <input type='text' class="form-control" />
+                <span class="input-group-addon">
+                  <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+              </div>            
+            </div>
+            <div class="form-group">
+              <button type="button" id="date-cond-btn-submit" class="btn btn-primary">Submit</button>
+              <button type="button" id="date-cond-btn-remove" class="btn btn-warning">Remove</button>
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal date condition-->
     <!-- Modal load test-->
     <div class="modal fade" id="loadTestModal" tabindex="-1" role="dialog" aria-labelledby="loadModalLabel">
       <div class="modal-dialog" role="document">
-        <div class="modal-content">
+        <div class="modal-content test">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="loadModalLabel">Load Saved Test</h4>
@@ -169,7 +209,7 @@
     <!-- Modal save test-->
     <div class="modal fade" id="saveTestModal" tabindex="-1" role="dialog" aria-labelledby="saveModalLabel">
       <div class="modal-dialog" role="document">
-        <div class="modal-content">
+        <div class="modal-content test">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="saveModalLabel">Save Test</h4>
@@ -204,5 +244,7 @@
     <script src="js/sophia-mqm-ui.js"></script>
     <script src="js/sophia-vis-ui.js"></script>
     <script src="js/sophia-vis-topics.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/bootstrap-datetimepicker.min.js"></script>
   </body>
 </html>

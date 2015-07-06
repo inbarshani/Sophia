@@ -38,10 +38,11 @@ app.use('/getTopicsLinks', function(request, response) {
 
 app.use('/searchFlows', function(request, response) {
     var queryText = request.query.q;
+    var dateCondition = JSON.parse(request.query.dateCondition);
     var isFirstQuery = request.query.isFirstQuery;
     var currentNodes = JSON.parse(request.query.currentNodes);
 
-    idol_queries.search(queryText, function(documents_hash) {
+    idol_queries.search(queryText, dateCondition, function(documents_hash) {
         // verify that the nodes of the documents are connected after existing nodes
         //console.log('documents_hash keys: '+require('util').inspect(Object.keys(documents_hash), {depth: 2}));
         var idolResultNodes = Object.keys(documents_hash);
