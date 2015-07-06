@@ -28,17 +28,13 @@ $(document).ready(function() {
         function(result) {
             if (result.sophiaTestId == null) {
                 // test not running
-                $("#reportStep").attr("disabled", true);
-                $("#endTestBtn").attr("disabled", true);
-                $("#startTestBtn").removeAttr("disabled");
-                $("#testsSelect").removeAttr("disabled");
+                setEnableByID(true, ["#startTestBtn", "#testsSelect"]);
+                setEnableByID(false, ["#reportStepFail", "#reportStepPass", "#endTestBtn"]);
                 $("#instructions").text('Press "Start Test" to begin execution');
                 $("#currentStep").text('');
             } else {
-                $("#testsSelect").attr("disabled", true);
-                $("#startTestBtn").attr("disabled", true);
-                $("#reportStep").removeAttr("disabled");
-                $("#endTestBtn").removeAttr("disabled");
+                setEnableByID(false, ["#startTestBtn", "#testsSelect"]);
+                setEnableByID(true, ["#reportStepFail", "#reportStepPass", "#endTestBtn"]);
                 currentTest = parseInt(result.sophiaCurrentTest);
                 currentStep = parseInt(result.sophiaCurrentStep);
                 var test_desc = 'Manual test';
@@ -52,7 +48,7 @@ $(document).ready(function() {
                 if (!step_desc)
                 {
                     step_desc = '<<test done>>';
-                    $("#reportStep").attr("disabled", true);
+                    setEnableByID(false, ["#reportStepFail", "#reportStepPass"]);
                 }                        
                 $("#currentStep").text(step_desc);
             }
@@ -60,16 +56,14 @@ $(document).ready(function() {
 });
 
 $("#startTestBtn").click(function() {
-    $("#startTestBtn").attr("disabled", true);
-    $("#testsSelect").attr("disabled", true);
+    setEnableByID(false, ["#startTestBtn", "#testsSelect"]);
+    setEnableByID(true, ["#reportStepFail", "#reportStepPass", "#endTestBtn"]);
     var selectedTest = $("#testsSelect").val();
     if (selectedTest != 'new')
     {
         currentTest = parseInt(selectedTest);
     }
     currentStep = 1;
-    $("#reportStep").removeAttr("disabled");
-    $("#endTestBtn").removeAttr("disabled");
     var ts = new Date().getTime();
     chrome.storage.local.get('dataUrl', function(result) {
         var dataUrl = result.dataUrl;
@@ -139,10 +133,8 @@ $("#startTestBtn").click(function() {
 });
 
 $("#endTestBtn").click(function() {
-    $("#endTestBtn").attr("disabled", true);
-    $("#reportStep").attr("disabled", true);
-    $("#startTestBtn").removeAttr("disabled");
-    $("#testsSelect").removeAttr("disabled");
+    setEnableByID(true, ["#startTestBtn", "#testsSelect"]);
+    setEnableByID(false, ["#reportStepFail", "#reportStepPass", "#endTestBtn"]);
     $("#currentStep").text('');
     var description = "Manual test";
     if (currentTest >= 0)
@@ -167,26 +159,29 @@ $("#endTestBtn").click(function() {
                 console.log("Sophia extension GUID not defined");
                 return;
             }
-            // report both step end and test end
-            var step_args = {
-                type: "TestStep",
-                timestamp: ts,
-                action: "done",
-                status: 'failed',
-                testID: guid,
-                stepNumber: currentStep,
-                description: step_desc
-            }
-            var step_data = JSON.stringify(step_args);
-            $.ajax({
-                url: dataUrl,
-                type: 'POST',
-                data: step_data,
-                dataType: 'json',
-                success: function(doc) {
-                    console.log("TestStep stop reported");
+            if (step_desc)
+            {
+                // there is an active test step, so fail it before reporting end test
+                var step_args = {
+                    type: "TestStep",
+                    timestamp: ts,
+                    action: "done",
+                    status: 'failed',
+                    testID: guid,
+                    stepNumber: currentStep,
+                    description: step_desc
                 }
-            });
+                var step_data = JSON.stringify(step_args);
+                $.ajax({
+                    url: dataUrl,
+                    type: 'POST',
+                    data: step_data,
+                    dataType: 'json',
+                    success: function(doc) {
+                        console.log("TestStep stop reported");
+                    }
+                });
+            }
             var args = {
                 type: "Test",
                 timestamp: ts,
@@ -218,6 +213,16 @@ $("#endTestBtn").click(function() {
     });
 });
 
+function setEnableByID(isEnabled, ids)
+{
+    ids.forEach(function(id){
+        if (isEnabled)
+            $(id).removeAttr("disabled");
+        else
+            $(id).attr("disabled", true);
+    });
+}
+
 $("#reportStepPass").click(function(){
     reportStep('passed');
 });
@@ -227,6 +232,7 @@ $("#reportStepFail").click(function(){
 });
 
 function reportStep(status) {
+    setEnableByID(false, ["#reportStepFail", "#reportStepPass"]);
     console.log("TestStep event");
     var ts = new Date().getTime();
     var step_desc = '';
@@ -271,6 +277,7 @@ function reportStep(status) {
                 data: data,
                 dataType: 'json',
                 success: function(doc) {
+                    setEnableByID(true, ["#reportStepFail", "#reportStepPass"]);
                     console.log("TestStep reported");
                     currentStep++;
                     if (currentTest >= 0)
@@ -280,7 +287,7 @@ function reportStep(status) {
                         if (!step_desc)
                         {
                             step_desc = '<<test done>>';
-                            $("#reportStep").attr("disabled", true);
+                            setEnableByID(false, ["#reportStepFail", "#reportStepPass"]);
                         }                        
                     }
                     else
