@@ -15,7 +15,6 @@ app.post('/data', function(request, response) {
         //console.log("Got event with data in _body: "+request._body+" and body: "+request.body);
         sendToQueue(request.body, response);
     } else {
-        var ms = new Date().getMilliseconds();
         var content = "";
         request.on("data", function(chunk) {
             content += chunk;
@@ -34,6 +33,7 @@ app.post('/file', function(request, response) {
         content += chunk;
     });
     request.on("end", function() {
+        response.sendStatus(202); // 202 - accepted, not completed
         var ts = new Date().getTime();
         var startIndex = content.indexOf('data:image/jpeg;base64,') + 23;
         var endIndex = content.lastIndexOf('\r\n------WebKitFormBoundary');
@@ -64,6 +64,7 @@ app.post('/file', function(request, response) {
                 console.log('Failed to analyze image: '+
                     absPath + '/' + fileName + ' due to exception:\n'+ex);
             }
+            response.sendStatus(200); // completed
         });
     });
 });
