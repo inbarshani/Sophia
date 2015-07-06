@@ -89,8 +89,8 @@ app.use('/searchFlows', function(request, response) {
 
 app.use('/searchScreens', function(request, response) {
     var queryText = request.query.q;
-
-    idol_queries.search(queryText, function(documents_hash) {
+    var dateCondition = JSON.parse(request.query.dateCondition);
+    idol_queries.search(queryText, dateCondition, function(documents_hash) {
         var idolResultNodes = Object.keys(documents_hash);
         if (idolResultNodes.length > 0) {
             neo4j_queries.getNearestScreens(idolResultNodes,

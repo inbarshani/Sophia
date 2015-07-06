@@ -293,7 +293,7 @@ function searchScreens(query) {
     //  clear top level vars
     reportString = 'Type: SCREENS\n';
 
-        var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query))
+        var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query) + "&dateCondition=" + JSON.stringify(dateCondition))
             .done(function(data) {
                     $("#all_results").load("html/screens.html", function () {
                         var screens_results_row = $('#screens_results_row');
