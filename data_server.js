@@ -13,6 +13,7 @@ app.post('/data', function(request, response) {
     //console.log("Got data event");
     if (request._body) {
         //console.log("Got event with data in _body: "+request._body+" and body: "+request.body);
+        response.status(200).json({ value: 'OK' });
         sendToQueue(request.body, response);
     } else {
         var content = "";
@@ -22,6 +23,7 @@ app.post('/data', function(request, response) {
         request.on("end", function() {
             //if (content.indexOf('TestStep') > 0)
             //    console.log("Got event with chunked data: "+content.substring(0, 200));
+            response.status(200).json({ value: 'OK' });
             sendToQueue(JSON.parse(content), response);
         });
     }
@@ -33,7 +35,7 @@ app.post('/file', function(request, response) {
         content += chunk;
     });
     request.on("end", function() {
-        response.sendStatus(202); // 202 - accepted, not completed
+        response.status(202).json({ value: 'OK' }); // 202 - accepted, not completed
         var ts = new Date().getTime();
         var startIndex = content.indexOf('data:image/jpeg;base64,') + 23;
         var endIndex = content.lastIndexOf('\r\n------WebKitFormBoundary');
@@ -64,7 +66,6 @@ app.post('/file', function(request, response) {
                 console.log('Failed to analyze image: '+
                     absPath + '/' + fileName + ' due to exception:\n'+ex);
             }
-            response.sendStatus(200); // completed
         });
     });
 });
@@ -87,7 +88,6 @@ rabbitMq.on('error', function(err) {
 
 
 function sendToQueue(data, response) {
-    response.status(200).json({ value: 'OK' });
     var data_json = JSON.stringify(data);
     if (rabbitMq) {
         rabbitMq.publish('sophia', data_json);
