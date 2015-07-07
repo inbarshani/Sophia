@@ -6,6 +6,7 @@ module.exports = {
 	},
 
 	extractDataFromIDOL: function(idol_document, formatted_result){
+		formatted_result.caption = 'screen capture';
 		return formatted_result;		
 	}
 };

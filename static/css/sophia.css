@@ -139,7 +139,7 @@
   width: 150px;
 }
 
-.modal-content {
+.modal-content.big-modal {
     height: 632px;
     width: 1120px;
     margin-left: -260px;
@@ -171,4 +171,8 @@
 	margin-right: 7px;
   	margin-left: -5px;
   	margin-top: 2px;
+}
+
+span.input-group-addon {
+	padding: 6px 12px;
 }
