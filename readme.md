@@ -46,6 +46,13 @@ B. Jetty and MQM log parser
 	See <Sophia>\agents\jetty\logging\start.ini for an example. 
 4. copy <Sophia>\agents\jetty\logging\sophia to \logstash-1.4.2\patterns
 5. Restart Jetty
+6. running logstash in the background:
+	cd /var/opt/logstash-1.4.2/bin
+	./logstash -f log.conf &
+	to bring to foreground: fg
+	to send to background: bg
+	to check bg jobs: jobs -l
+	to check if logstash is running: ps aux | grep logstash
 
 
 Happy Coding! :p
