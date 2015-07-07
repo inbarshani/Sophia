@@ -19,7 +19,8 @@ var d3Topics = {
       this.initTopics();
     else
     {
-      this.svg.html("");
+        this.svg.html("");
+
     }
 
     var outerRadius = 600 / 2;

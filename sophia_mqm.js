@@ -17,8 +17,9 @@ app.use(express.static(__dirname + '/static'));
 
 app.use('/getTopics', function(request, response) {
     var query = request.query.q;
+    var dateCondition = JSON.parse(request.query.dateCondition);
     console.log("getTopics query: "+query);
-    idol_queries.getTopics(query, null, function(topics) {
+    idol_queries.getTopics(query, null, dateCondition, function(topics) {
         if (topics)
             response.send(JSON.stringify(topics));
         else
@@ -38,10 +39,11 @@ app.use('/getTopicsLinks', function(request, response) {
 
 app.use('/searchFlows', function(request, response) {
     var queryText = request.query.q;
+    var dateCondition = JSON.parse(request.query.dateCondition);
     var isFirstQuery = request.query.isFirstQuery;
     var currentNodes = JSON.parse(request.query.currentNodes);
 
-    idol_queries.search(queryText, function(documents_hash) {
+    idol_queries.search(queryText, dateCondition, function(documents_hash) {
         // verify that the nodes of the documents are connected after existing nodes
         //console.log('documents_hash keys: '+require('util').inspect(Object.keys(documents_hash), {depth: 2}));
         var idolResultNodes = Object.keys(documents_hash);
@@ -87,8 +89,8 @@ app.use('/searchFlows', function(request, response) {
 
 app.use('/searchScreens', function(request, response) {
     var queryText = request.query.q;
-
-    idol_queries.search(queryText, function(documents_hash) {
+    var dateCondition = JSON.parse(request.query.dateCondition);
+    idol_queries.search(queryText, dateCondition, function(documents_hash) {
         var idolResultNodes = Object.keys(documents_hash);
         if (idolResultNodes.length > 0) {
             neo4j_queries.getNearestScreens(idolResultNodes,

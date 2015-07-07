@@ -8,15 +8,19 @@ var selectedTopicsArray = [];
 var testQueryTypes = {QUERY: 0, 
     TOPIC: 1};
 var isAjaxActive = 0;
-var searchTypes = {FLOWS: 0, 
+var searchTypes = {
+    FLOWS: 0, 
     SCREENS: 1,
     ISSUES: 2,
-    TOPICS: 3};
+    TOPICS: 3,
+    TRENDS: 4
+};
 var searchType = searchTypes.FLOWS;
 var user;
 var lastQuery = "";
 var selectedTestID;
 var queries = [];
+var dateCondition = {from: null, to: null};
 //var loaded = false;
 
 //var loadedTopics = false;
@@ -55,6 +59,9 @@ $(document).ready(function() {
     
     $('body').click(onDocumentClick);
 
+    $('#date-cond').on('click', function(e) {
+        openDateDialog();
+    });
     $('#load-test').on('click', function(e) {
         openLoadTestDialog();
     });
@@ -84,6 +91,21 @@ $(document).ready(function() {
         if (e.keyCode == 13) {
             saveTest();
         }
+    });
+    $('#fromDate').datetimepicker()
+        .on('dp.change', function(){
+            $('#fromDate').data("DateTimePicker").hide();
+        });
+    $('#toDate').datetimepicker()
+        .on('dp.change', function(){
+            $('#toDate').data("DateTimePicker").hide();
+        });
+
+    $('#date-cond-btn-submit').on('click', function(e) {
+        setDateCondition();
+    });
+    $('#date-cond-btn-remove').on('click', function(e) {
+        removeDateCondition();
     });
 });
 
@@ -155,6 +177,9 @@ function switchSearch(newSearchType) {
         updateSelectedTopics();
       //  $('#topics_results_row').removeClass('show').addClass('hidden');
         $( "#all_results" ).load( "html/topics.html" );
+    } else if (searchType == searchTypes.TRENDS)
+    {       
+        $( "#all_results" ).load( "html/trends.html" );
     }
     // update searchType
     searchType = newSearchType;
@@ -176,8 +201,12 @@ function updateSearchNavigation()
         id_of_li = "#search-screens";
     else if (searchType == searchTypes.ISSUES)
         id_of_li = "#search-issues";
-    else if (searchType == searchTypes.TOPICS)
+    else if (searchType == searchTypes.TOPICS) {
         id_of_li = "#search-topics";
+        $("#topics-vis-container").html("");
+        d3Topics.svg = null;
+    } else if (searchType == searchTypes.TRENDS)
+        id_of_li = "#search-trends";
     var search_type_li = $(id_of_li);
     search_type_li.removeClass('search').addClass('selected_search');
     // change siblings style
@@ -219,6 +248,7 @@ function searchFlows(query, callback) {
     reportString = reportString + 'Search: ' + query + '\n';
     var jqxhr = $.ajax("/searchFlows?q=" + fixedEncodeURIComponent(query) + 
         '&currentNodes=' + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)) +
+        '&dateCondition=' + JSON.stringify(dateCondition) + 
         isFirstQuery)
         .done(function(data) {
             //console.log("Search returned: " + data);
@@ -273,7 +303,7 @@ function searchScreens(query) {
     //  clear top level vars
     reportString = 'Type: SCREENS\n';
 
-        var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query))
+        var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query) + "&dateCondition=" + JSON.stringify(dateCondition))
             .done(function(data) {
                     $("#all_results").load("html/screens.html", function () {
                         var screens_results_row = $('#screens_results_row');
@@ -337,7 +367,7 @@ function searchTopics(query, queryType, autoSelect, callback) {
             callback();
         }
     } else {
-        var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]")
+        var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]&dateCondition=" + JSON.stringify(dateCondition))
             .done(function(data) {
                 var loadedTopics =  $('#availbale_topics_list');
                 if (loadedTopics.length>0) {
@@ -381,7 +411,7 @@ function searchTopics(query, queryType, autoSelect, callback) {
                 }
                 else {
                     $("#all_results").load("html/topics.html", function () {
-                        
+
                         var availbale_topics_list = $('#availbale_topics_list');
                         availbale_topics_list.empty();
                         //console.log("Search returned: " + data);
@@ -531,7 +561,7 @@ function clearSearch(searchType) {
     d3Topics.svg = null;
     switchSearch(searchType);
     update();
-
+    dateCondition = {from: null, to: null};
     $('#search-text').focus();
 }
 
@@ -617,6 +647,10 @@ function reportAudit() {
             console.log("Failed reporting audit log: " + err);
         });
 
+}
+
+function openDateDialog() {
+    $('#dateModal').modal('show');
 }
 
 function openLoadTestDialog() {
@@ -817,4 +851,34 @@ function reQueryFlows() {
     if (f.length > 0) {
         f[0]();
     }
+}
+
+function setDateCondition() {
+    if ($('#fromDate').data('DateTimePicker').date()) {
+        dateCondition.from = $('#fromDate').data('DateTimePicker').date().unix() * 1000;
+    } else {
+        dateCondition.from = null;
+    }
+    if ($('#toDate').data('DateTimePicker').date()) {
+        dateCondition.to = $('#toDate').data('DateTimePicker').date().unix() * 1000;
+    } else {
+        dateCondition.to = null;
+    }
+    $('#dateModal').modal('hide');
+    if (dateCondition.from || dateCondition.to) {
+        $('#dateCondIndicator').removeClass('hidden');
+        $('#dateCondIndicator').tooltip({title: 'Date condition exists'});
+   } else {
+        $('#dateCondIndicator').addClass('hidden');
+    }
+}
+
+function removeDateCondition() {
+    dateCondition = {from: null, to: null};
+    $('#fromDate').data('DateTimePicker').date(null);
+    $('#toDate').data('DateTimePicker').date(null);
+    $('#dateModal').modal('hide');
+    $('#dateCondIndicator').addClass('hidden');
+    $('#dateCondIndicator').tooltip('destroy');
+
 }
