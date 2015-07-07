@@ -8,10 +8,13 @@ var selectedTopicsArray = [];
 var testQueryTypes = {QUERY: 0, 
     TOPIC: 1};
 var isAjaxActive = 0;
-var searchTypes = {FLOWS: 0, 
+var searchTypes = {
+    FLOWS: 0, 
     SCREENS: 1,
     ISSUES: 2,
-    TOPICS: 3};
+    TOPICS: 3,
+    TRENDS: 4
+};
 var searchType = searchTypes.FLOWS;
 var user;
 var lastQuery = "";
@@ -174,6 +177,9 @@ function switchSearch(newSearchType) {
         updateSelectedTopics();
       //  $('#topics_results_row').removeClass('show').addClass('hidden');
         $( "#all_results" ).load( "html/topics.html" );
+    } else if (searchType == searchTypes.TRENDS)
+    {       
+        $( "#all_results" ).load( "html/trends.html" );
     }
     // update searchType
     searchType = newSearchType;
@@ -195,8 +201,12 @@ function updateSearchNavigation()
         id_of_li = "#search-screens";
     else if (searchType == searchTypes.ISSUES)
         id_of_li = "#search-issues";
-    else if (searchType == searchTypes.TOPICS)
+    else if (searchType == searchTypes.TOPICS) {
         id_of_li = "#search-topics";
+        $("#topics-vis-container").html("");
+        d3Topics.svg = null;
+    } else if (searchType == searchTypes.TRENDS)
+        id_of_li = "#search-trends";
     var search_type_li = $(id_of_li);
     search_type_li.removeClass('search').addClass('selected_search');
     // change siblings style
