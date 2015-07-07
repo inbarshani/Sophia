@@ -19,14 +19,8 @@ var d3Topics = {
       this.initTopics();
     else
     {
-        if(d3.selectAll("#topics-vis-container.svg").length()==0)
-        {
-            this.initTopics();
-        }
-        else
-        {
-            this.svg.html("");
-        }
+        this.svg.html("");
+
     }
 
     var outerRadius = 600 / 2;
