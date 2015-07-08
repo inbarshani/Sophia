@@ -8,9 +8,11 @@ results.txt
 results.xml
 result.txt
 result.xml
+ports.txt
 
-# Audit information from Sophia
+# Sophia Data
 audit/*
+*.db
 
 # Runtime data
 pids

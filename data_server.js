@@ -35,6 +35,7 @@ app.post('/file', function(request, response) {
         content += chunk;
     });
     request.on("end", function() {
+		console.log('Saving file');
         response.status(202).json({ value: 'OK' }); // 202 - accepted, not completed
         var ts = new Date().getTime();
         var startIndex = content.indexOf('data:image/jpeg;base64,') + 23;
