@@ -32,7 +32,7 @@ function searchFlows(query, callback) {
                         query + ' <span class="badge">' + currentPaths.length + '</span></li>');
                         reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
                         update();
-                        addRemoveLast();
+                        addIconsToLast();
                         if (callback) {
                             callback();
                         }
@@ -43,7 +43,7 @@ function searchFlows(query, callback) {
                 query + ' <span class="badge">' + currentPaths.length + '</span></li>');
                 reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
                 update();
-                addRemoveLast();
+                addIconsToLast();
                 if (callback) {
                     callback();
                 }
@@ -63,26 +63,30 @@ function searchFlows(query, callback) {
         });
 }
 
-function addRemoveLast() {
+function addIconsToLast() {
     var lis = $('#flow-list > li');
+    // don't remove old ones
+    /*
     for (var i = 0; i < lis.length; i++) {
         if($(lis[i]).find('span').length > 1) {
             $($(lis[i]).find('span')[1]).remove();
         }
-    }
+    }*/
+    var currentIndex = lis.length - 1;
     var span = $('<span>');
-    span.attr('title', "Delete Last");
+    span.attr('title', "Remove step");
     span.addClass('glyphicon glyphicon-trash delete-flow');
     span.on('click', function() {
-        $(lis[lis.length - 1]).remove();
+        //var items = $('#flow-list > li');
+        //$(items[currentIndex]).remove();
+        queries.splice(currentIndex, 1);
         reQueryFlows();
     });
-    $(lis[lis.length - 1]).append(span);
+    $(lis[currentIndex]).append(span);
 }
 
 function reQueryFlows() {
     var tempQueries = queries;
-    tempQueries.pop();
     clearSearch(searchTypes.FLOWS);
     var ul = $('#flow-list');
     ul.empty();
