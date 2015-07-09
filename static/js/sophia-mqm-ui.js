@@ -1,12 +1,10 @@
-var currentPaths = [];
 var reportString = '';
-var currentBackboneNodes = [];
-var currentDataNodes = [];
 var suggestionsArray = [];
 var availableTopicsArray = [];
 var selectedTopicsArray = [];
 var testQueryTypes = {QUERY: 0, 
-    TOPIC: 1};
+    TOPIC: 1,
+    VERIFICATION: 2};
 var isAjaxActive = 0;
 var searchTypes = {
     FLOWS: 0, 
@@ -131,24 +129,6 @@ $(document).ajaxComplete(function( event, xhr, settings ) {
     }
 });
 
-function updateCurrentPaths(newPaths) {
-    if (currentPaths.length > 0) {
-        // if there are existing paths of preivous queries, we need to combine
-        newPaths.map(function(newPath) {
-            var startNode = newPath.nodes[0].id;
-            for (var i = 0; i < currentPaths.length; i++) {
-                if (currentPaths[i].last_backbone == startNode ||
-                    currentPaths[i].last_data == startNode) {
-                    // combine newPath with currentPath
-                    newPath.nodes.shift(); // remove the node common to previous and new path
-                    newPath.nodes = currentPaths[i].nodes.concat(newPath.nodes);
-                    break; // don't need to go over all the rest of the paths
-                }
-            }
-        });
-    }
-    currentPaths = newPaths;
-}
 
 function switchSearch(newSearchType) {
     queries = [];
@@ -160,10 +140,7 @@ function switchSearch(newSearchType) {
         $( "#all_results" ).load( "html/screens.html" );
     else if (searchType == searchTypes.FLOWS)
     {       
-        currentPaths.length = 0;
-        currentBackboneNodes.length = 0;
-        currentDataNodes.length = 0;
-        $('#flow-list').empty();
+        clearFlowsSearch();
        // $('#flow_results').removeClass('show').addClass('hidden');
         $( "#all_results" ).load( "html/flows.html" );
     }
@@ -257,13 +234,8 @@ function clearSearch(searchType) {
     if (!searchType) {
         searchType = searchTypes.FLOWS;
     }
-    // remove all nodes
-    currentPaths.length = 0;
-    currentBackboneNodes.length = 0;
-    currentDataNodes.length = 0;
-    // clear flow list
+    clearFlowsSearch();
     $('#availbale_topics_list').empty();
-    $('#flow-list').empty();
     $('#topics-vis-container').html('');
     d3Topics.svg = null;
     switchSearch(searchType);

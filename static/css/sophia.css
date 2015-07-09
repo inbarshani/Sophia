@@ -166,11 +166,16 @@
     vertical-align: middle;
     float: none;
 }
-.delete-flow {
+.flow-step-icons-start ,
+.flow-step-icons {
 	float: left;
 	margin-right: 7px;
   	margin-left: -5px;
   	margin-top: 2px;
+}
+
+.flow-step-icons {
+  	margin-left: 0px;
 }
 
 span.input-group-addon {
