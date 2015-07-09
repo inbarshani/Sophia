@@ -6,7 +6,13 @@ module.exports = {
 	},
 
 	extractDataFromIDOL: function(idol_document, formatted_result){
-		formatted_result.caption = idol_document['DESCRIPTION'][0];
+		//console.log('idol_document obj: '+require('util').inspect(idol_document, {depth:4}));
+		formatted_result.caption = idol_document['DESCRIPTION'][0] + '\n';
+		if (idol_document['STATUS'])
+			formatted_result.caption += 'Status: ' + idol_document['STATUS'][0];
+		else
+			formatted_result.caption += 'Action: ' + idol_document['ACTION'][0];
+
 		return formatted_result;		
 	}
 };

@@ -1,4 +1,6 @@
 match n where ANY(l IN labels(n) WHERE l='Test') return n
 
+match n where ANY(l IN labels(n) WHERE l =~ '.*log.*') return n
+
 IDOL:
 action=Query&fieldtext=MATCH%7BUI%7D%3ASophiaType&databasematch=Sophia&maxresults=100

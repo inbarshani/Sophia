@@ -218,7 +218,7 @@ function showDetails(x, y, node) {
     $('#detailsText').append(li);
     li = $('<li>');
     li.addClass('list-group-item');
-    li.text(node.data.caption);
+    li.html(node.data.caption.replace('\n','<br/>'));
     $('#detailsText').append(li);
     li = $('<li>');
     li.addClass('list-group-item');
