@@ -19,7 +19,7 @@ function getLongWords(text, minLength)
 	//console.log('getLongWords words length: '+words.length);
 	var good_words = [];
 	words.forEach(function(word){
-		console.log('getLongWords word: '+word);
+		//console.log('getLongWords word: '+word);
 		if (word.length > minLength)
 			good_words.push(word);
 	});
