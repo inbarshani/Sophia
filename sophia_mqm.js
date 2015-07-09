@@ -264,4 +264,33 @@ app.use('/tests/type/:type', function(request, response) {
     }
 });
 
+app.use('/searchTrends', function(request, response) {
+    var queryText = request.query.q;
+    var dateCondition = (request.query.dateCondition) ? JSON.parse(request.query.dateCondition) : {};
+    var resultNodes = [];
+    var testsCount = 0;
+    idol_queries.searchTrends(queryText, dateCondition, function(documents_hash) {
+        var idolResultNodes = Object.keys(documents_hash);
+        if (idolResultNodes.length > 0) {
+            neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {
+                response.send(JSON.stringify(bbNodes));
+            });
+        } else {// no results from IDOL
+            response.send(JSON.stringify([]));
+        }
+    });
+});
+
+function queryTestBackBoneNodes(index, numTests, response) {
+    return function() {
+        neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {
+            resultNodes[index].b = bbNodes;
+            if (index == testsCount - 1) {
+                response.send(JSON.stringify(resultNodes));
+            }
+        });
+    }
+};
+
+
 app.listen(8085);
