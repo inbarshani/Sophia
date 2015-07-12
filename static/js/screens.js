@@ -1,5 +1,3 @@
-var screensServer = 'http://myd-vm00366:8085'
-
 /**
  * Created by gazitn on 7/7/2015.
  */

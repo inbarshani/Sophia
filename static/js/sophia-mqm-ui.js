@@ -19,6 +19,8 @@ var lastQuery = "";
 var selectedTestID;
 var queries = [];
 var dateCondition = {from: null, to: null};
+var screensServer = 'http://myd-vm00366:8085'
+
 
 function fixedEncodeURIComponent(str) {
     return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
@@ -53,8 +55,6 @@ $(document).ready(function() {
 
     update();
     
-    $('body').click(onDocumentClick);
-
     $('#date-cond').on('click', function(e) {
         openDateDialog();
     });

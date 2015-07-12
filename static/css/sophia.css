@@ -3,9 +3,6 @@
 }
 
 #details {
-	position: absolute;
-	width: 0px;
-	height: 0px;
 	border: 1px solid #5bc0de;
 	background-color: #fff;
 	font-size: 14px;
@@ -18,12 +15,8 @@
 	margin-top: 20px;
 }
 
-#flow_results .closeX {
-	float: right;
-	color: #000;
-	margin-right: 5px;
-	cursor: pointer;
-	height: 10px;
+#details #nodeScreens img {
+  max-width: 200px;
 }
 
 #flow_results .path {
