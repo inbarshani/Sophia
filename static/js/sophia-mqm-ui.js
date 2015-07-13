@@ -11,7 +11,8 @@ var searchTypes = {
     SCREENS: 1,
     ISSUES: 2,
     TOPICS: 3,
-    TRENDS: 4
+    TRENDS: 4,
+    SAVED: 5
 };
 var searchType = searchTypes.FLOWS;
 var user;
@@ -136,24 +137,22 @@ function switchSearch(newSearchType) {
         return false; // false = no click
     // change results status
     if (searchType == searchTypes.SCREENS)
-       // $('#screens_results').removeClass('show').addClass('hidden');
-        $( "#all_results" ).load( "html/screens.html" );
+    {
+    }
     else if (searchType == searchTypes.FLOWS) {       
         clearFlowsSearch();
-       // $('#flow_results').removeClass('show').addClass('hidden');
-        $( "#all_results" ).load( "html/flows.html" );
     } else if (searchType == searchTypes.TOPICS) {       
         availableTopicsArray.length = 0;
         selectedTopicsArray.length = 0;
         $('#available_topics_list').empty();
         updateSelectedTopics();
-      //  $('#topics_results_row').removeClass('show').addClass('hidden');
-        $( "#all_results" ).load( "html/topics.html" );
     } else if (searchType == searchTypes.TRENDS) {       
-        $( "#all_results" ).load( "html/trends.html" );
+    } else if (searchType == searchTypes.SAVED) {       
     }
+
     // update searchType
     searchType = newSearchType;
+    $( "#all_results" ).html('');
     localStorage.setItem("sophiaSearchType", searchType);
 
     updateSearchNavigation();
@@ -178,6 +177,9 @@ function updateSearchNavigation()
         d3Topics.svg = null;
     } else if (searchType == searchTypes.TRENDS)
         id_of_li = "#search-trends";
+    else if (searchType == searchTypes.SAVED)
+        id_of_li = "#search-saved";
+
     var search_type_li = $(id_of_li);
     search_type_li.removeClass('search').addClass('selected_search');
     // change siblings style
@@ -201,6 +203,8 @@ function search(query){
         searchTopics(query);
     } else if (searchType == searchTypes.TRENDS) {
         searchTrends(query);
+    } else if (searchType == searchTypes.SAVED) {
+        searchSavedTests(query);
     }
 }
 

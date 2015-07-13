@@ -185,7 +185,7 @@ app.use('/tests/id/:id', function(request, response) {
     var id = request.params.id;
     tests_queries.getTestByID(id, function(err, test) {
         if (err)
-            response.send(err);
+            response.status(500).send(err);
         else
             response.send(test);
     });
@@ -195,7 +195,7 @@ app.use('/tests/type/:type', function(request, response) {
     var type = request.params.type;
     tests_queries.getTestsByType(type, function(err, tests) {
         if (err)
-            response.send(err);
+            response.status(500).send(err);
         else
             response.send(tests);
     });
