@@ -5,8 +5,8 @@ function searchTopics(query, queryType, autoSelect, callback) {
     // change UI to show list of images instead of flows
     //  clear top level vars
     reportString = 'Type: TOPICS\n';
-    // var availbale_topics_list = $('#availbale_topics_list');
-    // availbale_topics_list.empty();
+    // var available_topics_list = $('#available_topics_list');
+    // available_topics_list.empty();
     lastQuery = query;
     reportString = reportString + 'Search: ' + query + '\n';
     if (queryType && queryType==testQueryTypes.TOPIC) {
@@ -23,10 +23,10 @@ function searchTopics(query, queryType, autoSelect, callback) {
     } else {
         var jqxhr = $.ajax("/getTopics?q="+query+"&currentPaths=[]&dateCondition=" + JSON.stringify(dateCondition))
             .done(function(data) {
-                var loadedTopics =  $('#availbale_topics_list');
+                var loadedTopics =  $('#available_topics_list');
                 if (loadedTopics.length>0) {
-                    var availbale_topics_list = $('#availbale_topics_list');
-                    availbale_topics_list.empty();
+                    var available_topics_list = $('#available_topics_list');
+                    available_topics_list.empty();
                     //console.log("Search returned: " + data);
                     availableTopicsArray = JSON.parse(data);
                     if (availableTopicsArray && availableTopicsArray.length > 0) {
@@ -48,11 +48,11 @@ function searchTopics(query, queryType, autoSelect, callback) {
                                         return toggleTopic(i);
                                     };
                                 }(this, topic.name, index));
-                            availbale_topics_list.append(new_topic);
+                            available_topics_list.append(new_topic);
                         });
                     }
                     else {
-                        availbale_topics_list.append(
+                        available_topics_list.append(
                             '<li class="">' + query +
                             ': No topics found.' +
                             '</li>'
@@ -66,8 +66,8 @@ function searchTopics(query, queryType, autoSelect, callback) {
                 else {
                     $("#all_results").load("html/topics.html", function () {
 
-                        var availbale_topics_list = $('#availbale_topics_list');
-                        availbale_topics_list.empty();
+                        var available_topics_list = $('#available_topics_list');
+                        available_topics_list.empty();
                         //console.log("Search returned: " + data);
                         availableTopicsArray = JSON.parse(data);
                         if (availableTopicsArray && availableTopicsArray.length > 0) {
@@ -89,11 +89,11 @@ function searchTopics(query, queryType, autoSelect, callback) {
                                             return toggleTopic(i);
                                         };
                                     }(this, topic.name, index));
-                                availbale_topics_list.append(new_topic);
+                                available_topics_list.append(new_topic);
                             });
                         }
                         else {
-                            availbale_topics_list.append(
+                            available_topics_list.append(
                                 '<li class="">' + query +
                                 ': No topics found.' +
                                 '</li>'
@@ -118,19 +118,19 @@ function searchTopics(query, queryType, autoSelect, callback) {
     }
 }
 
-function toggleTopic(availbale_topic_id)
+function toggleTopic(available_topic_id)
 {
-    if (!availableTopicsArray[availbale_topic_id].selected)
+    if (!availableTopicsArray[available_topic_id].selected)
     {
-        availableTopicsArray[availbale_topic_id].selected = true;
-        selectedTopicsArray.push(availableTopicsArray[availbale_topic_id]);
+        availableTopicsArray[available_topic_id].selected = true;
+        selectedTopicsArray.push(availableTopicsArray[available_topic_id]);
     }
     else
     {
-        availableTopicsArray[availbale_topic_id].selected = false;
+        availableTopicsArray[available_topic_id].selected = false;
         for(var i=0;i<selectedTopicsArray.length;i++)
         {
-            if (selectedTopicsArray[i].name == availableTopicsArray[availbale_topic_id].name)
+            if (selectedTopicsArray[i].name == availableTopicsArray[available_topic_id].name)
                 break;
         }
         if (i < selectedTopicsArray.length)

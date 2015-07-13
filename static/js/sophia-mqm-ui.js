@@ -138,22 +138,18 @@ function switchSearch(newSearchType) {
     if (searchType == searchTypes.SCREENS)
        // $('#screens_results').removeClass('show').addClass('hidden');
         $( "#all_results" ).load( "html/screens.html" );
-    else if (searchType == searchTypes.FLOWS)
-    {       
+    else if (searchType == searchTypes.FLOWS) {       
         clearFlowsSearch();
        // $('#flow_results').removeClass('show').addClass('hidden');
         $( "#all_results" ).load( "html/flows.html" );
-    }
-    else if (searchType == searchTypes.TOPICS)
-    {       
+    } else if (searchType == searchTypes.TOPICS) {       
         availableTopicsArray.length = 0;
         selectedTopicsArray.length = 0;
-        $('#availbale_topics_list').empty();
+        $('#available_topics_list').empty();
         updateSelectedTopics();
       //  $('#topics_results_row').removeClass('show').addClass('hidden');
         $( "#all_results" ).load( "html/topics.html" );
-    } else if (searchType == searchTypes.TRENDS)
-    {       
+    } else if (searchType == searchTypes.TRENDS) {       
         $( "#all_results" ).load( "html/trends.html" );
     }
     // update searchType
@@ -197,17 +193,14 @@ function search(query){
         return false;
     }
     queries.push({query:query, type: testQueryTypes.QUERY});
-    if (searchType == searchTypes.FLOWS)
-    {
+    if (searchType == searchTypes.FLOWS) {
         searchFlows(query);
-    }
-    else if (searchType == searchTypes.SCREENS)
-    {
+    } else if (searchType == searchTypes.SCREENS) {
         searchScreens(query);
-    }
-    else if (searchType == searchTypes.TOPICS)
-    {
+    } else if (searchType == searchTypes.TOPICS) {
         searchTopics(query);
+    } else if (searchType == searchTypes.TRENDS) {
+        searchTrends(query);
     }
 }
 
@@ -235,7 +228,7 @@ function clearSearch(searchType) {
         searchType = searchTypes.FLOWS;
     }
     clearFlowsSearch();
-    $('#availbale_topics_list').empty();
+    $('#available_topics_list').empty();
     $('#topics-vis-container').html('');
     d3Topics.svg = null;
     switchSearch(searchType);
@@ -270,34 +263,27 @@ function updateNavigation() {
 function updateSearchResults() {
     // clear last search term
     //$('#search-text').val('');
-    if (searchType == searchTypes.FLOWS && ($('#flow-list').has('li').length > 0))
-    {
+    if (searchType == searchTypes.FLOWS && ($('#flow-list').has('li').length > 0)) {
         $('#flow_results').removeClass('hidden').addClass('show');
         visualize();
-    }
-    else // no current flows search
-    {
+    } else { // no current flows search
         $('#flow_results').removeClass('show').addClass('hidden');
     }
-
-    if (searchType == searchTypes.SCREENS && ($('#screens_results_row').has('li').length > 0))
-    {
+    if (searchType == searchTypes.SCREENS && ($('#screens_results_row').has('li').length > 0)) {
         $('#screens_results').removeClass('hidden').addClass('show');
+    } else {
+        $('#screens_results').removeClass('show').addClass('hidden');
     }
-    else
-    {
-        $('#screens_results').removeClass('show').addClass('hidden');        
-    }
-
-    if (searchType == searchTypes.TOPICS && ($('#availbale_topics').has('div').length > 0 || selectedTopicsArray.length > 0))
-    {
+    if (searchType == searchTypes.TOPICS && ($('#available_topics').has('div').length > 0 || selectedTopicsArray.length > 0)) {
         $('#topics_results_row').removeClass('hidden').addClass('show');
-    }
-    else
-    {
+    } else {
         $('#topics_results_row').removeClass('show').addClass('hidden');        
     }
-
+    if (searchType == searchTypes.TRENDS && ($('#trends_results_row').has('li').length > 0)) {
+        $('#trends_results').removeClass('hidden').addClass('show');
+    } else {
+        $('#trneds_results').removeClass('show').addClass('hidden');
+    }
 }
 
 
@@ -399,7 +385,7 @@ function loadTest() {
             if (type == searchTypes.FLOWS) {
                 ul = $('#flow-list');
             } else if (type == searchTypes.TOPICS) {
-                ul = $('#availbale_topics_list');
+                ul = $('#available_topics_list');
             }
             ul.empty();
             var f = [];
