@@ -181,9 +181,11 @@ app.post('/saveTest', function(request, response) {
     }
 });
 
-app.use('/tests/id/:id', function(request, response) {
+app.use('/tests/:id', function(request, response) {
+    console.log('get test: '+JSON.stringify(request.params)+' '+JSON.stringify(request.query));
     var id = request.params.id;
-    tests_queries.getTestByID(id, function(err, test) {
+    var dateCondition = (request.query.dateCondition) ? JSON.parse(request.query.dateCondition) : {};
+    tests_queries.getTestByID(id, dateCondition, function(err, test) {
         if (err)
             response.status(500).send(err);
         else
@@ -191,15 +193,18 @@ app.use('/tests/id/:id', function(request, response) {
     });
 });
 
-app.use('/tests/type/:type', function(request, response) {
-    var type = request.params.type;
-    tests_queries.getTestsByType(type, function(err, tests) {
+app.use('/tests', function(request, response) {
+    console.log('get tests: '+JSON.stringify(request.query));
+    var type = request.query.type;
+    var name = request.query.name;
+    tests_queries.getTestsByType(type, name, function(err, tests) {
         if (err)
             response.status(500).send(err);
         else
             response.send(tests);
     });
 });
+
 
 app.use('/searchTrends', function(request, response) {
     var queryText = request.query.q;

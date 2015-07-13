@@ -1,12 +1,10 @@
-var intervals = [];
-
 function searchSavedTests(query){
     reportString = 'Type: SAVED_TESTS\n';
+    clearSavedTestsSearch();
     //  + "&dateCondition=" + JSON.stringify(dateCondition)
-    var jqxhr = $.ajax("/tests/type/" + searchTypes.FLOWS)
+    var jqxhr = $.ajax("/tests?type=" + searchTypes.FLOWS + "&name="+query)
         .done(function(savedTestsArray) {
             $("#all_results").load("html/saved_tests.html", function () {
-            	/* fix */
                 var saved_tests_list = $('#saved-list');
                 lastQuery = query;
                 reportString = reportString + 'Search: ' + query + '\n';
@@ -15,9 +13,6 @@ function searchSavedTests(query){
                     for(var i=0;i<savedTestsArray.length;i++){                    	
                         var test = savedTestsArray[i];
                         updateTestStatus(test.id);
-                        intervals.push(setInterval(function(){
-                        	updateTestStatus(test.id);
-                        },1000));
                     }
                     reportString = reportString + 'Results #: ' + savedTestsArray.length + '\n';
                 }
@@ -37,12 +32,14 @@ function searchSavedTests(query){
             console.log("Search failed: " + err.responseText);
             reportString = reportString + 'Result: failed query\n';
 
+            clearSavedTestsSearch();
+
             update();
         });
 }
 
 function updateTestStatus(testId){
-	$.ajax("/tests/id/" + testId)
+	$.ajax("/tests/" + testId + '?dateCondition=' + JSON.stringify(dateCondition))
 	.done(function(testDetails) {
 		//console.log('test: '+JSON.stringify(testDetails));
 	    var passedSteps = 0;
@@ -72,18 +69,17 @@ function updateTestStatus(testId){
 	    	saved_test_item.addClass(li_class);
 	    	saved_test_item.html(innerHtml);
 	    }
+
+	    setTimeout(function(){updateTestStatus(testId);},1000);
 	})
 	.fail(function(err){
 	    alert("Unable to complete search at this time, try again later");
 	    console.log("Search failed: " + err.responseText);
-	    reportString = reportString + 'Result: failed query\n';        						
+	    reportString = reportString + 'Result: failed query\n';
+	    clearSavedTestsSearch();     						
 	});	
 }
 
 function clearSavedTestsSearch()
 {
-	intervals.forEach(function(interval){
-		clearInterval(interval);
-	});
-	intervals.length = 0;
 }

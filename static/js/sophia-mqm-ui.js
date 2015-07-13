@@ -325,7 +325,7 @@ function openSaveTestDialog() {
 
 function showTests(type) {
     $('#tests-list').empty();
-    var jqxhr = $.ajax("/tests/type/" + type)
+    var jqxhr = $.ajax("/tests?type=" + type)
         .done(function(tests) {
             //console.log("getTopicsLinks returned: " + data);
             var li;
@@ -382,7 +382,7 @@ function loadTest() {
     availableTopicsArray = [];
     selectedTopicsArray = [];
 
-    var jqxhr = $.ajax("/tests/id/" + selectedTestID)
+    var jqxhr = $.ajax("/tests/" + selectedTestID)
         .done(function(test) {
             queries = [];
             var ul;
