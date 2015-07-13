@@ -7,9 +7,6 @@ var idol_queries = require('./lib/idol_queries');
 var neo4j_queries = require('./lib/neo4j_queries');
 var tests_queries = require('./lib/tests_queries');
 
-var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database('./sophia.db');
-
 var app = express();
 app.use(bodyParser.json());
 
@@ -19,7 +16,7 @@ app.use(express.static(__dirname + '/static'));
 app.use('/getTopics', function(request, response) {
     var query = request.query.q;
     var dateCondition = JSON.parse(request.query.dateCondition);
-    console.log("getTopics query: "+query);
+    console.log("getTopics query: " + query);
     idol_queries.getTopics(query, null, dateCondition, function(topics) {
         if (topics)
             response.send(JSON.stringify(topics));
@@ -49,32 +46,33 @@ app.use('/searchFlows', function(request, response) {
         //console.log('documents_hash keys: '+require('util').inspect(Object.keys(documents_hash), {depth: 2}));
         var idolResultNodes = Object.keys(documents_hash);
         if (idolResultNodes.length > 0) {
-            neo4j_queries.doesPathExists(currentNodes, idolResultNodes, isFirstQuery, function(paths_to_nodes) {
-                var last_backbone_nodes = [];
-                var last_data_nodes = [];
-                // join paths_to_nodes with data from docuemtns
-                //console.log('documents_hash: '+require('util').inspect(documents_hash, {depth: 2}));
-                paths_to_nodes.map(function(path) {
-                    //console.log('mapping path of length: '+path.nodes.length);
-                    if (path.last_backbone && last_backbone_nodes.indexOf(path.last_backbone) < 0)
-                        last_backbone_nodes.push(path.last_backbone);
-                    if (path.last_data && last_data_nodes.indexOf(path.last_data) < 0)
-                        last_data_nodes.push(path.last_data);
-                    for (var i = 0; i < path.nodes.length; i++) {
-                        var node_id = path.nodes[i].id;
-                        var node_doc = documents_hash['' + node_id];
-                        //console.log('document for '+node_id+' is '+node_doc);
-                        path.nodes[i].data = node_doc;
-                    }
+            neo4j_queries.doesPathExists(currentNodes, idolResultNodes, isFirstQuery,
+                function(err, paths_to_nodes) {
+                    var last_backbone_nodes = [];
+                    var last_data_nodes = [];
+                    // join paths_to_nodes with data from docuemtns
+                    //console.log('documents_hash: '+require('util').inspect(documents_hash, {depth: 2}));
+                    paths_to_nodes.map(function(path) {
+                        //console.log('mapping path of length: '+path.nodes.length);
+                        if (path.last_backbone && last_backbone_nodes.indexOf(path.last_backbone) < 0)
+                            last_backbone_nodes.push(path.last_backbone);
+                        if (path.last_data && last_data_nodes.indexOf(path.last_data) < 0)
+                            last_data_nodes.push(path.last_data);
+                        for (var i = 0; i < path.nodes.length; i++) {
+                            var node_id = path.nodes[i].id;
+                            var node_doc = documents_hash['' + node_id];
+                            //console.log('document for '+node_id+' is '+node_doc);
+                            path.nodes[i].data = node_doc;
+                        }
+                    });
+                    var response_body = {
+                        paths_to_nodes: paths_to_nodes,
+                        last_backbone_nodes: last_backbone_nodes,
+                        last_data_nodes: last_data_nodes
+                    };
+                    //console.log('paths_to_nodes: '+JSON.stringify(response_body));
+                    response.send(JSON.stringify(response_body));
                 });
-                var response_body = {
-                    paths_to_nodes: paths_to_nodes,
-                    last_backbone_nodes: last_backbone_nodes,
-                    last_data_nodes: last_data_nodes
-                };
-                //console.log('paths_to_nodes: '+JSON.stringify(response_body));
-                response.send(JSON.stringify(response_body));
-            });
         } else // no results from IDOL
         {
             var response_body = {
@@ -99,10 +97,8 @@ app.use('/searchScreens', function(request, response) {
                     var allTimestamps = prevScreenTimestamps.concat(nextScreenTimestamps);
                     response.send(JSON.stringify(allTimestamps));
                 });
-        }
-        else
-        {
-            response.send(JSON.stringify([]));            
+        } else {
+            response.send(JSON.stringify([]));
         }
     });
 });
@@ -113,7 +109,8 @@ app.use('/getScreens', function(request, response) {
         selectedNodeArray.push(request.query.selectedNode);
         neo4j_queries.getNearestScreens(selectedNodeArray,
             function(prevScreenTimestamps, nextScreenTimestamps) {
-                var prevScreenTimestamp = null, nextScreenTimestamp = null;
+                var prevScreenTimestamp = null,
+                    nextScreenTimestamp = null;
                 if (prevScreenTimestamps.length > 0)
                     prevScreenTimestamp = prevScreenTimestamps[0];
                 if (nextScreenTimestamps.length > 0)
@@ -148,7 +145,7 @@ app.use('/screen/:timestamp', function(request, response) {
 app.use('/report', function(request, response) {
     if (request.query.reportString.length > 0) {
         var reportString = new Date().toUTCString() + ' ' +
-            'Client IP: ' + request.connection.remoteAddress + '\n' + 
+            'Client IP: ' + request.connection.remoteAddress + '\n' +
             request.query.reportString + '\n';
         var username = request.query.user;
         // create audit folder
@@ -159,7 +156,7 @@ app.use('/report', function(request, response) {
         }
 
         // save an audit of the actions done by a user
-        fs.appendFile('./audit/'+username+'.log', reportString, function(err) {
+        fs.appendFile('./audit/' + username + '.log', reportString, function(err) {
             if (err)
                 console.log('Error saving audit data: ' + reportString);
         });
@@ -170,23 +167,23 @@ app.use('/report', function(request, response) {
 app.post('/saveTest', function(request, response) {
     if (request._body) {
         var error = null;
-        
+
         var user = request.body.user;
         var name = request.body.name;
         var type = request.body.type;
 
-        tests_queries.save(user, name, type, '', request.body.queries, function(err){
+        tests_queries.save(user, name, type, '', request.body.queries, function(err) {
             if (err)
                 response.send(err);
             else
                 response.sendStatus(200);
-        });        
+        });
     }
 });
 
 app.use('/tests/id/:id', function(request, response) {
     var id = request.params.id;
-    tests_queries.getTestByID(id, function(err, test){
+    tests_queries.getTestByID(id, function(err, test) {
         if (err)
             response.send(err);
         else
@@ -196,11 +193,11 @@ app.use('/tests/id/:id', function(request, response) {
 
 app.use('/tests/type/:type', function(request, response) {
     var type = request.params.type;
-    tests_queries.getTestsByType(type, function(err, tests){
+    tests_queries.getTestsByType(type, function(err, tests) {
         if (err)
             response.send(err);
         else
-            response.send(tests);        
+            response.send(tests);
     });
 });
 
@@ -215,7 +212,7 @@ app.use('/searchTrends', function(request, response) {
             neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {
                 response.send(JSON.stringify(bbNodes));
             });
-        } else {// no results from IDOL
+        } else { // no results from IDOL
             response.send(JSON.stringify([]));
         }
     });
