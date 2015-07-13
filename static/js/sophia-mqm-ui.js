@@ -147,7 +147,8 @@ function switchSearch(newSearchType) {
         $('#available_topics_list').empty();
         updateSelectedTopics();
     } else if (searchType == searchTypes.TRENDS) {       
-    } else if (searchType == searchTypes.SAVED) {       
+    } else if (searchType == searchTypes.SAVED) {
+        clearSavedTestsSearch();
     }
 
     // update searchType
@@ -232,6 +233,7 @@ function clearSearch(searchType) {
         searchType = searchTypes.FLOWS;
     }
     clearFlowsSearch();
+    clearSavedTestsSearch();
     $('#available_topics_list').empty();
     $('#topics-vis-container').html('');
     d3Topics.svg = null;
