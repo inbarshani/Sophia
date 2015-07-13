@@ -175,6 +175,33 @@ span.input-group-addon {
 	padding: 6px 12px;
 }
 
+#trends_list {         
+  padding:0 0 0 0;
+  margin:5px;
+  float: left;
+}
+#trends_list label.btn-default.active{background-color:#1E90FF;color:#FFF}
+#trends_list label.btn-default{width:90px;border:1px solid #efefef;margin:5px; box-shadow:5px 8px 8px 0 #ccc;}
+#trends_list .btn span.glyphicon{
+    opacity: 0;
+}
+#trends_list .btn.active span.glyphicon {
+    opacity: 1;
+}
+#trends_list .btn {
+	white-space: normal;
+	background-color:#87CEFA;
+}
+
+#trends_list .btn-disabled {
+	background-color:#FFF;
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+.trends-list-container {
+	height: 110px;
+}
 .carousel-control.left, 
 .carousel-control.right {
     background-image: none;
