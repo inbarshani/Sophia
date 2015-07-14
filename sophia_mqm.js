@@ -172,17 +172,34 @@ app.post('/saveTest', function(request, response) {
         var name = request.body.name;
         var type = request.body.type;
 
-        tests_queries.save(user, name, type, '', request.body.queries, function(err) {
+        tests_queries.save(user, name, type, '', request.body.queries, function(err, testId) {
             if (err)
                 response.send(err);
             else
+            {
+                // save test run, then send response
+                tests_queries.saveTestRun(testId, sophia_consts.testRunTypes.USER, request.body.queries);
                 response.sendStatus(200);
+            }
         });
     }
 });
 
-app.use('/tests/:id', function(request, response) {
-    console.log('get test: '+JSON.stringify(request.params)+' '+JSON.stringify(request.query));
+app.post('/tests/:id/runs', function(request, response){
+    //console.log('post test run: '+JSON.stringify(request.params)+' '+JSON.stringify(request.body));
+    var id = request.params.id;
+    var queries = request.body.queries;
+    tests_queries.saveTestRun(id, sophia_consts.testRunTypes.USER, queries,
+        function(err){
+            if (err)
+                response.status(500).send(err);
+            else
+                response.sendStatus(200);
+        });
+});
+
+app.get('/tests/:id', function(request, response) {
+    //console.log('get test: '+JSON.stringify(request.params)+' '+JSON.stringify(request.query));
     var id = request.params.id;
     var dateCondition = (request.query.dateCondition) ? JSON.parse(request.query.dateCondition) : {};
     tests_queries.getTestByID(id, dateCondition, function(err, test) {
@@ -193,7 +210,7 @@ app.use('/tests/:id', function(request, response) {
     });
 });
 
-app.use('/tests', function(request, response) {
+app.get('/tests', function(request, response) {
     console.log('get tests: '+JSON.stringify(request.query));
     var type = request.query.type;
     var name = request.query.name;

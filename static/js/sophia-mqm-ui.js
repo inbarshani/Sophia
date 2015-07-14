@@ -394,10 +394,26 @@ function loadTest() {
                 ul = $('#available_topics_list');
             }
             ul.empty();
+            // chain all calls to search(query), and add a final call
+            //  to save the test run
             var f = [];
+            f[test.queries.length] = (function(){
+                    var params = {
+                        queries: queries
+                    };
+                    //console.log('save test on load');
+                    $.ajax({  
+                        type: 'POST',  
+                        url: '/tests/'+selectedTestID+'/runs',
+                        cache: false,
+                        data: JSON.stringify(params),
+                        headers: { "Content-Type": "application/json"  }
+                    });
+                });
             for (var i = test.queries.length - 1; i >= 0; i--) {
                 f[i] = (function(query, func) {
                     return function() {
+                        //console.log('run query #'+i);
                         queries.push(query);
                         if (queries.length == 1) // single time enable the save button
                             $('#save-test').removeClass('disabled');
@@ -409,6 +425,7 @@ function loadTest() {
                     };
                 }(test.queries[i], f[i+1]));
             }
+            // add a function to 'save' the test run on completion of load
             f[0]();
         })
         .fail(function(err) {

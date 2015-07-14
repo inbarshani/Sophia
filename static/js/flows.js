@@ -25,6 +25,7 @@ function searchFlows(query, callback) {
             //console.log("Search returned: " + data);
             var responseData = JSON.parse(data);
             var li_html = '';
+            queries[queries.length-1].result = responseData.paths_to_nodes.length;
             if (queries[queries.length -1].type == testQueryTypes.QUERY)
             {
                 updateCurrentPaths(responseData.paths_to_nodes);
