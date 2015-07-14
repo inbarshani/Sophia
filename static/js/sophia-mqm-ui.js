@@ -399,6 +399,8 @@ function loadTest() {
                 f[i] = (function(query, func) {
                     return function() {
                         queries.push(query);
+                        if (queries.length == 1) // single time enable the save button
+                            $('#save-test').removeClass('disabled');
                         if (type == searchTypes.FLOWS) {
                             searchFlows(query.query, func);
                         } else if (type == searchTypes.TOPICS) {

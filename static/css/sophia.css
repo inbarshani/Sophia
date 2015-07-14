@@ -2,6 +2,10 @@
 	cursor: pointer;
 }
 
+.disabled {
+  pointer-events: none;
+}
+
 #details {
 	border: 1px solid #5bc0de;
 	background-color: #fff;
