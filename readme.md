@@ -38,21 +38,29 @@ CREATE TABLE `SOP_QUERY` (
 );
  
 
-B. Jetty and MQM log parser
+B. Jetty and MQM log parser - REPEAT STEPS 3-4 AFTER MQM DEPLOYMENT!!!!
 ====
 1. Download Logstash (current version is 1.4.2) and extract to a folder in ALM server
 2. Extract <Sophia>\agents\jetty\logging\log.conf to \logstash-1.4.2\bin
-3. enable Jetty logging: edit /DATA/ads_slave/deployments/8081/hp/mqm/server/conf/start.ini and enable the relevant logs.
+3. enable Jetty logging: edit /DATA/ads_slave/deployments/8082/hp/mqm/server/conf/start.ini and enable the relevant logs:
+	jetty.xml
+	jetty-requestlog.xml
+	jetty-deploy.xml
+	jetty-rewrite.xml
+	jetty-stats.xml
+	jetty-logging.xml
 	See <Sophia>\agents\jetty\logging\start.ini for an example. 
-4. copy <Sophia>\agents\jetty\logging\sophia to \logstash-1.4.2\patterns
-5. Restart Jetty
-6. running logstash in the background:
+4. create folder /DATA/ads_slave/deployments/8082/hp/mqm/server/logs
+5. copy <Sophia>\agents\jetty\logging\sophia to \logstash-1.4.2\patterns
+6. Restart Jetty
+7. running logstash in the background:
 	cd /var/opt/logstash-1.4.2/bin
 	./logstash -f log.conf &
 	to bring to foreground: fg
 	to send to background: bg
 	to check bg jobs: jobs -l
 	to check if logstash is running: ps aux | grep logstash
+8. in MQM site admin configure to log everything
 
 
 Happy Coding! :p

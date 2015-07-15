@@ -41,7 +41,7 @@
         </div>
         <div id="topbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><h4><span class="label label-info">v0.1.1</span></h4></li>
+            <li><h4><span class="label label-info">v0.1.3</span></h4></li>
           </ul>
         </div>
       </div>
@@ -73,7 +73,7 @@
               <ul class="dropdown-menu dropdown-menu-right">
                 <li><a href="#" id="date-cond">Date Condition</a></li>
                 <li><a href="#" id="load-test">Load Test</a></li>
-                <li class="disabled" id="save-test"><a href="#">Save Test</a></li>
+                <li class="disabled" id="save-test" role="button"><a href="#">Save Test</a></li>
               </ul>
             </span>
           </div>
@@ -103,6 +103,9 @@
               <li role="presentation" class="search" id="search-trends">
                 <a href="#" onclick="switchSearch(searchTypes.TRENDS);">Trends</a>
               </li>
+              <li role="presentation" class="search" id="search-saved">
+                <a href="#" onclick="switchSearch(searchTypes.SAVED);">Saved Tests</a>
+              </li>
             </ul>
           </div>
         </div>
@@ -114,15 +117,13 @@
 
     <hr id="search-options-divider" class="hidden"/>
 
+    <div id="busy" class="busyindicator"></div>
+
+
       <!-- START results area -->
     <div id = "all_results">
     </div>
 
-    <div id="details" class="panel panel-default hidden">
-      <div class="closeX" onclick="hideDetails();"><span>X</span></div>
-      <ul id="detailsText" class="list-group"></ul>
-    </div>
-    <div id="busy" class="busyindicator"> </div>
     <!-- Modal date condition -->
     <div class="modal fade" id="dateModal" tabindex="-1" role="dialog" aria-labelledby="dateModalLabel">
       <div class="modal-dialog modal-sm" role="document">
@@ -245,12 +246,15 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="bootstrap-3.3.4-dist/js/bootstrap.min.js"></script>
     <script src="js/sophia-mqm-ui.js"></script>
-    <script src="js/sophia-vis-ui.js"></script>
+    <script src="js/sophia-vis-flows.js"></script>
     <script src="js/sophia-vis-topics.js"></script>
     <script src="js/moment.min.js"></script>
     <script src="js/bootstrap-datetimepicker.min.js"></script>
     <script src="js/flows.js"></script>
     <script src="js/screens.js"></script>
     <script src="js/topics.js"></script>
+    <script src="js/trends.js"></script>
+    <script src="js/sophia-vis-trends.js"></script>
+    <script src="js/saved_tests.js"></script>
   </body>
 </html>

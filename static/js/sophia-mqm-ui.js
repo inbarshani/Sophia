@@ -1,19 +1,18 @@
-var currentPaths = [];
 var reportString = '';
-var currentBackboneNodes = [];
-var currentDataNodes = [];
 var suggestionsArray = [];
 var availableTopicsArray = [];
 var selectedTopicsArray = [];
 var testQueryTypes = {QUERY: 0, 
-    TOPIC: 1};
+    TOPIC: 1,
+    VERIFICATION: 2};
 var isAjaxActive = 0;
 var searchTypes = {
     FLOWS: 0, 
     SCREENS: 1,
     ISSUES: 2,
     TOPICS: 3,
-    TRENDS: 4
+    TRENDS: 4,
+    SAVED: 5
 };
 var searchType = searchTypes.FLOWS;
 var user;
@@ -21,6 +20,8 @@ var lastQuery = "";
 var selectedTestID;
 var queries = [];
 var dateCondition = {from: null, to: null};
+var screensServer = 'http://myd-vm00366:8085'
+
 
 function fixedEncodeURIComponent(str) {
     return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
@@ -55,8 +56,6 @@ $(document).ready(function() {
 
     update();
     
-    $('body').click(onDocumentClick);
-
     $('#date-cond').on('click', function(e) {
         openDateDialog();
     });
@@ -131,24 +130,6 @@ $(document).ajaxComplete(function( event, xhr, settings ) {
     }
 });
 
-function updateCurrentPaths(newPaths) {
-    if (currentPaths.length > 0) {
-        // if there are existing paths of preivous queries, we need to combine
-        newPaths.map(function(newPath) {
-            var startNode = newPath.nodes[0].id;
-            for (var i = 0; i < currentPaths.length; i++) {
-                if (currentPaths[i].last_backbone == startNode ||
-                    currentPaths[i].last_data == startNode) {
-                    // combine newPath with currentPath
-                    newPath.nodes.shift(); // remove the node common to previous and new path
-                    newPath.nodes = currentPaths[i].nodes.concat(newPath.nodes);
-                    break; // don't need to go over all the rest of the paths
-                }
-            }
-        });
-    }
-    currentPaths = newPaths;
-}
 
 function switchSearch(newSearchType) {
     queries = [];
@@ -156,31 +137,23 @@ function switchSearch(newSearchType) {
         return false; // false = no click
     // change results status
     if (searchType == searchTypes.SCREENS)
-       // $('#screens_results').removeClass('show').addClass('hidden');
-        $( "#all_results" ).load( "html/screens.html" );
-    else if (searchType == searchTypes.FLOWS)
-    {       
-        currentPaths.length = 0;
-        currentBackboneNodes.length = 0;
-        currentDataNodes.length = 0;
-        $('#flow-list').empty();
-       // $('#flow_results').removeClass('show').addClass('hidden');
-        $( "#all_results" ).load( "html/flows.html" );
+    {
     }
-    else if (searchType == searchTypes.TOPICS)
-    {       
+    else if (searchType == searchTypes.FLOWS) {       
+        clearFlowsSearch();
+    } else if (searchType == searchTypes.TOPICS) {       
         availableTopicsArray.length = 0;
         selectedTopicsArray.length = 0;
-        $('#availbale_topics_list').empty();
+        $('#available_topics_list').empty();
         updateSelectedTopics();
-      //  $('#topics_results_row').removeClass('show').addClass('hidden');
-        $( "#all_results" ).load( "html/topics.html" );
-    } else if (searchType == searchTypes.TRENDS)
-    {       
-        $( "#all_results" ).load( "html/trends.html" );
+    } else if (searchType == searchTypes.TRENDS) {       
+    } else if (searchType == searchTypes.SAVED) {
+        clearSavedTestsSearch();
     }
+
     // update searchType
     searchType = newSearchType;
+    $( "#all_results" ).html('');
     localStorage.setItem("sophiaSearchType", searchType);
 
     updateSearchNavigation();
@@ -205,6 +178,9 @@ function updateSearchNavigation()
         d3Topics.svg = null;
     } else if (searchType == searchTypes.TRENDS)
         id_of_li = "#search-trends";
+    else if (searchType == searchTypes.SAVED)
+        id_of_li = "#search-saved";
+
     var search_type_li = $(id_of_li);
     search_type_li.removeClass('search').addClass('selected_search');
     // change siblings style
@@ -220,17 +196,16 @@ function search(query){
         return false;
     }
     queries.push({query:query, type: testQueryTypes.QUERY});
-    if (searchType == searchTypes.FLOWS)
-    {
+    if (searchType == searchTypes.FLOWS) {
         searchFlows(query);
-    }
-    else if (searchType == searchTypes.SCREENS)
-    {
+    } else if (searchType == searchTypes.SCREENS) {
         searchScreens(query);
-    }
-    else if (searchType == searchTypes.TOPICS)
-    {
+    } else if (searchType == searchTypes.TOPICS) {
         searchTopics(query);
+    } else if (searchType == searchTypes.TRENDS) {
+        searchTrends(query);
+    } else if (searchType == searchTypes.SAVED) {
+        searchSavedTests(query);
     }
 }
 
@@ -257,13 +232,9 @@ function clearSearch(searchType) {
     if (!searchType) {
         searchType = searchTypes.FLOWS;
     }
-    // remove all nodes
-    currentPaths.length = 0;
-    currentBackboneNodes.length = 0;
-    currentDataNodes.length = 0;
-    // clear flow list
-    $('#availbale_topics_list').empty();
-    $('#flow-list').empty();
+    clearFlowsSearch();
+    clearSavedTestsSearch();
+    $('#available_topics_list').empty();
     $('#topics-vis-container').html('');
     d3Topics.svg = null;
     switchSearch(searchType);
@@ -298,34 +269,27 @@ function updateNavigation() {
 function updateSearchResults() {
     // clear last search term
     //$('#search-text').val('');
-    if (searchType == searchTypes.FLOWS && ($('#flow-list').has('li').length > 0))
-    {
+    if (searchType == searchTypes.FLOWS && ($('#flow-list').has('li').length > 0)) {
         $('#flow_results').removeClass('hidden').addClass('show');
         visualize();
-    }
-    else // no current flows search
-    {
+    } else { // no current flows search
         $('#flow_results').removeClass('show').addClass('hidden');
     }
-
-    if (searchType == searchTypes.SCREENS && ($('#screens_results_row').has('li').length > 0))
-    {
+    if (searchType == searchTypes.SCREENS && ($('#screens_results_row').has('li').length > 0)) {
         $('#screens_results').removeClass('hidden').addClass('show');
+    } else {
+        $('#screens_results').removeClass('show').addClass('hidden');
     }
-    else
-    {
-        $('#screens_results').removeClass('show').addClass('hidden');        
-    }
-
-    if (searchType == searchTypes.TOPICS && ($('#availbale_topics').has('div').length > 0 || selectedTopicsArray.length > 0))
-    {
+    if (searchType == searchTypes.TOPICS && ($('#available_topics').has('div').length > 0 || selectedTopicsArray.length > 0)) {
         $('#topics_results_row').removeClass('hidden').addClass('show');
-    }
-    else
-    {
+    } else {
         $('#topics_results_row').removeClass('show').addClass('hidden');        
     }
-
+    if (searchType == searchTypes.TRENDS && ($('#trends_results_row').has('li').length > 0)) {
+        $('#trends_results').removeClass('hidden').addClass('show');
+    } else {
+        $('#trneds_results').removeClass('show').addClass('hidden');
+    }
 }
 
 
@@ -361,7 +325,7 @@ function openSaveTestDialog() {
 
 function showTests(type) {
     $('#tests-list').empty();
-    var jqxhr = $.ajax("/tests/type/" + type)
+    var jqxhr = $.ajax("/tests?type=" + type)
         .done(function(tests) {
             //console.log("getTopicsLinks returned: " + data);
             var li;
@@ -418,7 +382,7 @@ function loadTest() {
     availableTopicsArray = [];
     selectedTopicsArray = [];
 
-    var jqxhr = $.ajax("/tests/id/" + selectedTestID)
+    var jqxhr = $.ajax("/tests/" + selectedTestID)
         .done(function(test) {
             queries = [];
             var ul;
@@ -427,14 +391,32 @@ function loadTest() {
             if (type == searchTypes.FLOWS) {
                 ul = $('#flow-list');
             } else if (type == searchTypes.TOPICS) {
-                ul = $('#availbale_topics_list');
+                ul = $('#available_topics_list');
             }
             ul.empty();
+            // chain all calls to search(query), and add a final call
+            //  to save the test run
             var f = [];
+            f[test.queries.length] = (function(){
+                    var params = {
+                        queries: queries
+                    };
+                    //console.log('save test on load');
+                    $.ajax({  
+                        type: 'POST',  
+                        url: '/tests/'+selectedTestID+'/runs',
+                        cache: false,
+                        data: JSON.stringify(params),
+                        headers: { "Content-Type": "application/json"  }
+                    });
+                });
             for (var i = test.queries.length - 1; i >= 0; i--) {
                 f[i] = (function(query, func) {
                     return function() {
+                        //console.log('run query #'+i);
                         queries.push(query);
+                        if (queries.length == 1) // single time enable the save button
+                            $('#save-test').removeClass('disabled');
                         if (type == searchTypes.FLOWS) {
                             searchFlows(query.query, func);
                         } else if (type == searchTypes.TOPICS) {
@@ -443,6 +425,7 @@ function loadTest() {
                     };
                 }(test.queries[i], f[i+1]));
             }
+            // add a function to 'save' the test run on completion of load
             f[0]();
         })
         .fail(function(err) {

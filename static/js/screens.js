@@ -10,24 +10,29 @@ function searchScreens(query) {
         .done(function(data) {
             $("#all_results").load("html/screens.html", function () {
                 var screens_results_row = $('#screens_results_row');
+                var screens_carousel = $('#screens_carousel_items');
                 screens_results_row.empty();
+                screens_carousel.empty();
                 lastQuery = query;
                 reportString = reportString + 'Search: ' + query + '\n';
                 //console.log("Search returned: " + data);
                 var timestampsArray = JSON.parse(data);
                 if (timestampsArray.length > 0) {
-                    // create list of screens
-                    // <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
-                    //  <img src="timestamp"/>
-                    // </li>
-                    timestampsArray.forEach(function (timestamp) {
+                    for(var i=0;i<timestampsArray.length;i++){
+                        var timestamp = timestampsArray[i];
                         screens_results_row.append(
                             '<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">' +
-                            '  <img onclick="showModal(\'/screen/' + timestamp + '\');"' +
-                            '       src="/screen/' + timestamp + '"/>' +
+                            '  <img onclick="showModal('+i+');"' +
+                            '       src="'+screensServer+'/screen/' + timestamp + '"/>' +
                             '</li>'
                         );
-                    });
+                        var div_class = 'item';
+                        if (i==0) div_class = 'item active';
+                        screens_carousel.append('<div class="'+div_class+'">'+
+                            '<img src="'+screensServer+'/screen/' + timestamp + 
+                            '"/></div>');
+                        $('#screensCarousel').carousel(); 
+                    }
                     reportString = reportString + 'Results #: ' + timestampsArray.length + '\n';
                 }
                 else {
@@ -62,14 +67,8 @@ function getScreens(node_id, callback) {
         });
 }
 
-function showModal(src)
+function showModal(item)
 {
-    var img = '<img src="' + src + '" class="img-responsive"/>';
     $('#screenModal').modal();
-    $('#screenModal').on('shown.bs.modal', function(){
-        $('#screenModal .modal-body').html(img);
-    });
-    $('#screenModal').on('hidden.bs.modal', function(){
-        $('#screenModal .modal-body').html('');
-    });
+    $('#screensCarousel').carousel(item);
 }

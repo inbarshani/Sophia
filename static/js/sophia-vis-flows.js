@@ -180,30 +180,12 @@ function animateCircle(left, top, row, node) {
     })();
 }
 
-function onDocumentClick(event) {
-    if (event.target.tagName.toLowerCase() != 'circle') {
-        hideDetails();
-    }
-}
-
 function animateDetails(x, y, node) {
-    if (!$('#details').hasClass('hidden')) {
-        hideDetails(function() {
-            showDetails(x, y, node);
-        });
-    } else {
-        showDetails(x, y, node);
-    }
+    showDetails(x, y, node);
+    $('#flowDetailsModal').modal();
 }
 
 function showDetails(x, y, node) {
-    $('#details').css('left', x);
-    $('#details').css('top', y);
-    $('#details').removeClass('hidden');
-    $("#details").animate({
-        height: detailsHeight,
-        width: detailsWidth
-    });
     /*
     data: Object
     caption: "<some text,,,>"
@@ -211,57 +193,32 @@ function showDetails(x, y, node) {
     id: "219637"
     type: "UI_Change"
     */
-    $('#detailsText').html('');
-    var li = $('<li>');
-    li.addClass('list-group-item');
-    li.text(node.data.type);
-    $('#detailsText').append(li);
-    li = $('<li>');
-    li.addClass('list-group-item');
-    li.text(node.data.caption);
-    $('#detailsText').append(li);
-    li = $('<li>');
-    li.addClass('list-group-item');
-    li.text('Graph node: ' + node.data.graph_node);
-    $('#detailsText').append(li);
-    li = $('<li>');
-    li.addClass('list-group-item');
-    li.text('ID: ' + node.data.id);
-    $('#detailsText').append(li);
+    $('#details #nodeType').text(node.data.type);
+    $('#details #nodeCaption').html(node.data.caption.replace('\n','<br/>'));
+    $('#details #nodeGraphID').text('Graph node: ' + node.data.graph_node);
+    $('#details #nodeDocID').text('Document ID: ' + node.data.id);
 
     getScreens(node.data.graph_node, function(prevTimestamp, nextTimestamp){
-        var li = $('<li>');
-        li.addClass('list-group-item');
-        if (prevTimestamp && nextTimestamp)
+        if (prevTimestamp)
         {
-            li.html('Screens: <a href="/screen/' + prevTimestamp + '">Before</a>, '+
-                '<a href="/screen/' + nextTimestamp + '">After</a>');
-        }
-        else if (prevTimestamp)
-        {
-            li.html('Previous screen: <a href="/screen/' + prevTimestamp + '">Before</a>');
-        }
-        else if (nextTimestamp)
-        {
-            li.html('Next screen: <a href="/screen/' + nextTimestamp + '">After</a>');
+            $('#details #nodeScreens #screenBefore').html('Before:<br/>' +
+                '<a target="_blank" href="'+ screensServer+'/screen/' + prevTimestamp + '">'+
+                '<img class="img-thumbnail" src="'+
+                screensServer+'/screen/' + prevTimestamp + '"></img></a>');
         }
         else
-            li.text('No screens.');
-        $('#detailsText').append(li);
-    });
-}
+            $('#details #nodeScreens #screenBefore').html('No pre-action screen');
 
-function hideDetails(callback) {
-    $("#details").animate({
-        height: '0px',
-        width: '0px'
-    }, function() {
-            $('#details').addClass('hidden');
-            if (callback) {
-                callback();
-            }
+        if (nextTimestamp)
+        {
+            $('#details #nodeScreens #screenAfter').html('After:<br/>'+
+                '<a target="_blank" href="'+ screensServer+'/screen/' + nextTimestamp + '">'+
+                '<img class="img-thumbnail" src="' +
+                screensServer+'/screen/' + nextTimestamp + '"></img></a>');
         }
-    );
+        else
+            $('#details #nodeScreens #screenAfter').html('No post-action screen');
+    });
 }
 
 function highlight(li, nodes) {

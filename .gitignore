@@ -13,6 +13,7 @@ ports.txt
 # Sophia Data
 audit/*
 *.db
+*.db.bak
 
 # Runtime data
 pids

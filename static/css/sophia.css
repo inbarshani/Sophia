@@ -2,10 +2,11 @@
 	cursor: pointer;
 }
 
+.disabled {
+  pointer-events: none;
+}
+
 #details {
-	position: absolute;
-	width: 0px;
-	height: 0px;
 	border: 1px solid #5bc0de;
 	background-color: #fff;
 	font-size: 14px;
@@ -18,12 +19,8 @@
 	margin-top: 20px;
 }
 
-#flow_results .closeX {
-	float: right;
-	color: #000;
-	margin-right: 5px;
-	cursor: pointer;
-	height: 10px;
+#details #nodeScreens img {
+  max-width: 200px;
 }
 
 #flow_results .path {
@@ -166,13 +163,64 @@
     vertical-align: middle;
     float: none;
 }
-.delete-flow {
+.flow-step-icons-start ,
+.flow-step-icons {
 	float: left;
 	margin-right: 7px;
   	margin-left: -5px;
   	margin-top: 2px;
 }
 
+.flow-step-icons {
+  	margin-left: 0px;
+}
+
 span.input-group-addon {
 	padding: 6px 12px;
+}
+
+#trends_tests_list {         
+  padding:0 0 0 0;
+  margin:5px;
+  float: left;
+}
+#trends_tests_list label.btn-default.active{background-color:#1E90FF;color:#FFF}
+#trends_tests_list label.btn-default{width:90px;border:1px solid #efefef;margin:5px; box-shadow:5px 8px 8px 0 #ccc;}
+#trends_tests_list .btn span.glyphicon{
+    opacity: 0;
+}
+#trends_tests_list .btn.active span.glyphicon {
+    opacity: 1;
+}
+#trends_tests_list .btn {
+	white-space: normal;
+	background-color:#87CEFA;
+}
+
+#trends_tests_list .btn-disabled {
+	background-color:#FFF;
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.trends-list-container {
+	display: inline-block;
+}
+
+.carousel-control.left, 
+.carousel-control.right {
+    background-image: none;
+    color: #000;
+}
+
+.carousel-control .icon-prev,
+.carousel-control .glyphicon-chevron-left {
+  left: 10%;
+  margin-left: -10px;
+}
+.carousel-control .icon-next,
+.carousel-control .glyphicon-chevron-right {
+  right: 10%;
+  margin-right: -10px;
 }
