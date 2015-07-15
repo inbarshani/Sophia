@@ -157,6 +157,8 @@ function reQueryFlows() {
         f[i] = (function(query, func) {
             return function() {
                 queries.push(query);
+                if (queries.length == 1) // single time enable the save button
+                    $('#save-test').removeClass('disabled');
                 timer = setInterval(function(){
                     if (completeVisualize == true) {
                         clearInterval(timer);
