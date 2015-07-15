@@ -55,7 +55,8 @@ function updateTestStatus(testId){
 	    var saved_test_item = $('#saved-list #'+testId);
 	    var innerHtml = 'Test: '+ testDetails.name + '</br>' +
 		        ''+passedSteps+' of ' + testDetails.queries.length + 
-		        ' steps passed</br>';
+		        ' steps passed</br>' + 
+		        ' Updated: '+new Date(testDetails.updated).toLocaleString();
 
 	    if (saved_test_item.length == 0)
 	    	saved_test_item = $('#saved-list').append(
