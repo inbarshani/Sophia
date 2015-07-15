@@ -1,42 +1,42 @@
 /**
  * Created by gazitn on 7/7/2015.
  */
-var trendsBackboneNodes = [];
-var trendsPaths = [];
+var allTests = [];
+var selectedTests = [];
 
 function searchTrends(query, callback) {
     var jqxhr = $.ajax("/searchTrends?q=" + fixedEncodeURIComponent(query) +
     '&dateCondition=' + JSON.stringify(dateCondition))
         .done(function(data) {
             $( "#all_results" ).load( "html/trends.html", function(){
-                var trends = JSON.parse(data);
-                var trendsList = $('#trends_list');
+                var allTests = JSON.parse(data);
+                var testsList = $('#trends_tests_list');
                 $('#trends_results').removeClass('hidden');
                 var li, label, div, h5, span;
-                trendsList.empty();
-                trends.forEach(function (trend) {
+                testsList.empty();
+                allTests.forEach(function (test) {
                     li = $('<li>');
                     li.addClass('btn-group bizmoduleselect');
                     li.on('click', function(t){
                         return function() {
-                            $('#trends-vis-container').text(t.test.id);
+                            testOnClick(t);
                         }
-                    }(trend));
-                    li.data('trend-id', trend.test.id);
-                    li.data('toggle', 'buttons');
+                    }(test));
+                    li.attr('data-test-id', test.test.id);
+                    li.attr('data-toggle', 'buttons');
                     label = $('<label>');
                     label.addClass('btn btn-default');
                     div = $('<div>');
                     h5 = $('<h5>');
-                    h5.text('Test: ' + trend.test.id);
+                    h5.text('Test: ' + test.test.id);
                     span = $('<span>');
                     span.addClass('badge');
-                    span.text(trend.bbNodes.length);
+                    span.text(test.bbNodes.length);
                     div.append(h5);
                     div.append(span);
                     label.append(div);
                     li.append(label);
-                    trendsList.append(li);
+                    testsList.append(li);
                 });
             });
         })
@@ -46,8 +46,19 @@ function searchTrends(query, callback) {
             reportString = reportString + 'Result: failed query\n';
 
             // remove all nodes
-            trendsPaths.length = 0;
-            trendsBackboneNodes.length = 0;
+            allTests.length = 0;
+            selectedTests.length = 0;
             update();
         });
+}
+
+function testOnClick(test) {
+    // toggle test selection
+    var testIndex = selectedTests.indexOf(test);
+    if (testIndex >= 0) {
+        selectedTests.splice(testIndex, 1);
+    } else {
+        selectedTests.push(test);
+    }
+    visualizeTrendTest();
 }
