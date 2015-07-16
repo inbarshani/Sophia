@@ -223,12 +223,12 @@ app.get('/tests', function(request, response) {
 });
 
 
-app.use('/searchTrends', function(request, response) {
+app.use('/searchReview', function(request, response) {
     var queryText = request.query.q;
     var dateCondition = (request.query.dateCondition) ? JSON.parse(request.query.dateCondition) : {};
     var resultNodes = [];
     var testsCount = 0;
-    idol_queries.searchTrends(queryText, dateCondition, function(documents_hash) {
+    idol_queries.searchReview(queryText, dateCondition, function(documents_hash) {
         var idolResultNodes = Object.keys(documents_hash);
         if (idolResultNodes.length > 0) {
             neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {

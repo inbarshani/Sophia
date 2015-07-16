@@ -23,12 +23,11 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
       <!-- Load c3.css -->
-      <link href="/c3-0.4.10/c3.css" rel="stylesheet" type="text/css">
+      <link href="https://rawgit.com/masayuki0812/c3/master/c3.css" rel="stylesheet" type="text/css">
 
       <!-- Load d3.js and c3.js -->
-      <script src="/c3-0.4.10/d3.v3.min.js" charset="utf-8"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
-      <script src="/c3-0.4.10/c3.min.js"></script>
+      <script src="https://rawgit.com/masayuki0812/c3/master/c3.min.js" charset="utf-8"></script>
   </head>
   <body>
     <!---->
@@ -109,6 +108,9 @@
               </li>
               <li role="presentation" class="search" id="search-trends">
                 <a href="#" onclick="switchSearch(searchTypes.TRENDS);">Trends</a>
+              </li>
+              <li role="presentation" class="search" id="search-review">
+                <a href="#" onclick="switchSearch(searchTypes.REVIEW);">Review</a>
               </li>
               <li role="presentation" class="search" id="search-saved">
                 <a href="#" onclick="switchSearch(searchTypes.SAVED);">Saved Tests</a>
@@ -261,7 +263,9 @@
     <script src="js/screens.js"></script>
     <script src="js/topics.js"></script>
     <script src="js/trends.js"></script>
+    <script src="js/review.js"></script>
     <script src="js/sophia-vis-trends.js"></script>
+    <script src="js/sophia-vis-review.js"></script>
     <script src="js/saved_tests.js"></script>
   </body>
 </html>

@@ -12,7 +12,8 @@ var searchTypes = {
     ISSUES: 2,
     TOPICS: 3,
     TRENDS: 4,
-    SAVED: 5
+    SAVED: 5,
+    REVIEW: 6
 };
 var searchType = searchTypes.FLOWS;
 var user;
@@ -149,6 +150,7 @@ function switchSearch(newSearchType) {
     } else if (searchType == searchTypes.TRENDS) {       
     } else if (searchType == searchTypes.SAVED) {
         clearSavedTestsSearch();
+    } else if (searchType == searchTypes.REVIEW) {
     }
 
     // update searchType
@@ -180,6 +182,8 @@ function updateSearchNavigation()
         id_of_li = "#search-trends";
     else if (searchType == searchTypes.SAVED)
         id_of_li = "#search-saved";
+    else if (searchType == searchTypes.REVIEW)
+        id_of_li = "#search-review";
 
     var search_type_li = $(id_of_li);
     search_type_li.removeClass('search').addClass('selected_search');
@@ -206,6 +210,8 @@ function search(query){
         searchTrends(query);
     } else if (searchType == searchTypes.SAVED) {
         searchSavedTests(query);
+    } else if (searchType == searchTypes.REVIEW) {
+        searchReview(query);
     }
 }
 
@@ -288,8 +294,14 @@ function updateSearchResults() {
     if (searchType == searchTypes.TRENDS && ($('#trends_results_row').has('li').length > 0)) {
         $('#trends_results').removeClass('hidden').addClass('show');
     } else {
-        $('#trneds_results').removeClass('show').addClass('hidden');
+        $('#trends_results').removeClass('show').addClass('hidden');
     }
+    if (searchType == searchTypes.REVIEW && ($('#review_results_row').has('li').length > 0)) {
+        $('#review_results').removeClass('hidden').addClass('show');
+    } else {
+        $('#review_results').removeClass('show').addClass('hidden');
+    }
+
 }
 
 

@@ -4,14 +4,14 @@
 var allTests = [];
 var selectedTests = [];
 
-function searchTrends(query, callback) {
-    var jqxhr = $.ajax("/searchTrends?q=" + fixedEncodeURIComponent(query) +
+function searchReview(query, callback) {
+    var jqxhr = $.ajax("/searchreview?q=" + fixedEncodeURIComponent(query) +
     '&dateCondition=' + JSON.stringify(dateCondition))
         .done(function(data) {
-            $( "#all_results" ).load( "html/trends.html", function(){
+            $( "#all_results" ).load( "html/review.html", function(){
                 var allTests = JSON.parse(data);
-                var testsList = $('#trends_tests_list');
-                $('#trends_results').removeClass('hidden');
+                var testsList = $('#review_tests_list');
+                $('#review_results').removeClass('hidden');
                 var li, label, div, h5, span;
                 testsList.empty();
                 allTests.forEach(function (test) {
@@ -60,5 +60,5 @@ function testOnClick(test) {
     } else {
         selectedTests.push(test);
     }
-    visualizeTrendTest();
+    visualizeReviewTest();
 }
