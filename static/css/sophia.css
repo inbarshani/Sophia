@@ -235,6 +235,7 @@ span.input-group-addon {
 
 .review-list-container {
   display: inline-block;
+  width: 100%;
 }
 
 .carousel-control.left, 
@@ -252,4 +253,8 @@ span.input-group-addon {
 .carousel-control .glyphicon-chevron-right {
   right: 10%;
   margin-right: -10px;
+}
+
+#review_vis_container {
+  padding: 45px 15px 15px;  
 }
