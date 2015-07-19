@@ -19,6 +19,12 @@ module.exports = {
 				obj.high_priority_index = obj.high_priority_index + ' ' + obj.value;
 			}
 		}
+		else if (obj.eventType == 'log')
+		{
+			obj.type = 'UI_Log';
+        	obj.high_priority_index = obj.value; 
+	        obj.indexable_content = '';
+		}
 		else
 		{
 			obj.type = 'UI_Event';
@@ -41,6 +47,10 @@ module.exports = {
 		}
 		else if (formatted_result.type == 'UI_Transition'){
 			formatted_result.caption = 'UI transition for elemnt '+idol_document['ELEMENTID']+ 
+				' in '+idol_document['URL'][0];
+		}
+		else if (formatted_result.type == 'UI_Log'){
+			formatted_result.caption = 'UI log: '+idol_document['DRETITLE']+ 
 				' in '+idol_document['URL'][0];
 		}
 		else { // UI_Event

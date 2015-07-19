@@ -132,5 +132,31 @@ var addListeners = function() {
         }
     }, false);
     
+    // capture log messages as well
+    var scriptToWrapConsoleLog = 
+        'window.original_log = console.log;'+
+        'window.original_log_error = console.error;'+
+        'window.console.log = function () {'+
+        'var sophiaLogEvent = new CustomEvent(\'sophiaLogEvent\',{\'detail\':arguments});'+
+        'window.dispatchEvent(sophiaLogEvent);'+
+        'window.original_log.apply(this, Array.prototype.slice.call(arguments));'+
+        '};'+
+        'window.console.error = function () {'+
+        'var sophiaLogErrorEvent = new CustomEvent(\'sophiaLogErrorEvent\',{\'detail\':arguments});'+
+        'window.dispatchEvent(sophiaLogErrorEvent);'+
+        'window.original_log_error.apply(this, Array.prototype.slice.call(arguments));'+
+        '};';
+    var script = document.createElement('script');
+    var code = document.createTextNode('(function() {' + scriptToWrapConsoleLog + '})();');
+    script.appendChild(code);
+    (document.body || document.head).appendChild(script);
+    window.addEventListener("sophiaLogEvent", function(event) {
+        console.log('sophia got a console event from page: '+JSON.stringify(event.detail));
+        window.__eumRumService.reportEventToSophia('log', document, event);
+    }, false);
+    window.addEventListener("sophiaLogErrorEvent", function(event) {
+        console.log('sophia got a console error event from page: '+JSON.stringify(event.detail));
+        window.__eumRumService.reportEventToSophia('log', document, event);
+    }, false);
 }
 

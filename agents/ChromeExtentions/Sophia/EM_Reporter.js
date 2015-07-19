@@ -67,7 +67,12 @@
                 lastSrcLength = src.length;
                 args.src = src;
             }
-        } else {
+        } 
+        else if (action=="log"){
+            args.eventType = action;
+            args.value = event.detail[0];
+        }
+        else {
             args.tagName = event.target.tagName;
             if (event.target.id) {
                 args.elementId = event.target.id;
