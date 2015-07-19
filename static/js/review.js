@@ -8,37 +8,7 @@ function searchReview(query, callback) {
     var jqxhr = $.ajax("/searchreview?q=" + fixedEncodeURIComponent(query) +
     '&dateCondition=' + JSON.stringify(dateCondition))
         .done(function(data) {
-            $( "#all_results" ).load( "html/review.html", function(){
-                var allTests = JSON.parse(data);
-                var testsList = $('#review_tests_list');
-                $('#review_results').removeClass('hidden');
-                var li, label, div, h5, span;
-                testsList.empty();
-                allTests.forEach(function (test) {
-                    li = $('<li>');
-                    li.addClass('btn-group bizmoduleselect');
-                    li.on('click', function(t){
-                        return function() {
-                            testOnClick(t);
-                        }
-                    }(test));
-                    li.attr('data-test-id', test.test.id);
-                    li.attr('data-toggle', 'buttons');
-                    label = $('<label>');
-                    label.addClass('btn btn-default');
-                    div = $('<div>');
-                    h5 = $('<h5>');
-                    h5.text('Test: ' + test.test.id);
-                    span = $('<span>');
-                    span.addClass('badge');
-                    span.text(test.bbNodes.length);
-                    div.append(h5);
-                    div.append(span);
-                    label.append(div);
-                    li.append(label);
-                    testsList.append(li);
-                });
-            });
+            showTests(data);
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
@@ -50,15 +20,4 @@ function searchReview(query, callback) {
             selectedTests.length = 0;
             update();
         });
-}
-
-function testOnClick(test) {
-    // toggle test selection
-    var testIndex = selectedTests.indexOf(test);
-    if (testIndex >= 0) {
-        selectedTests.splice(testIndex, 1);
-    } else {
-        selectedTests.push(test);
-    }
-    visualizeReviewTest();
 }
