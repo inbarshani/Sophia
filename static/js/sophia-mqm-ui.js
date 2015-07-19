@@ -286,7 +286,7 @@ function updateSearchResults() {
     } else {
         $('#screens_results').removeClass('show').addClass('hidden');
     }
-    if (searchType == searchTypes.TOPICS && ($('#available_topics').has('div').length > 0 || selectedTopicsArray.length > 0)) {
+    if (searchType == searchTypes.TOPICS && ($('#available_topics').has('li').length > 0 || selectedTopicsArray.length > 0)) {
         $('#topics_results_row').removeClass('hidden').addClass('show');
     } else {
         $('#topics_results_row').removeClass('show').addClass('hidden');        

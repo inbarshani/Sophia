@@ -17,7 +17,7 @@ app.use('/getTopics', function(request, response) {
     var query = request.query.q;
     var dateCondition = JSON.parse(request.query.dateCondition);
     console.log("getTopics query: " + query);
-    idol_queries.getTopics(query, null, dateCondition, function(topics) {
+    idol_queries.getTopics(query, dateCondition, function(topics) {
         if (topics)
             response.send(JSON.stringify(topics));
         else
