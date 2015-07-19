@@ -25,10 +25,10 @@
                         window.__eumRumService.baseAppUrl = storageChange.newValue;
                     }
                 } else if (key == "fileUrl") {
-                    if (storageChange.newValue == window.__eumRumService.fileUploadUrl) {
+                    if (storageChange.newValue == window.__eumRumService.fileUrl) {
                         return;
                     } else {
-                        window.__eumRumService.fileUploadUrl = storageChange.newValue;
+                        window.__eumRumService.fileUrl = storageChange.newValue;
                     }
                 }
             }
@@ -189,11 +189,11 @@
         reportTestStartToSophia: reportTestStartToSophia
     };
 
-    chrome.storage.local.get(['dataUrl', 'sophiaTestId', 'baseAppUrl', 'fileUploadUrl'], function (result) {
+    chrome.storage.local.get(['dataUrl', 'sophiaTestId', 'baseAppUrl', 'fileUrl'], function (result) {
         window.__eumRumService.dataUrl = result.dataUrl;
         window.__eumRumService.testId = result.sophiaTestId;
         window.__eumRumService.baseAppUrl = result.baseAppUrl;
-        window.__eumRumService.fileUploadUrl = result.fileUploadUrl;
+        window.__eumRumService.fileUrl = result.fileUrl;
     });
 
 })();

@@ -18,10 +18,10 @@ global.sophiaTestIDUpdateScript = function(){
         '   console.log("chrome.runtime: "+chrome.runtime);'+
         '   chrome.runtime.sendMessage('+
         '        "iojhohbfacfjepmplgkdjleclmafeddm", '+
-        '       {sophiaTestId: \"'+sophiaTestID+'\", '+
-        '           appBaseUrl: \"'+appBaseUrl+'\",'+ 
-        '           dataUrl: \"'+dataUrl+'\",'+ 
-        '           fileUrl: \"'+fileUploadUrl+'\"'+ 
+        '       {sophiaTestId: \"'+global.sophiaTestID+'\", '+
+        '           baseAppUrl: \"'+global.appBaseUrl+'\",'+ 
+        '           dataUrl: \"'+global.dataUrl+'\",'+ 
+        '           fileUrl: \"'+global.fileUploadUrl+'\"'+ 
         '       },{},'+ 
         '        function(response)'+ 
         '        {'+

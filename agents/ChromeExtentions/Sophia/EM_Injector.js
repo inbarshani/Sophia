@@ -2,13 +2,13 @@ $(document).ready(function() {
     console.log("Sophia injector, document ready, baseAppUrl=" + window.__eumRumService.baseAppUrl);
 
     if (!window.__eumRumService.baseAppUrl) {
-        chrome.storage.local.get(['dataUrl', 'sophiaTestId', 'baseAppUrl', 'fileUploadUrl'], function (result) {
+        chrome.storage.local.get(['dataUrl', 'sophiaTestId', 'baseAppUrl', 'fileUrl'], function (result) {
             console.log("Sophia injector, document ready, read from local storage:" + 
                 JSON.stringify(result));
             window.__eumRumService.dataUrl = result.dataUrl;
             window.__eumRumService.testId = result.sophiaTestId;
             window.__eumRumService.baseAppUrl = result.baseAppUrl;
-            window.__eumRumService.fileUploadUrl = result.fileUploadUrl;
+            window.__eumRumService.fileUrl = result.fileUrl;
             console.log("Sophia injector, document ready, updated from local storage:" + 
                 JSON.stringify(window.__eumRumService));
             addListeners();
