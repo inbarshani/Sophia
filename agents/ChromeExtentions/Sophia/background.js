@@ -21,7 +21,10 @@ chrome.runtime.onMessageExternal.addListener(
     function(message, sender, sendResponse) {
         console.log('background got external message with test Id: ' + message);
         chrome.storage.local.set({
-            'sophiaTestId': message.sophiaTestId
+            'sophiaTestId': message.sophiaTestId,
+            'baseAppUrl': message.baseAppUrl,
+            'dataUrl': message.dataUrl,
+            'fileUrl': message.fileUrl
         }, function() {
             console.log('New test GUID saved');
         });

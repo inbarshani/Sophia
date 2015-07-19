@@ -1,36 +1,20 @@
 $(document).ready(function() {
-//console.log("1 data url=" + window.__eumRumService.dataUrl);
+    console.log("Sophia injector, document ready, baseAppUrl=" + window.__eumRumService.baseAppUrl);
 
-    if (!window.__eumRumService.dataUrl) {
-        if (document.getElementById("sophiadataurl")) {
-            //console.log("2");
-            // automated test
-            var testId = document.getElementById("sophiatestid").innerText;
-            var baseAppUrl = document.getElementById("sophiabaseappurl").innerText;
-            var dataUrl = document.getElementById("sophiadataurl").innerText;
-            var fileUploadUrl = document.getElementById("sophiafileuploadurl").innerText;
-//            window.__eumRumService.reportTestStartToSophia(testId);
-            window.__eumRumService.testId = testId;
-            window.__eumRumService.dataUrl = dataUrl;
-            window.__eumRumService.fileUploadUrl = fileUploadUrl;
-            window.__eumRumService.baseAppUrl = baseAppUrl;
-
-            chrome.storage.local.set({'baseAppUrl': baseAppUrl}, function() {
-              console.log('App URL Settings saved');
-            });
-            chrome.storage.local.set({'dataUrl': dataUrl}, function() {
-                console.log('Data URL Settings saved');
-            });
-            chrome.storage.local.set({'fileUrl': fileUploadUrl}, function() {
-              console.log('File URL Settings saved');
-            });
-            chrome.storage.local.set({'sophiaTestId': testId}, function() {
-              console.log('Test ID saved');
-            });
-
-        } 
+    if (!window.__eumRumService.baseAppUrl) {
+        chrome.storage.local.get(['dataUrl', 'sophiaTestId', 'baseAppUrl', 'fileUploadUrl'], function (result) {
+            console.log("Sophia injector, document ready, read from local storage:" + 
+                JSON.stringify(result));
+            window.__eumRumService.dataUrl = result.dataUrl;
+            window.__eumRumService.testId = result.sophiaTestId;
+            window.__eumRumService.baseAppUrl = result.baseAppUrl;
+            window.__eumRumService.fileUploadUrl = result.fileUploadUrl;
+            console.log("Sophia injector, document ready, updated from local storage:" + 
+                JSON.stringify(window.__eumRumService));
+            addListeners();
+        });        
     }
-    if (document.URL.indexOf(window.__eumRumService.baseAppUrl) == 0) {
+    else if (document.URL.indexOf(window.__eumRumService.baseAppUrl) == 0) {
         //console.log("4");
         addListeners();
     }

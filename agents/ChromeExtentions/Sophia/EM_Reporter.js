@@ -2,6 +2,7 @@
     if (window.__eumRumService) return;
 
     chrome.storage.onChanged.addListener(function (changes, namespace) {
+        console.log('Sophia reporter, update changes in storage: '+JSON.stringify(changes));
         for (key in changes) {
             if (namespace == "local") {
                 var storageChange = changes[key];
@@ -34,17 +35,6 @@
         }
     });
         
-    chrome.runtime.onMessage.addListener(
-      function(message, sender, sendResponse) {
-          console.log('got message with test Id: '+message);
-            chrome.storage.local.set({
-                'sophiaTestId': message.sophiaTestId
-            }, function() {
-                console.log('New test GUID saved');
-            });
-      });  
-
-    
     var lastSrcLength;
     var reportEventToSophia = function (action, document_root, event) {
         var dataUrl = window.__eumRumService.dataUrl;

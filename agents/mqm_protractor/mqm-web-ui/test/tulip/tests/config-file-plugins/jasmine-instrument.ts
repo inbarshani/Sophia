@@ -10,6 +10,33 @@ global.appBaseUrl = "http://myd-vm06983.hpswlabs.adapps.hp.com:8082/";
 global.fileUploadUrl = "http://"+sophia_machine+":8082/file";
 global.dataUrl = "http://"+sophia_machine+":8082/data";
 global.sophiaTestID = '';
+global.sophiaTestIDUpdateScript = function(){
+    var script =        
+        'try ' +
+        '{ ' +
+        ' if (chrome && chrome.runtime){'+
+        '   console.log("chrome.runtime: "+chrome.runtime);'+
+        '   chrome.runtime.sendMessage('+
+        '        "iojhohbfacfjepmplgkdjleclmafeddm", '+
+        '       {sophiaTestId: \"'+sophiaTestID+'\", '+
+        '           appBaseUrl: \"'+appBaseUrl+'\",'+ 
+        '           dataUrl: \"'+dataUrl+'\",'+ 
+        '           fileUrl: \"'+fileUploadUrl+'\"'+ 
+        '       },{},'+ 
+        '        function(response)'+ 
+        '        {'+
+        '            console.log("recevied response: "+response);'+
+        '        });'+
+        ' }'+
+        ' else console.log("Sophia failed to communicate with extension");'+
+        '}'+
+        'catch(ex)' +
+        '{' +
+        '    console.log("exception in sendmessage: "+ex);'+
+        '}';
+    console.log('updating browser with new test ID using script: '+script);
+    return script;    
+};
 
 function reportToSophia(args) {
     var post_data = JSON.stringify(args);
