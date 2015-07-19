@@ -3,6 +3,7 @@
  */
 var allTests = [];
 var selectedTests = [];
+var selectedBBsByTest = [];
 
 function searchReview(query, callback) {
     var jqxhr = $.ajax("/searchreview?q=" + fixedEncodeURIComponent(query) +

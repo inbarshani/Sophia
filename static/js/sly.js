@@ -795,6 +795,7 @@
 		 * @return {Mixed} Activated item index or false on fail.
 		 */
 		function activate(item, force) {
+			return;
 			var index = getIndex(item);
 
 			if (!itemNav || index < 0) {
@@ -805,7 +806,7 @@
 			// has been a change. Otherwise just return the current active index.
 			if (last.active !== index || force) {
 				// Update classes
-				$items.eq(rel.activeItem).removeClass(o.activeClass);
+//				$items.eq(rel.activeItem).removeClass(o.activeClass);
 				$items.eq(index).addClass(o.activeClass);
 
 				last.active = rel.activeItem = index;
