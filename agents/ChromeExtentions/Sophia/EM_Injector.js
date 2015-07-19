@@ -76,33 +76,6 @@ var hasBlurHandler = function(elem) {
 }
 
 var addListeners = function() {
-    setTimeout(function() {
-        //document.addEventListener("DOMSubtreeModified", listenerFunc, false);
-
-        function sophiaErrHandler() {
-            window.onerror = function(errorMsg, url, lineNumber, column, errorObj) {
-                console.log("ERRRRRR: " + errorObj);
-                var errData = {
-                    type: "ClientError",
-                    timestamp: new Date().getTime(),
-                    errorMessage: errorMsg,
-                    url: url,
-                    lineNumber: lineNumber,
-                    column: column
-                }
-                if (errorObj) {
-                    errData.stacktrace = errorObj.stack;
-                }
-                document.dispatchEvent(new CustomEvent('ErrorToSophia', {detail: errData}));
-            }
-        }
-
-        var script = document.createElement('script');
-        script.textContent = '(' + sophiaErrHandler + '())';
-        document.head.appendChild(script);
-        script.parentNode.removeChild(script);
-    }, 2000);
-
     document.addEventListener('ErrorToSophia', function(event) {
         window.__eumRumService.reportErrorToSophia(event.detail);
     });
@@ -136,16 +109,28 @@ var addListeners = function() {
     var scriptToWrapConsoleLog = 
         'window.original_log = console.log;'+
         'window.original_log_error = console.error;'+
-        'window.console.log = function () {'+
+        'console.log = function () {'+
         'var sophiaLogEvent = new CustomEvent(\'sophiaLogEvent\',{\'detail\':arguments});'+
         'window.dispatchEvent(sophiaLogEvent);'+
         'window.original_log.apply(this, Array.prototype.slice.call(arguments));'+
         '};'+
-        'window.console.error = function () {'+
+        'console.error = function () {'+
         'var sophiaLogErrorEvent = new CustomEvent(\'sophiaLogErrorEvent\',{\'detail\':arguments});'+
         'window.dispatchEvent(sophiaLogErrorEvent);'+
         'window.original_log_error.apply(this, Array.prototype.slice.call(arguments));'+
-        '};';
+        '};'+
+        'window.onerror = function(errorMsg, url, lineNumber, column, errorObj) {'+
+        '        var errData = {'+
+        '            errorMessage: errorMsg,'+
+        '            url: url,'+
+        '            lineNumber: lineNumber,'+
+        '            column: column'+
+        '        };'+
+        '        if (errorObj) {'+
+        '            errData.stacktrace = errorObj.stack;'+
+        '        }'+
+        '        window.dispatchEvent(new CustomEvent(\'sophiaLogErrorEvent\', {\'detail\': errData}));'+
+        '    }';
     var script = document.createElement('script');
     var code = document.createTextNode('(function() {' + scriptToWrapConsoleLog + '})();');
     script.appendChild(code);
