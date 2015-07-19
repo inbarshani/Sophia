@@ -6,7 +6,6 @@ var idol_queries = require('./lib/idol_queries');
 
 var app = express();
 
-app.use(express.static(__dirname + '/static'));
 app.use(bodyParser.json())
 
 app.post('/data', function(request, response) {
@@ -100,3 +99,7 @@ function sendToQueue(data, response) {
         }
     }
 }
+
+process.on('uncaughtException', function (err) {
+  console.log('process uncaughtException: '+require('util').inspect(err));
+});
