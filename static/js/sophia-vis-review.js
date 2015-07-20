@@ -64,12 +64,12 @@ function showTests(data) {
 function visualizeReviewTest() {
 	var panel, panelHeader, panelBody, container, frame, ul;
 	var slyControlsHtml = '<div class="scrollbar"><div class="handle"><div class="mousearea"></div></div></div>\
-	<button class="backward"><i class="glyphicon glyphicon-chevron-left"></i></button><button class="forward"><i class="glyphicon glyphicon-chevron-right"></i></button>\
-	<div class="frame"><ul class="slidee"></ul></div>\
+	<button class="backward"><i class="glyphicon glyphicon-chevron-left small-40"></i></button><button class="forward"><i class="glyphicon glyphicon-chevron-right small-40"></i></button>\
+	<div class="frame small"><ul class="slidee"></ul></div>\
 	<div class="controls">\
-	<button class="prevPage"><i class="glyphicon glyphicon-fast-backward"></i> Prev Page</button>\
+	<button class="prevPage"><i class="glyphicon glyphicon-fast-backward small-22"></i> Prev Page</button>\
 	<span class="divider"></span>\
-	<button class="nextPage">Next Page <i class="glyphicon glyphicon-fast-forward"></i></button></div>';
+	<button class="nextPage">Next Page <i class="glyphicon glyphicon-fast-forward small-22"></i></button></div>';
 
 	var options = {
 	    horizontal: 1,
@@ -133,34 +133,23 @@ function visualizeReviewTest() {
 function createBBListForTest(test, ul) {
 	var li, div, ddUl, ddLi;
 	test.bbNodes.forEach(function (node) {
-	    li = $('<li class="dropdown">');
+	    li = $('<li class="dropdown small">');
 	    div = $('<div data-toggle="dropdown">');
 	    div.css('height', '100%');
-	    ddUl = $('<ul class="dropdown-menu">');
-	    ddUl.css('top', '10px');
-	    ddUl.css('left', '75px');
-	    ddUl.css('height', '67px');
-	    ddLi = $('<li>');
-	    ddLi.css('height', '31px');
-	    ddLi.css('padding-top', '5px');
-	    ddLi.css('background', '#fff');
-	    ddLi.css('font-size', '14px');
+	    ddUl = $('<ul class="dropdown-menu dd">');
+	    ddLi = $('<li class="dd">');
 	    ddLi.text('Set as start');
 	    ddLi.on('click', function(item, n, id){
 	    	return function() {
-	    		bbNodeSelectFirst(item, n, id);
+	    		bbNodeSelect(item, n, id, 'start');
 	    	};
 	    }(li, node, test.test.id));
 	    ddUl.append(ddLi);
-	    ddLi = $('<li>');
-	    ddLi.css('height', '31px');
-	    ddLi.css('padding-top', '0px');
-	    ddLi.css('background', '#fff');
-	    ddLi.css('font-size', '14px');
+	    ddLi = $('<li class="dd">');
 	    ddLi.text('Set as end');
 	    ddLi.on('click', function(item, n, id){
 	    	return function() {
-	    		bbNodeSelectSecond(item, n, id);
+	    		bbNodeSelect(item, n, id, 'end');
 	    	};
 	    }(li, node, test.test.id));
 	    ddUl.append(ddLi);
@@ -187,45 +176,84 @@ function testOnClick(li, test) {
 
 
 
-function bbNodeSelectFirst(li, node, testId) {
+function bbNodeSelect(li, node, testId, type) {
     var selectedTest = null;
-/*    for (var i = 0; i < selectedBBsByTest.length; i++) {
+    var ul = li.parent();
+    for (var i = 0; i < selectedBBsByTest.length; i++) {
     	if (selectedBBsByTest[i].testId == testId) {
-    		selectedTests = selectedBBsByTest[i];
+    		selectedTest = selectedBBsByTest[i];
+    		break;
     	}
     }
     if (selectedTest == null) {
-    	// option 1
-    	selectedTest = {testId: testId, startNode: node, endNode: null};
-    	selectedBBsByTest.push(selectedTest);
-    	li.addClass('active start');
-    } else {
-		if (selectedTest.startNode == null) {
-			selectedTest.startNode = node;
-	    	li.addClass('active end');
-		} else {
-		if (selectedTest.endNode == null) {
-			selectedTest.endNode = node;
-	    	li.addClass('active end');
-		} else {
-
-		}
-    }
-    var testIndex = selectedBBsByTest.map(function (t) { return t.testId; }).indexOf(test.id);
-    if (testIndex >= 0) {
-    	li.removeClass('active');
-    } else {
-    	li.addClass('active');
-    	if (selectdBBsByTest.length == 0) {
-    		// add "start" node
-	    	selectdBBsByTest.push({testId: testId, startNode: node, endNode: null});
+    	selectedTest = {testId: testId, startNode: null, endNode: null};
+    	if (type == "start") {
+    		selectedTest.startNode = node;
     	} else {
-
+    		selectedTest.endNode = node;
     	}
+    	selectedBBsByTest.push(selectedTest);
+    	li.addClass('active ' + type);
+    } else {
+    	if (type == "start") {
+    		selectedTest.startNode = node;
+    	} else {
+    		selectedTest.endNode = node;
+    	}
+    	var lis = ul.children();
+    	for (i = 0; i < lis.length; i++) {
+			if ($(lis[i]).hasClass(type)) {
+				$(lis[i]).removeClass('active ' + type);
+			}
+    	}
+	    li.addClass('active ' + type);
+	    if (selectedTest.startNode != null && selectedTest.endNode != null) {
+	    	expandNodes(ul);
+	    	setTimeout(function(){
+		    	collapseNodes(ul);
+	    	}, 500);
+	    }
     }
-    */
 }
 
-function bbNodeSelectSecond(li, node, testId) {
-    var selectedTest = null;
+function collapseNodes(ul) {
+	var lis = ul.children();
+	var startIndex = -1;
+	var li;
+	for (i = 0; i < lis.length; i++) {
+		if (startIndex < 0) {
+			if ($(lis[i]).hasClass('start')) {
+				startIndex = i;
+				continue;
+			}
+		} else {
+			if ($(lis[i]).hasClass('end')) {
+				if (i - startIndex > 1) {
+					li = $('<li class="small collapsed">');
+					li.text('...');
+					li.insertBefore($(lis[i]));
+					li.on('click', function(list) {
+						return function() {
+							expandNodes(list)
+						}
+					}(ul));
+				}
+				break;
+			} else {
+				$(lis[i]).addClass('hidden');
+			}
+		}
+	}
+}
+
+function expandNodes(ul) {
+	var lis = ul.children();
+	for (i = 0; i < lis.length; i++) {
+		if ($(lis[i]).hasClass('hidden')) {
+			$(lis[i]).removeClass('hidden');
+		} else if ($(lis[i]).hasClass('collapsed')) {
+			$(lis[i]).remove();
+			break;
+		}
+	}
 }
