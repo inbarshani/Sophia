@@ -54,8 +54,8 @@ function showTestsForReview(data) {
 			// Buttons
 			forward: container.find('.forward'),
 			backward: container.find('.backward'),
-			prevPage: container.find('.prevPage'),
-			nextPage: container.find('.nextPage')
+		//	prevPage: container.find('.prevPage'),
+		//	nextPage: container.find('.nextPage')
 		}).init();
 		$('li').removeClass('active');
 	});
@@ -66,10 +66,10 @@ function visualizeReviewTest() {
 	var slyControlsHtml = '<div class="scrollbar"><div class="handle"><div class="mousearea"></div></div></div>\
 	<button class="backward"><i class="glyphicon glyphicon-chevron-left small-40"></i></button><button class="forward"><i class="glyphicon glyphicon-chevron-right small-40"></i></button>\
 	<div class="frame small"><ul class="slidee"></ul></div>\
-	<div class="controls">\
+	<div class="controls">';/*\
 	<button class="prevPage"><i class="glyphicon glyphicon-fast-backward small-22"></i> Prev Page</button>\
 	<span class="divider"></span>\
-	<button class="nextPage">Next Page <i class="glyphicon glyphicon-fast-forward small-22"></i></button></div>';
+	<button class="nextPage">Next Page <i class="glyphicon glyphicon-fast-forward small-22"></i></button></div>';*/
 
 	var options = {
 	    horizontal: 1,
@@ -82,11 +82,11 @@ function visualizeReviewTest() {
 	$('#review_vis_container').html('');
 	for (var i = 0; i < selectedTests.length; i++) {
 		panel = $('<div>');
-		panel.addClass('panel panel-default');
-		panelHeader=$('<div>');
-		panelHeader.addClass('panel-heading');
+		panel.addClass('panel-default');
+		panelHeader=$('<span>');
+		//panelHeader.addClass('panel-heading');
 		panelBody=$('<div>');
-		panelBody.addClass('panel-body');
+	//	panelBody.addClass('panel-body');
 
 		container = $('<div>');
 		container.addClass('sly');
