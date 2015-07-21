@@ -26,7 +26,7 @@ function searchReview(query, callback) {
 function getNodesStats(nodes, callback) {
     var jqxhr = $.ajax("/testNodesData?nodes=" + JSON.stringify(nodes))
         .done(function(data) {
-            showReviewStats(data);
+            callback(data);
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");

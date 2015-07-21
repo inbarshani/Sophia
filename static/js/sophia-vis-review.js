@@ -259,7 +259,7 @@ function collapseNodesAndGetStats(ul) {
 		}
 	}
   	getNodesStats(nodes, function(data){
-  		displayStats(data);
+  		displayStats(JSON.parse(data));
   	});
 }
 
@@ -272,5 +272,15 @@ function expandNodes(ul) {
 			$(lis[i]).remove();
 			break;
 		}
+	}
+}
+
+function displayStats(stats) {
+	var text = '';
+	var p;
+	for (var name in stats) {
+		p = $('<p>');
+		p.text(name + ':' + stats[name]);
+//		$('#divBetween').append(p);	
 	}
 }
