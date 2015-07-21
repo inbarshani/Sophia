@@ -1,4 +1,4 @@
-function showTests(data) {
+function showTestsForReview(data) {
 	$( "#all_results" ).load( "html/review.html", function(){
 		var allTests = JSON.parse(data);
 		var testsList = $('#review_tests_list');
