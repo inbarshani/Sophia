@@ -83,7 +83,7 @@ function visualizeReviewTest() {
 	for (var i = 0; i < selectedTests.length; i++) {
 		panel = $('<div>');
 		panel.addClass('panel panel-default');
-		panelHeader=$('<div>');
+		panelHeader=$('<span>');
 		panelHeader.addClass('panel-heading');
 		panelBody=$('<div>');
 		panelBody.addClass('panel-body');
