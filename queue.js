@@ -3,9 +3,6 @@ var neo4j = require('neo4j');
 var http = require('http');
 var jsontoxml = require('jsontoxml');
 
-// connect to neo4j DB, on Yaron's machine and Inbar's machine
-//var db = new neo4j.GraphDatabase('http://localhost:7474');
-var db = new neo4j.GraphDatabase('http://16.60.168.105:7474');
 
 var dateTime = require("./dateTime");
 
@@ -23,6 +20,11 @@ var Step = require('Step');
 var sophia_consts = require('./lib/sophia_consts');
 var idol_queries = require('./lib/idol_queries');
 var neo4j_queries = require('./lib/neo4j_queries');
+
+// connect to neo4j DB, on Yaron's machine and Inbar's machine
+//var db = new neo4j.GraphDatabase('http://localhost:7474');
+var db = new neo4j.GraphDatabase('http://'+sophia_consts.NEO4J_DB_SERVER+':7474');
+
 
 var connection = amqp.createConnection({
     host: 'localhost'
@@ -146,7 +148,7 @@ function _processQueueMessage(msg) {
                 }
             };
             console.log(" [x] Add new node query: " + query);
-            db.query(query, params, function(err, results) {
+            db.cypher({query: query, params: params}, function(err, results) {
                 try {
                     if (err) {
                         console.error('neo4j query failed: ' + query + '\n');

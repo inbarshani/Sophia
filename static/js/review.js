@@ -9,7 +9,7 @@ function searchReview(query, callback) {
     var jqxhr = $.ajax("/searchreview?q=" + fixedEncodeURIComponent(query) +
     '&dateCondition=' + JSON.stringify(dateCondition))
         .done(function(data) {
-            showTests(data);
+            showTestsForReview(data);
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
