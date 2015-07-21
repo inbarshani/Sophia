@@ -1,4 +1,4 @@
-.sly { margin: 0px auto 40px; border-bottom: 1px solid #aaa; }
+.sly { margin: 0px auto 40px; /*border-bottom: 1px solid #aaa;*/ }
 
 .sly button, .sly button { background: transparent; border: 0;opacity: .5; }
 .sly button:hover, .sly button:hover { opacity: 1; }
