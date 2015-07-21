@@ -17,7 +17,7 @@ module.exports = {
     },
 
     extractDataFromIDOL: function(idol_document, formatted_result) {
-        console.log('idol_document obj: '+require('util').inspect(idol_document, {depth:4}));
+        //console.log('idol_document obj: '+require('util').inspect(idol_document, {depth:4}));
         formatted_result.caption = idol_document['DRETITLE'][0];
         return formatted_result;
     }
