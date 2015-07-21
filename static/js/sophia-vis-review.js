@@ -220,6 +220,7 @@ function collapseNodes(ul) {
 	var lis = ul.children();
 	var startIndex = -1;
 	var li;
+    var div;
 	for (i = 0; i < lis.length; i++) {
 		if (startIndex < 0) {
 			if ($(lis[i]).hasClass('start')) {
@@ -229,14 +230,22 @@ function collapseNodes(ul) {
 		} else {
 			if ($(lis[i]).hasClass('end')) {
 				if (i - startIndex > 1) {
-					li = $('<li class="small collapsed">');
+				/*	li = $('<li class="small collapsed">');
 					li.text('...');
 					li.insertBefore($(lis[i]));
 					li.on('click', function(list) {
 						return function() {
 							expandNodes(list)
 						}
-					}(ul));
+					}(ul));*/
+                    li = $('<li class="small collapsed">');
+                    li.insertBefore($(lis[i]));
+                    li.append('<div id="divBetween">')
+                    li.on('click', function(list) {
+                        return function() {
+                            expandNodes(list)
+                        }
+                    }(ul));
 				}
 				break;
 			} else {
