@@ -82,11 +82,11 @@ function visualizeReviewTest() {
 	$('#review_vis_container').html('');
 	for (var i = 0; i < selectedTests.length; i++) {
 		panel = $('<div>');
-		panel.addClass('panel panel-default');
+		panel.addClass('panel-default');
 		panelHeader=$('<span>');
-		panelHeader.addClass('panel-heading');
+		//panelHeader.addClass('panel-heading');
 		panelBody=$('<div>');
-		panelBody.addClass('panel-body');
+	//	panelBody.addClass('panel-body');
 
 		container = $('<div>');
 		container.addClass('sly');
