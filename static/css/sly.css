@@ -13,8 +13,8 @@
 .sly .frame ul li { float: left; width: 100px; height: 100px; margin: 0 10px 0 10px; padding-top: 20px; background: #eee; color: #3a3c47; text-align: center; cursor: pointer; }
 .sly .frame ul li.small { float: left; width: 75px; height: 75px; margin: 0 5px 0 5px; padding-top: 10px; background: #eee; color: #3a3c47; text-align: center; cursor: pointer; font-size: 11px;}
 .sly .frame ul li.active { color: #fff; background: #82bf4c; }
-.sly .frame ul li.active.start { color: #fff; background: #007700; }
-.sly .frame ul li.active.end { color: #fff; background: #770000; }
+.sly .frame ul li.active.start { color: #fff; background: #8FBC8F; }
+.sly .frame ul li.active.end { color: #fff; background: #F08080; }
 .sly .frame ul li.collapsed { color: #999; background: #fff; }
 .sly.tests .frame ul li.active { color: #fff; background: #1E90FF; }
 
