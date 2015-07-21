@@ -2,7 +2,7 @@
  * Created by gazitn on 7/7/2015.
  */
 var allTests = [];
-var selectedTests = [];
+var selectedReviewTests = [];
 var selectedBBsByTest = [];
 
 function searchReview(query, callback) {
@@ -18,7 +18,21 @@ function searchReview(query, callback) {
 
             // remove all nodes
             allTests.length = 0;
-            selectedTests.length = 0;
+            selectedReviewTests.length = 0;
+            update();
+        });
+}
+
+function getNodesStats(nodes, callback) {
+    var jqxhr = $.ajax("/testNodesData?nodes=" + JSON.stringify(nodes))
+        .done(function(data) {
+            showReviewStats(data);
+        })
+        .fail(function(err) {
+            alert("Unable to complete search at this time, try again later");
+            console.log("Search failed: " + err);
+            reportString = reportString + 'Result: failed query\n';
+
             update();
         });
 }

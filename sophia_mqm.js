@@ -240,6 +240,13 @@ app.use('/searchReview', function(request, response) {
     });
 });
 
+app.use('/testNodesData', function(request, response) {
+    var nodes = JSON.parse(request.query.nodes);
+    neo4j_queries.getNodesStats(nodes, function(stats) {
+        response.send(JSON.stringify(stats));
+    });
+});
+
 function queryTestBackBoneNodes(index, numTests, response) {
     return function() {
         neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {
