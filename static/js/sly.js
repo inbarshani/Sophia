@@ -70,7 +70,7 @@
 		var $frame = $(frame);
 		var $slidee = o.slidee ? $(o.slidee).eq(0) : $frame.children().eq(0);
 		var frameSize = 0;
-		var slideeSize = 0;
+		var slideeSize = 100;
 		var pos = {
 			start: 0,
 			center: 0,
@@ -248,6 +248,7 @@
 					if (i === lastItemIndex) {
 						item.end += paddingEnd;
 						slideeSize += paddingEnd;
+                        slideeSize=slideeSize+100;
 						ignoredMargin = singleSpaced ? itemMarginEnd : 0;
 					}
 
@@ -332,7 +333,7 @@
 			}
 
 			// Extend relative variables object with some useful info
-			rel.slideeSize = slideeSize;
+			rel.slideeSize = slideeSize+50;
 			rel.frameSize = frameSize;
 			rel.sbSize = sbSize;
 			rel.handleSize = handleSize;

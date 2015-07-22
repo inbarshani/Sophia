@@ -272,6 +272,10 @@ span.input-group-addon {
     margin-right: 5px;
     cursor: pointer;
 }
+#widthUi
+{
+    width: 280px !important;
+}
 #review_vis_container {
  /* padding: 45px 15px 15px;*/
 }

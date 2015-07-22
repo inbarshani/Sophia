@@ -65,7 +65,7 @@ function visualizeReviewTest() {
 	var panel, panelHeader, panelBody, container, frame, ul;
 	var slyControlsHtml = '<div class="scrollbar"><div class="handle"><div class="mousearea"></div></div></div>\
 	<button class="backward"><i class="glyphicon glyphicon-chevron-left small-40"></i></button><button class="forward"><i class="glyphicon glyphicon-chevron-right small-40"></i></button>\
-	<div class="frame small"><ul class="slidee"></ul></div>\
+	<div class="frame small"><ul class=".sly .frame ul div"></ul></div>\
 	<div class="controls">';/*\
 	<button class="prevPage"><i class="glyphicon glyphicon-fast-backward small-22"></i> Prev Page</button>\
 	<span class="divider"></span>\
