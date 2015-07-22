@@ -251,7 +251,8 @@ function collapseNodesAndGetStats(ul) {
 				}
 				break;
 			} else {
-				nodes.push($(lis[i]).data('bb-id'));
+				if ($(lis[i]).data('bb-id').length > 0)
+					nodes.push($(lis[i]).data('bb-id'));
 				$(lis[i]).addClass('hidden');
 			}
 		}
