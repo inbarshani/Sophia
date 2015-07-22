@@ -242,14 +242,14 @@ function collapseNodesAndGetStats(ul) {
 							expandNodes(list)
 						}
 					}(ul));*/
-                    li = $('<li class="small collapsed">');
-                    li.insertBefore($(lis[i]));
-                    li.append('<div id="divBetween">')
-                    li.on('click', function(list) {
+                 //   li = $('<li class="small collapsed">');
+                //    li.insertBefore($(lis[i]));
+                //    li.append('<div id="divBetween">')
+                /*    li.on('click', function(list) {
                         return function() {
                             expandNodes(list)
                         }
-                    }(ul));
+                    }(ul));*/
 				}
 				break;
 			} else {
@@ -259,7 +259,7 @@ function collapseNodesAndGetStats(ul) {
 		}
 	}
   	getNodesStats(nodes, function(data){
-  		displayStats(JSON.parse(data));
+  		displayStats(lis, ul, JSON.parse(data));
   	});
 }
 
@@ -275,12 +275,21 @@ function expandNodes(ul) {
 	}
 }
 
-function displayStats(stats) {
+function displayStats(lis, ul, stats) {
 	var text = '';
 	var p;
 	for (var name in stats) {
-		p = $('<p>');
-		p.text(name + ':' + stats[name]);
-//		$('#divBetween').append(p);	
-	}
+        /*p = $('<p>');
+         p.text(name + ':' + stats[name]);
+         $('#divBetween')*/
+        li = $('<li  id="divBetween">');
+        li.insertBefore($(lis[i]));
+        li.append('<div id="divBetween">')
+        li.text(name + ':' + stats[name]);
+        li.on('click', function (list) {
+            return function () {
+                expandNodes(list)
+            }
+        }(ul));
+    }
 }
