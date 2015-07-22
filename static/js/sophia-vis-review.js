@@ -274,15 +274,19 @@ function expandNodes(ul) {
 }
 
 function displayStats(lis, ul, stats) {
-	var text = '';
+    var colors = ['red', 'blue', 'green', 'teal', 'rosybrown', 'tan', 'plum', 'saddlebrown'];
+    var text = '';
 	var p;
 	for (var name in stats) {
         /*p = $('<p>');
          p.text(name + ':' + stats[name]);
          $('#divBetween')*/
-        li = $('<li  id="divBetween">');
+        var li = $('<li  id="divBetween">');
         li.insertBefore($(lis[i]));
         li.append('<div id="divBetween">')
+        document.getElementById("divBetween").style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+       // li.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
         li.text(name + ':' + stats[name]);
         li.on('click', function (list) {
             return function () {
