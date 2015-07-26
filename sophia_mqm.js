@@ -232,7 +232,24 @@ app.use('/searchReview', function(request, response) {
         var idolResultNodes = Object.keys(documents_hash);
         if (idolResultNodes.length > 0) {
             neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {
-                response.send(JSON.stringify(bbNodes));
+                var referenceIds = [];
+                bbNodes.map(function(test){
+                    test.bbNodes.map(function(node){
+                        referenceIds.push(node.id);
+                    });
+                });
+                idol_queries.searchByReference(referenceIds, function(idolDocs){
+                    var idolResultNodes = Object.keys(idolDocs);
+                    bbNodes.map(function(test){
+                        test.bbNodes.map(function(node){
+                            var doc = idolDocs[node.id];
+                            if (doc) {
+                                node.caption = doc.caption;
+                            }
+                        });
+                    });
+                    response.send(JSON.stringify(bbNodes));
+                });
             });
         } else { // no results from IDOL
             response.send(JSON.stringify([]));
