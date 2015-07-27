@@ -262,11 +262,12 @@ function collapseNodesAndGetStats(ul) {
   	});
 }
 
-function expandNodes(ul) {
+function expandNodes( ul) {
 	var lis = ul.children();
-	for (i = 0; i < lis.length; i++) {
+	for (i = 0; i < lis.length+1; i++) {
 		if ($(lis[i]).hasClass('hidden')) {
 			$(lis[i]).removeClass('hidden');
+          //  $(li).removeClass('hidden');
 		} else if ($(lis[i]).hasClass('collapsed')) {
 			$(lis[i]).remove();
 			break;
@@ -291,9 +292,11 @@ function displayStats(lis, ul, stats) {
         li.text(name + ':' + stats[name]);
         li.on('click', function (list) {
             return function () {
-                expandNodes(list)
-            }
+                expandNodes(list )
+
+            };
         }(ul));
+      //  li.childNodes.removeClass('hidden');
     }
 }
 
