@@ -130,7 +130,7 @@ function createBBListForTest(test, ul) {
 	var li, div, ddUl, ddLi;
 	test.bbNodes.forEach(function (node) {
 	    li = $('<li class="dropdown small">');
-	    div = $('<div data-toggle="dropdown">');
+	    div = $('<div data-toggle="dropdown" data-toggle="tooltip" data-placement="top" title= "'+node.caption+'">');
 	    div.css('height', '100%');
 	    ddUl = $('<ul class="dropdown-menu dd">');
 	    ddLi = $('<li class="dd">');
@@ -150,8 +150,9 @@ function createBBListForTest(test, ul) {
 	    }(li, node, test.test.id));
 	    ddUl.append(ddLi);
 	    li.attr('data-bb-id', node.id);
-	    div.text(node.type + ': ' + node.caption);
-	    li.append(div);
+	    div.text(node.type);//(node.type + ': ' + node.caption);
+      //  div.title = node.caption;
+            li.append(div);
 	    li.append(ddUl);
 	    ul.append(li);
 	});
