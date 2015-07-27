@@ -206,7 +206,7 @@ function bbNodeSelect(li, node, testId, type) {
     	}
 	    li.addClass('active ' + type);
 	    if (selectedReviewBBTest.startNode != null && selectedReviewBBTest.endNode != null) {
-	    	expandNodes(ul);
+	    //	expandNodes(ul);
 	    	setTimeout(function(){
 		    	collapseNodesAndGetStats(ul);
 	    	}, 500);
@@ -292,7 +292,7 @@ function displayStats(lis, ul, stats) {
         li.text(name + ':' + stats[name]);
         li.on('click', function (list) {
             return function () {
-                expandNodes(list )
+         //       expandNodes(list )
 
             };
         }(ul));
