@@ -150,7 +150,7 @@ function createBBListForTest(test, ul) {
 	    }(li, node, test.test.id));
 	    ddUl.append(ddLi);
 	    li.attr('data-bb-id', node.id);
-	    div.text(node.type);
+	    div.text(node.type + ': ' + node.caption);
 	    li.append(div);
 	    li.append(ddUl);
 	    ul.append(li);
