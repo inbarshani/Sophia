@@ -290,7 +290,7 @@ function displayStats(lis, ul, stats) {
         document.getElementById("divBetween").style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
        // li.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
 
-        li.text(name + ':' + stats[name][0].counts);
+        li.text(name + ':' + stats[name].length);
         li.on('click', function (list) {
             return function () {
          //       expandNodes(list )
