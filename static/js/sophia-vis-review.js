@@ -179,8 +179,6 @@ function testOnClick(li, test) {
     }
 }
 
-
-
 function bbNodeSelect(li, node, testId, type) {
     var selectedReviewBBTest = findBBTest(testId);
     var ul = li.parent();
@@ -209,13 +207,13 @@ function bbNodeSelect(li, node, testId, type) {
 	    if (selectedReviewBBTest.startNode != null && selectedReviewBBTest.endNode != null) {
 	    //	expandNodes(ul);
 	    	setTimeout(function(){
-		    	collapseNodesAndGetStats(ul);
+		    	collapseNodesAndGetStats(testId,ul);
 	    	}, 500);
 	    }
     }
 }
 
-function collapseNodesAndGetStats(ul) {
+function collapseNodesAndGetStats(testId, ul) {
 	var lis = ul.children();
 	var startIndex = -1;
 	var li;
@@ -258,8 +256,15 @@ function collapseNodesAndGetStats(ul) {
 			}
 		}
 	}
-  	getNodesStats(nodes, function(data){
+  	getNodesStats(testId, nodes, function(data, testId){
   		displayStats(lis, ul, JSON.parse(data));
+        for(var i=0; i< selectedBBsByTest.length; i++)
+        {
+            if(selectedBBsByTest[i].testId==testId)
+            {
+                selectedBBsByTest[i].compareNodes = nodes;
+            }
+        }
   	});
 }
 
@@ -275,7 +280,7 @@ function expandNodes( ul) {
 		}
 	}
 }
-
+var compareDataInfo = [];
 function displayStats(lis, ul, stats) {
     var colors = ['red', 'blue', 'green', 'teal', 'rosybrown', 'tan', 'plum', 'saddlebrown'];
     var text = '';
@@ -294,9 +299,17 @@ function displayStats(lis, ul, stats) {
         li.on('click', function (list) {
             return function () {
          //       expandNodes(list )
-                searchBackBoneData(stats[name],function(data){
-                    
-                });
+                function bringDataForNodes(selectedBBsByTest,i) {
+                    if(selectedBBsByTest.compareNodes!==null)
+                    {
+                        searchBackBoneData(selectedBBsByTest.testId,selectedBBsByTest.compareNodes,function(testId,data){
+                            compareDataInfo.push({testId:testId, dataNodes: data})
+                        });
+                    }
+                }
+                for(var i=0; i<selectedBBsByTest.length;i++) {
+                    bringDataForNodes(selectedBBsByTest[i], i);
+                }
             };
         }(ul));
     }

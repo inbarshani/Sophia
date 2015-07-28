@@ -23,10 +23,10 @@ function searchReview(query, callback) {
         });
 }
 
-function searchBackBoneData(ids, callback) {
+function searchBackBoneData(testId, ids, callback) {
     var jqxhr = $.ajax("/searchBackBoneData?ids=" + JSON.stringify(ids))
         .done(function(data) {
-            callback(data);
+            callback(testId,data);
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
@@ -36,10 +36,10 @@ function searchBackBoneData(ids, callback) {
         });
 }
 
-function getNodesStats(nodes, callback) {
+function getNodesStats(testId, nodes, callback) {
     var jqxhr = $.ajax("/testNodesData?nodes=" + JSON.stringify(nodes))
         .done(function(data) {
-            callback(data);
+            callback(data, testId);
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
