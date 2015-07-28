@@ -61,11 +61,11 @@ function showTestsForReview(data) {
 	});
 }
 
-function visualizeReviewTest() {
-	var panel, panelHeader, panelBody, container, frame, ul;
+function visualizeReviewTest(test) {
+	var div, panelHeader, panelBody, container, frame, ul;
 	var slyControlsHtml = '<div class="scrollbar"><div class="handle"><div class="mousearea"></div></div></div>\
 	<button class="backward"><i class="glyphicon glyphicon-chevron-left small-40"></i></button><button class="forward"><i class="glyphicon glyphicon-chevron-right small-40"></i></button>\
-	<div class="frame small"><ul class="slidee"></ul></div>\
+	<div class="frame small"><ul class=".sly .frame ul div"></ul></div>\
 	<div class="controls">';/*\
 	<button class="prevPage"><i class="glyphicon glyphicon-fast-backward small-22"></i> Prev Page</button>\
 	<span class="divider"></span>\
@@ -79,62 +79,58 @@ function visualizeReviewTest() {
 	    touchDragging: 1
 	};
 
-	$('#review_vis_container').html('');
-	for (var i = 0; i < selectedReviewTests.length; i++) {
-		panel = $('<div>');
-		panel.addClass('panel-default');
-		panelHeader=$('<span>');
-		//panelHeader.addClass('panel-heading');
-		panelBody=$('<div>');
-	//	panelBody.addClass('panel-body');
+	div = $('<div>');
+	div.addClass('col-md-1');
+	div.text('Test ' + test.test.id);
+	div.attr('id','test-name-' + test.test.id);
+	$('#review_vis_container').append(div);
 
-		container = $('<div>');
-		container.addClass('sly');
-		container.html(slyControlsHtml);
-		ul = $(container.find('ul'));
-		createBBListForTest(selectedReviewTests[i], ul);
-		frame = container.find('.frame');
-		panelHeader.text('Test ' + selectedReviewTests[i].test.id);
-		panel.append(panelHeader);
-		panelBody.append(container);
-		panel.append(panelBody);
-		$('#review_vis_container').append(panel);
+	div = $('<div>');
+	div.addClass('col-md-11');
+	div.attr('id','test-sly-' + test.test.id);
+	container = $('<div>');
+	container.addClass('sly');
+	container.html(slyControlsHtml);
+	ul = $(container.find('ul'));
+	createBBListForTest(test, ul);
+	frame = container.find('.frame');
+	div.append(container);
+	$('#review_vis_container').append(div);
 
-		var sly = new Sly(frame, {
-			horizontal: 1,
-			itemNav: 'basic',
-			activateMiddle: false,
-			smart: 1,
-			activateOn: 'click',
-			mouseDragging: 1,
-			touchDragging: 1,
-			releaseSwing: 1,
-			startAt: 0,
-			scrollBar: container.find('.scrollbar'),
-			scrollBy: 1,
-			pagesBar: container.find('.pages'),
-			activatePageOn: 'click',
-			speed: 200,
-			moveBy: 600,
-			elasticBounds: 1,
-			dragHandle: 1,
-			dynamicHandle: 1,
-			clickBar: 1,
+	var sly = new Sly(frame, {
+		horizontal: 1,
+		itemNav: 'basic',
+		activateMiddle: false,
+		smart: 1,
+		activateOn: 'click',
+		mouseDragging: 1,
+		touchDragging: 1,
+		releaseSwing: 1,
+		startAt: 0,
+		scrollBar: container.find('.scrollbar'),
+		scrollBy: 1,
+		pagesBar: container.find('.pages'),
+		activatePageOn: 'click',
+		speed: 200,
+		moveBy: 600,
+		elasticBounds: 1,
+		dragHandle: 1,
+		dynamicHandle: 1,
+		clickBar: 1,
 
-			// Buttons
-			forward: container.find('.forward'),
-			backward: container.find('.backward'),
-			prevPage: container.find('.prevPage'),
-			nextPage: container.find('.nextPage')
-		}).init();
-	}
+		// Buttons
+		forward: container.find('.forward'),
+		backward: container.find('.backward'),
+		prevPage: container.find('.prevPage'),
+		nextPage: container.find('.nextPage')
+	}).init();
 }	
 
 function createBBListForTest(test, ul) {
 	var li, div, ddUl, ddLi;
 	test.bbNodes.forEach(function (node) {
 	    li = $('<li class="dropdown small">');
-	    div = $('<div data-toggle="dropdown">');
+	    div = $('<div data-toggle="dropdown" data-toggle="tooltip" data-placement="top" title= "'+node.caption+'">');
 	    div.css('height', '100%');
 	    ddUl = $('<ul class="dropdown-menu dd">');
 	    ddLi = $('<li class="dd">');
@@ -154,8 +150,9 @@ function createBBListForTest(test, ul) {
 	    }(li, node, test.test.id));
 	    ddUl.append(ddLi);
 	    li.attr('data-bb-id', node.id);
-	    div.text(node.type);
-	    li.append(div);
+	    div.text(node.type);//(node.type + ': ' + node.caption);
+      //  div.title = node.caption;
+            li.append(div);
 	    li.append(ddUl);
 	    ul.append(li);
 	});
@@ -166,39 +163,41 @@ function testOnClick(li, test) {
     var testIndex = selectedReviewTests.indexOf(test);
     if (testIndex >= 0) {
     	li.removeClass('active');
+    	$('#test-name-' + test.test.id).remove();
+    	$('#test-sly-' + test.test.id).remove();
         selectedReviewTests.splice(testIndex, 1);
+        for (var i = 0; i < selectedBBsByTest.length; i++) {
+	    	if (selectedBBsByTest[i].testId == test.test.id) {
+	    		selectedBBsByTest.splice(i);
+	    	}
+	    }
+	 
     } else {
     	li.addClass('active');
         selectedReviewTests.push(test);
+	    visualizeReviewTest(test);
     }
-    visualizeReviewTest();
 }
 
 
 
 function bbNodeSelect(li, node, testId, type) {
-    var selectedReviewTest = null;
+    var selectedReviewBBTest = findBBTest(testId);
     var ul = li.parent();
-    for (var i = 0; i < selectedBBsByTest.length; i++) {
-    	if (selectedBBsByTest[i].testId == testId) {
-    		selectedReviewTest = selectedBBsByTest[i];
-    		break;
-    	}
-    }
-    if (selectedReviewTest == null) {
-    	selectedReviewTest = {testId: testId, startNode: null, endNode: null, nodes: []};
+    if (selectedReviewBBTest == null) {
+    	selectedReviewBBTest = {testId: testId, startNode: null, endNode: null, nodes: []};
     	if (type == "start") {
-    		selectedReviewTest.startNode = node;
+    		selectedReviewBBTest.startNode = node;
     	} else {
-    		selectedReviewTest.endNode = node;
+    		selectedReviewBBTest.endNode = node;
     	}
-    	selectedBBsByTest.push(selectedReviewTest);
+    	selectedBBsByTest.push(selectedReviewBBTest);
     	li.addClass('active ' + type);
     } else {
     	if (type == "start") {
-    		selectedReviewTest.startNode = node;
+    		selectedReviewBBTest.startNode = node;
     	} else {
-    		selectedReviewTest.endNode = node;
+    		selectedReviewBBTest.endNode = node;
     	}
     	var lis = ul.children();
     	for (i = 0; i < lis.length; i++) {
@@ -207,8 +206,8 @@ function bbNodeSelect(li, node, testId, type) {
 			}
     	}
 	    li.addClass('active ' + type);
-	    if (selectedReviewTest.startNode != null && selectedReviewTest.endNode != null) {
-	    	expandNodes(ul);
+	    if (selectedReviewBBTest.startNode != null && selectedReviewBBTest.endNode != null) {
+	    //	expandNodes(ul);
 	    	setTimeout(function(){
 		    	collapseNodesAndGetStats(ul);
 	    	}, 500);
@@ -242,32 +241,34 @@ function collapseNodesAndGetStats(ul) {
 							expandNodes(list)
 						}
 					}(ul));*/
-                    li = $('<li class="small collapsed">');
-                    li.insertBefore($(lis[i]));
-                    li.append('<div id="divBetween">')
-                    li.on('click', function(list) {
+                 //   li = $('<li class="small collapsed">');
+                //    li.insertBefore($(lis[i]));
+                //    li.append('<div id="divBetween">')
+                /*    li.on('click', function(list) {
                         return function() {
                             expandNodes(list)
                         }
-                    }(ul));
+                    }(ul));*/
 				}
 				break;
 			} else {
-				nodes.push($(lis[i]).data('bb-id'));
+				if ($(lis[i]).data('bb-id').length > 0)
+					nodes.push($(lis[i]).data('bb-id'));
 				$(lis[i]).addClass('hidden');
 			}
 		}
 	}
   	getNodesStats(nodes, function(data){
-  		displayStats(JSON.parse(data));
+  		displayStats(lis, ul, JSON.parse(data));
   	});
 }
 
-function expandNodes(ul) {
+function expandNodes( ul) {
 	var lis = ul.children();
-	for (i = 0; i < lis.length; i++) {
+	for (i = 0; i < lis.length+1; i++) {
 		if ($(lis[i]).hasClass('hidden')) {
 			$(lis[i]).removeClass('hidden');
+          //  $(li).removeClass('hidden');
 		} else if ($(lis[i]).hasClass('collapsed')) {
 			$(lis[i]).remove();
 			break;
@@ -275,12 +276,37 @@ function expandNodes(ul) {
 	}
 }
 
-function displayStats(stats) {
-	var text = '';
+function displayStats(lis, ul, stats) {
+    var colors = ['red', 'blue', 'green', 'teal', 'rosybrown', 'tan', 'plum', 'saddlebrown'];
+    var text = '';
 	var p;
 	for (var name in stats) {
-		p = $('<p>');
-		p.text(name + ':' + stats[name]);
-//		$('#divBetween').append(p);	
-	}
+        /*p = $('<p>');
+         p.text(name + ':' + stats[name]);
+         $('#divBetween')*/
+        var li = $('<li  id="divBetween">');
+        li.insertBefore($(lis[i]));
+        li.append('<div id="divBetween">')
+        document.getElementById("divBetween").style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+       // li.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+        li.text(name + ':' + stats[name].length);
+        li.on('click', function (list) {
+            return function () {
+         //       expandNodes(list )
+                searchBackBoneData(stats[name],function(data){
+                    
+                });
+            };
+        }(ul));
+    }
+}
+
+function findBBTest(testId) {
+    for (var i = 0; i < selectedBBsByTest.length; i++) {
+    	if (selectedBBsByTest[i].testId == testId) {
+    		return selectedBBsByTest[i];
+    	}
+    }
+    return null;
 }

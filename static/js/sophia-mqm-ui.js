@@ -31,6 +31,9 @@ function fixedEncodeURIComponent(str) {
 }
 
 $(document).ready(function() {
+    //for tooltip
+    $('[data-toggle="tooltip"]').tooltip();
+    //for tooltip
     user = localStorage.getItem("user");
     if (!user)
         window.location.href = './login.html';

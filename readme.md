@@ -62,5 +62,13 @@ B. Jetty and MQM log parser - REPEAT STEPS 3-4 AFTER MQM DEPLOYMENT!!!!
 	to check if logstash is running: ps aux | grep logstash
 8. in MQM site admin configure to log everything
 
+C. AppPulse POC
+====
+1. Download Logstash (current version is 1.4.2) and extract to a folder in AppPulse server
+2. Extract <Sophia>\agents\app_pulse\log.conf to \logstash-1.4.2\bin
+3. copy <Sophia>\agents\jetty\logging\sophia to \logstash-1.4.2\patterns
+4. make sure the next log files exist: /opt/HP/diagApps/logs/ApmAppsAll.log, RUM-dal.log
+5. run logstash as described in B.7
+
 
 Happy Coding! :p

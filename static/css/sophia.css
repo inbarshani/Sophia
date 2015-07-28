@@ -256,6 +256,7 @@ span.input-group-addon {
 }
 #divBetween
 {
+    margin-top: 26px;
     padding: 4px 7px 4px 9px;
     border-radius: 20px;
     color: rgb(255, 255, 255);
@@ -270,6 +271,10 @@ span.input-group-addon {
     font-size: 12px;
     margin-right: 5px;
     cursor: pointer;
+}
+#widthUi
+{
+    width: 280px !important;
 }
 #review_vis_container {
  /* padding: 45px 15px 15px;*/
