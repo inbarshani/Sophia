@@ -263,6 +263,7 @@ function collapseNodesAndGetStats(testId, ul) {
             if(selectedBBsByTest[i].testId==testId)
             {
                 selectedBBsByTest[i].compareNodes = nodes;
+                selectedBBsByTest[i].type = data.type;
             }
         }
   	});
@@ -283,24 +284,30 @@ function expandNodes( ul) {
 var compareDataInfo = [];
 function displayStats(lis, ul, stats) {
     var colors = ['red', 'blue', 'green', 'teal', 'rosybrown', 'tan', 'plum', 'saddlebrown'];
-    var text = '';
-	var p;
+    var everyThree = false;
+    var count = 0;
+    var div =   $('<div>');
 	for (var name in stats) {
-        /*p = $('<p>');
-         p.text(name + ':' + stats[name]);
-         $('#divBetween')*/
+        if(count == 3)
+        {
+            everyThree = true;
+        }
+        if(everyThree)
+        {
+
+        }
         var li = $('<li  id="divBetween">');
+        div.appendChild(li)
         li.insertBefore($(lis[i]));
         li.append('<div id="divBetween">')
         document.getElementById("divBetween").style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-       // li.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
 
         li.text(name + ':' + stats[name].length);
         li.on('click', function (list) {
             return function () {
          //       expandNodes(list )
                 function bringDataForNodes(selectedBBsByTest,i) {
-                    if(selectedBBsByTest.compareNodes!==null)
+                    if(selectedBBsByTest.compareNodes!==null)// && selectedBBsByTest.type == name)
                     {
                         searchBackBoneData(selectedBBsByTest.testId,selectedBBsByTest.compareNodes,function(testId,data){
                             compareDataInfo.push({testId:testId, dataNodes: data})
