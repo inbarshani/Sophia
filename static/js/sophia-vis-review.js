@@ -258,8 +258,7 @@ function collapseNodesAndGetStats(testId, ul) {
 	}
   	getNodesStats(testId, nodes, function(data, testId){
   		displayStats(lis, ul, JSON.parse(data));
-        for(var i=0; i< selectedBBsByTest.length; i++)
-        {
+        for(var i=0; i< selectedBBsByTest.length; i++) {
             if(selectedBBsByTest[i].testId==testId)
             {
                 selectedBBsByTest[i].compareNodes = nodes;
@@ -273,7 +272,6 @@ function expandNodes( ul) {
 	for (i = 0; i < lis.length+1; i++) {
 		if ($(lis[i]).hasClass('hidden')) {
 			$(lis[i]).removeClass('hidden');
-          //  $(li).removeClass('hidden');
 		} else if ($(lis[i]).hasClass('collapsed')) {
 			$(lis[i]).remove();
 			break;
@@ -285,23 +283,22 @@ function displayStats(lis, ul, stats) {
     var colors = ['red', 'blue', 'green', 'teal', 'rosybrown', 'tan', 'plum', 'saddlebrown'];
     var text = '';
 	var p;
+	 var div;
+	var li;
+	var counter = 0;
 	for (var name in stats) {
-        /*p = $('<p>');
-         p.text(name + ':' + stats[name]);
-         $('#divBetween')*/
-        var li = $('<li  id="divBetween">');
-        li.insertBefore($(lis[i]));
-        li.append('<div id="divBetween">')
-        document.getElementById("divBetween").style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-       // li.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-
-        li.text(name + ':' + stats[name].length);
-        li.on('click', function (list) {
+        div = $('<div class="divBetween">');
+        if (counter++ % 3 == 0) {
+        	li = $('<li class="stats">');
+	        li.insertBefore($(lis[i]));
+        }
+        div.css('background-color', colors[counter]);
+        li.append(div);	
+        div.text(name + ':' + stats[name].length);
+        div.on('click', function (list) {
             return function () {
-         //       expandNodes(list )
                 function bringDataForNodes(selectedBBsByTest,i) {
-                    if(selectedBBsByTest.compareNodes!==null)
-                    {
+                    if(selectedBBsByTest.compareNodes!==null) {
                         searchBackBoneData(selectedBBsByTest.testId,selectedBBsByTest.compareNodes,function(testId,data){
                             compareDataInfo.push({testId:testId, dataNodes: data})
                         });
