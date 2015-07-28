@@ -294,6 +294,7 @@ function displayStats(lis, ul, stats) {
         li.on('click', function (list) {
             return function () {
          //       expandNodes(list )
+                searchBackBoneData(stats[name]);
             };
         }(ul));
       //  li.childNodes.removeClass('hidden');

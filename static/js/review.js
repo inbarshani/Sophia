@@ -23,6 +23,19 @@ function searchReview(query, callback) {
         });
 }
 
+function searchBackBoneData(ids, callback) {
+    var jqxhr = $.ajax("/searchBackBoneData?ids=" + JSON.stringify(ids))
+        .done(function(data) {
+            callback(data);
+        })
+        .fail(function(err) {
+            alert("Unable to complete search at this time, try again later");
+            console.log("Search failed: " + err);
+            reportString = reportString + 'Result: failed query\n';
+            update();
+        });
+}
+
 function getNodesStats(nodes, callback) {
     var jqxhr = $.ajax("/testNodesData?nodes=" + JSON.stringify(nodes))
         .done(function(data) {

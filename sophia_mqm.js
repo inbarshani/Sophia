@@ -257,6 +257,14 @@ app.use('/searchReview', function(request, response) {
     });
 });
 
+app.use('/searchBackBoneData', function(request, response) {
+    var ids = JSON.parse(request.query.ids);
+    idol_queries.searchByReference(ids, function(idolDocs){
+        var idolResultNodes = Object.keys(idolDocs);
+        response.send(JSON.stringify(idolDocs));
+    });
+});
+
 app.use('/testNodesData', function(request, response) {
     var nodes = JSON.parse(request.query.nodes);
     neo4j_queries.getNodesStats(nodes, function(stats) {
