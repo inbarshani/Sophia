@@ -293,7 +293,7 @@ function displayStats(lis, ul, stats) {
         }
         div.css('background-color', colors[counter]);
         li.append(div);	
-        div.text(name + ':' + stats[name]);
+        div.text(name + ':' + stats[name].length);
         div.on('click', function (list) {
             return function () {
                 function bringDataForNodes(selectedBBsByTest,i) {
