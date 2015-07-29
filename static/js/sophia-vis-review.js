@@ -256,7 +256,7 @@ function collapseNodesAndGetStats(testId, ul) {
 			}
 		}
 	}
-  	getNodesStats(testId, function(data, testId){
+  	getNodesStats(testId, nodes, function(data, testId){
         var stats = JSON.parse(data);
         for(var i=0; i< selectedBBsByTest.length; i++) {
             if(selectedBBsByTest[i].testId==testId)
@@ -293,12 +293,12 @@ function displayStats(lis, ul, stats) {
         }
         div.css('background-color', colors[counter]);
         li.append(div);	
-        div.text(name + ':' + stats[name].length);
+        div.text(name + ':' + stats[name]);
         div.on('click', function (list) {
             return function () {
                 function bringDataForNodes(selectedBBsByTest,i) {
-                    if(selectedBBsByTest.compareNodes!==null && selectedBBsByTest.type==name) {
-                        searchBackBoneData(selectedBBsByTest.testId,selectedBBsByTest.compareNodes,function(testId,data){
+                    if(selectedBBsByTest.compareNodes!==null && selectedBBsByTest.compareNodes[name]!==null) {
+                        searchBackBoneData(selectedBBsByTest.testId,selectedBBsByTest.compareNodes[name],function(testId,data){
                             compareDataInfo.push({testId:testId, dataNodes: data})
                         });
                     }
