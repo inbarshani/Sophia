@@ -248,7 +248,7 @@
 					if (i === lastItemIndex) {
 						item.end += paddingEnd;
 						slideeSize += paddingEnd;
-                        slideeSize=slideeSize+100;
+                        slideeSize=slideeSize+450;
 						ignoredMargin = singleSpaced ? itemMarginEnd : 0;
 					}
 
@@ -333,7 +333,7 @@
 			}
 
 			// Extend relative variables object with some useful info
-			rel.slideeSize = slideeSize+50;
+			rel.slideeSize = slideeSize+450;
 			rel.frameSize = frameSize;
 			rel.sbSize = sbSize;
 			rel.handleSize = handleSize;
