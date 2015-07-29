@@ -289,25 +289,49 @@ function displayStats(lis, ul, stats) {
         div = $('<div class="divBetween">');
         if (counter++ % 3 == 0) {
         	li = $('<li class="stats">');
-        li.insertBefore($(lis[i]));
+	        li.insertBefore($(lis[i]));
         }
         div.css('background-color', colors[counter]);
         li.append(div);	
         div.text(name + ':' + stats[name].length);
-        div.on('click', function (list) {
+        div.on('click', function (list, type) {
             return function () {
-                function bringDataForNodes(selectedBBsByTest,i) {
-                    if(selectedBBsByTest.compareNodes!==null && selectedBBsByTest.compareNodes[name]!==undefined) {
-                        searchBackBoneData(selectedBBsByTest.testId,selectedBBsByTest.compareNodes[name],function(testId,data){
-                            compareDataInfo.push({testId:testId, dataNodes: data})
+                function bringDataForNodes(i) {
+                	var found = false;
+                	if (i >= selectedBBsByTest.length) {
+                        searchBackBoneData(compareDataInfo, function(testId,data){
+                        	// display compare data
                         });
+                		return;
+                	}
+                    if(selectedBBsByTest[i].compareNodes!==null && selectedBBsByTest[i].compareNodes[type]!==undefined) {
+                    	for (var j = 0; j < compareDataInfo.length; j++) {
+                    		if (compareDataInfo[j].testId == selectedBBsByTest[i].testId) {
+                    			found = true;
+                    		}
+                    	}
+                    	if (!found) {
+	                        compareDataInfo.push({testId: selectedBBsByTest[i].testId, dataNodes: selectedBBsByTest[i].compareNodes[type]});
+                    	}
+                        bringDataForNodes(i+1);
                     }
+
+
                 }
-                for(var i=0; i<selectedBBsByTest.length;i++) {
-                    bringDataForNodes(selectedBBsByTest[i], i);
-                }
-            };
-        }(ul));
+                
+                bringDataForNodes(0);
+                /*(function(t) {
+			        for(var i = 0; i < selectedBBsByTest.length; i++) {
+						if(selectedBBsByTest[i].compareNodes!==null && selectedBBsByTest[i].compareNodes[t]!==undefined) {
+			                searchBackBoneData(selectedBBsByTest[i].testId,selectedBBsByTest[i].compareNodes[t],function(testId,data){
+			                    compareDataInfo.push({testId:testId, dataNodes: data})
+			                });
+			            }
+			        }
+			    })(name);
+*/
+		    };
+        }(ul, name));
     }
 }
 

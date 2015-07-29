@@ -23,10 +23,10 @@ function searchReview(query, callback) {
         });
 }
 
-function searchBackBoneData(testId, ids, callback) {
-    var jqxhr = $.ajax("/searchBackBoneData?ids=" + JSON.stringify(ids))
+function searchBackBoneData(compareDataInfoObject, callback) {
+    var jqxhr = $.ajax("/searchBackBoneData?o=" + JSON.stringify(compareDataInfoObject))
         .done(function(data) {
-            callback(testId,data);
+            callback(data);
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");

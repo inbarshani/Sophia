@@ -258,11 +258,19 @@ app.use('/searchReview', function(request, response) {
 });
 
 app.use('/searchBackBoneData', function(request, response) {
-    var ids = JSON.parse(request.query.ids);
-    idol_queries.searchByReference(ids, function(idolDocs){
-        var idolResultNodes = Object.keys(idolDocs);
-        response.send(JSON.stringify(idolDocs));
-    });
+    var compareObjData = JSON.parse(request.query.o);
+    var results = [];
+    function getIdolNodesData(i) {
+        if (i >= compareObjData.length) {
+            response.send(JSON.stringify(results));
+        } else {
+            idol_queries.searchByReference(compareObjData[i].dataNodes, function(idolDocs){
+                results.push({testId: compareObjData[i].testId, dataNodes: idolDocs});
+                getIdolNodesData(i+1);
+            });
+        }
+    }
+    getIdolNodesData(0);
 });
 
 app.use('/testNodesData', function(request, response) {
