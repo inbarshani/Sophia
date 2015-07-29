@@ -10,7 +10,7 @@
 .sly .frame { margin: 0 auto; height: 100px; line-height: 30px; overflow: hidden; text-shadow: none; }
 .sly .frame.small { height: 75px; line-height: 50px;  }
 .sly .frame ul { list-style: none; margin: 0; padding: 0; height: 100%; font-size: 18px; }
-.sly .frame ul li { float: left; width: 100px; /*height: 100px;*/ margin: 0 10px 0 10px; padding-top: 20px; background: #eee; color: #3a3c47; text-align: center; cursor: pointer; }
+.sly .frame ul li { float: left; width: 100px; height: 100px; margin: 0 10px 0 10px; padding-top: 20px; background: #eee; color: #3a3c47; text-align: center; cursor: pointer; }
 .sly .frame ul li.small { float: left; width: 75px; height: 75px; margin: 0 5px 0 5px; padding-top: 10px; background: #eee; color: #3a3c47; text-align: center; cursor: pointer; font-size: 11px;}
 .sly .frame ul li.active { color: #fff; background: #82bf4c; }
 .sly .frame ul li.active.start { color: #fff; background: #8FBC8F; }
