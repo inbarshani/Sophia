@@ -256,15 +256,15 @@ function collapseNodesAndGetStats(testId, ul) {
 			}
 		}
 	}
-  	getNodesStats(testId, nodes, function(data, testId){
-  		displayStats(lis, ul, JSON.parse(data));
+  	getNodesStats(testId, function(data, testId){
+        var stats = JSON.parse(data);
         for(var i=0; i< selectedBBsByTest.length; i++) {
             if(selectedBBsByTest[i].testId==testId)
             {
-                selectedBBsByTest[i].compareNodes = nodes;
-                selectedBBsByTest[i].type = data.type;
+                selectedBBsByTest[i].compareNodes = stats;
             }
         }
+        displayStats(lis, ul, JSON.parse(data));
   	});
 }
 
@@ -297,7 +297,7 @@ function displayStats(lis, ul, stats) {
         div.on('click', function (list) {
             return function () {
                 function bringDataForNodes(selectedBBsByTest,i) {
-                    if(selectedBBsByTest.compareNodes!==null) {
+                    if(selectedBBsByTest.compareNodes!==null && selectedBBsByTest.type==name) {
                         searchBackBoneData(selectedBBsByTest.testId,selectedBBsByTest.compareNodes,function(testId,data){
                             compareDataInfo.push({testId:testId, dataNodes: data})
                         });
