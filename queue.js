@@ -144,7 +144,8 @@ function _processQueueMessage(msg) {
 
             var params = {
                 attributes: {
-                    timestamp: data.timestamp
+                    timestamp: data.timestamp,
+                    test_id: current_test_id
                 }
             };
             console.log(" [x] Add new node query: " + query);
