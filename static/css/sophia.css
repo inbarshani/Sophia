@@ -256,8 +256,7 @@ span.input-group-addon {
 }
 .divBetween
 {
-    margin-top: 0px;
-    padding: 4px 7px 4px 9px;
+    padding: 4px 5px 0 5px;
     border-radius: 20px;
     color: rgb(255, 255, 255);
     background-color: rgb(255, 117, 110);
@@ -269,8 +268,11 @@ span.input-group-addon {
     vertical-align: baseline;
     user-select: none;
     font-size: 11px;
-    margin-right: 5px;
+    margin: 5px 5px 0px 5px ;
     cursor: pointer;
+    width: 90px;
+    height: 18px;
+    overflow: hidden;
 }
 #review_vis_container {
  /* padding: 45px 15px 15px;*/
