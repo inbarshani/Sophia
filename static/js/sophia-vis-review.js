@@ -297,7 +297,7 @@ function displayStats(lis, ul, stats) {
         div.on('click', function (list) {
             return function () {
                 function bringDataForNodes(selectedBBsByTest,i) {
-                    if(selectedBBsByTest.compareNodes!==null && selectedBBsByTest.compareNodes[name]!==null) {
+                    if(selectedBBsByTest.compareNodes!==null && selectedBBsByTest.compareNodes[name]!==undefined) {
                         searchBackBoneData(selectedBBsByTest.testId,selectedBBsByTest.compareNodes[name],function(testId,data){
                             compareDataInfo.push({testId:testId, dataNodes: data})
                         });
