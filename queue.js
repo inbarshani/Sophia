@@ -51,7 +51,7 @@ var lock = new Padlock();
 
 connection.on('ready', function() {
     console.log('connected to RabbitMQ');
-    connection.queue('sophia', {
+    connection.queue(sophia_config.QUEUE_NAME, {
         autoDelete: false,
         durable: true
     }, function(queue) {

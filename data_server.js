@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var amqp = require('amqp');
 var fs = require('fs');
 var idol_queries = require('./lib/idol_queries');
+var sophia_config = require('./lib/sophia_config');
 
 var app = express();
 
@@ -70,7 +71,7 @@ app.post('/file', function(request, response) {
     });
 });
 
-app.listen(8082);
+app.listen(sophia_config.DATA_SERVER_PORT);
 var rabbitMq = amqp.createConnection({
     host: 'localhost'
 });
@@ -90,7 +91,7 @@ rabbitMq.on('error', function(err) {
 function sendToQueue(data, response) {
     var data_json = JSON.stringify(data);
     if (rabbitMq) {
-        rabbitMq.publish('sophia', data_json);
+        rabbitMq.publish(sophia_config.QUEUE_NAME, data_json);
         if (data.src != undefined) {
             console.log(" [x] RabbitMQ Sent request data with timestamp: " + data.timestamp + "\n");
         } else {

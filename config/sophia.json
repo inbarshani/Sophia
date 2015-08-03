@@ -22,7 +22,9 @@
         "MAX_PATH_LENGTH": 5000,
         "MAX_PATH_TO_SCREEN_LENGTH": 50,
         "NEO4J_DB_SERVER": "16.60.168.105",
-        "NEO4J_DB_PORT": "7474"
+        "NEO4J_DB_PORT": "7474",
+        "QUEUE_NAME": "sophia",
+        "DATA_SERVER_PORT": 8082
     },
     "development": {
         "IDOL_DB_NAME": "Sophia_dev",
