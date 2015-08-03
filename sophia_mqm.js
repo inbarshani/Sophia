@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 
-var sophia_consts = require('./lib/sophia_consts');
+var config = require('konfig')();
 var idol_queries = require('./lib/idol_queries');
 var neo4j_queries = require('./lib/neo4j_queries');
 var tests_queries = require('./lib/tests_queries');
@@ -178,7 +178,7 @@ app.post('/saveTest', function(request, response) {
             else
             {
                 // save test run, then send response
-                tests_queries.saveTestRun(testId, sophia_consts.testRunTypes.USER, request.body.queries);
+                tests_queries.saveTestRun(testId, config.sophia.testRunTypes.USER, request.body.queries);
                 response.sendStatus(200);
             }
         });
@@ -189,7 +189,7 @@ app.post('/tests/:id/runs', function(request, response){
     //console.log('post test run: '+JSON.stringify(request.params)+' '+JSON.stringify(request.body));
     var id = request.params.id;
     var queries = request.body.queries;
-    tests_queries.saveTestRun(id, sophia_consts.testRunTypes.USER, queries,
+    tests_queries.saveTestRun(id, config.sophia.testRunTypes.USER, queries,
         function(err){
             if (err)
                 response.status(500).send(err);
@@ -293,3 +293,8 @@ function queryTestBackBoneNodes(index, numTests, response) {
 
 
 app.listen(8085);
+console.log('Running Sophia web server with the next params: ');
+for (var name in config.sophia) {
+    console.log(name + ': ' + config.sophia[name]);
+}
+console.log('To change Sophia environment run one of the next options: \r\nset NODE_ENV=apppulse&&node sophia_mqm.js\r\nset NODE_ENV=&&node sophia_mqm.js');

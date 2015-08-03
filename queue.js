@@ -17,13 +17,12 @@ var teststep = require("./processors/test_step");
 
 var Step = require('Step');
 
-var sophia_consts = require('./lib/sophia_consts');
+var config = require('konfig')();
 var idol_queries = require('./lib/idol_queries');
 var neo4j_queries = require('./lib/neo4j_queries');
 
-// connect to neo4j DB, on Yaron's machine and Inbar's machine
-//var db = new neo4j.GraphDatabase('http://localhost:7474');
-var db = new neo4j.GraphDatabase('http://'+sophia_consts.NEO4J_DB_SERVER+':7474');
+// connect to neo4j DB
+var db = new neo4j.GraphDatabase('http://' + config.sophia.NEO4J_DB_SERVER + ':' + config.sophia.NEO4J_DB_PORT);
 
 
 var connection = amqp.createConnection({
@@ -192,7 +191,7 @@ function linkNewData(node_id, type, timestamp, test_node_id) {
     // also, remove existing relation if there is one between immediates
     try {
         console.log(' [***] Linking a new node ' + node_id + ' to test node ' + test_node_id);
-        var isBackbone = (sophia_consts.backboneTypes.indexOf(type) >= 0);
+        var isBackbone = (config.sophia.backboneTypes.indexOf(type) >= 0);
         Step(
             function findNewNodeLocation() {
                 console.log(' [***] findNewNodeLocation');

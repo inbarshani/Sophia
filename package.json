@@ -18,7 +18,8 @@
     "xml2js": "^0.4.8",
     "xmldom": "0.X.X",
     "xpath": "0.X.X",
-    "sqlite3": "*"
+    "sqlite3": "*",
+    "konfig": "*"
   },
   "scripts": {
     "start": "node loadAll.js"
