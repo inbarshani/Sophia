@@ -7,6 +7,8 @@ A. Sophia Server Setup
 ====
 1. Install NEO4J DB:
 http://neo4j.com/download-thanks/?edition=community&flavour=windows&_ga=1.98862107.484321419.1415021153
+Multiple Server instances on one machine:
+http://fooo.fr/~vjeux/github/github-recommandation/db/doc/manual/html/server-installation.html#_multiple_server_instances_on_one_machine
 2. Install Node.js
 http://nodejs.org/
 3. install Erlang OTP (current version is 17):

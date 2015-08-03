@@ -1,0 +1,31 @@
+{
+    "default": {
+        "backboneRoot": ["Test"],
+        "backboneTypes": ["Test", "TestStep", "UI"],
+        "backboneLinkType": "FOLLOWED_BY",
+        "dataLinkType": "LINKED_TO",
+        "IDOL_DB_NAME": "Sophia",
+        "maxResults": 150,
+        "TESTS_DB_FILE": "./sophia.db",
+        "TESTS_DB_SCHEME_FILE": "./createSophiaDB.sql",
+        "testRunTypes": {"USER": 0, "SCHEDULER": 1},
+        "queryTypes": {"QUERY": 0, 
+            "TOPIC": 1,
+            "VERIFICATION": 2},
+        "searchTypes": {
+            "FLOWS": 0, 
+            "SCREENS": 1,
+            "ISSUES": 2,
+            "TOPICS": 3,
+            "TRENDS": 4
+        },
+        "MAX_PATH_LENGTH": 5000,
+        "MAX_PATH_TO_SCREEN_LENGTH": 50,
+        "NEO4J_DB_SERVER": "16.60.168.105",
+        "NEO4J_DB_PORT": "7474"
+    },
+    "development": {
+        "IDOL_DB_NAME": "Sophia_dev",
+        "NEO4J_DB_SERVER": "localhost"
+    }
+}

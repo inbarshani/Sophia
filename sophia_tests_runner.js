@@ -1,4 +1,4 @@
-var sophia_consts = require('./lib/sophia_consts');
+var sophia_config = require('./lib/sophia_config');
 var idol_queries = require('./lib/idol_queries');
 var neo4j_queries = require('./lib/neo4j_queries');
 var tests_queries = require('./lib/tests_queries');
@@ -6,8 +6,8 @@ var tests_queries = require('./lib/tests_queries');
 var running = 0;
 
 function runTests() {
-    //console.log('get tests by type: ' + sophia_consts.searchTypes.FLOWS);
-    tests_queries.getTestsByType('' + sophia_consts.searchTypes.FLOWS, '',
+    //console.log('get tests by type: ' + sophia_config.searchTypes.FLOWS);
+    tests_queries.getTestsByType('' + sophia_config.searchTypes.FLOWS, '',
         function(err, tests) {
             console.log('got tests to run: ' + require('util').inspect(tests, {
                 depth: 3
@@ -70,7 +70,7 @@ function runNextQueryFlow(testId, queries, currentNodes, results) {
                         });
                     } else
                         paths_to_nodes = [];
-                    if (currentQuery.type == sophia_consts.queryTypes.QUERY)
+                    if (currentQuery.type == sophia_config.queryTypes.QUERY)
                         currentNodes = last_backbone_nodes.concat(last_backbone_nodes);
                     //console.log('paths_to_nodes: '+JSON.stringify(response_body));
                     results.push({
@@ -96,7 +96,7 @@ function saveFlowResults(testId, results) {
         depth: 3
     }));
     running--;
-    tests_queries.saveTestRun(testId, sophia_consts.testRunTypes.SCHEDULER, results);
+    tests_queries.saveTestRun(testId, sophia_config.testRunTypes.SCHEDULER, results);
 }
 
 if (!running) {

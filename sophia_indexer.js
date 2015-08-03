@@ -1,4 +1,4 @@
-var sophia_consts = require('./lib/sophia_consts');
+var sophia_config = require('./lib/sophia_config');
 var idol_queries = require('./lib/idol_queries');
 var neo4j_queries = require('./lib/neo4j_queries');
 

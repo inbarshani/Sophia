@@ -1,0 +1,8 @@
+{
+    "default": {
+        "IDOL_DB_NAME": "Sophia",
+        "TESTS_DB_FILE": "./sophia.db",
+        "NEO4J_DB_SERVER": "16.60.168.105",
+        "NEO4J_DB_PORT": "7474"
+    }
+}

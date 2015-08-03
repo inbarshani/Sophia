@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 
-var sophia_consts = require('./lib/sophia_consts');
+var sophia_config = require('./lib/sophia_config');
 var idol_queries = require('./lib/idol_queries');
 var neo4j_queries = require('./lib/neo4j_queries');
 var tests_queries = require('./lib/tests_queries');
@@ -178,7 +178,7 @@ app.post('/saveTest', function(request, response) {
             else
             {
                 // save test run, then send response
-                tests_queries.saveTestRun(testId, sophia_consts.testRunTypes.USER, request.body.queries);
+                tests_queries.saveTestRun(testId, sophia_config.testRunTypes.USER, request.body.queries);
                 response.sendStatus(200);
             }
         });
@@ -189,7 +189,7 @@ app.post('/tests/:id/runs', function(request, response){
     //console.log('post test run: '+JSON.stringify(request.params)+' '+JSON.stringify(request.body));
     var id = request.params.id;
     var queries = request.body.queries;
-    tests_queries.saveTestRun(id, sophia_consts.testRunTypes.USER, queries,
+    tests_queries.saveTestRun(id, sophia_config.testRunTypes.USER, queries,
         function(err){
             if (err)
                 response.status(500).send(err);
