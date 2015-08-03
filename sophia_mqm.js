@@ -275,7 +275,7 @@ app.use('/searchBackBoneData', function(request, response) {
 
 app.use('/testNodesData', function(request, response) {
     var nodes = JSON.parse(request.query.nodes);
-    neo4j_queries.getNodesStats(nodes, function(stats) {
+    neo4j_queries.getDataNodesStats(nodes, function(stats) {
         response.send(JSON.stringify(stats));
     });
 });
