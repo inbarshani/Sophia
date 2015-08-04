@@ -225,7 +225,44 @@ app.get('/tests', function(request, response) {
 
 app.use('/searchReview', function(request, response) {
     var queryText = request.query.q;
+    var testStepID = '';
+    if (queryText.match(/StepID=[0-9]{1,6}/))
+    {
+        testStepID = queryText.split('=')[1];
+    }
     var dateCondition = (request.query.dateCondition) ? JSON.parse(request.query.dateCondition) : {};
+    if (testStepID.length == 0)
+        searchTestsByName(queryText, dateCondition, response);
+    else
+        searchSimilarTestSteps(testStepID, dateCondition, response);
+
+});
+
+app.use('/searchBackBoneData', function(request, response) {
+    var compareObjData = JSON.parse(request.query.o);
+    var results = [];
+    function getIdolNodesData(i) {
+        if (i >= compareObjData.length) {
+            response.send(JSON.stringify(results));
+        } else {
+            idol_queries.searchByReference(compareObjData[i].dataNodes, function(idolDocs){
+                results.push({testId: compareObjData[i].testId, dataNodes: idolDocs});
+                getIdolNodesData(i+1);
+            });
+        }
+    }
+    getIdolNodesData(0);
+});
+
+app.use('/testNodesData', function(request, response) {
+    var nodes = JSON.parse(request.query.nodes);
+    neo4j_queries.getDataNodesStats(nodes, function(stats) {
+        response.send(JSON.stringify(stats));
+    });
+});
+
+function searchTestsByName(queryText, dateCondition, response)
+{
     var resultNodes = [];
     var testsCount = 0;
     idol_queries.searchReview(queryText, dateCondition, function(documents_hash) {
@@ -254,42 +291,42 @@ app.use('/searchReview', function(request, response) {
         } else { // no results from IDOL
             response.send(JSON.stringify([]));
         }
-    });
-});
+    });    
+}
 
-app.use('/searchBackBoneData', function(request, response) {
-    var compareObjData = JSON.parse(request.query.o);
-    var results = [];
-    function getIdolNodesData(i) {
-        if (i >= compareObjData.length) {
-            response.send(JSON.stringify(results));
-        } else {
-            idol_queries.searchByReference(compareObjData[i].dataNodes, function(idolDocs){
-                results.push({testId: compareObjData[i].testId, dataNodes: idolDocs});
-                getIdolNodesData(i+1);
+function searchSimilarTestSteps(testStepID, dateCondition, response)
+{
+    /*
+    var resultNodes = [];
+    var testsCount = 0;
+    idol_queries.searchReview(queryText, dateCondition, function(documents_hash) {
+        var idolResultNodes = Object.keys(documents_hash);
+        if (idolResultNodes.length > 0) {
+            neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {
+                var referenceIds = [];
+                bbNodes.map(function(test){
+                    test.bbNodes.map(function(node){
+                        referenceIds.push(node.id);
+                    });
+                });
+                idol_queries.searchByReference(referenceIds, function(idolDocs){
+                    var idolResultNodes = Object.keys(idolDocs);
+                    bbNodes.map(function(test){
+                        test.bbNodes.map(function(node){
+                            var doc = idolDocs[node.id];
+                            if (doc) {
+                                node.caption = doc.caption;
+                            }
+                        });
+                    });
+                    response.send(JSON.stringify(bbNodes));
+                });
             });
+        } else { // no results from IDOL
+            response.send(JSON.stringify([]));
         }
-    }
-    getIdolNodesData(0);
-});
-
-app.use('/testNodesData', function(request, response) {
-    var nodes = JSON.parse(request.query.nodes);
-    neo4j_queries.getDataNodesStats(nodes, function(stats) {
-        response.send(JSON.stringify(stats));
-    });
-});
-
-function queryTestBackBoneNodes(index, numTests, response) {
-    return function() {
-        neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {
-            resultNodes[index].b = bbNodes;
-            if (index == testsCount - 1) {
-                response.send(JSON.stringify(resultNodes));
-            }
-        });
-    }
-};
+    });*/
+}
 
 
-app.listen(8085);
+app.listen(sophia_config.WEB_APP_PORT);
