@@ -5,6 +5,7 @@
         "backboneLinkType": "FOLLOWED_BY",
         "dataLinkType": "LINKED_TO",
         "IDOL_DB_NAME": "Sophia",
+        "IDOL_SERVER": "16.60.168.105",
         "maxResults": 150,
         "TESTS_DB_FILE": "./sophia.db",
         "TESTS_DB_SCHEME_FILE": "./createSophiaDB.sql",
@@ -23,7 +24,9 @@
         "MAX_PATH_TO_SCREEN_LENGTH": 50,
         "NEO4J_DB_SERVER": "16.60.168.105",
         "NEO4J_DB_PORT": "7474",
-        "QUEUE_NAME": "sophia",
+        "QUEUE_HOST": "localhost",
+        "QUEUE_DATA_NAME": "sophia",
+        "QUEUE_TEST_NAME": "sophia_tests",
         "DATA_SERVER_PORT": 8082
     },
     "development": {

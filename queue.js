@@ -26,7 +26,7 @@ var db = new neo4j.GraphDatabase('http://' + sophia_config.NEO4J_DB_SERVER + ':'
 
 
 var connection = amqp.createConnection({
-    host: 'localhost'
+    host: sophia_config.QUEUE_HOST
 });
 
 var current_test_id = null;
@@ -51,12 +51,12 @@ var lock = new Padlock();
 
 connection.on('ready', function() {
     console.log('connected to RabbitMQ');
-    connection.queue(sophia_config.QUEUE_NAME, {
+    connection.queue(sophia_config.QUEUE_DATA_NAME, {
         autoDelete: false,
         durable: true
     }, function(queue) {
 
-        console.log(' [*] Waiting for messages. To exit press CTRL+C')
+        console.log(' [*] Waiting for messages '+sophia_config.QUEUE_DATA_NAME+'. To exit press CTRL+C')
 
         queue.subscribe(processQueueMessage);
     });
@@ -97,7 +97,11 @@ function _processQueueMessage(msg) {
                     console.log(' [x] Stop test');
                     var indexOfTestInArray = indexOfTestByID(data.testID);
                     if (indexOfTestInArray >= 0)
+                    {
+                        connection.publish(sophia_config.QUEUE_TEST_NAME, 
+                            {TestNodeID: active_tests[indexOfTestInArray].test_node_id});
                         active_tests.splice(indexOfTestInArray, 1);
+                    }
                     if (current_test_id == data.testID)
                     {
                         current_test_id = null;
