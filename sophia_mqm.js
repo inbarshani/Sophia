@@ -276,6 +276,9 @@ function searchTestsByName(queryText, dateCondition, response)
                 idol_queries.searchByReference(referenceIds, function(idolDocs){
                     var idolResultNodes = Object.keys(idolDocs);
                     bbNodes.map(function(test){
+                        //console.log('searchTestsByName bbNodes test: '+
+                        //    require('util').inspect(test, {depth:4}));
+                        test.name = documents_hash[''+test.test.id].name;
                         test.bbNodes.map(function(node){
                             var doc = idolDocs[node.id];
                             if (doc) {
