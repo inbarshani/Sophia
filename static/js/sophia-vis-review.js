@@ -17,7 +17,7 @@ function showTestsForReview(data) {
             label = $('<label>');
             div = $('<div>');
             h5 = $('<h5>');
-            h5.text('Test: ' + test.test.id);
+            h5.text('Test: ' + test.name.substring(35));
             span = $('<span>');
             span.addClass('badge');
             span.text(test.bbNodes.length);
@@ -81,7 +81,7 @@ function visualizeReviewTest(test) {
 
 	div = $('<div>');
 	div.addClass('col-md-1');
-	div.text('Test ' + test.test.id);
+	div.text('Test: ' + test.name.substring(35));
 	div.attr('id','test-name-' + test.test.id);
 	$('#review_vis_container').append(div);
 
@@ -130,7 +130,8 @@ function createBBListForTest(test, ul) {
 	var li, div, ddUl, ddLi;
 	test.bbNodes.forEach(function (node) {
 	    li = $('<li class="dropdown small">');
-	    div = $('<div data-toggle="dropdown" data-toggle="tooltip" data-placement="top" title= "'+node.caption+'">');
+	    div = $('<div data-toggle="dropdown" data-toggle="tooltip"'+
+	    	' data-placement="top" title= "'+node.caption+'">');
 	    div.css('height', '100%');
 	    ddUl = $('<ul class="dropdown-menu dd">');
 	    ddLi = $('<li class="dd">');
@@ -150,9 +151,12 @@ function createBBListForTest(test, ul) {
 	    }(li, node, test.test.id));
 	    ddUl.append(ddLi);
 	    li.attr('data-bb-id', node.id);
-	    div.text(node.type);//(node.type + ': ' + node.caption);
+	    if (node.similar)
+	    	li.addClass('active');
+	    //div.text(node.type);
+	    div.text(node.type + ': ' + node.caption);
       //  div.title = node.caption;
-            li.append(div);
+        li.append(div);
 	    li.append(ddUl);
 	    ul.append(li);
 	});
