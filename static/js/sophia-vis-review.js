@@ -6,7 +6,10 @@ function showTestsForReview(data) {
 		var li, label, div, h5, span;
 		testsList.empty();
 		allTests.forEach(function (test) {
-		    li = $('<li>');
+		    li = $('<li '+
+			' data-toggle="tooltip"'+
+	    	' data-placement="top" title="'+test.name+' (ID: '+test.test.id+
+	    	')">');
 		    li.on('click', function(item, t){
 		        return function() {
 		            testOnClick(item, t);
@@ -15,14 +18,14 @@ function showTestsForReview(data) {
 		    li.attr('data-test-id', test.test.id);
 		    li.attr('data-toggle', 'buttons');
             label = $('<label>');
-            div = $('<div>');
+            div = $('<div class="test_caption">');
             h5 = $('<h5>');
-            h5.text('Test: ' + test.name.substring(35));
+            h5.text(test.name.substring(0,35));
             span = $('<span>');
             span.addClass('badge');
             span.text(test.bbNodes.length);
-            div.append(h5);
             div.append(span);
+            div.append(h5);
             label.append(div);
             li.append(label);
 		    testsList.append(li);
@@ -79,9 +82,8 @@ function visualizeReviewTest(test) {
 	    touchDragging: 1
 	};
 
-	div = $('<div>');
-	div.addClass('col-md-1');
-	div.text('Test: ' + test.name.substring(35));
+	div = $('<div class="col-md-1" >');
+	div.text('Test: ' + test.name.substring(0,35));
 	div.attr('id','test-name-' + test.test.id);
 	$('#review_vis_container').append(div);
 
@@ -131,7 +133,8 @@ function createBBListForTest(test, ul) {
 	test.bbNodes.forEach(function (node) {
 	    li = $('<li class="dropdown small">');
 	    div = $('<div data-toggle="dropdown" data-toggle="tooltip"'+
-	    	' data-placement="top" title= "'+node.caption+'">');
+	    	' data-placement="top" title="'+node.caption+' (ID: '+
+	    	node.id+')" class="teststep_caption">');
 	    div.css('height', '100%');
 	    ddUl = $('<ul class="dropdown-menu dd">');
 	    ddLi = $('<li class="dd">');
@@ -152,11 +155,11 @@ function createBBListForTest(test, ul) {
 	    ddUl.append(ddLi);
 	    ddLi = $('<li class="dd">');
 	    ddLi.text('Search similar');
-	    ddLi.on('click', function(node, testId){
+	    ddLi.on('click', function(node, test){
 	    	return function() {
-	    		nodeSearchSimilar(node, testId);
+	    		nodeSearchSimilar(node, test);
 	    	};
-	    }(node, test.test.id));
+	    }(node, test));
 	    ddUl.append(ddLi);
 	    li.attr('data-bb-id', node.id);
 	    if (node.similar)
@@ -225,10 +228,11 @@ function bbNodeSelect(li, node, testId, type) {
     }
 }
 
-function nodeSearchSimilar(node, testID)
+function nodeSearchSimilar(node, test)
 {
 	$("#search-text")
-		.val('LIKE StepID='+node.id+' of TestID='+testID)
+		.val('LIKE Step \''+node.caption.substring(0,20)+
+			'\' of Test \''+test.name.substring(0,20)+'\'')
 		.css('font-style', 'italic');
 	searchReview('StepID='+node.id);
 }
