@@ -152,11 +152,11 @@ function createBBListForTest(test, ul) {
 	    ddUl.append(ddLi);
 	    ddLi = $('<li class="dd">');
 	    ddLi.text('Search similar');
-	    ddLi.on('click', function(node){
+	    ddLi.on('click', function(node, testId){
 	    	return function() {
-	    		nodeSearchSimilar(node);
+	    		nodeSearchSimilar(node, testId);
 	    	};
-	    }(node));
+	    }(node, test.test.id));
 	    ddUl.append(ddLi);
 	    li.attr('data-bb-id', node.id);
 	    if (node.similar)
@@ -225,9 +225,12 @@ function bbNodeSelect(li, node, testId, type) {
     }
 }
 
-function nodeSearchSimilar(node)
+function nodeSearchSimilar(node, testID)
 {
-	searchReview('StepID='+node.id)
+	$("#search-text")
+		.val('LIKE StepID='+node.id+' of TestID='+testID)
+		.css('font-style', 'italic');
+	searchReview('StepID='+node.id);
 }
 
 function collapseNodesAndGetStats(testId, ul) {
