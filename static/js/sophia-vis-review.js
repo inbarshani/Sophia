@@ -299,8 +299,37 @@ function displayStats(lis, ul, stats) {
                 function bringDataForNodes(i) {
                 	var found = false;
                 	if (i >= selectedBBsByTest.length) {
-                        searchBackBoneData(compareDataInfo, function(testId,data){
-                        	// display compare data
+                        searchBackBoneData(compareDataInfo, function(dataTests){
+                          //  $( "#all_results").append( $( "users")).load( "html/listTable.html");
+                            $( "#compareTable").load("html/listTable.html");
+                            console.log(dataTests);
+                            dataTests =  JSON.parse(dataTests);
+                            var table =  $( "#tbodyCompareTable");
+                            var tr = table.append("<tr>");
+
+                            var table = $('<table></table>').addClass('foo');
+                            for(var i=0; i<dataTests.length; i++)){
+                                var row = $('<tr></tr>').addClass('bar').text('result ' + i);
+                                table.append(row);
+                            }
+
+                            $('#here_table').append(table);
+                          /*  for( var i=0; i<dataTests.length; i++)
+                            {
+                                var td = $('<td class ="testName">');
+                                tr.append(td);
+                                td.innerHTML = "Test "+dataTests[i].testId;
+                            }
+                            table.append(tr);*/
+                             //   $( "#tbodyCompareTable").append('<tr>').append('<td class="name">').text("Test "+dataTests[i].testId);
+                          /*      $( "#tbodyCompareTable").append('<tr><th>' + "Test "+dataTests[i].testId + '</th><td>100,000</td></tr>');
+                            }*/
+                            var options = {
+                                valueNames: ['testName']
+                            };
+
+                            var userList = new List('users', options);
+
                         });
                 		return;
                 	}
@@ -320,16 +349,6 @@ function displayStats(lis, ul, stats) {
                 }
                 
                 bringDataForNodes(0);
-                /*(function(t) {
-			        for(var i = 0; i < selectedBBsByTest.length; i++) {
-						if(selectedBBsByTest[i].compareNodes!==null && selectedBBsByTest[i].compareNodes[t]!==undefined) {
-			                searchBackBoneData(selectedBBsByTest[i].testId,selectedBBsByTest[i].compareNodes[t],function(testId,data){
-			                    compareDataInfo.push({testId:testId, dataNodes: data})
-			                });
-			            }
-			        }
-			    })(name);
-*/
 		    };
         }(ul, name));
     }
