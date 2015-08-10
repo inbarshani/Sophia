@@ -3,7 +3,7 @@ match n where ANY(l IN labels(n) WHERE l='Test') return n
 match n where ANY(l IN labels(n) WHERE l =~ '.*log.*') return n
 
 IDOL:
-action=Query&fieldtext=MATCH%7BUI%7D%3ASophiaType&databasematch=Sophia&maxresults=100
+action=Query&fieldtext=MATCH{UI}:SophiaType&databasematch=Sophia&maxresults=100
 action=Query&fieldtext=EXISTS{}:Hash&databasematch=Sophia_dev&maxresults=100
 action=Query&fieldtext=LENGTH{1,100000}:Hash&databasematch=Sophia_dev&maxresults=100
 

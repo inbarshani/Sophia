@@ -30,9 +30,9 @@ exports.config= {
 //        ,sharedSpace: 'shared_space'
     },
     database: {
-        dbType: 'MSSQL',
-        dbName: undefined,
-        defaultTableSpace: undefined
+        dbType: 'ORACLE',
+        dbName: 'mydtbld0064.isr.hp.com',
+        defaultTableSpace: 'QC_DATA'
     },
 
 
@@ -95,7 +95,7 @@ exports.config= {
 
     backlogDirectory: '//rubicon.isr.hp.com/products/LT/TPS/tulip-test-reports/MqM',
 
-    baseUrl: 'http://myd-vm06983.hpswlabs.adapps.hp.com:8082/qcbin/',
+    baseUrl: 'http://myd-vm06983.hpswlabs.adapps.hp.com:8082/',
 //usually grant insert these lines automatically, once we move to grunt we can remove them
     'seleniumServerJar': '../../../selenium/server/selenium-server-standalone-2.42.2.jar',
     'seleniumArgs': [
@@ -127,6 +127,7 @@ exports.config= {
      * - getting the language of the client. currently the DataProvider's language is the language of the client.
      */
     onPrepare: './config-file-plugins/jasmine-instrument.js',
+//    onPrepare: '../core/runner/initialize-runner-script.js',
     beforeLaunch: '../core/runner/site-admin-preparations.js',
 
     debug: false,
