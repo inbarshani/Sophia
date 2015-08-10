@@ -328,20 +328,15 @@ function displayStats(lis, ul, stats) {
                                 console.log(dataTests);
                                 dataTests = JSON.parse(dataTests);
                                 var table = $("#compareTableList");
-                                var tr = '<tr>';
-                                tr += '<th class="caption">' + "Caption" + '</td>';
+                                var trH = '<tr>';
+                                trH += '<th class="caption">' + "Caption" + '</td>';
+                                var  tr =  '<tr>';
                                 //built the header/title of the table
                                 for(var i=0; i<dataTests.length;i++)
                                 {
-                                    tr +='<th class="test">' + "Test " + dataTests[i].testId + '</th>';
-                                }
-                                tr += '</tr>';
-                                table.append(tr);
-                                tr =  '<tr>';
-                                for(var i=0; i<dataTests.length;i++)
-                                {
+                                    trH +='<th class="test">' + "Test " + dataTests[i].testId + '</th>';
                                     var testNodes = dataTests[i]
-                                   var nodes =  testNodes.dataNodes;
+                                    var nodes =  testNodes.dataNodes;
                                     for(var key in nodes)
                                     {
                                         console.log(nodes[key].caption);
@@ -350,7 +345,21 @@ function displayStats(lis, ul, stats) {
                                         tr+='<tr>'
                                     }
                                 }
-
+                                trH += '</tr>';
+                                table.append(trH);
+                           //    var  tr =  '<tr>';
+                           //     for(var i=0; i<dataTests.length;i++)
+                           //     {
+                            //        var testNodes = dataTests[i]
+                           //        var nodes =  testNodes.dataNodes;
+                            /*        for(var key in nodes)
+                                    {
+                                        console.log(nodes[key].caption);
+                                        tr += '<td class="caption">' + nodes[key].caption + '</td>';
+                                        tr += '</tr>';
+                                        tr+='<tr>'
+                                    }*/
+                         //       }
                                 table.append(tr);
 
                                 var options = {
