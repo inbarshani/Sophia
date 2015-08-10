@@ -366,7 +366,7 @@ function buildCompareTable(dataTests)
             for(var key in nodes)
             {
                 console.log(nodes[key].caption);
-                tr += '<td class="caption">' + nodes[key].caption + '</td>';
+                tr += '<td class="caption" data-toggle="dropdown" data-toggle="tooltip"  data-placement="top" title="'+ nodes[key].caption +'">'+nodes[key].caption +'</td>';
                 for(var check=0; check<=i; check++)
                 {
                     if(check!=i)
