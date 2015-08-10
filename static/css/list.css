@@ -4,6 +4,10 @@
 td,th {
     padding:10px;
     border:solid 1px #eee;
+    max-width: 482px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 input {

@@ -324,55 +324,7 @@ function displayStats(lis, ul, stats) {
                 	var found = false;
                 	if (i >= selectedBBsByTest.length) {
                         searchBackBoneData(compareDataInfo, function(dataTests){
-                            $("#compareTable").load("html/listTable.html", function() {
-                                console.log(dataTests);
-                                dataTests = JSON.parse(dataTests);
-                                var table = $("#compareTableList");
-                                var trH = '<tr>';
-                                trH += '<th class="caption">' + "Caption" + '</td>';
-                                var  tr =  '<tr>';
-                                //built the compare table
-                                for(var i=0; i<dataTests.length;i++)
-                                {
-                                    trH +='<th class="test">' + "Test " + dataTests[i].testId + '</th>';
-                                    var testNodes = dataTests[i]
-                                    var nodes =  testNodes.dataNodes;
-                                    for(var key in nodes)
-                                    {
-                                        console.log(nodes[key].caption);
-                                        tr += '<td class="caption">' + nodes[key].caption + '</td>';
-                                        for(var check=0; check<=i; check++)
-                                        {
-                                            if(check!=i)
-                                            {
-                                                tr+='<td class="test">' + '-' + '</td>';
-                                            }
-                                            else
-                                            {
-                                                tr+='<td class="test">' + '+' + '</td>';
-                                                if(i+1<dataTests.length)
-                                                {
-                                                   for(var t=check; t<dataTests.length-1; t++)
-                                                   {
-                                                       tr+='<td class="test">' + '-' + '</td>';
-                                                   }
-                                                }
-                                            }
-                                        }
-                                        tr += '</tr>';
-                                        tr+='<tr>'
-                                    }
-                                }
-                                trH += '</tr>';
-                                table.append(trH);
-                                table.append(tr);
-
-                                var options = {
-                                    valueNames: ['caption', 'test']
-                                };
-
-                                var userList = new List('users', options);
-                            });
+                            buildCompareTable(dataTests);
                         });
                 		return;
                 	}
@@ -395,6 +347,58 @@ function displayStats(lis, ul, stats) {
 		    };
         }(ul, name));
     }
+}
+function buildCompareTable(dataTests)
+{
+    $("#compareTable").load("html/listTable.html", function() {
+        console.log(dataTests);
+        dataTests = JSON.parse(dataTests);
+        var table = $("#compareTableList");
+        var trH = '<tr>';
+        trH += '<th class="caption">' + "Caption" + '</td>';
+        var  tr =  '<tr>';
+        //built the compare table
+        for(var i=0; i<dataTests.length;i++)
+        {
+            trH +='<th class="test">' + "Test " + dataTests[i].testId + '</th>';
+            var testNodes = dataTests[i]
+            var nodes =  testNodes.dataNodes;
+            for(var key in nodes)
+            {
+                console.log(nodes[key].caption);
+                tr += '<td class="caption">' + nodes[key].caption + '</td>';
+                for(var check=0; check<=i; check++)
+                {
+                    if(check!=i)
+                    {
+                        tr+='<td class="test">' + '-' + '</td>';
+                    }
+                    else
+                    {
+                        tr+='<td class="test">' + '+' + '</td>';
+                        if(i+1<dataTests.length)
+                        {
+                            for(var t=check; t<dataTests.length-1; t++)
+                            {
+                                tr+='<td class="test">' + '-' + '</td>';
+                            }
+                        }
+                    }
+                }
+                tr += '</tr>';
+                tr+='<tr>'
+            }
+        }
+        trH += '</tr>';
+        table.append(trH);
+        table.append(tr);
+
+        var options = {
+            valueNames: ['caption', 'test']
+        };
+
+        var userList = new List('users', options);
+    });
 }
 
 function findBBTest(testId) {
