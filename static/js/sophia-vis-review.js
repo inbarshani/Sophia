@@ -329,13 +329,20 @@ function displayStats(lis, ul, stats) {
                                 dataTests = JSON.parse(dataTests);
                                 var table = $("#compareTableList");
                                 var tr = '<tr>';
-                                tr += '<td class="name">' + "Joun" + '</td>';
-                                tr += '<td class="born">' + "1986" + '</td>';
+                                tr += '<th class="caption">' + "Caption" + '</td>';
+                                for(var i=0; i<dataTests.length;i++)
+                                {
+                                    tr +='<th class="test">' + "Test " + dataTests[i].testId + '</td>';
+                                }
+
+                               // var tr = '<tr>';
+                               // tr += '<td class="name">' + "Joun" + '</td>';
+                             //   tr += '<td class="born">' + "1986" + '</td>';
                                 tr += '</tr>';
                                 table.append(tr);
                                 // table.append('<tr> <td class="name">Jonny Stromberg</td> <td class="born">1986</td> </tr> <tr> <td class="name">Jonas Arnklint</td> <td class="born">1985</td> </tr> <tr> <td class="name">Martina Elm</td> <td class="born">1986</td> </tr> <tr> <td class="name">Gustaf Lindqvist</td> <td class="born">1983</td> </tr>');
                                 var options = {
-                                    valueNames: ['name', 'born']
+                                    valueNames: ['caption', 'test']
                                 };
 
                                 var userList = new List('users', options);
