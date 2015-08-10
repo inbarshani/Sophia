@@ -375,7 +375,7 @@ function buildCompareTable(dataTests)
                     }
                     else
                     {
-                        tr+='<td class="test">' + '+' + '</td>';
+                        tr+='<td class="test" style="background-color:#8FBC8F">' + '+' + '</td>';
                         if(i+1<dataTests.length)
                         {
                             for(var t=check; t<dataTests.length-1; t++)
@@ -399,7 +399,7 @@ function buildCompareTable(dataTests)
             outerWindow: 2
         };
         var options = {
-            valueNames: ['caption', 'test'],
+            valueNames: ['caption', 'test']
        /*     page: 3,
             plugins: [
                 ListPagination(paginationTopOptions),
