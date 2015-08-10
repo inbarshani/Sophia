@@ -20,6 +20,47 @@ exports.config= {
     // var inputLang = settings.inputLanguage; --> return the defined inputLanguage
 
     /**
+     * a possible way to pass the test login info.
+     * (currently not in use)
+     */
+    loginInfo: {
+        username: 'sa_auto',
+        password: ''
+//        commented this because current code will fail the test if BR existing
+//        ,sharedSpace: 'shared_space'
+    },
+    database: {
+        dbType: 'MSSQL',
+        dbName: undefined,
+        defaultTableSpace: undefined
+    },
+
+
+    multiCapabilities: [{
+        'browserName': 'chrome'
+    } ],
+
+    specs: ['./pre-flight/*.js'],
+
+    //in case suite is specified(i.e. --suite="sanity"), use one of the following suites
+    //if no suite is mentioned the protractor will run the "specs" parameter
+    suites: {
+        //add only folders with *.js to All suite
+        All: ['./pre-flight/*.js', './daniel/*.js', './ehud/*.js', './yuval/*.js', './jack/*.js'],
+        //CssScreenshot: './css-screenshot-test.js', // currently we don't have any working css test
+        CSS: './applitools-tests/*css*.js',
+        Daniel:'./daniel/*sanity.js',
+        Ehud:'./ehud/*sanity*.js',
+        Yuval:'./yuval/*sanity*.js',
+        Jack:'./jack/*sanity*.js',
+        PreFlight:'./pre-flight/*tab*.js',
+        PCoE:['./ehud/*1082*e2e*', './yuval/*1739*e2e.js', './daniel/*3090*3092*dashboard-crud.js', './yuval/*3811*e2e.js',
+            './ehud/*3843*e2e*', './daniel/*1125*smart-single-lookup-list-sanity.js', './daniel/*1125*smart-multi-reference-field-sanity.js',
+            './ehud/*1698*memo-field-images*e2e*', 'daniel/*3821*e2e*', './daniel/*3849*context-dashboard-aggregated-quality-per-bli.js'],
+        EverGreen: './evergreen/*.js'
+    },
+
+    /**
      * Directory for reports (browser logs)
      * if printCustomizatonLAbelsToFile parameters is set to true, files with customization data (e.g. fields, types, lists)
      * will be saved under logs folder. The data is project-specific. The files are stored once per test run after the first login
@@ -51,45 +92,6 @@ exports.config= {
      * if set to true, UI performance will be tested and a suitable report will be generated
      */
     performance: false,
-
-    /**
-     * a possible way to pass the test login info.
-     * (currently not in use)
-     */
-    loginInfo: {
-        username: 'sa',
-        password: '',
-//        commented this because current code will fail the test if BR existing
-        domain: 'DEFAULT',
-        project: 'Sophia1'
-    },
-
-    database: {
-        dbType: 'MSSQL',
-        dbName: undefined,
-        defaultTableSpace: undefined
-    },
-
-
-    multiCapabilities: [{
-        'browserName': 'chrome'
-    } ],
-
-    specs: ['./pre-flight/*.js'],
-
-    //in case suite is specified(i.e. --suite="sanity"), use one of the following suites
-    //if no suite is mentioned the protractor will run the "specs" parameter
-    suites: {
-        //add only folders with *.js to All suite
-        All: ['./pre-flight/*.js', './daniel/*.js', './ehud/*.js', './yuval/*.js', './jack/*.js'],
-        //CssScreenshot: './css-screenshot-test.js', // currently we don't have any working css test
-        Daniel:'./daniel/*.js',
-        Ehud:'./ehud/*.js',
-        Yuval:'./yuval/*.js',
-        Jack:'./jack/*.js',
-        PreFlight:'./pre-flight/*.js',
-        PCoE:'./ehud/feature-1082-comments-test.js'
-    },
 
     backlogDirectory: '//rubicon.isr.hp.com/products/LT/TPS/tulip-test-reports/MqM',
 
@@ -128,8 +130,8 @@ exports.config= {
     beforeLaunch: '../core/runner/site-admin-preparations.js',
 
     debug: false,
-    allScriptsTimeout: 6000000,
-    getPageTimeout: 6000000
+    allScriptsTimeout: 600000,
+    getPageTimeout: 600000
 
 
 };

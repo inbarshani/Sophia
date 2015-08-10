@@ -263,8 +263,6 @@ app.use('/testNodesData', function(request, response) {
 
 function searchTestsByName(queryText, dateCondition, response)
 {
-    var resultNodes = [];
-    var testsCount = 0;
     idol_queries.searchReview(queryText, dateCondition, function(documents_hash) {
         var idolResultNodes = Object.keys(documents_hash);
         if (idolResultNodes.length > 0) {
@@ -278,6 +276,9 @@ function searchTestsByName(queryText, dateCondition, response)
                 idol_queries.searchByReference(referenceIds, function(idolDocs){
                     var idolResultNodes = Object.keys(idolDocs);
                     bbNodes.map(function(test){
+                        //console.log('searchTestsByName bbNodes test: '+
+                        //    require('util').inspect(test, {depth:4}));
+                        test.name = documents_hash[''+test.test.id].name;
                         test.bbNodes.map(function(node){
                             var doc = idolDocs[node.id];
                             if (doc) {
@@ -296,36 +297,62 @@ function searchTestsByName(queryText, dateCondition, response)
 
 function searchSimilarTestSteps(testStepID, dateCondition, response)
 {
-    /*
-    var resultNodes = [];
-    var testsCount = 0;
-    idol_queries.searchReview(queryText, dateCondition, function(documents_hash) {
-        var idolResultNodes = Object.keys(documents_hash);
-        if (idolResultNodes.length > 0) {
-            neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {
-                var referenceIds = [];
-                bbNodes.map(function(test){
-                    test.bbNodes.map(function(node){
-                        referenceIds.push(node.id);
-                    });
+    idol_queries.searchSimilar(testStepID, dateCondition, function(documents_hash) {
+        var testIDs = Object.keys(documents_hash);
+        if (testIDs.length > 0) {
+            idol_queries.searchTestsByID(testIDs, function(test_documents_hash){
+                var idolResultNodes = Object.keys(test_documents_hash);
+                // we need to user IDOL doc id instead of testIDs
+                idolResultNodes.forEach(function(idolResult){
+                    var testID = test_documents_hash[idolResult].testID;                    
+                    documents_hash[idolResult] = documents_hash[testID];
+                    documents_hash[testID] = null;
                 });
-                idol_queries.searchByReference(referenceIds, function(idolDocs){
-                    var idolResultNodes = Object.keys(idolDocs);
+                //console.log('searchSimilarTestSteps documents_hash: '+
+                //    require('util').inspect(documents_hash, {depth:4}));
+                neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {
+                    var referenceIds = [];
                     bbNodes.map(function(test){
                         test.bbNodes.map(function(node){
-                            var doc = idolDocs[node.id];
-                            if (doc) {
-                                node.caption = doc.caption;
-                            }
+                            referenceIds.push(node.id);
                         });
                     });
-                    response.send(JSON.stringify(bbNodes));
+                    idol_queries.searchByReference(referenceIds, function(idolDocs){
+                        var idolResultNodes = Object.keys(idolDocs);
+                        // use the previous 'similar' search to mark
+                        //  the backbone nodes that are similar, 
+                        //  so UI can highlight them
+                        bbNodes.map(function(test){
+                            test.name = test_documents_hash[''+test.test.id].name;
+                            //console.log('searchSimilarTestSteps bbNodes test: '+
+                            //    require('util').inspect(test, {depth:4}));
+                            var similarNodes = documents_hash[''+test.test.id];
+                            var similarNodesIDs = [];
+                            similarNodes.forEach(function(node){
+                                similarNodesIDs.push(node.graph_node);
+                            });
+                            //console.log('searchSimilarTestSteps similarNodes for '+test.test.id+': '+
+                            //    require('util').inspect(similarNodes, {depth:4}));
+                            test.bbNodes.map(function(node){
+                                var doc = idolDocs[node.id];
+                                if (doc) {
+                                    node.caption = doc.caption;
+                                }
+                                if (similarNodesIDs.indexOf(node.id) >= 0)
+                                {
+                                    console.log('similar node '+node.id+' for test '+test.test.id);
+                                    node.similar = true;
+                                }
+                            });
+                        });
+                        response.send(JSON.stringify(bbNodes));
+                    });
                 });
             });
         } else { // no results from IDOL
             response.send(JSON.stringify([]));
         }
-    });*/
+    });
 }
 
 

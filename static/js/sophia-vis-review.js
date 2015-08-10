@@ -6,7 +6,10 @@ function showTestsForReview(data) {
 		var li, label, div, h5, span;
 		testsList.empty();
 		allTests.forEach(function (test) {
-		    li = $('<li>');
+		    li = $('<li '+
+			' data-toggle="tooltip"'+
+	    	' data-placement="top" title="'+test.name+' (ID: '+test.test.id+
+	    	')">');
 		    li.on('click', function(item, t){
 		        return function() {
 		            testOnClick(item, t);
@@ -15,14 +18,14 @@ function showTestsForReview(data) {
 		    li.attr('data-test-id', test.test.id);
 		    li.attr('data-toggle', 'buttons');
             label = $('<label>');
-            div = $('<div>');
+            div = $('<div class="test_caption">');
             h5 = $('<h5>');
-            h5.text('Test: ' + test.test.id);
+            h5.text(test.name.substring(0,35));
             span = $('<span>');
             span.addClass('badge');
             span.text(test.bbNodes.length);
-            div.append(h5);
             div.append(span);
+            div.append(h5);
             label.append(div);
             li.append(label);
 		    testsList.append(li);
@@ -79,9 +82,8 @@ function visualizeReviewTest(test) {
 	    touchDragging: 1
 	};
 
-	div = $('<div>');
-	div.addClass('col-md-1');
-	div.text('Test ' + test.test.id);
+	div = $('<div class="col-md-1" >');
+	div.text('Test: ' + test.name.substring(0,35));
 	div.attr('id','test-name-' + test.test.id);
 	$('#review_vis_container').append(div);
 
@@ -130,7 +132,9 @@ function createBBListForTest(test, ul) {
 	var li, div, ddUl, ddLi;
 	test.bbNodes.forEach(function (node) {
 	    li = $('<li class="dropdown small">');
-	    div = $('<div data-toggle="dropdown" data-toggle="tooltip" data-placement="top" title= "'+node.caption+'">');
+	    div = $('<div data-toggle="dropdown" data-toggle="tooltip"'+
+	    	' data-placement="top" title="'+node.caption+' (ID: '+
+	    	node.id+')" class="teststep_caption">');
 	    div.css('height', '100%');
 	    ddUl = $('<ul class="dropdown-menu dd">');
 	    ddLi = $('<li class="dd">');
@@ -149,10 +153,21 @@ function createBBListForTest(test, ul) {
 	    	};
 	    }(li, node, test.test.id));
 	    ddUl.append(ddLi);
+	    ddLi = $('<li class="dd">');
+	    ddLi.text('Search similar');
+	    ddLi.on('click', function(node, test){
+	    	return function() {
+	    		nodeSearchSimilar(node, test);
+	    	};
+	    }(node, test));
+	    ddUl.append(ddLi);
 	    li.attr('data-bb-id', node.id);
-	    div.text(node.type);//(node.type + ': ' + node.caption);
+	    if (node.similar)
+	    	li.addClass('active');
+	    //div.text(node.type);
+	    div.text(node.type + ': ' + node.caption);
       //  div.title = node.caption;
-            li.append(div);
+        li.append(div);
 	    li.append(ddUl);
 	    ul.append(li);
 	});
@@ -211,6 +226,15 @@ function bbNodeSelect(li, node, testId, type) {
 	    	}, 500);
 	    }
     }
+}
+
+function nodeSearchSimilar(node, test)
+{
+	$("#search-text")
+		.val('LIKE Step \''+node.caption.substring(0,20)+
+			'\' of Test \''+test.name.substring(0,20)+'\'')
+		.css('font-style', 'italic');
+	searchReview('StepID='+node.id);
 }
 
 function collapseNodesAndGetStats(testId, ul) {

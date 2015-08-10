@@ -50,6 +50,13 @@ $(document).ready(function() {
         search();
     });
 
+    $('#search-text').on('focus', function(e) {
+        if ($('#search-text').css('font-style') == 'italic' ) {
+            $('#search-text').val('');
+            $('#search-text').css('font-style', 'normal');
+        }
+    });
+
     $('#search-text').keyup(function(e) {
         if (e.keyCode == 13) {
             search();

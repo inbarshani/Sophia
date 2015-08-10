@@ -1,89 +1,88 @@
 .clickable {
-	cursor: pointer;
+    cursor: pointer;
 }
 
 .disabled {
-  pointer-events: none;
+    pointer-events: none;
 }
 
 #details {
-	border: 1px solid #5bc0de;
-	background-color: #fff;
-	font-size: 14px;
-	color: #000;
-	z-index: 1001;
-	word-wrap: break-word;
+    border: 1px solid #5bc0de;
+    background-color: #fff;
+    font-size: 14px;
+    color: #000;
+    z-index: 1001;
+    word-wrap: break-word;
 }
 
 #detailsText {
-	margin-top: 20px;
+    margin-top: 20px;
 }
 
 #details #nodeScreens img {
-  max-width: 200px;
+    max-width: 200px;
 }
 
 #flow_results .path {
-	stroke: #000;
-	stroke-width: 1px;
+    stroke: #000;
+    stroke-width: 1px;
 }
 
 #flow_results .circle {
-	stroke: none;
-	fill: #5bc0de;
+    stroke: none;
+    fill: #5bc0de;
 }
 
 #flow_results .circle.highlighted {
-	stroke: none;
-	fill: #00ff00;
+    stroke: none;
+    fill: #00ff00;
 }
 
 #flow_results .text {
-	font-size: 12px;
-	text-anchor: middle;
-	fill: #000;
+    font-size: 12px;
+    text-anchor: middle;
+    fill: #000;
 }
 
 #scrollHoriz {
-	float: left;
-  	margin-left: 40%;
-  	margin-right: auto;}
+    float: left;
+    margin-left: 40%;
+    margin-right: auto;
+}
 
 #scrollVertical {
-  	margin-top: -35%;
-  	margin-bottom: auto;  	
-  	position: relative;
-  	float: right;
+    margin-top: -35%;
+    margin-bottom: auto;
+    position: relative;
+    float: right;
 }
 
 #vis-container {
-	overflow: hidden;
+    overflow: hidden;
 }
+
 #vis-container:hover {
-	overflow: auto;
+    overflow: auto;
 }
 
-#vis-container::-webkit-scrollbar
-{
-	width: 20px;
+#vis-container::-webkit-scrollbar {
+    width: 20px;
 }
 
-#vis-container::-webkit-scrollbar-thumb
-{
-	background-color: #5bc0de;
-	border-radius: 10px;
-	border: 6px solid rgba(255, 255, 255, 1);
+#vis-container::-webkit-scrollbar-thumb {
+    background-color: #5bc0de;
+    border-radius: 10px;
+    border: 6px solid rgba(255, 255, 255, 1);
 }
 
-.busyindicator
-{
-	position: absolute; 
-	top: 50%;
-	left: 50%;	
-	width: 32px;
-	height: 32px;
-	background-image: url(../img/download.gif); 
- 	z-index: 300;
+.busyindicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    background-image: url(../img/download.gif);
+    z-index: 300;
 }
 
 .form-login {
@@ -93,47 +92,48 @@
     padding-left: 20px;
     padding-right: 20px;
     border-radius: 15px;
-    border-color:#d2d2d2;
+    border-color: #d2d2d2;
     border-width: 5px;
-    box-shadow:0 1px 0 #cfcfcf;
+    box-shadow: 0 1px 0 #cfcfcf;
 }
 
 .nav-pills > li.selected_search {
-  color: red;
-  border-bottom: 4px solid red;
-  font-weight: bold;
+    color: red;
+    border-bottom: 4px solid red;
+    font-weight: bold;
 }
 
 .nav-pills > li.selected_search > a {
-  color: red;	
-  background-color: #fff;
+    color: red;
+    background-color: #fff;
 }
 
 .nav-pills > li.search > a {
-  color: gray;
+    color: gray;
 }
-
 
 .nav-pills > li.search > a:focus,
 .nav-pills > li.search > a:hover {
-  color: black;
-  background-color: #fff;
+    color: black;
+    background-color: #fff;
 }
 
-#screens_results ul {         
-  padding:0 0 0 0;
-  margin:0 0 0 0;
+#screens_results ul {
+    padding: 0 0 0 0;
+    margin: 0 0 0 0;
 }
-#screens_results ul li {     
-  list-style:none;
-  margin-bottom:25px;           
+
+#screens_results ul li {
+    list-style: none;
+    margin-bottom: 25px;
 }
+
 #screens_results ul li img {
-  cursor: pointer;
-  border-style: solid;
-  border-width: 1px;
-  height: 150px;
-  width: 150px;
+    cursor: pointer;
+    border-style: solid;
+    border-width: 1px;
+    height: 150px;
+    width: 150px;
 }
 
 .modal-content.big-modal {
@@ -142,103 +142,153 @@
     margin-left: -260px;
 }
 
-#topics_results label.btn-default.active{background-color:#1E90FF;color:#FFF}
-#topics_results label.btn-default{width:90%;border:1px solid #efefef;margin:5px; box-shadow:5px 8px 8px 0 #ccc;}
-#topics_results label .bizcontent{width:100%;}
-#topics_results .btn-group{width:90%}
-#topics_results .btn span.glyphicon{
+#topics_results label.btn-default.active {
+    background-color: #1E90FF;
+    color: #FFF
+}
+
+#topics_results label.btn-default {
+    width: 90%;
+    border: 1px solid #efefef;
+    margin: 5px;
+    box-shadow: 5px 8px 8px 0 #ccc;
+}
+
+#topics_results label .bizcontent {
+    width: 100%;
+}
+
+#topics_results .btn-group {
+    width: 90%
+}
+
+#topics_results .btn span.glyphicon {
     opacity: 0;
 }
+
 #topics_results .btn.active span.glyphicon {
     opacity: 1;
 }
+
 #topics_results .btn {
-	white-space: normal;
-	background-color:#87CEFA;
+    white-space: normal;
+    background-color: #87CEFA;
 }
 
 #topics_results .btn-disabled {
-	background-color:#FFF;
+    background-color: #FFF;
     display: inline-block;
     vertical-align: middle;
     float: none;
 }
-.flow-step-icons-start ,
+
+.flow-step-icons-start,
 .flow-step-icons {
-	float: left;
-	margin-right: 7px;
-  	margin-left: -5px;
-  	margin-top: 2px;
+    float: left;
+    margin-right: 7px;
+    margin-left: -5px;
+    margin-top: 2px;
 }
 
 .flow-step-icons {
-  	margin-left: 0px;
+    margin-left: 0px;
 }
 
 span.input-group-addon {
-	padding: 6px 12px;
+    padding: 6px 12px;
 }
 
-#trends_tests_list {         
-  padding:0 0 0 0;
-  margin:5px;
-  float: left;
+#trends_tests_list {
+    padding: 0 0 0 0;
+    margin: 5px;
+    float: left;
 }
-#trends_tests_list label.btn-default.active{background-color:#1E90FF;color:#FFF}
-#trends_tests_list label.btn-default{width:90px;border:1px solid #efefef;margin:5px; box-shadow:5px 8px 8px 0 #ccc;}
-#trends_tests_list .btn span.glyphicon{
+
+#trends_tests_list label.btn-default.active {
+    background-color: #1E90FF;
+    color: #FFF
+}
+
+#trends_tests_list label.btn-default {
+    width: 90px;
+    border: 1px solid #efefef;
+    margin: 5px;
+    box-shadow: 5px 8px 8px 0 #ccc;
+}
+
+#trends_tests_list .btn span.glyphicon {
     opacity: 0;
 }
+
 #trends_tests_list .btn.active span.glyphicon {
     opacity: 1;
 }
+
 #trends_tests_list .btn {
-	white-space: normal;
-	background-color:#87CEFA;
+    white-space: normal;
+    background-color: #87CEFA;
 }
 
 #trends_tests_list .btn-disabled {
-	background-color:#FFF;
+    background-color: #FFF;
     display: inline-block;
     vertical-align: middle;
     float: none;
 }
 
 .trends-list-container {
-	display: inline-block;
+    display: inline-block;
 }
 
-#trends_tests_list {         
-  padding:0 0 0 0;
-  margin:5px;
-  float: left;
+#trends_tests_list {
+    padding: 0 0 0 0;
+    margin: 5px;
+    float: left;
 }
-#review_tests_list label.btn-default.active{background-color:#1E90FF;color:#FFF}
-#review_tests_list label.btn-default{width:90px;border:1px solid #efefef;margin:5px; box-shadow:5px 8px 8px 0 #ccc;}
-#review_tests_list .btn span.glyphicon{
+
+#review_tests_list label.btn-default.active {
+    background-color: #1E90FF;
+    color: #FFF
+}
+
+#review_tests_list label.btn-default {
+    width: 90px;
+    border: 1px solid #efefef;
+    margin: 5px;
+    box-shadow: 5px 8px 8px 0 #ccc;
+}
+
+#review_tests_list .btn span.glyphicon {
     opacity: 0;
 }
+
 #review_tests_list .btn.active span.glyphicon {
     opacity: 1;
 }
+
 #review_tests_list .btn {
-  white-space: normal;
-  background-color:#87CEFA;
+    white-space: normal;
+    background-color: #87CEFA;
 }
 
 #review_tests_list .btn-disabled {
-  background-color:#FFF;
+    background-color: #FFF;
     display: inline-block;
     vertical-align: middle;
     float: none;
 }
 
-.review-list-container {
-  display: inline-block;
-  width: 100%;
+#review_results .test_caption,
+#review_results .teststep_caption {
+  word-wrap: break-word;
 }
 
-.carousel-control.left, 
+.review-list-container {
+    display: inline-block;
+    width: 100%;
+}
+
+.carousel-control.left,
 .carousel-control.right {
     background-image: none;
     color: #000;
@@ -246,16 +296,17 @@ span.input-group-addon {
 
 .carousel-control .icon-prev,
 .carousel-control .glyphicon-chevron-left {
-  left: 10%;
-  margin-left: -10px;
+    left: 10%;
+    margin-left: -10px;
 }
+
 .carousel-control .icon-next,
 .carousel-control .glyphicon-chevron-right {
-  right: 10%;
-  margin-right: -10px;
+    right: 10%;
+    margin-right: -10px;
 }
-.divBetween
-{
+
+.divBetween {
     padding: 4px 5px 0 5px;
     border-radius: 20px;
     color: rgb(255, 255, 255);
@@ -268,12 +319,13 @@ span.input-group-addon {
     vertical-align: baseline;
     user-select: none;
     font-size: 11px;
-    margin: 5px 5px 0px 5px ;
+    margin: 5px 5px 0px 5px;
     cursor: pointer;
     width: 90px;
     height: 18px;
     overflow: hidden;
 }
+
 #review_vis_container {
- /* padding: 45px 15px 15px;*/
+    /* padding: 45px 15px 15px;*/
 }

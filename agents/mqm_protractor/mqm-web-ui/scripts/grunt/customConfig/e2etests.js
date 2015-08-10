@@ -16,7 +16,7 @@ module.exports = function(grunt, config) {
   var MAX_INSTANCES_GRID = 20;
   var MAX_INSTANCES_DEV = 1;
 
-  var serverUrl = grunt.option('server-url') || 'http://localhost:8080/qcbin/';
+  var serverUrl = grunt.option('server-url') || 'http://localhost:8080/';
   var css = grunt.option('cssScreenshots');
   var browsersParam = grunt.option('browsers') || 'chrome';
   var browserLang = grunt.option('browser-lang');
@@ -170,21 +170,15 @@ module.exports = function(grunt, config) {
       var start = new Date();
       config.startTimeStr = start.getUTCDate() + '' + (start.getMonth() + 1) + '_' + start.getHours() + start.getMinutes() + '_' + start.getSeconds() + start.getMilliseconds();
 
-      if (config.loginInfo.domain === undefined || config.loginInfo.domain === '') {
-        config.loginInfo.domain = 'domain_' + config.startTimeStr;
-        console.log('domain is not supplied in configuration. generated domain name: ' + config.loginInfo.domain);
-      }
-
-      if (config.loginInfo.project === undefined || config.loginInfo.project === '') {
-        config.loginInfo.project = 'project_' + config.startTimeStr;
-        console.log('project is not supplied in configuration. generated project name: ' + config.loginInfo.project);
+      if (config.loginInfo.sharedSpace === undefined || config.loginInfo.sharedSpace === '') {
+        config.loginInfo.sharedSpace = 'shared_space_' + config.startTimeStr;
+        console.log('Shared space name is not supplied in configuration. generated shared space name: ' + config.loginInfo.sharedSpace);
       }
 
       config.loginInfo = {
         username: config.loginInfo['username'],
         password: config.loginInfo['password'],
-        domain: config.loginInfo['domain'],
-        project: config.loginInfo['project']
+        sharedSpace: config.loginInfo['sharedSpace']
       };
 
       config.appUser = {
@@ -192,6 +186,10 @@ module.exports = function(grunt, config) {
         appPass: ''
       };
 
+      config.seleniumArgs = [];
+      config.multiCapabilities.forEach(function(capability) {
+        config.seleniumArgs.push(capability);
+      });
       config.seleniumArgs.push('-Dwebdriver.ie.driver=' + SELENIUM_IE_32_DRIVER_PATH);
       config.cssScreenshots['enabled'] = data.cssScreenshots;
 
