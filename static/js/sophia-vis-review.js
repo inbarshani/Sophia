@@ -331,7 +331,7 @@ function displayStats(lis, ul, stats) {
                                 var trH = '<tr>';
                                 trH += '<th class="caption">' + "Caption" + '</td>';
                                 var  tr =  '<tr>';
-                                //built the header/title of the table
+                                //built the compare table
                                 for(var i=0; i<dataTests.length;i++)
                                 {
                                     trH +='<th class="test">' + "Test " + dataTests[i].testId + '</th>';
@@ -341,8 +341,6 @@ function displayStats(lis, ul, stats) {
                                     {
                                         console.log(nodes[key].caption);
                                         tr += '<td class="caption">' + nodes[key].caption + '</td>';
-                                       /* tr+='<td class="test">' + '+' + '</td>';
-                                        tr+='<td class="test">' + '-' + '</td>';*/
                                         for(var check=0; check<=i; check++)
                                         {
                                             if(check!=i)
@@ -352,6 +350,13 @@ function displayStats(lis, ul, stats) {
                                             else
                                             {
                                                 tr+='<td class="test">' + '+' + '</td>';
+                                                if(i+1<dataTests.length)
+                                                {
+                                                   for(var t=check; t<dataTests.length-1; t++)
+                                                   {
+                                                       tr+='<td class="test">' + '-' + '</td>';
+                                                   }
+                                                }
                                             }
                                         }
                                         tr += '</tr>';
