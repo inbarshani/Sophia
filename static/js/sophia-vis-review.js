@@ -341,25 +341,25 @@ function displayStats(lis, ul, stats) {
                                     {
                                         console.log(nodes[key].caption);
                                         tr += '<td class="caption">' + nodes[key].caption + '</td>';
+                                       /* tr+='<td class="test">' + '+' + '</td>';
+                                        tr+='<td class="test">' + '-' + '</td>';*/
+                                        for(var check=0; check<=i; check++)
+                                        {
+                                            if(check!=i)
+                                            {
+                                                tr+='<td class="test">' + '-' + '</td>';
+                                            }
+                                            else
+                                            {
+                                                tr+='<td class="test">' + '+' + '</td>';
+                                            }
+                                        }
                                         tr += '</tr>';
                                         tr+='<tr>'
                                     }
                                 }
                                 trH += '</tr>';
                                 table.append(trH);
-                           //    var  tr =  '<tr>';
-                           //     for(var i=0; i<dataTests.length;i++)
-                           //     {
-                            //        var testNodes = dataTests[i]
-                           //        var nodes =  testNodes.dataNodes;
-                            /*        for(var key in nodes)
-                                    {
-                                        console.log(nodes[key].caption);
-                                        tr += '<td class="caption">' + nodes[key].caption + '</td>';
-                                        tr += '</tr>';
-                                        tr+='<tr>'
-                                    }*/
-                         //       }
                                 table.append(tr);
 
                                 var options = {
