@@ -31,7 +31,7 @@
         "WEB_APP_PORT": 8085
     },
     "development": {
-        "IDOL_DB_NAME": "Sophia_dev",
-        "NEO4J_DB_SERVER": "localhost"
+      "IDOL_DB_NAME": "Sophia_dev",
+      "NEO4J_DB_SERVER": "localhost"
     }
 }

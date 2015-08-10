@@ -324,36 +324,22 @@ function displayStats(lis, ul, stats) {
                 	var found = false;
                 	if (i >= selectedBBsByTest.length) {
                         searchBackBoneData(compareDataInfo, function(dataTests){
-                          //  $( "#all_results").append( $( "users")).load( "html/listTable.html");
-                            $( "#compareTable").load("html/listTable.html");
-                            console.log(dataTests);
-                            dataTests =  JSON.parse(dataTests);
-                            var table =  $( "#tbodyCompareTable");
-                            var tr = table.append("<tr>");
+                            $("#compareTable").load("html/listTable.html", function() {
+                                console.log(dataTests);
+                                dataTests = JSON.parse(dataTests);
+                                var table = $("#compareTableList");
+                                var tr = '<tr>';
+                                tr += '<td class="name">' + "Joun" + '</td>';
+                                tr += '<td class="born">' + "1986" + '</td>';
+                                tr += '</tr>';
+                                table.append(tr);
+                                // table.append('<tr> <td class="name">Jonny Stromberg</td> <td class="born">1986</td> </tr> <tr> <td class="name">Jonas Arnklint</td> <td class="born">1985</td> </tr> <tr> <td class="name">Martina Elm</td> <td class="born">1986</td> </tr> <tr> <td class="name">Gustaf Lindqvist</td> <td class="born">1983</td> </tr>');
+                                var options = {
+                                    valueNames: ['name', 'born']
+                                };
 
-                            var table = $('<table></table>').addClass('foo');
-                            for(var i=0; i<dataTests.length; i++)){
-                                var row = $('<tr></tr>').addClass('bar').text('result ' + i);
-                                table.append(row);
-                            }
-
-                            $('#here_table').append(table);
-                          /*  for( var i=0; i<dataTests.length; i++)
-                            {
-                                var td = $('<td class ="testName">');
-                                tr.append(td);
-                                td.innerHTML = "Test "+dataTests[i].testId;
-                            }
-                            table.append(tr);*/
-                             //   $( "#tbodyCompareTable").append('<tr>').append('<td class="name">').text("Test "+dataTests[i].testId);
-                          /*      $( "#tbodyCompareTable").append('<tr><th>' + "Test "+dataTests[i].testId + '</th><td>100,000</td></tr>');
-                            }*/
-                            var options = {
-                                valueNames: ['testName']
-                            };
-
-                            var userList = new List('users', options);
-
+                                var userList = new List('users', options);
+                            });
                         });
                 		return;
                 	}
