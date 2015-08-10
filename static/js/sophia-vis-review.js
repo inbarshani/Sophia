@@ -323,8 +323,30 @@ function displayStats(lis, ul, stats) {
                 function bringDataForNodes(i) {
                 	var found = false;
                 	if (i >= selectedBBsByTest.length) {
-                        searchBackBoneData(compareDataInfo, function(testId,data){
-                        	// display compare data
+                        searchBackBoneData(compareDataInfo, function(dataTests){
+                            $("#compareTable").load("html/listTable.html", function() {
+                                console.log(dataTests);
+                                dataTests = JSON.parse(dataTests);
+                                var table = $("#compareTableList");
+                                var tr = '<tr>';
+                                tr += '<th class="caption">' + "Caption" + '</td>';
+                                for(var i=0; i<dataTests.length;i++)
+                                {
+                                    tr +='<th class="test">' + "Test " + dataTests[i].testId + '</td>';
+                                }
+
+                               // var tr = '<tr>';
+                               // tr += '<td class="name">' + "Joun" + '</td>';
+                             //   tr += '<td class="born">' + "1986" + '</td>';
+                                tr += '</tr>';
+                                table.append(tr);
+                                // table.append('<tr> <td class="name">Jonny Stromberg</td> <td class="born">1986</td> </tr> <tr> <td class="name">Jonas Arnklint</td> <td class="born">1985</td> </tr> <tr> <td class="name">Martina Elm</td> <td class="born">1986</td> </tr> <tr> <td class="name">Gustaf Lindqvist</td> <td class="born">1983</td> </tr>');
+                                var options = {
+                                    valueNames: ['caption', 'test']
+                                };
+
+                                var userList = new List('users', options);
+                            });
                         });
                 		return;
                 	}
@@ -344,16 +366,6 @@ function displayStats(lis, ul, stats) {
                 }
                 
                 bringDataForNodes(0);
-                /*(function(t) {
-			        for(var i = 0; i < selectedBBsByTest.length; i++) {
-						if(selectedBBsByTest[i].compareNodes!==null && selectedBBsByTest[i].compareNodes[t]!==undefined) {
-			                searchBackBoneData(selectedBBsByTest[i].testId,selectedBBsByTest[i].compareNodes[t],function(testId,data){
-			                    compareDataInfo.push({testId:testId, dataNodes: data})
-			                });
-			            }
-			        }
-			    })(name);
-*/
 		    };
         }(ul, name));
     }
