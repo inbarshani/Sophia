@@ -393,11 +393,20 @@ function buildCompareTable(dataTests)
         table.append(trH);
         table.append(tr);
 
-        var options = {
-            valueNames: ['caption', 'test']
+        var paginationTopOptions = {
+            name: "paginationTop",
+            paginationClass: "paginationTop",
+            outerWindow: 2
         };
-
+        var options = {
+            valueNames: ['caption', 'test'],
+       /*     page: 3,
+            plugins: [
+                ListPagination(paginationTopOptions),
+            ]*/
+        };
         var userList = new List('users', options);
+  //      var listObj = new List('listId', options);
     });
 }
 
