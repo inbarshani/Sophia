@@ -330,17 +330,29 @@ function displayStats(lis, ul, stats) {
                                 var table = $("#compareTableList");
                                 var tr = '<tr>';
                                 tr += '<th class="caption">' + "Caption" + '</td>';
+                                //built the header/title of the table
                                 for(var i=0; i<dataTests.length;i++)
                                 {
-                                    tr +='<th class="test">' + "Test " + dataTests[i].testId + '</td>';
+                                    tr +='<th class="test">' + "Test " + dataTests[i].testId + '</th>';
                                 }
-
-                               // var tr = '<tr>';
-                               // tr += '<td class="name">' + "Joun" + '</td>';
-                             //   tr += '<td class="born">' + "1986" + '</td>';
                                 tr += '</tr>';
                                 table.append(tr);
-                                // table.append('<tr> <td class="name">Jonny Stromberg</td> <td class="born">1986</td> </tr> <tr> <td class="name">Jonas Arnklint</td> <td class="born">1985</td> </tr> <tr> <td class="name">Martina Elm</td> <td class="born">1986</td> </tr> <tr> <td class="name">Gustaf Lindqvist</td> <td class="born">1983</td> </tr>');
+                                tr =  '<tr>';
+                                for(var i=0; i<dataTests.length;i++)
+                                {
+                                    var testNodes = dataTests[i]
+                                   var nodes =  testNodes.dataNodes;
+                                    for(var key in nodes)
+                                    {
+                                        console.log(nodes[key].caption);
+                                        tr += '<td class="caption">' + nodes[key].caption + '</td>';
+                                        tr += '</tr>';
+                                        tr+='<tr>'
+                                    }
+                                }
+
+                                table.append(tr);
+
                                 var options = {
                                     valueNames: ['caption', 'test']
                                 };
