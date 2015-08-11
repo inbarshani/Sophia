@@ -245,7 +245,7 @@ app.use('/searchBackBoneData', function(request, response) {
         if (i >= compareObjData.length) {
             response.send(JSON.stringify(results));
         } else {
-            idol_queries.searchByReference(compareObjData[i].dataNodes, function(idolDocs){
+            idol_queries.searchByReference(compareObjData[i].dataNodes, false, function(idolDocs){
                 results.push({testId: compareObjData[i].testId, dataNodes: idolDocs});
                 getIdolNodesData(i+1);
             });
@@ -273,7 +273,7 @@ function searchTestsByName(queryText, dateCondition, response)
                         referenceIds.push(node.id);
                     });
                 });
-                idol_queries.searchByReference(referenceIds, function(idolDocs){
+                idol_queries.searchByReference(referenceIds, false, function(idolDocs){
                     var idolResultNodes = Object.keys(idolDocs);
                     bbNodes.map(function(test){
                         //console.log('searchTestsByName bbNodes test: '+
@@ -304,9 +304,9 @@ function searchSimilarTestSteps(testStepID, dateCondition, response)
                 var idolResultNodes = Object.keys(test_documents_hash);
                 // we need to user IDOL doc id instead of testIDs
                 idolResultNodes.forEach(function(idolResult){
-                    var testID = test_documents_hash[idolResult].testID;                    
-                    documents_hash[idolResult] = documents_hash[testID];
-                    documents_hash[testID] = null;
+                    var similarTestID = test_documents_hash[idolResult].testID;                    
+                    documents_hash[idolResult] = documents_hash[similarTestID];
+                    documents_hash[similarTestID] = null;
                 });
                 //console.log('searchSimilarTestSteps documents_hash: '+
                 //    require('util').inspect(documents_hash, {depth:4}));
@@ -317,7 +317,7 @@ function searchSimilarTestSteps(testStepID, dateCondition, response)
                             referenceIds.push(node.id);
                         });
                     });
-                    idol_queries.searchByReference(referenceIds, function(idolDocs){
+                    idol_queries.searchByReference(referenceIds, false, function(idolDocs){
                         var idolResultNodes = Object.keys(idolDocs);
                         // use the previous 'similar' search to mark
                         //  the backbone nodes that are similar, 
@@ -341,7 +341,10 @@ function searchSimilarTestSteps(testStepID, dateCondition, response)
                                 if (similarNodesIDs.indexOf(node.id) >= 0)
                                 {
                                     console.log('similar node '+node.id+' for test '+test.test.id);
-                                    node.similar = true;
+                                    if (node.id == testStepID)
+                                        node.same = true;
+                                    else
+                                        node.similar = true;
                                 }
                             });
                         });

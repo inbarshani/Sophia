@@ -283,6 +283,16 @@ span.input-group-addon {
   word-wrap: break-word;
 }
 
+#review_results .similar {
+  background-color: #228B22;
+  color: #FFF;
+}
+
+#review_results .same {
+  background-color: #483D8B;
+  color: #FFF;
+}
+
 .review-list-container {
     display: inline-block;
     width: 100%;

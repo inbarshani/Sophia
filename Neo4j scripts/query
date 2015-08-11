@@ -4,9 +4,12 @@ match n where ANY(l IN labels(n) WHERE l =~ '.*log.*') return n
 
 IDOL:
 action=Query&fieldtext=MATCH{UI}:SophiaType&databasematch=Sophia&maxresults=100
+action=Query&fieldtext=EQUAL{32164}:DREREFERENCE&databasematch=Sophia&maxresults=100
 action=Query&fieldtext=EXISTS{}:Hash&databasematch=Sophia_dev&maxresults=100
 action=Query&fieldtext=LENGTH{1,100000}:Hash&databasematch=Sophia_dev&maxresults=100
-
+Suggest:
+action=Suggest&Reference=32165&FieldText=MATCH{Test,TestStep,UI}:SOPHIATYPE&databasematch=Sophia&maxResults=150&MinScore=40&Print=ALL
+action=SuggestOnText&Text=click on TRANSLATE in http://myd-vm06983.hpswlabs.adapps.hp.com:8082/ui/?p=1102/1002/product-overview/hierarchy/dashboard?selectedEntities=%5B%221002%22%5D&includeChildren=false click on INPUT in http://myd-vm06983.hpswlabs.adapps.hp.com:8082/ui/?p=1102/1002/product-overview/hierarchy/dashboard?selectedEntities=%5B%221002%22%5D&includeChildren=false UI transition for elemnt undefined in http://myd-vm06983.hpswlabs.adapps.hp.com:8082/ui/?p=1102/1002/product-overview/hierarchy/dashboard?selectedEntities=%5B%221002%22%5D&includeChildren=false&FieldText=MATCH{Test,TestStep,UI}:SOPHIATYPE&databasematch=Sophia&maxResults=150&MinScore=40&Print=ALL
 
 Optimize path queries:
 MATCH path=start-[*..400]->destination WHERE id(start) IN {currentStartNodes} AND id(destination) IN {destinationNodes} return extract(n in nodes(path)| [id(n), labels(n)]) as path_nodes ORDER BY LENGTH(path_nodes)

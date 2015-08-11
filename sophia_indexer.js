@@ -36,7 +36,7 @@ function _hashBackboneNodes(msg)
 {
 	console.log('_hashBackboneNodes with msg: '+require('util').inspect(msg));
 	// need to wait for awhile, to allow IDOL and neo4j to complete indexing
-	setTimeout(hashBackboneNodes, 60000, msg);
+	setTimeout(hashBackboneNodes, (2 * 60 * 1000), msg);
 }
 
 function hashBackboneNodes(msg)
@@ -57,14 +57,14 @@ function indexTestByIDs(testNodeIDsArray)
 			backbone_nodes.forEach(function(backbone_node){
 				neo4j_queries.getDataNodesStats([parseInt(backbone_node.id)], 
 					function(stats){
-					var hash_string = '';
+					var hash_items = [];
 					var node_ids = [];
 					Object.keys(stats).forEach(function(key){
 						node_ids = node_ids.concat(stats[key]);
 					});
 					if (node_ids.length > 0)
 					{
-						idol_queries.searchByReference(node_ids, function(documents_hash){
+						idol_queries.searchByReference(node_ids, false, function(documents_hash){
 							var idolResultNodes = Object.keys(documents_hash);
 							//console.log('indexTestByID '+backbone_node.test_id+
 							//	' stats IDOL results: '+idolResultNodes.length);
@@ -72,13 +72,17 @@ function indexTestByIDs(testNodeIDsArray)
 								var result_caption = documents_hash[idolResult].caption;						
 								if (result_caption!='screen capture')
 								{
-									//console.log('indexTestByID '+backbone_node.test_id+
-									//	' adding to hash: '+result_caption);
-									hash_string += result_caption +'\n';
+									// check if we repeat existing additions
+									if (hash_items.indexOf(result_caption) < 0)
+									{
+										//console.log('indexTestByID '+backbone_node.test_id+
+										//	' adding to hash: '+result_caption);
+										hash_items.push(result_caption);
+									}
 								}
 							});
 							idol_queries.updateIdolDocument(null, backbone_node.id, 
-								{"hash": hash_string});
+								{"hash": hash_items.join('\n')});
 							//console.log('node '+backbone_node.test_id+' hash:\n'+hash_string);
 						});
 					}

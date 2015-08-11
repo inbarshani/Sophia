@@ -162,8 +162,10 @@ function createBBListForTest(test, ul) {
 	    }(node, test));
 	    ddUl.append(ddLi);
 	    li.attr('data-bb-id', node.id);
-	    if (node.similar)
-	    	li.addClass('active');
+	    if (node.same)
+	    	li.addClass('same');
+	    else if (node.similar)
+	    	li.addClass('similar');
 	    //div.text(node.type);
 	    div.text(node.type + ': ' + node.caption);
       //  div.title = node.caption;
@@ -274,8 +276,7 @@ function collapseNodesAndGetStats(testId, ul) {
 				}
 				break;
 			} else {
-				if ($(lis[i]).data('bb-id').length > 0)
-					nodes.push($(lis[i]).data('bb-id'));
+				nodes.push($(lis[i]).data('bb-id'));
 				$(lis[i]).addClass('hidden');
 			}
 		}
