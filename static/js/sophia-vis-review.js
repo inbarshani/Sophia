@@ -276,7 +276,7 @@ function collapseNodesAndGetStats(testId, ul) {
 				}
 				break;
 			} else {
-				if ($(lis[i]).data('bb-id').length > 0)
+				if ($(lis[i]).data('bb-id') > 0)
 					nodes.push($(lis[i]).data('bb-id'));
 				$(lis[i]).addClass('hidden');
 			}
