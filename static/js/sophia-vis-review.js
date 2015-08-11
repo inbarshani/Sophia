@@ -162,8 +162,10 @@ function createBBListForTest(test, ul) {
 	    }(node, test));
 	    ddUl.append(ddLi);
 	    li.attr('data-bb-id', node.id);
-	    if (node.similar)
-	    	li.addClass('active');
+	    if (node.same)
+	    	li.addClass('same');
+	    else if (node.similar)
+	    	li.addClass('similar');
 	    //div.text(node.type);
 	    div.text(node.type + ': ' + node.caption);
       //  div.title = node.caption;

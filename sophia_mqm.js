@@ -304,9 +304,9 @@ function searchSimilarTestSteps(testStepID, dateCondition, response)
                 var idolResultNodes = Object.keys(test_documents_hash);
                 // we need to user IDOL doc id instead of testIDs
                 idolResultNodes.forEach(function(idolResult){
-                    var testID = test_documents_hash[idolResult].testID;                    
-                    documents_hash[idolResult] = documents_hash[testID];
-                    documents_hash[testID] = null;
+                    var similarTestID = test_documents_hash[idolResult].testID;                    
+                    documents_hash[idolResult] = documents_hash[similarTestID];
+                    documents_hash[similarTestID] = null;
                 });
                 //console.log('searchSimilarTestSteps documents_hash: '+
                 //    require('util').inspect(documents_hash, {depth:4}));
@@ -341,7 +341,10 @@ function searchSimilarTestSteps(testStepID, dateCondition, response)
                                 if (similarNodesIDs.indexOf(node.id) >= 0)
                                 {
                                     console.log('similar node '+node.id+' for test '+test.test.id);
-                                    node.similar = true;
+                                    if (node.id == testStepID)
+                                        node.same = true;
+                                    else
+                                        node.similar = true;
                                 }
                             });
                         });
