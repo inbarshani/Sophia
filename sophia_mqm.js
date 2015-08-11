@@ -245,7 +245,7 @@ app.use('/searchBackBoneData', function(request, response) {
         if (i >= compareObjData.length) {
             response.send(JSON.stringify(results));
         } else {
-            idol_queries.searchByReference(compareObjData[i].dataNodes, function(idolDocs){
+            idol_queries.searchByReference(compareObjData[i].dataNodes, false, function(idolDocs){
                 results.push({testId: compareObjData[i].testId, dataNodes: idolDocs});
                 getIdolNodesData(i+1);
             });
@@ -273,7 +273,7 @@ function searchTestsByName(queryText, dateCondition, response)
                         referenceIds.push(node.id);
                     });
                 });
-                idol_queries.searchByReference(referenceIds, function(idolDocs){
+                idol_queries.searchByReference(referenceIds, false, function(idolDocs){
                     var idolResultNodes = Object.keys(idolDocs);
                     bbNodes.map(function(test){
                         //console.log('searchTestsByName bbNodes test: '+
@@ -317,7 +317,7 @@ function searchSimilarTestSteps(testStepID, dateCondition, response)
                             referenceIds.push(node.id);
                         });
                     });
-                    idol_queries.searchByReference(referenceIds, function(idolDocs){
+                    idol_queries.searchByReference(referenceIds, false, function(idolDocs){
                         var idolResultNodes = Object.keys(idolDocs);
                         // use the previous 'similar' search to mark
                         //  the backbone nodes that are similar, 
