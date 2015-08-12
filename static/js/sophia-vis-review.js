@@ -129,12 +129,13 @@ function visualizeReviewTest(test) {
 }	
 
 function createBBListForTest(test, ul) {
-	var li, div, ddUl, ddLi;
+	var li, div, ddUl, ddLi, h6;
 	test.bbNodes.forEach(function (node) {
 	    li = $('<li class="dropdown small">');
 	    div = $('<div data-toggle="dropdown" data-toggle="tooltip"'+
 	    	' data-placement="top" title="'+node.caption+' (ID: '+
 	    	node.id+')" class="teststep_caption">');
+        h6 = $('<h6 style="margin-top: -2px">');
 	    div.css('height', '100%');
 	    ddUl = $('<ul class="dropdown-menu dd">');
 	    ddLi = $('<li class="dd">');
@@ -167,8 +168,10 @@ function createBBListForTest(test, ul) {
 	    else if (node.similar)
 	    	li.addClass('similar');
 	    //div.text(node.type);
-	    div.text(node.type + ': ' + node.caption);
+	    //div.text(node.type + ': '+node.caption);
+        h6.text(node.type + ': '+node.caption);
       //  div.title = node.caption;
+        div.append(h6);
         li.append(div);
 	    li.append(ddUl);
 	    ul.append(li);
