@@ -356,7 +356,12 @@ function buildCompareTable(dataTests)
         dataTests = JSON.parse(dataTests);
         var table = $("#compareTableList");
         var trH = '<tr>';
-        trH += '<th class="caption">' + "Caption" + '</td>';
+        var obj =  dataTests[0].dataNodes;
+        for(var key in obj)
+        {
+            var caption = obj[key].type;
+        }
+        trH += '<th class="caption">' + caption + '</td>';
         var  tr =  '<tr>';
         //built the compare table
         for(var i=0; i<dataTests.length;i++)
@@ -396,15 +401,14 @@ function buildCompareTable(dataTests)
 
         var options = {
             valueNames: [ 'caption', 'test' ],
-            page: 2,
+            page: 3,
             plugins: [
                 ListPagination({})
             ]
         };
 
         var listObj = new List('listId', options);
-        $('#tableId').paging({limit:2, rowDisplayStyle: 'block'});
-
+        $('#tableId').paging({limit: 10, rowDisplayStyle: 'block', activePage: 0, rows: []});
     });
 }
 

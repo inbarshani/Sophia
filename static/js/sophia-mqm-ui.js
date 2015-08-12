@@ -36,10 +36,6 @@ $(document).ready(function() {
     //for tooltip
     $('[data-toggle="tooltip"]').tooltip();
     //for tooltip
-
-    //paging
-
-    //paging
     user = localStorage.getItem("user");
     if (!user)
         window.location.href = './login.html';
