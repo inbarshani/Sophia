@@ -36,10 +36,10 @@ function searchBackBoneData(compareDataInfoObject, callback) {
         });
 }
 
-function getNodesStats(testId, nodes, callback) {
+function getNodesStats(name, testId, nodes, callback) {
     var jqxhr = $.ajax("/testNodesData?nodes=" + JSON.stringify(nodes))
         .done(function(data) {
-            callback(data, testId);
+            callback(data, testId, name);
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
