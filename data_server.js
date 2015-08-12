@@ -4,6 +4,7 @@ var amqp = require('amqp');
 var fs = require('fs');
 var idol_queries = require('./lib/idol_queries');
 var sophia_config = require('./lib/sophia_config');
+var Busboy = require('busboy');
 
 var app = express();
 
@@ -30,19 +31,26 @@ app.post('/data', function(request, response) {
 });
 
 app.post('/file', function(request, response) {
-    var content = "";
-    request.on("data", function(chunk) {
-        content += chunk;
-    });
-    request.on("end", function() {
-		console.log('Saving file');
-        response.status(202).json({ value: 'OK' }); // 202 - accepted, not completed
-        var ts = new Date().getTime();
-        var startIndex = content.indexOf('data:image/jpeg;base64,') + 23;
-        var endIndex = content.lastIndexOf('\r\n------WebKitFormBoundary');
-        var fileContent = content.substring(startIndex, endIndex);
-        var buffer = new Buffer(fileContent, 'base64');
-        var fileName = ts + '.jpg';
+    var timestamp = null;
+    var busboy = new Busboy({ headers: request.headers });  
+    busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated) {
+      //console.log('Field [' + fieldname + ']: value: ' + JSON.stringify(val));
+      if (fieldname == 'data')
+      {
+        timestamp = JSON.parse(val).timestamp;
+        console.log('Loaded file timestamp: '+timestamp);
+      }
+      else if (fieldname == 'file')
+      {
+        val = val.substring('data:image/jpeg;base64,'.length);
+        //console.log('file content for save: '+val);
+        var buffer = new Buffer(val, 'base64');
+        if (!timestamp)
+        {
+            console.log('no timestamp (yet), file is ready for save');
+            timestamp = new Date().getTime();
+        }
+        var fileName = timestamp + '.jpg';
         var wstream = fs.createWriteStream('./upload/' + fileName, {
             flags: 'w',
             encoding: 'base64'
@@ -50,7 +58,7 @@ app.post('/file', function(request, response) {
 //        wstream.write(buffer);
         wstream.end(buffer, "UTF-8", function() {
             var data = {
-                timestamp: ts,
+                timestamp: timestamp,
                 type: "SCREEN",
                 file: fileName
             };
@@ -67,8 +75,14 @@ app.post('/file', function(request, response) {
                 console.log('Failed to analyze image: '+
                     absPath + '/' + fileName + ' due to exception:\n'+ex);
             }
-        });
+        });        
+      }
     });
+    busboy.on('finish', function() {
+      console.log('Done parsing Sophia file upload!');
+    });
+    request.pipe(busboy);
+    response.status(202).json({ value: 'OK' }); // 202 - accepted, not completed
 });
 
 app.listen(sophia_config.DATA_SERVER_PORT);

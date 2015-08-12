@@ -113,12 +113,12 @@ function TrackRequest(info) {
                     //console.log(screenshotUrl);
                     //			var blob = screenshotUrl.replace('data:image/jpeg;base64,', '');
                     var data = {
-                        timestamps: ts,
+                        timestamp: ts,
                         type: "SCREEN",
                         testID: testGuid
                     };
                     var formData = new FormData();
-                    //			formData.append(data, JSON.stringify(data));
+                    formData.append("data", JSON.stringify(data));
                     formData.append("file", screenshotUrl);
 
                     var request = new XMLHttpRequest();

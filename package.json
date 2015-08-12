@@ -6,6 +6,7 @@
   "dependencies": {
     "amqp": "*",
     "body-parser": "1.10.x",
+    "busboy": "^0.2.9",
     "csvtojson": "0.X.X",
     "express": "^4.10.3",
     "jsontoxml": "0.0.11",
@@ -23,7 +24,6 @@
     "xpath": "0.X.X"
   },
   "scripts": {
-    "start": "node loadAll.js"
   },
   "author": {
     "name": "HP Software",
