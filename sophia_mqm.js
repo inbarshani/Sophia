@@ -246,7 +246,7 @@ app.use('/searchBackBoneData', function(request, response) {
             response.send(JSON.stringify(results));
         } else {
             idol_queries.searchByReference(compareObjData[i].dataNodes, false, function(idolDocs){
-                results.push({testId: compareObjData[i].testId, dataNodes: idolDocs});
+                results.push({testId: compareObjData[i].testId,testName: compareObjData[i].testName, dataNodes: idolDocs});
                 getIdolNodesData(i+1);
             });
         }

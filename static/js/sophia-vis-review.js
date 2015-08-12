@@ -140,19 +140,19 @@ function createBBListForTest(test, ul) {
 	    ddUl = $('<ul class="dropdown-menu dd">');
 	    ddLi = $('<li class="dd">');
 	    ddLi.text('Set as start');
-	    ddLi.on('click', function(item, n, id){
+	    ddLi.on('click', function(item, n, id, name){
 	    	return function() {
-	    		bbNodeSelect(item, n, id, 'start');
+	    		bbNodeSelect(item, n, id, name, 'start');
 	    	};
-	    }(li, node, test.test.id));
+	    }(li, node, test.test.id, test.name));
 	    ddUl.append(ddLi);
 	    ddLi = $('<li class="dd">');
 	    ddLi.text('Set as end');
-	    ddLi.on('click', function(item, n, id){
+	    ddLi.on('click', function(item, n, id, name){
 	    	return function() {
-	    		bbNodeSelect(item, n, id, 'end');
+	    		bbNodeSelect(item, n, id, name, 'end');
 	    	};
-	    }(li, node, test.test.id));
+	    }(li, node, test.test.id, test.name));
 	    ddUl.append(ddLi);
 	    ddLi = $('<li class="dd">');
 	    ddLi.text('Search similar');
@@ -199,7 +199,7 @@ function testOnClick(li, test) {
     }
 }
 
-function bbNodeSelect(li, node, testId, type) {
+function bbNodeSelect(li, node, testId, name, type) {
     var selectedReviewBBTest = findBBTest(testId);
     var ul = li.parent();
     if (selectedReviewBBTest == null) {
@@ -227,7 +227,7 @@ function bbNodeSelect(li, node, testId, type) {
 	    if (selectedReviewBBTest.startNode != null && selectedReviewBBTest.endNode != null) {
 	    //	expandNodes(ul);
 	    	setTimeout(function(){
-		    	collapseNodesAndGetStats(testId,ul);
+		    	collapseNodesAndGetStats(name, testId,ul);
 	    	}, 500);
 	    }
     }
@@ -242,7 +242,7 @@ function nodeSearchSimilar(node, test)
 	searchReview('StepID='+node.id);
 }
 
-function collapseNodesAndGetStats(testId, ul) {
+function collapseNodesAndGetStats(name, testId, ul) {
 	var lis = ul.children();
 	var startIndex = -1;
 	var li;
@@ -284,12 +284,13 @@ function collapseNodesAndGetStats(testId, ul) {
 			}
 		}
 	}
-  	getNodesStats(testId, nodes, function(data, testId){
+  	getNodesStats(name,testId, nodes, function(data, testId, name){
         var stats = JSON.parse(data);
         for(var i=0; i< selectedBBsByTest.length; i++) {
             if(selectedBBsByTest[i].testId==testId)
             {
                 selectedBBsByTest[i].compareNodes = stats;
+                selectedBBsByTest[i].testName = name;
             }
         }
         displayStats(lis, ul, JSON.parse(data));
@@ -339,7 +340,7 @@ function displayStats(lis, ul, stats) {
                     		}
                     	}
                     	if (!found) {
-	                        compareDataInfo.push({testId: selectedBBsByTest[i].testId, dataNodes: selectedBBsByTest[i].compareNodes[type]});
+	                        compareDataInfo.push({testId: selectedBBsByTest[i].testId,testName:selectedBBsByTest[i].testName, dataNodes: selectedBBsByTest[i].compareNodes[type]});
                     	}
                         bringDataForNodes(i+1);
                     }
@@ -369,7 +370,7 @@ function buildCompareTable(dataTests)
         //built the compare table
         for(var i=0; i<dataTests.length;i++)
         {
-            trH +='<th class="test">' + "Test " + dataTests[i].testId + '</th>';
+            trH +='<th class="test" data-toggle="dropdown" data-toggle="tooltip"  data-placement="top" title="'+ dataTests[i].testName +'">'+ "Test " + dataTests[i].testName + '</th>';
             var testNodes = dataTests[i]
             var nodes =  testNodes.dataNodes;
             for(var key in nodes)
