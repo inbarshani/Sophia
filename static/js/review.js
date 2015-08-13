@@ -24,7 +24,8 @@ function searchReview(query, callback) {
 }
 
 function searchBackBoneData(compareDataInfoObject, callback) {
-    var jqxhr = $.ajax("/searchBackBoneData?o=" + JSON.stringify(compareDataInfoObject))
+    var query = fixedEncodeURIComponent(JSON.stringify(compareDataInfoObject));
+    var jqxhr = $.ajax("/searchBackBoneData?o=" + query)
         .done(function(data) {
             callback(data);
         })
