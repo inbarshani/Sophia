@@ -32,12 +32,12 @@ var connection = amqp.createConnection({
 var current_test_id = null;
 var current_test_node_id = null;
 
-var active_tests = [];
+var tests_history = [];
 function indexOfTestByID(test_id)
 {
-    for (var i = 0; i < active_tests.length; i++) {
-        console.log('active_tests['+i+' of '+active_tests.length+']: '+JSON.stringify(active_tests[i]));
-        if (active_tests[i].test_id == test_id) {
+    for (var i = 0; i < tests_history.length; i++) {
+        console.log('tests_history['+i+' of '+tests_history.length+']: '+JSON.stringify(tests_history[i]));
+        if (tests_history[i].test_id == test_id) {
             return i;
         }
     }
@@ -99,8 +99,7 @@ function _processQueueMessage(msg) {
                     if (indexOfTestInArray >= 0)
                     {
                         connection.publish(sophia_config.QUEUE_TEST_NAME, 
-                            {TestNodeID: active_tests[indexOfTestInArray].test_node_id});
-                        active_tests.splice(indexOfTestInArray, 1);
+                            {TestNodeID: tests_history[indexOfTestInArray].test_node_id});
                     }
                     if (current_test_id == data.testID)
                     {
@@ -133,8 +132,8 @@ function _processQueueMessage(msg) {
                 var indexOfTestInArray = indexOfTestByID(data.testID);
                 if (indexOfTestInArray >= 0)
                 {
-                    current_test_id = active_tests[indexOfTestInArray].test_id;
-                    current_test_node_id = active_tests[indexOfTestInArray].test_node_id;
+                    current_test_id = tests_history[indexOfTestInArray].test_id;
+                    current_test_node_id = tests_history[indexOfTestInArray].test_node_id;
                 }
             }
             else if (!current_test_id && !data.testID) {
@@ -161,7 +160,7 @@ function _processQueueMessage(msg) {
                         idol_queries.addToIdol(results[0]['NodeID'], data);
                         if (data.type == 'Test') {
                             current_test_node_id = results[0]['NodeID'];
-                            active_tests.push({test_id: current_test_id, test_node_id: current_test_node_id});
+                            tests_history.push({test_id: current_test_id, test_node_id: current_test_node_id});
                             lock.release();
                         } else if (current_test_node_id) {
                             linkNewData(results[0]['NodeID'], data.type, data.timestamp, current_test_node_id);

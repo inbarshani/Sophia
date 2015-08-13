@@ -31,37 +31,36 @@ app.post('/data', function(request, response) {
 });
 
 app.post('/file', function(request, response) {
-    var timestamp = null;
+    var data = null;
     var busboy = new Busboy({ headers: request.headers });  
     busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated) {
       //console.log('Field [' + fieldname + ']: value: ' + JSON.stringify(val));
       if (fieldname == 'data')
       {
-        timestamp = JSON.parse(val).timestamp;
-        console.log('Loaded file timestamp: '+timestamp);
+        data = JSON.parse(val);
+        console.log('Loaded file data: '+JSON.stringify(data));
       }
       else if (fieldname == 'file')
       {
         val = val.substring('data:image/jpeg;base64,'.length);
         //console.log('file content for save: '+val);
         var buffer = new Buffer(val, 'base64');
-        if (!timestamp)
+        if (!data)
         {
-            console.log('no timestamp (yet), file is ready for save');
-            timestamp = new Date().getTime();
+            console.log('no data for queue (yet), file is ready for save');
+            data = {
+                timestamp: new Date().getTime(),
+                type: "SCREEN",
+                file: fileName
+            };
         }
-        var fileName = timestamp + '.jpg';
+        var fileName = data.timestamp + '.jpg';
         var wstream = fs.createWriteStream('./upload/' + fileName, {
             flags: 'w',
             encoding: 'base64'
         });
 //        wstream.write(buffer);
         wstream.end(buffer, "UTF-8", function() {
-            var data = {
-                timestamp: timestamp,
-                type: "SCREEN",
-                file: fileName
-            };
             var absPath = fs.realpathSync('./upload/');
             try
             {
