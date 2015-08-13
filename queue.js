@@ -74,6 +74,7 @@ function _processQueueMessage(msg) {
         var obj = JSON.parse(msg.data);
         var data;        
         var obj_type = obj.type.toLowerCase();
+        var temp_test_id, temp_test_node_id = null;
         console.log(" [x] New msg type is: " + obj_type);
         if (obj != null) {
             if (obj_type == 'mqm_log' || obj_type == 'sa_log') {
@@ -132,8 +133,8 @@ function _processQueueMessage(msg) {
                 var indexOfTestInArray = indexOfTestByID(data.testID);
                 if (indexOfTestInArray >= 0)
                 {
-                    current_test_id = tests_history[indexOfTestInArray].test_id;
-                    current_test_node_id = tests_history[indexOfTestInArray].test_node_id;
+                    temp_test_id = tests_history[indexOfTestInArray].test_id;
+                    temp_test_node_id = tests_history[indexOfTestInArray].test_node_id;
                 }
             }
             else if (!current_test_id && !data.testID) {
@@ -147,7 +148,7 @@ function _processQueueMessage(msg) {
             var params = {
                 attributes: {
                     timestamp: data.timestamp,
-                    test_id: current_test_id
+                    test_id: (temp_test_id? temp_test_id : current_test_id)
                 }
             };
             console.log(" [x] Add new node query: " + query);
@@ -163,7 +164,12 @@ function _processQueueMessage(msg) {
                             tests_history.push({test_id: current_test_id, test_node_id: current_test_node_id});
                             lock.release();
                         } else if (current_test_node_id) {
-                            linkNewData(results[0]['NodeID'], data.type, data.timestamp, current_test_node_id);
+                            linkNewData(results[0]['NodeID'], 
+                                data.type, 
+                                data.timestamp, 
+                                (temp_test_node_id ? temp_test_node_id :current_test_node_id));
+                            temp_test_id = null;
+                            temp_test_node_id = null;
                         }
                         else
                             lock.release();
