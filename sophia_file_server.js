@@ -40,9 +40,25 @@ app.post('/file', function(request, response) {
                 var absPath = fs.realpathSync('./upload/');
                 try
                 {
-                    idol_queries.analyzeImage(absPath + '/' + fileName, function(text) {
-                        data.text = text;
-                        sendToQueue(data, response);
+                    idol_queries.analyzeImagePost(absPath + '/' + fileName, function(token) {
+                        if (token && token.length > 0)
+                        {
+                            var interval = setInterval(function(){
+                                idol_queries.analyzeImageCheck(token, function(text){
+                                    if (text && text.length)
+                                    {
+                                        clearInterval(interval);
+                                        data.text = text;
+                                        sendToQueue(data, response);
+                                    }
+                                });
+                            }, 1000);
+                        }
+                        else
+                        {
+                            data.text = '';
+                            sendToQueue(data, response);
+                        }
                     });
                 }
                 catch(ex)
@@ -91,7 +107,26 @@ function sendToQueue(data, response) {
         }
     }
 }
-
+/*
 process.on('uncaughtException', function (err) {
   console.log('process uncaughtException: '+require('util').inspect(err));
 });
+*/
+
+/*
+idol_queries.analyzeImagePost('C:\\Users\\shanii\\workspace\\Sophia\\upload\\1439389615486.jpg',
+    function(token){
+        if (token && token.length > 0)
+        {
+            var interval = setInterval(function(){
+                idol_queries.analyzeImageCheck(token, function(text){
+                    if (text && text.length)
+                    {
+                        console.log('got text: '+text);
+                        clearInterval(interval);
+                    }
+                });
+            }, 1000);
+        }
+    });
+*/
