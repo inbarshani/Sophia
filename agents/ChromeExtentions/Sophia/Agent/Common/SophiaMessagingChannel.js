@@ -79,6 +79,7 @@ Util.inherit(SophiaMessagingChannel, EventDispatcher, {
     init: function() {
         console.log('SophiaMessagingChannel init log');
         this._logger.trace("SophiaMessagingChannel init");
+        var that = this;
 
 
         chrome.storage.local.get(['dataUrl', 'sophiaTestId', 'baseAppUrl', 'fileUrl'], 
@@ -92,7 +93,10 @@ Util.inherit(SophiaMessagingChannel, EventDispatcher, {
                 console.log("SophiaMessagingChannel background: received message '" + JSON.stringify(msg) + "'");
                 // currently do nothing as we handle the messages in send message
                 // if decide to do something here, needs to handle the this binding
-
+                if (that && that._sophiaTestId)
+                {
+                    that._recordScreenshot();
+                }
             });
         });
 
@@ -118,7 +122,8 @@ Util.inherit(SophiaMessagingChannel, EventDispatcher, {
 
     sendMessage: function(msg) {
         //console.log('SophiaMessagingChannel sendMessage log: ' + JSON.stringify(msg));
-        this._logger.trace("SophiaMessagingChannel sendMessage: " + msg);
+        console.log("SophiaMessagingChannel sendMessage got msg: " + 
+            JSON.stringify(msg));
         // get to the actual message we want, if it's there
         if (msg && msg.data && msg.data.data && msg.data.data._data) {
             var msgData = msg.data.data._data;
@@ -171,11 +176,60 @@ Util.inherit(SophiaMessagingChannel, EventDispatcher, {
                         console.log("SophiaMessagingChannel sendMessage data posted: " + doc);
                     }
                   });
+
+                this._recordScreenshot();
             }
+
         }
     },
 
     // *** Private methods ***
+
+
+    _recordScreenshot: function(){
+        console.log('SophiaMessagingChannel recordScreenshot');
+        var baseAppUrl = this._baseAppUrl;
+        var fileUrl = this._fileUrl;
+        var sophiaTestId = this._sophiaTestId;
+
+        chrome.tabs.query({
+            active: true
+        }, function(tabs) {
+            console.log('SophiaMessagingChannel recordScreenshot got tabs');
+            console.log('SophiaMessagingChannel tabs[0].url: '+tabs[0].url + 
+                ' with baseAppUrl: '+baseAppUrl);
+            if (tabs[0].url.indexOf(baseAppUrl) == 0) {
+                chrome.tabs.captureVisibleTab(function(screenshotUrl) {
+                    console.log('SophiaMessagingChannel recordScreenshot captureVisibleTab');
+                    var ts = new Date().getTime();
+                    //console.log(screenshotUrl);
+                    //          var blob = screenshotUrl.replace('data:image/jpeg;base64,', '');
+                    var data = {
+                        timestamp: ts,
+                        type: "SCREEN",
+                        testID: sophiaTestId
+                    };
+                    var formData = new FormData();
+                    formData.append("data", JSON.stringify(data));
+                    formData.append("file", screenshotUrl);
+
+                    console.log('SophiaMessagingChannel sending screenshot with timestamp: '+ ts + 
+                        ' to: '+fileUrl);
+                    $.ajax({
+                        url: fileUrl,
+                        type: 'POST',
+                        data: formData,
+                        dataType: 'multipart/form-data',
+                        contentType: false,
+                        processData: false,
+                        success: function (doc) {
+                            console.log("SophiaMessagingChannel sendMessage screenshot posted: " + doc);
+                        }
+                    });
+                });
+            }
+        });
+    },
 
     _setValuesFromStorage: function(result)
     {
