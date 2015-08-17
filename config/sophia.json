@@ -6,6 +6,8 @@
         "dataLinkType": "LINKED_TO",
         "IDOL_DB_NAME": "Sophia",
         "IDOL_SERVER": "16.60.168.105",
+        "IDOL_OCR_SERVER": "16.60.168.105",
+        "IDOL_OCR_SERVER_PORT": 18000,
         "maxResults": 150,
         "TESTS_DB_FILE": "./sophia.db",
         "TESTS_DB_SCHEME_FILE": "./createSophiaDB.sql",
@@ -28,6 +30,7 @@
         "QUEUE_DATA_NAME": "sophia",
         "QUEUE_TEST_NAME": "sophia_tests",
         "DATA_SERVER_PORT": 8082,
+        "FILE_SERVER_PORT": 8083,
         "WEB_APP_PORT": 8085,
         "hashSimiliarityThreshold": 0.7
     },

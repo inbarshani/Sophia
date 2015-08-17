@@ -10,26 +10,6 @@ var app = express();
 
 app.use(bodyParser.json())
 
-app.post('/data', function(request, response) {
-    //console.log("Got data event");
-    if (request._body) {
-        //console.log("Got event with data in _body: "+request._body+" and body: "+request.body);
-        response.status(200).json({ value: 'OK' });
-        sendToQueue(request.body, response);
-    } else {
-        var content = "";
-        request.on("data", function(chunk) {
-            content += chunk;
-        });
-        request.on("end", function() {
-            //if (content.indexOf('TestStep') > 0)
-            //    console.log("Got event with chunked data: "+content.substring(0, 200));
-            response.status(200).json({ value: 'OK' });
-            sendToQueue(JSON.parse(content), response);
-        });
-    }
-});
-
 app.post('/file', function(request, response) {
     var data = null;
     var busboy = new Busboy({ headers: request.headers });  
@@ -55,19 +35,22 @@ app.post('/file', function(request, response) {
         }
         var fileName = data.timestamp + '.jpg';
         fs.writeFile('./upload/' + fileName, val, {encoding: 'base64'}, function() {
-            var absPath = fs.realpathSync('./upload/');
-            try
-            {
-                idol_queries.analyzeImage(absPath + '/' + fileName, function(text) {
-                    data.text = text;
-                    sendToQueue(data, response);
-                });
-            }
-            catch(ex)
-            {
-                console.log('Failed to analyze image: '+
-                    absPath + '/' + fileName + ' due to exception:\n'+ex);
-            }
+            // wait time, to make sure the file is accessible for IDOL
+            setTimeout(30 * 1000, function(){
+                var absPath = fs.realpathSync('./upload/');
+                try
+                {
+                    idol_queries.analyzeImage(absPath + '/' + fileName, function(text) {
+                        data.text = text;
+                        sendToQueue(data, response);
+                    });
+                }
+                catch(ex)
+                {
+                    console.log('Failed to analyze image: '+
+                        absPath + '/' + fileName + ' due to exception:\n'+ex);
+                }
+            });
         });        
       }
     });
@@ -78,7 +61,8 @@ app.post('/file', function(request, response) {
     response.status(202).json({ value: 'OK' }); // 202 - accepted, not completed
 });
 
-app.listen(sophia_config.DATA_SERVER_PORT);
+app.listen(sophia_config.FILE_SERVER_PORT);
+
 var rabbitMq = amqp.createConnection({
     host: sophia_config.QUEUE_HOST
 });
