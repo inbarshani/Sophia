@@ -36,7 +36,7 @@ app.post('/file', function(request, response) {
         var fileName = data.timestamp + '.jpg';
         fs.writeFile('./upload/' + fileName, val, {encoding: 'base64'}, function() {
             // wait time, to make sure the file is accessible for IDOL
-            setTimeout(30 * 1000, function(){
+            setTimeout(function(){
                 var absPath = fs.realpathSync('./upload/');
                 try
                 {
@@ -50,7 +50,7 @@ app.post('/file', function(request, response) {
                     console.log('Failed to analyze image: '+
                         absPath + '/' + fileName + ' due to exception:\n'+ex);
                 }
-            });
+            }, 30*1000);
         });        
       }
     });
