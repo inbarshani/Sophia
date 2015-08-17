@@ -36,14 +36,15 @@ app.post('/file', function(request, response) {
         var fileName = data.timestamp + '.jpg';
         fs.writeFile('./upload/' + fileName, val, {encoding: 'base64'}, function() {
             // wait time, to make sure the file is accessible for IDOL
-            setTimeout(function(){
-                var absPath = fs.realpathSync('./upload/');
-                try
-                {
-                    idol_queries.analyzeImagePost(absPath + '/' + fileName, function(token) {
-                        if (token && token.length > 0)
-                        {
-                            var interval = setInterval(function(){
+            var absPath = fs.realpathSync('./upload/');
+            try
+            {
+                idol_queries.analyzeImagePost(absPath + '/' + fileName, function(token) {
+                    if (token && token.length > 0)
+                    {
+                        var interval = setInterval(function(){
+                            try
+                            {
                                 idol_queries.analyzeImageCheck(token, function(text){
                                     if (text && text.length)
                                     {
@@ -52,21 +53,25 @@ app.post('/file', function(request, response) {
                                         sendToQueue(data, response);
                                     }
                                 });
-                            }, 1000);
-                        }
-                        else
-                        {
-                            data.text = '';
-                            sendToQueue(data, response);
-                        }
-                    });
-                }
-                catch(ex)
-                {
-                    console.log('Failed to analyze image: '+
-                        absPath + '/' + fileName + ' due to exception:\n'+ex);
-                }
-            }, 30*1000);
+                            }
+                            catch(ex)
+                            {
+                                console.log('Failed to check OCR of image, will continue trying: '+ex);
+                            }
+                        }, 1000);
+                    }
+                    else
+                    {
+                        data.text = '';
+                        sendToQueue(data, response);
+                    }
+                });
+            }
+            catch(ex)
+            {
+                console.log('Failed to analyze image: '+
+                    absPath + '/' + fileName + ' due to exception:\n'+ex);
+            }
         });        
       }
     });
@@ -107,6 +112,7 @@ function sendToQueue(data, response) {
         }
     }
 }
+
 /*
 process.on('uncaughtException', function (err) {
   console.log('process uncaughtException: '+require('util').inspect(err));
