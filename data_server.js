@@ -44,7 +44,6 @@ app.post('/file', function(request, response) {
       {
         val = val.substring('data:image/jpeg;base64,'.length);
         //console.log('file content for save: '+val);
-        var buffer = new Buffer(val, 'base64');
         if (!data)
         {
             console.log('no data for queue (yet), file is ready for save');
@@ -55,12 +54,7 @@ app.post('/file', function(request, response) {
             };
         }
         var fileName = data.timestamp + '.jpg';
-        var wstream = fs.createWriteStream('./upload/' + fileName, {
-            flags: 'w',
-            encoding: 'base64'
-        });
-//        wstream.write(buffer);
-        wstream.end(buffer, "UTF-8", function() {
+        fs.writeFile('./upload/' + fileName, val, {encoding: 'base64'}, function() {
             var absPath = fs.realpathSync('./upload/');
             try
             {
