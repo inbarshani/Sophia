@@ -309,20 +309,63 @@ function expandNodes( ul) {
 	}
 }
 var compareDataInfo = [];
+var listOrder=[];
 function displayStats(lis, ul, stats) {
     var colors = ['red', 'blue', 'green', 'teal', 'rosybrown', 'tan', 'plum', 'saddlebrown'];
-	 var div;
+	var div;
 	var li;
+    var firstTime = false;
+    if(listOrder.length==0)
+    {
+        firstTime=true;
+    }
 	var counter = 0;
+
+    var tempOrderList=listOrder;
 	for (var name in stats) {
+        var isSimilar = false;
         div = $('<div class="divBetween">');
         if (counter++ % 3 == 0) {
         	li = $('<li class="stats">');
 	        li.insertBefore($(lis[i]));
         }
         div.css('background-color', colors[counter]);
-        li.append(div);	
-        div.text(name + ':' + stats[name].length);
+        li.append(div);
+        if(firstTime)
+        {
+            listOrder.push(name);
+            div.text(name + ':' + stats[name].length);
+        }
+        else
+        {
+            var isBreak=false;
+            var tempState = Object.keys(stats).map(function(k) { return stats[k] });;
+            for(var j=0;j<tempOrderList.length;j++)
+            {
+                for(var name in stats)
+                {
+                    if(tempOrderList[j]===name)
+                    {
+                        div.text(name + ':' + stats[name].length);
+                        var index = tempOrderList.indexOf(name);
+                        tempOrderList.splice(index, 1);
+                        var indexStates = tempState.indexOf(name);
+                        tempState.splice(indexStates, 1);
+                        isSimilar=true;
+                        isBreak=true;
+                        break;
+                    }
+                }
+                if(isBreak)
+                {
+                    break;
+                }
+            }
+            if(!isSimilar)
+            {
+                div.text(name + ':' + stats[name].length);
+            }
+        }
         div.on('click', function (list, type) {
             return function () {
                 function bringDataForNodes(i) {
