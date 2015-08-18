@@ -310,18 +310,21 @@ function expandNodes( ul) {
 }
 var compareDataInfo = [];
 var listOrder=[];
+var countTests=0;
+
 function displayStats(lis, ul, stats) {
     var colors = ['red', 'blue', 'green', 'teal', 'rosybrown', 'tan', 'plum', 'saddlebrown'];
 	var div;
 	var li;
     var firstTime = false;
+    countTests++;
     if(listOrder.length==0)
     {
         firstTime=true;
     }
 	var counter = 0;
 
-    var tempOrderList=listOrder;
+    var tempOrderList = listOrder.slice();
 	for (var name in stats) {
         var isSimilar = false;
         div = $('<div class="divBetween">');
@@ -339,18 +342,15 @@ function displayStats(lis, ul, stats) {
         else
         {
             var isBreak=false;
-            var tempState = Object.keys(stats).map(function(k) { return stats[k] });;
             for(var j=0;j<tempOrderList.length;j++)
             {
-                for(var name in stats)
+                for(var n in stats)
                 {
-                    if(tempOrderList[j]===name)
+                    if(tempOrderList[j]===n)
                     {
-                        div.text(name + ':' + stats[name].length);
-                        var index = tempOrderList.indexOf(name);
+                        div.text(n + ':' + stats[n].length);
+                        var index = tempOrderList.indexOf(n);
                         tempOrderList.splice(index, 1);
-                        var indexStates = tempState.indexOf(name);
-                        tempState.splice(indexStates, 1);
                         isSimilar=true;
                         isBreak=true;
                         break;
