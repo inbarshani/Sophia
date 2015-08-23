@@ -238,6 +238,52 @@ app.use('/searchReview', function(request, response) {
 
 });
 
+
+app.use('/searchError', function(request, response) {
+    var queryText = request.query.q;
+    var dateCondition = (request.query.dateCondition) ? JSON.parse(request.query.dateCondition) : {};
+    var results = {dataNodes: {}, backboneNodes:[]};
+    idol_queries.search(queryText, dateCondition, function(documents_hash) {
+        var idolResultNodes = Object.keys(documents_hash);
+        var dataDocs = {};
+        var dataResultsNodes = [];
+        if (idolResultNodes.length > 0) {
+            for (var i = 0; i < idolResultNodes.length; i++) {
+                var doc = documents_hash[idolResultNodes[i]];
+                if (sophia_config.backboneTypes.indexOf(doc.type) < 0) {
+                    // this is a data node
+                    results.dataNodes[idolResultNodes[i]] = doc;
+                    dataResultsNodes.push(idolResultNodes[i]);
+                }
+            }
+            neo4j_queries.getBackboneNodesForDataNodes(dataResultsNodes, function(nodes) {
+                var referenceIds = [];
+                nodes.map(function(test){
+                    test.bbNodes.map(function(node){
+                        referenceIds.push(node.id);
+                    });
+                });
+                idol_queries.searchByReference(referenceIds, false, function(idolDocs){
+                    var idolResultNodes = Object.keys(idolDocs);
+                    nodes.map(function(test){
+                        //console.log('searchTestsByName bbNodes test: '+
+                        //    require('util').inspect(test, {depth:4}));
+                        test.name = documents_hash[''+test.test.id].name;
+                        test.bbNodes.map(function(node){
+                            var doc = idolDocs[node.id];
+                            if (doc) {
+                                node.caption = doc.caption;
+                            }
+                        });
+                    });
+                    results.backboneNodes = nodes;
+                    response.send(JSON.stringify(results));
+                });
+            });
+        }
+    });
+});
+
 app.use('/searchBackBoneData', function(request, response) {
     var compareObjData = JSON.parse(request.query.o);
     var results = [];
