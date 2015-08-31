@@ -7,7 +7,7 @@ var sophia_machine = 'myd-vm00366.hpswlabs.adapps.hp.com';
 //var sophia_machine = 'localhost';
 
 global.appBaseUrl = "http://myd-vm06983.hpswlabs.adapps.hp.com:8082/";
-global.fileUploadUrl = "http://"+sophia_machine+":8082/file";
+global.fileUploadUrl = "http://"+sophia_machine+":8083/file";
 global.dataUrl = "http://"+sophia_machine+":8082/data";
 global.sophiaTestID = '';
 global.sophiaTestIDUpdateScript = function(){
@@ -145,21 +145,78 @@ var SpecReporter = function () {
 SpecReporter.prototype = {
   reportRunnerStarting: function (runner) {
     this.started = true;
-    //console.log('*** Runner started '+require('util').inspect(runner));
+    console.log('*** Sophia instrument Runner started ');
     sendSophiaParamsToBrowser(this.currentSuite.guid);
   },
 
   reportRunnerResults: function (runner) {
-    //console.log('*** Runner done');
+    console.log('*** Sophia instrument Runner done, this.currentSuite: '+
+        require('util').inspect(this.currentSuite));
     this.finished = true;
+    if (this.currentSuite)
+    {
+        this.reportTest(this.currentSuite.done_timestamp, 
+            this.currentSuite.description, 'stop');
+        this.currentSuite = null;    
+    }
   },
 
   reportSuiteResults: function (suite) {
-    //console.log('*** Suite results: '+require('util').inspect(suite));
+    console.log('*** Sophia instrument Suite results: '+require('util').inspect(suite));
+    var ts = new Date().getTime();
+    if (suite.parentSuite)
+    {
+        // an internal suite is actually a test step
+        this.reportTestStep(ts, suite.description, 'stop', 'unverified');
+    }
+    else
+    {
+        // top suite, test end
+        if (suite.id == this.currentSuite.id)
+        {
+            this.reportTest(this.currentSuite.done_timestamp, 
+                this.currentSuite.description, 'stop');
+            this.currentSuite = null;
+        }
+    }
+  },
+
+  reportSuiteStarting: function (suite) {
+    console.log('*** Sophia instrument Suite starting: '+require('util').inspect(suite));
+    var ts = new Date().getTime();
+    if (suite.parentSuite)
+    {
+        // an internal suite is actually a test step
+        this.reportTestStep(ts, suite.description, 'start', '');
+    }
+    else
+    {
+        // top suite, test start
+        if (this.currentSuite.id != suite.id ||
+            this.currentSuite.description != suite.description)
+        {
+            // a new suite starting = a new test 
+            // report to Sophia of the previous test end, and new test start
+            if (this.currentSuite.id != -1)
+            {
+                // report the end of the previous test
+                this.reportTest(this.currentSuite.done_timestamp, 
+                    this.currentSuite.description, 'stop');
+            }
+            this.currentSuite.description = suite.description;
+            this.currentSuite.id = suite.id;
+            this.currentSuite.guid = uuid();
+            global.sophiaTestID = this.currentSuite.guid;
+            sendSophiaParamsToBrowser(this.currentSuite.guid);
+            this.currentSuite.done_timestamp = ts;
+
+            this.reportTest(ts, this.currentSuite.description, 'start');
+        }
+    }
   },
 
   reportSpecStarting: function (spec) {
-    //console.log('*** Spec start: '+require('util').inspect(spec));    
+    console.log('*** Sophia instrument Spec start: '+spec.description);    
     var ts = new Date().getTime();
     if (this.currentSuite.id != spec.suite.id ||
         this.currentSuite.description != spec.suite.description)
@@ -169,15 +226,8 @@ SpecReporter.prototype = {
         if (this.currentSuite.id != -1)
         {
             // report the end of the previous test
-            var old_test_args = {
-                timestamp: this.currentSuite.done_timestamp,
-                type: 'Test',
-                action: 'stop',
-                description: this.currentSuite.description,
-                testID: this.currentSuite.guid            
-            }
-
-            reportToSophia(old_test_args);
+            this.reportTest(this.currentSuite.done_timestamp, 
+                this.currentSuite.description, 'stop');
         }
         this.currentSuite.description = spec.suite.description;
         this.currentSuite.id = spec.suite.id;
@@ -186,37 +236,19 @@ SpecReporter.prototype = {
         sendSophiaParamsToBrowser(this.currentSuite.guid);
         this.currentSuite.done_timestamp = ts;
 
-        var new_test_args = {
-            timestamp: ts,
-            type: 'Test',
-            action: 'start',
-            description: this.currentSuite.description,
-            testID: this.currentSuite.guid            
-        }
-
-        reportToSophia(new_test_args);
+        this.reportTest(ts, this.currentSuite.description, 'start');
     }
 
     // get a new timestamp - likely no different than the previous, 
     //  but can make a difference when reporting the step
     ts = new Date().getTime();
-    var args = {
-        timestamp: ts,
-        type: 'TestStep',
-        action: 'start',
-        description: spec.description,
-        testID: this.currentSuite.guid
-    };
-
-    reportToSophia(args);
+    this.reportTestStep(ts, spec.description, 'start', '');
   },
 
   reportSpecResults: function (spec) {
-    //console.log('*** Spec done: '+require('util').inspect(spec));
+    console.log('*** Sophia instrument Spec done: '+spec.description);
+
     var ts = new Date().getTime();
-    // don't know if this is the last step, but save it as such, 
-    //  so that when the suite ends we have a reference
-    this.currentSuite.done_timestamp = ts;
 
     // set the status for the step
     var status = "unverified";
@@ -225,17 +257,40 @@ SpecReporter.prototype = {
     else if (spec.results_.failedCount > 0)
         status = "failed";
 
+    this.reportTestStep(ts, spec.description, 'done', status);
+
+    // don't know if this is the last step, but save it as such, 
+    //  so that when the suite ends we have a reference
+    this.currentSuite.done_timestamp = ts;
+  },
+
+  reportTestStep: function(timestamp, description, action, status){
     // report step
     var args = {
-        timestamp: ts,
+        timestamp: timestamp,
         type: 'TestStep',
-        action: 'done',
-        description: spec.description,
+        action: action,
+        description: description,
         testID: this.currentSuite.guid,
         status: status
     };
 
     reportToSophia(args);
+  },
+
+  reportTest: function(timestamp, description, action){
+    var ts = new Date().getTime();
+    // report step
+    var args = {
+        timestamp: ts,
+        type: 'Test',
+        action: action,
+        description: description,
+        testID: this.currentSuite.guid
+    };
+
+    reportToSophia(args);
+
   }
 };
 
@@ -244,12 +299,19 @@ SpecReporter.prototype = {
 //global.expect = wrapGlobalFN(global.expect, 'expect');
 if (global.jasmine != undefined)
 {
-    console.log('jasmine defined');
+    console.log('Sophia jasmine defined');
     // add reporter
-    global.jasmine.getEnv().addReporter(new SpecReporter());
+    var reporter = new SpecReporter();
+    global.jasmine.getEnv().addReporter(reporter);
+    // need to override jasmine suite execute, so i'll have event for suite start
+    global.orgJasmineExecute = global.jasmine.Suite.prototype.execute;
+    global.jasmine.Suite.prototype.execute = (function(onComplete) {
+       reporter.reportSuiteStarting(this);
+       global.orgJasmineExecute.call(this, onComplete);
+    });
 }
 else
 {
-    console.log('jasmine not defined');
+    console.log('Sophia jasmine not defined');
     //console.log('globals:\n'+require('util').inspect(global, {depth: 4}));
 }
