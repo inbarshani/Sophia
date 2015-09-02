@@ -8,7 +8,7 @@ function showIssues(data) {
         $('#review_results').removeClass('hidden');
         var li, label, div, h5, span;
         testsList.empty();
-        allTests.forEach(function (test) {
+        allTests.backboneNodes.forEach(function (test) {
             li = $('<li '+
             ' data-toggle="tooltip"'+
             ' data-placement="top" title="'+test.name+' (ID: '+test.test.id+
