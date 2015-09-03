@@ -7,6 +7,7 @@ var jsontoxml = require('jsontoxml');
 var dateTime = require("./dateTime");
 
 var mqm_log = require("./processors/mqm_log");
+var site_log = require("./processors/site_log");
 var request = require("./processors/request");
 var jetty_error_log = require("./processors/jetty_error_log");
 var ui_raw = require("./processors/ui_raw");
@@ -104,6 +105,8 @@ function _processQueueMessage(msg) {
         if (obj != null) {
             if (obj_type == 'mqm_log' || obj_type == 'sa_log') {
                 data = mqm_log.getData(obj);
+            else if (obj_type == 'site_log') {
+                data = site_log.getData(obj);
             } else if (obj_type == 'request') {
                 data = request.getData(obj);
             } else if (obj_type == 'jetty_error_log') {
