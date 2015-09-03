@@ -217,7 +217,7 @@ function _processQueueMessage(msg) {
                                 current_test_node_id, data.timestamp);
                             tests_history.push(test_run);
                             lock.release();
-                        } else if (current_test_node_id) {
+                        } else if (current_test_node_id || temp_test_node_id) {
                             linkNewData(results[0]['NodeID'], 
                                 data.type, 
                                 data.timestamp, 
