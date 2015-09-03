@@ -32,16 +32,41 @@ var connection = amqp.createConnection({
 var current_test_id = null;
 var current_test_node_id = null;
 
+// tests history contains test_id, test_node_id and test timestamps start/end
+var test_record = function(test_id, test_node_id, test_start_timestamp){
+    this.id = test_id;
+    this.node_id = test_node_id;
+    this.start = test_start_timestamp;
+};
+
+test_record.prototype.id = null;
+test_record.prototype.node_id = null;
+test_record.prototype.start = null;
+
 var tests_history = [];
 function indexOfTestByID(test_id)
 {
     for (var i = 0; i < tests_history.length; i++) {
-        console.log('tests_history['+i+' of '+tests_history.length+']: '+JSON.stringify(tests_history[i]));
-        if (tests_history[i].test_id == test_id) {
+        console.log('Find test by ID, tests_history['+i+' of '+tests_history.length+']: '+
+            JSON.stringify(tests_history[i]));
+        if (tests_history[i].id == test_id) {
             return i;
         }
     }
     return -1;    
+}
+
+function indexOfTestByTimestamp(timestamp)
+{
+    for (var i = 0; i < tests_history.length; i++) {
+        console.log('Find test by timestamp, tests_history['+i+' of '+tests_history.length+']: '+
+            JSON.stringify(tests_history[i]));
+        if (tests_history[i].start <= timestamp && tests_history[i].end && 
+            tests_history[i].end >= timestamp) {
+            return i;
+        }
+    }
+    return -1;        
 }
 
 // mutex locking to guarntee that neo4j calls of different incoming queue messages
@@ -94,13 +119,13 @@ function _processQueueMessage(msg) {
             } else if (obj_type == 'test') {
                 data = test.getData(obj);                
                 if (data.action.toLowerCase() == "stop") {
-                    // this is the 2nd event of a test, so it is the test END event
                     console.log(' [x] Stop test');
                     var indexOfTestInArray = indexOfTestByID(data.testID);
                     if (indexOfTestInArray >= 0)
                     {
+                        tests_history[indexOfTestInArray].end = data.timestamp;
                         connection.publish(sophia_config.QUEUE_TEST_NAME, 
-                            {TestNodeID: tests_history[indexOfTestInArray].test_node_id});
+                            {TestNodeID: tests_history[indexOfTestInArray].node_id});
                     }
                     if (current_test_id == data.testID)
                     {
@@ -124,7 +149,8 @@ function _processQueueMessage(msg) {
             // this is a workaround which doesn't support multiple tests at the same time, will need to fix
             if (current_test_id != null && data.testID == undefined) {
                 data.testID = current_test_id;
-            } else if (data.testID && (current_test_id!=data.testID)) {
+            } else if (data.testID && (data.testID.length == 36 /* guid length */)
+                && (current_test_id!=data.testID)) {
                 // TODO: bind current_test_id by id of node of type Test, if the current is not set
                 // this will recover from disruptions in processing incoming events
                 // TODO: the problem - need to get node id as well, which requires a query on neo4j...
@@ -133,15 +159,40 @@ function _processQueueMessage(msg) {
                 var indexOfTestInArray = indexOfTestByID(data.testID);
                 if (indexOfTestInArray >= 0)
                 {
-                    temp_test_id = tests_history[indexOfTestInArray].test_id;
-                    temp_test_node_id = tests_history[indexOfTestInArray].test_node_id;
+                    temp_test_id = tests_history[indexOfTestInArray].id;
+                    temp_test_node_id = tests_history[indexOfTestInArray].node_id;
+                }
+                else
+                {
+                    // can't find the test by the ID
+                    lock.release();
+                    console.log(" [x] New data of type "+data.type+
+                        " and test id "+data.testID+
+                        " and timestamp "+data.timestamp+
+                        " is not associated with any test. Skipping...");
+                    return;    
                 }
             }
             else if (!current_test_id && !data.testID) {
-                // no current_test_id, no data.testID - don't create the node
-                lock.release();
-                console.log(" [x] No test ID. Skipping...");
-                return;    
+                // no current_test_id, no data.testID
+                // try to locate the correct test from the histoy of tests,
+                //   using the new data timestamp
+                // Currently: just work within the current session, i.e. if the process goes down, will not support additional events
+                var indexOfTestInArray = indexOfTestByTimestamp(data.timestamp);
+                if (indexOfTestInArray >= 0)
+                {
+                    temp_test_id = tests_history[indexOfTestInArray].id;
+                    temp_test_node_id = tests_history[indexOfTestInArray].node_id;
+                }
+                else
+                {
+                    lock.release();
+                    console.log(" [x] New data of type "+data.type+
+                        " and test id "+data.testID+
+                        " and timestamp "+data.timestamp+
+                        " is not associated with any test. Skipping...");
+                    return;    
+                }
             }
             var query = 'CREATE (new_node:' + data.type + ' {attributes} ) RETURN id(new_node) AS NodeID';
 
@@ -151,7 +202,7 @@ function _processQueueMessage(msg) {
                     test_id: (temp_test_id? temp_test_id : current_test_id)
                 }
             };
-            console.log(" [x] Add new node query: " + query);
+            console.log(" [x] Add new node query: " + query+" with params: "+JSON.stringify(params));
             db.cypher({query: query, params: params}, function(err, results) {
                 try {
                     if (err) {
@@ -161,7 +212,9 @@ function _processQueueMessage(msg) {
                         idol_queries.addToIdol(results[0]['NodeID'], data);
                         if (data.type == 'Test') {
                             current_test_node_id = results[0]['NodeID'];
-                            tests_history.push({test_id: current_test_id, test_node_id: current_test_node_id});
+                            var test_run = new test_record(current_test_id, 
+                                current_test_node_id, data.timestamp);
+                            tests_history.push(test_run);
                             lock.release();
                         } else if (current_test_node_id) {
                             linkNewData(results[0]['NodeID'], 

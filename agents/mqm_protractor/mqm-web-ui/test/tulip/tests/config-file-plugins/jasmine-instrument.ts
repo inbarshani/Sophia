@@ -146,7 +146,8 @@ SpecReporter.prototype = {
   reportRunnerStarting: function (runner) {
     this.started = true;
     console.log('*** Sophia instrument Runner started ');
-    sendSophiaParamsToBrowser(this.currentSuite.guid);
+    if (this.currentSuite && this.currentSuite.guid && this.currentSuite.guid > 0)
+        sendSophiaParamsToBrowser(this.currentSuite.guid);
   },
 
   reportRunnerResults: function (runner) {
