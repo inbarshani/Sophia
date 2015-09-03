@@ -3,9 +3,6 @@ var neo4j = require('neo4j');
 var http = require('http');
 var jsontoxml = require('jsontoxml');
 
-
-var dateTime = require("./dateTime");
-
 var mqm_log = require("./processors/mqm_log");
 var site_log = require("./processors/site_log");
 var request = require("./processors/request");
