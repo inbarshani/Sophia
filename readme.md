@@ -52,17 +52,21 @@ B. Jetty and MQM log parser - REPEAT STEPS 3-4 AFTER MQM DEPLOYMENT!!!!
 	jetty-stats.xml
 	jetty-logging.xml
 	See <Sophia>\agents\jetty\logging\start.ini for an example. 
-4. create folder /DATA/ads_slave/deployments/8082/hp/mqm/server/logs
-5. copy <Sophia>\agents\jetty\logging\sophia to \logstash-1.4.2\patterns
-6. Restart Jetty
-7. running logstash in the background:
+4. edit /DATA/ads_slave/deployments/8082/hp/mqm/server/conf/jetty-requestlog.xml
+	after the line <Set name="LogTimeZone"><Property name="requestlog.timezone" default="GMT"/></Set>
+	add the next line:
+    <Set name="logDateFormat">dd/MMM/yyyy:HH:mm:ss.SSS</Set>
+5. create folder /DATA/ads_slave/deployments/8082/hp/mqm/server/logs
+6. copy <Sophia>\agents\jetty\logging\sophia to \logstash-1.4.2\patterns
+7. Restart Jetty
+8. running logstash in the background:
 	cd /var/opt/logstash-1.4.2/bin
 	./logstash -f log.conf &
 	to bring to foreground: fg
 	to send to background: bg
 	to check bg jobs: jobs -l
 	to check if logstash is running: ps aux | grep logstash
-8. in MQM site admin configure to log everything
+9. in MQM site admin configure to log everything
 
 C. AppPulse POC
 ====
