@@ -4,8 +4,8 @@ module.exports = {
         d.setFullYear(new Date().getFullYear());
         obj.timestamp = d.getTime();
         obj.high_priority_index = obj.message;
-        obj.indexable_content = obj.req_type + ' ' + obj.username + ' ' + obj.ip + ' ' +
-        	obj.method + ' ' + obj.message;
+        obj.indexable_content = obj.level + ' ' + obj.username + ' ' + obj.alm_date + ' ' +
+        	obj.db_date + ' ' + obj.err_type + ' ' + obj.message;
         return obj;
 	},
 
@@ -14,3 +14,18 @@ module.exports = {
 		return formatted_result;		
 	}
 };
+
+/*
+{
+                        "type": "%{type}",
+                        "db_date":"%{db_date}", 
+                        "alm_date":"%{alm_date}", 
+                        "thread": "%{thread}", 
+                        "username": "%{username}", 
+                        "level": "%{level}",
+                        "err_type": "%{err_type}",
+                        "message": "%{error}"
+                
+                }
+
+*/
