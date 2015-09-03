@@ -105,6 +105,7 @@ function _processQueueMessage(msg) {
         if (obj != null) {
             if (obj_type == 'mqm_log' || obj_type == 'sa_log') {
                 data = mqm_log.getData(obj);
+            }
             else if (obj_type == 'site_log') {
                 data = site_log.getData(obj);
             } else if (obj_type == 'request') {
