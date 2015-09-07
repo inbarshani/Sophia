@@ -4,8 +4,9 @@
         "TESTS_DB_FILE": "./sophia_2.db",
         "NEO4J_DB_SERVER": "16.60.168.105",
         "NEO4J_DB_PORT": "7476",
-        "QUEUE_DATA_NAME": "sophia_2",
-        "QUEUE_TEST_NAME": "sophia_2_tests",
+        "QUEUE_DATA_EVENTS_NAME": "sophia2_data_events",
+        "QUEUE_TEST_EVENTS_NAME": "sophia2_test_events",
+        "QUEUE_TESTS_NAME": "sophia2_tests",
         "DATA_SERVER_PORT": 8092,
         "FILE_SERVER_PORT": 8093,
         "WEB_APP_PORT": 8095

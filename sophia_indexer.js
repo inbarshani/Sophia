@@ -12,7 +12,7 @@ if (process.argv.length == 2)
 
 	connection.on('ready', function() {
 	    console.log('connected to RabbitMQ');
-	    connection.queue(sophia_config.QUEUE_TEST_NAME, {
+	    connection.queue(sophia_config.QUEUE_TESTS_NAME, {
 	        autoDelete: false,
 	        durable: true
 	    }, function(queue) {

@@ -74,12 +74,12 @@ var lock = new Padlock();
 
 connection.on('ready', function() {
     console.log('connected to RabbitMQ');
-    connection.queue(sophia_config.QUEUE_DATA_NAME, {
+    connection.queue(sophia_config.QUEUE_DATA_EVENTS_NAME, {
         autoDelete: false,
         durable: true
     }, function(queue) {
 
-        console.log(' [*] Waiting for messages '+sophia_config.QUEUE_DATA_NAME+'. To exit press CTRL+C')
+        console.log(' [*] Waiting for messages '+sophia_config.QUEUE_DATA_EVENTS_NAME+'. To exit press CTRL+C')
 
         queue.subscribe(processQueueMessage);
     });
