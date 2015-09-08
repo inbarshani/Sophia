@@ -44,6 +44,7 @@ test_record.prototype.start = null;
 var tests_history = [];
 
 function indexOfTestByID(test_id) {
+    console.log('Find test by ID, tests_history.length: '+tests_history.length:);
     for (var i = 0; i < tests_history.length; i++) {
         console.log('Find test by ID, tests_history[' + i + ' of ' + tests_history.length + ']: ' +
             JSON.stringify(tests_history[i]));
@@ -55,6 +56,7 @@ function indexOfTestByID(test_id) {
 }
 
 function indexOfTestByTimestamp(timestamp) {
+    console.log('Find test by timestamp, tests_history.length: '+tests_history.length:);
     for (var i = 0; i < tests_history.length; i++) {
         console.log('Find test by timestamp, tests_history[' + i + ' of ' + tests_history.length + ']: ' +
             JSON.stringify(tests_history[i]));
@@ -129,7 +131,7 @@ function processTestEvent(test_event) {
             var indexOfTestInArray = indexOfTestByID(data.testID);
             if (indexOfTestInArray >= 0) {
                 tests_history[indexOfTestInArray].end = data.timestamp;
-                connection.publish(sophia_config.QUEUE_TEST_NAME, {
+                connection.publish(sophia_config.QUEUE_TESTS_NAME, {
                     TestNodeID: tests_history[indexOfTestInArray].node_id
                 });
             }

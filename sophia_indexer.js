@@ -17,7 +17,7 @@ if (process.argv.length == 2)
 	        durable: true
 	    }, function(queue) {
 
-	        console.log(' [*] Waiting for messages on '+sophia_config.QUEUE_TEST_NAME+
+	        console.log(' [*] Waiting for messages on '+sophia_config.QUEUE_TESTS_NAME+
 	        	'. To exit press CTRL+C')
 
 	        queue.subscribe(_hashBackboneNodes);
