@@ -31,7 +31,7 @@ var current_test_id = null;
 var current_test_node_id = null;
 
 // tests history contains test_id, test_node_id and test timestamps start/end
-var test_record = function(test_id, test_node_id, test_start_timestamp){
+var test_record = function(test_id, test_node_id, test_start_timestamp) {
     this.id = test_id;
     this.node_id = test_node_id;
     this.start = test_start_timestamp;
@@ -42,29 +42,28 @@ test_record.prototype.node_id = null;
 test_record.prototype.start = null;
 
 var tests_history = [];
-function indexOfTestByID(test_id)
-{
+
+function indexOfTestByID(test_id) {
     for (var i = 0; i < tests_history.length; i++) {
-        console.log('Find test by ID, tests_history['+i+' of '+tests_history.length+']: '+
+        console.log('Find test by ID, tests_history[' + i + ' of ' + tests_history.length + ']: ' +
             JSON.stringify(tests_history[i]));
         if (tests_history[i].id == test_id) {
             return i;
         }
     }
-    return -1;    
+    return -1;
 }
 
-function indexOfTestByTimestamp(timestamp)
-{
+function indexOfTestByTimestamp(timestamp) {
     for (var i = 0; i < tests_history.length; i++) {
-        console.log('Find test by timestamp, tests_history['+i+' of '+tests_history.length+']: '+
+        console.log('Find test by timestamp, tests_history[' + i + ' of ' + tests_history.length + ']: ' +
             JSON.stringify(tests_history[i]));
-        if (tests_history[i].start <= timestamp && tests_history[i].end && 
+        if (tests_history[i].start <= timestamp && tests_history[i].end &&
             tests_history[i].end >= timestamp) {
             return i;
         }
     }
-    return -1;        
+    return -1;
 }
 
 // mutex locking to guarntee that neo4j calls of different incoming queue messages
@@ -79,170 +78,229 @@ connection.on('ready', function() {
         durable: true
     }, function(queue) {
 
-        console.log(' [*] Waiting for messages '+sophia_config.QUEUE_DATA_EVENTS_NAME+'. To exit press CTRL+C')
+        console.log(' [*] Waiting for messages ' + sophia_config.QUEUE_DATA_EVENTS_NAME + '. To exit press CTRL+C')
 
         queue.subscribe(processQueueMessage);
+    });
+    connection.queue(sophia_config.QUEUE_NOT_LINKED_NAME, {
+        autoDelete: false,
+        durable: true
+    }, function(queue) {
+
+        console.log(' [*] Waiting for messages ' + sophia_config.QUEUE_NOT_LINKED_NAME);
+
+        queue.subscribe(processNoLinkQueueMessage);
     });
 });
 
 function processQueueMessage(msg) {
-    var params = [1];
-    params[0] = msg;
-    console.log(" [x] Received new msg at "+new Date()+" with active test: "+(current_test_id!=null));
+    var params = [];
+    params.push(msg);
+    params.push(true);
+    console.log(" [x] Received new msg at " + new Date() + " with active test: " + (current_test_id != null));
     lock.runwithlock(_processQueueMessage, params);
 }
 
+function processNoLinkQueueMessage(msg) {
+    var params = [];
+    params.push(msg);
+    params.push(false);
+    console.log(" [x] Received no link msg origin date " + new Date() + " with msg: " + msg);
+    setTimeout(function(){lock.runwithlock(_processQueueMessage, params);}, 
+        sophia_config.QUEUE_NOT_LINKED_DELAY);;
+}
+
 function _processQueueMessage(msg) {
+    var obj = JSON.parse(msg.data);
+    var obj_type = obj.type.toLowerCase();
+    console.log(" [x] New msg type is: " + obj_type);
+    if (obj_type == "test")
+        processTestEvent(obj);
+    else
+        processDataEvent(obj);
+};
+
+function processTestEvent(test_event) {
     try {
-        var obj = JSON.parse(msg.data);
-        var data;        
-        var obj_type = obj.type.toLowerCase();
-        var temp_test_id, temp_test_node_id = null;
-        console.log(" [x] New msg type is: " + obj_type);
-        if (obj != null) {
-            if (obj_type == 'mqm_log' || obj_type == 'sa_log') {
-                data = mqm_log.getData(obj);
+        var data = test.getData(test_event);
+        if (data.action.toLowerCase() == "stop") {
+            console.log(' [x] Stop test');
+            var indexOfTestInArray = indexOfTestByID(data.testID);
+            if (indexOfTestInArray >= 0) {
+                tests_history[indexOfTestInArray].end = data.timestamp;
+                connection.publish(sophia_config.QUEUE_TEST_NAME, {
+                    TestNodeID: tests_history[indexOfTestInArray].node_id
+                });
             }
-            else if (obj_type == 'site_log') {
-                data = site_log.getData(obj);
-            } else if (obj_type == 'request') {
-                data = request.getData(obj);
-            } else if (obj_type == 'jetty_error_log') {
-                data = jetty_error_log.getData(obj);
-            } else if (obj_type == 'ui_raw') {
-                data = ui_raw.getData(obj);
-            } else if (obj_type == 'ui_logical') {
-                data = ui_logical.getData(obj);
-            } else if (obj_type == 'screen') {
-                data = screen.getData(obj);
-            } else if (obj_type == 'teststep') {
-                data = teststep.getData(obj);
-            } else if (obj_type == 'test') {
-                data = test.getData(obj);                
-                if (data.action.toLowerCase() == "stop") {
-                    console.log(' [x] Stop test');
-                    var indexOfTestInArray = indexOfTestByID(data.testID);
-                    if (indexOfTestInArray >= 0)
-                    {
-                        tests_history[indexOfTestInArray].end = data.timestamp;
-                        connection.publish(sophia_config.QUEUE_TEST_NAME, 
-                            {TestNodeID: tests_history[indexOfTestInArray].node_id});
-                    }
-                    if (current_test_id == data.testID)
-                    {
-                        current_test_id = null;
-                        current_test_node_id = null;
-                    }
+            if (current_test_id == data.testID) {
+                current_test_id = null;
+                current_test_node_id = null;
+            }
+            lock.release();
+            return;
+        } else {
+            // got an event to start a test, may or may not stopped the active test (on the other hand, may not have an active test)
+            if (!current_test_id) {
+                console.log(' [x] Start test with ID: ' + data.testID);
+            } else
+                console.log(' [x] Switch to test with ID: ' + data.testID);
+            current_test_id = data.testID;
+            current_test_node_id = null;
+        }
+        var query = 'CREATE (new_node:' + data.type + ' {attributes} ) RETURN id(new_node) AS NodeID';
+
+        var params = {
+            attributes: {
+                timestamp: data.timestamp,
+                test_id: (temp_test_id ? temp_test_id : current_test_id)
+            }
+        };
+        console.log(" [x] Add new node query: " + query + " with params: " + JSON.stringify(params));
+        db.cypher({
+            query: query,
+            params: params
+        }, function(err, results) {
+            try {
+                if (err) {
+                    console.error('neo4j query failed: ' + query + '\n');
                     lock.release();
-                    return;
-                } else { 
-                    // got an event to start a test, may or may not stopped the active test (on the other hand, may not have an active test)
-                    if (!current_test_id) {
-                        console.log(' [x] Start test with ID: ' + data.testID);
-                    }
-                    else
-                        console.log(' [x] Switch to test with ID: ' + data.testID);                    
-                    current_test_id = data.testID;
-                    current_test_node_id = null;
+                } else if (results[0] && results[0]['NodeID']) {
+                    idol_queries.addToIdol(results[0]['NodeID'], data);
+                    current_test_node_id = results[0]['NodeID'];
+                    var test_run = new test_record(current_test_id,
+                        current_test_node_id, data.timestamp);
+                    tests_history.push(test_run);
+                    lock.release();
                 }
+            } catch (ex) {
+                console.log('exception after adding a new node: ' + ex);
+                lock.release();
+            }
+        });
+    } catch (ex) {
+        console.log(' [**] Exception in adding new data: ' + ex);
+        lock.release();
+    }
+}
+
+function processDataEvent(data_event, requeue_if_no_test) {
+    try {
+        var data;
+        var data_event_type = data_event.type.toLowerCase();
+        var temp_test_id, temp_test_node_id = null;
+        if (data_event_type != null) {
+            if (data_event_type == 'mqm_log' || data_event_type == 'sa_log') {
+                data = mqm_log.getData(data_event);
+            } else if (data_event_type == 'site_log') {
+                data = site_log.getData(data_event);
+            } else if (data_event_type == 'request') {
+                data = request.getData(data_event);
+            } else if (data_event_type == 'jetty_error_log') {
+                data = jetty_error_log.getData(data_event);
+            } else if (data_event_type == 'ui_raw') {
+                data = ui_raw.getData(data_event);
+            } else if (data_event_type == 'ui_logical') {
+                data = ui_logical.getData(data_event);
+            } else if (data_event_type == 'screen') {
+                data = screen.getData(data_event);
+            } else if (data_event_type == 'teststep') {
+                data = teststep.getData(data_event);
             }
             // for events that don't have built-in test ID, assume we're in context of the current test
             // this is a workaround which doesn't support multiple tests at the same time, will need to fix
             if (current_test_id != null && data.testID == undefined) {
                 data.testID = current_test_id;
-            } else if (data.testID && (data.testID.length == 36 /* guid length */)
-                && (current_test_id!=data.testID)) {
+            } else if (data.testID && (data.testID.length == 36 /* guid length */ ) && (current_test_id != data.testID)) {
                 // TODO: bind current_test_id by id of node of type Test, if the current is not set
                 // this will recover from disruptions in processing incoming events
                 // TODO: the problem - need to get node id as well, which requires a query on neo4j...
                 //          conflicts with the async nature of execution.
                 // Workaround: just work within the current session, i.e. if the process goes down, will not support additional events
                 var indexOfTestInArray = indexOfTestByID(data.testID);
-                if (indexOfTestInArray >= 0)
-                {
+                if (indexOfTestInArray >= 0) {
                     temp_test_id = tests_history[indexOfTestInArray].id;
                     temp_test_node_id = tests_history[indexOfTestInArray].node_id;
-                }
-                else
-                {
+                } else {
                     // can't find the test by the ID
+                    console.log(" [x] New data of type " + data.type +
+                        " and test id " + data.testID +
+                        " and timestamp " + data.timestamp +
+                        " is not associated with any test. \n"+
+                        " Sending to wait queue,");
+                    if (connection && requeue_if_no_test) {
+                        connection.publish(sophia_config.QUEUE_NOT_LINKED_NAME, 
+                            data_event);
+                    }                    
                     lock.release();
-                    console.log(" [x] New data of type "+data.type+
-                        " and test id "+data.testID+
-                        " and timestamp "+data.timestamp+
-                        " is not associated with any test. Skipping...");
-                    return;    
+                    return;
                 }
-            }
-            else if (!current_test_id && !data.testID) {
+            } else if (!current_test_id && !data.testID) {
                 // no current_test_id, no data.testID
                 // try to locate the correct test from the histoy of tests,
                 //   using the new data timestamp
                 // Currently: just work within the current session, i.e. if the process goes down, will not support additional events
                 var indexOfTestInArray = indexOfTestByTimestamp(data.timestamp);
-                if (indexOfTestInArray >= 0)
-                {
+                if (indexOfTestInArray >= 0) {
                     temp_test_id = tests_history[indexOfTestInArray].id;
                     temp_test_node_id = tests_history[indexOfTestInArray].node_id;
-                }
-                else
-                {
+                } else {
+                    console.log(" [x] New data of type " + data.type +
+                        " and test id " + data.testID +
+                        " and timestamp " + data.timestamp +
+                        " is not associated with any test. \n"+
+                        " Sending to wait queue");
+                    if (connection && requeue_if_no_test) {
+                        connection.publish(sophia_config.QUEUE_NOT_LINKED_NAME, 
+                            data_event);
+                    }                    
                     lock.release();
-                    console.log(" [x] New data of type "+data.type+
-                        " and test id "+data.testID+
-                        " and timestamp "+data.timestamp+
-                        " is not associated with any test. Skipping...");
-                    return;    
+                    return;
                 }
             }
-            var query = 'CREATE (new_node:' + data.type + ' {attributes} ) RETURN id(new_node) AS NodeID';
 
-            var params = {
-                attributes: {
-                    timestamp: data.timestamp,
-                    test_id: (temp_test_id? temp_test_id : current_test_id)
-                }
-            };
-            console.log(" [x] Add new node query: " + query+" with params: "+JSON.stringify(params));
-            db.cypher({query: query, params: params}, function(err, results) {
-                try {
-                    if (err) {
-                        console.error('neo4j query failed: ' + query + '\n');
-                        lock.release();
-                    } else if (results[0] && results[0]['NodeID']) {
-                        idol_queries.addToIdol(results[0]['NodeID'], data);
-                        if (data.type == 'Test') {
-                            current_test_node_id = results[0]['NodeID'];
-                            var test_run = new test_record(current_test_id, 
-                                current_test_node_id, data.timestamp);
-                            tests_history.push(test_run);
-                            lock.release();
-                        } else if (current_test_node_id || temp_test_node_id) {
-                            linkNewData(results[0]['NodeID'], 
-                                data.type, 
-                                data.timestamp, 
-                                (temp_test_node_id ? temp_test_node_id :current_test_node_id));
-                            temp_test_id = null;
-                            temp_test_node_id = null;
-                        }
-                        else
-                            lock.release();
-                        
-                    }
-                }
-                catch(ex)
-                {
-                    console.log('exception after adding a new node: '+ex);
-                    lock.release();
-                }
-            });
+            addNewData(data, (temp_test_id ? temp_test_id : current_test_id), 
+                (temp_test_node_id ? temp_test_node_id : current_test_node_id));
         }
     } catch (ex) {
         console.log(' [**] Exception in adding new data: ' + ex);
         lock.release();
     }
+}
 
-};
+function addNewData(data, test_id, test_node) {
+    var query = 'CREATE (new_node:' + data.type + ' {attributes} ) RETURN id(new_node) AS NodeID';
+
+    var params = {
+        attributes: {
+            timestamp: data.timestamp,
+            test_id: test_id
+        }
+    };
+    console.log(" [x] Add new node query: " + query + " with params: " + JSON.stringify(params));
+    db.cypher({
+        query: query,
+        params: params
+    }, function(err, results) {
+        try {
+            if (err) {
+                console.error('neo4j query failed: ' + query + '\n');
+                lock.release();
+            } else if (results[0] && results[0]['NodeID']) {
+                idol_queries.addToIdol(results[0]['NodeID'], data);
+                if (test_node) {
+                    linkNewData(results[0]['NodeID'],
+                        data.type,
+                        data.timestamp, test_node);
+                } else
+                    lock.release();
+
+            }
+        } catch (ex) {
+            console.log('exception after adding a new node: ' + ex);
+            lock.release();
+        }
+    });    
+}
 
 function linkNewData(node_id, type, timestamp, test_node_id) {
     // link a new node
@@ -265,7 +323,7 @@ function linkNewData(node_id, type, timestamp, test_node_id) {
                 console.log(' [***] linkNode. Err? ' + err);
                 if (err) throw err;
 
-                neo4j_queries.linkNode(node_id, isBackbone, prev_backbone_node_id, 
+                neo4j_queries.linkNode(node_id, isBackbone, prev_backbone_node_id,
                     next_backbone_node_id, prev_data_node_id, next_data_node_id, this);
             },
             function done(err) {
@@ -278,4 +336,3 @@ function linkNewData(node_id, type, timestamp, test_node_id) {
         lock.release();
     }
 }
-

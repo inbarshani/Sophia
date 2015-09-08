@@ -48,12 +48,9 @@ function sendToQueue(data, response) {
     var data_json = JSON.stringify(data);
     if (rabbitMq) {
         rabbitMq.publish(sophia_config.QUEUE_DATA_EVENTS_NAME, data_json);
-        if (data.src != undefined) {
-            console.log(" [x] RabbitMQ Sent request data with timestamp: " + data.timestamp + "\n");
-        } else {
-            //if (data_json.indexOf('TestStep')>0)
-            console.log(" [x] RabbitMQ Sent %s\n", data_json);
-        }
+        console.log(" [x] RabbitMQ Sent data to queue "+
+            sophia_config.QUEUE_DATA_EVENTS_NAME+
+            " with timestamp " + data.timestamp + "\n");
     }
 }
 
