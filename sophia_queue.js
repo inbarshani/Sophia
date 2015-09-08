@@ -44,7 +44,7 @@ test_record.prototype.start = null;
 var tests_history = [];
 
 function indexOfTestByID(test_id) {
-    console.log('Find test by ID, tests_history.length: '+tests_history.length:);
+    console.log('Find test by ID, tests_history.length: '+tests_history.length);
     for (var i = 0; i < tests_history.length; i++) {
         console.log('Find test by ID, tests_history[' + i + ' of ' + tests_history.length + ']: ' +
             JSON.stringify(tests_history[i]));
@@ -56,7 +56,7 @@ function indexOfTestByID(test_id) {
 }
 
 function indexOfTestByTimestamp(timestamp) {
-    console.log('Find test by timestamp, tests_history.length: '+tests_history.length:);
+    console.log('Find test by timestamp, tests_history.length: '+tests_history.length);
     for (var i = 0; i < tests_history.length; i++) {
         console.log('Find test by timestamp, tests_history[' + i + ' of ' + tests_history.length + ']: ' +
             JSON.stringify(tests_history[i]));
