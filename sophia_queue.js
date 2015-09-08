@@ -185,26 +185,27 @@ function processTestEvent(test_event) {
 
 function processDataEvent(data_event, requeue_if_no_test) {
     try {
-        var data;
-        var data_event_type = data_event.type.toLowerCase();
+        var data_event_string = JSON.stringify(data_event);
+        var data = JSON.parse(data_event_string); // clone data_event
+        var data_type = data.type.toLowerCase();
         var temp_test_id, temp_test_node_id = null;
-        if (data_event_type != null) {
-            if (data_event_type == 'mqm_log' || data_event_type == 'sa_log') {
-                data = mqm_log.getData(data_event);
-            } else if (data_event_type == 'site_log') {
-                data = site_log.getData(data_event);
-            } else if (data_event_type == 'request') {
-                data = request.getData(data_event);
-            } else if (data_event_type == 'jetty_error_log') {
+        if (data_type != null) {
+            if (data_type == 'mqm_log' || data_type == 'sa_log') {
+                data = mqm_log.getData(data);
+            } else if (data_type == 'site_log') {
+                data = site_log.getData(data);
+            } else if (data_type == 'request') {
+                data = request.getData(data);
+            } else if (data_type == 'jetty_error_log') {
                 data = jetty_error_log.getData(data_event);
-            } else if (data_event_type == 'ui_raw') {
-                data = ui_raw.getData(data_event);
-            } else if (data_event_type == 'ui_logical') {
-                data = ui_logical.getData(data_event);
-            } else if (data_event_type == 'screen') {
-                data = screen.getData(data_event);
-            } else if (data_event_type == 'teststep') {
-                data = teststep.getData(data_event);
+            } else if (data_type == 'ui_raw') {
+                data = ui_raw.getData(data);
+            } else if (data_type == 'ui_logical') {
+                data = ui_logical.getData(data);
+            } else if (data_type == 'screen') {
+                data = screen.getData(data);
+            } else if (data_type == 'teststep') {
+                data = teststep.getData(data);
             }
             // for events that don't have built-in test ID, assume we're in context of the current test
             // this is a workaround which doesn't support multiple tests at the same time, will need to fix
@@ -229,7 +230,7 @@ function processDataEvent(data_event, requeue_if_no_test) {
                     if (connection && requeue_if_no_test) {
                         console.log(" Sending to wait queue.")
                         connection.publish(sophia_config.QUEUE_NOT_LINKED_NAME, 
-                            JSON.stringify({data: data_event}));
+                            data_event_string);
                     }                    
                     lock.release();
                     return;
@@ -251,7 +252,7 @@ function processDataEvent(data_event, requeue_if_no_test) {
                     if (connection && requeue_if_no_test) {
                         console.log(" Sending to wait queue.")
                         connection.publish(sophia_config.QUEUE_NOT_LINKED_NAME, 
-                            JSON.stringify({data: data_event}));
+                            data_event_string);
                     }                    
                     lock.release();
                     return;
