@@ -105,15 +105,16 @@ function processNoLinkQueueMessage(msg) {
     var params = [];
     params.push(msg);
     params.push(false);
-    console.log(" [x] Received no link msg origin date " + new Date() + " with msg: " + msg);
+    console.log(" [x] Received no link msg with msg: " + msg);
     setTimeout(function(){lock.runwithlock(_processQueueMessage, params);}, 
         sophia_config.QUEUE_NOT_LINKED_DELAY);;
 }
 
 function _processQueueMessage(msg, requeue_if_no_test) {
+    console.log(" [x] New msg is being processed");
     var obj = JSON.parse(msg.data);
     var obj_type = obj.type.toLowerCase();
-    console.log(" [x] New msg type is: " + obj_type);
+    console.log(" [xx] New msg type is: " + obj_type);
     if (obj_type == "test")
         processTestEvent(obj);
     else
@@ -152,10 +153,10 @@ function processTestEvent(test_event) {
         var params = {
             attributes: {
                 timestamp: data.timestamp,
-                test_id: (temp_test_id ? temp_test_id : current_test_id)
+                test_id: data.testID
             }
         };
-        console.log(" [x] Add new node query: " + query + " with params: " + JSON.stringify(params));
+        console.log(" [xx] Add new node query: " + query + " with params: " + JSON.stringify(params));
         db.cypher({
             query: query,
             params: params
@@ -172,6 +173,11 @@ function processTestEvent(test_event) {
                     tests_history.push(test_run);
                     lock.release();
                 }
+                else {
+                    console.error('NodeID is not found in neo4j results for adding test: '+
+                        require('util').inspect(results, {depth: 4}));
+                    lock.release();                
+                }                
             } catch (ex) {
                 console.log('exception after adding a new node: ' + ex);
                 lock.release();
@@ -223,7 +229,7 @@ function processDataEvent(data_event, requeue_if_no_test) {
                     temp_test_node_id = tests_history[indexOfTestInArray].node_id;
                 } else {
                     // can't find the test by the ID
-                    console.log(" [x] New data of type " + data.type +
+                    console.log(" [xx] New data of type " + data.type +
                         " and test id " + data.testID +
                         " and timestamp " + data.timestamp +
                         " is not associated with any test. \n");
@@ -245,7 +251,7 @@ function processDataEvent(data_event, requeue_if_no_test) {
                     temp_test_id = tests_history[indexOfTestInArray].id;
                     temp_test_node_id = tests_history[indexOfTestInArray].node_id;
                 } else {
-                    console.log(" [x] New data of type " + data.type +
+                    console.log(" [xx] New data of type " + data.type +
                         " and test id " + data.testID +
                         " and timestamp " + data.timestamp +
                         " is not associated with any test.");
@@ -259,6 +265,7 @@ function processDataEvent(data_event, requeue_if_no_test) {
                 }
             }
 
+            console.log('[xx] Adding the new data event');
             addNewData(data, (temp_test_id ? temp_test_id : current_test_id), 
                 (temp_test_node_id ? temp_test_node_id : current_test_node_id));
         }
@@ -295,6 +302,11 @@ function addNewData(data, test_id, test_node) {
                 } else
                     lock.release();
 
+            }
+            else {
+                console.error('NodeID is not found in neo4j results: '+
+                    require('util').inspect(results, {depth: 4}));
+                lock.release();                
             }
         } catch (ex) {
             console.log('exception after adding a new node: ' + ex);
