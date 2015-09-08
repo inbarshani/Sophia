@@ -99,7 +99,8 @@ function processQueueMessage(msg) {
     var params = [];
     params.push(msg);
     params.push(true);
-    console.log(" [x] Received new msg at " + new Date() + " with active test: " + (current_test_id != null));
+    console.log(" [x] Received new msg at " + new Date() + 
+        " with active test: " + (current_test_id != null));
     lock.runwithlock(_processQueueMessage, params);
 }
 
@@ -107,7 +108,7 @@ function processNoLinkQueueMessage(msg) {
     var params = [];
     params.push(msg);
     params.push(false);
-    console.log(" [x] Received no link msg with msg: " + msg);
+    console.log(" [x] Received no link msg");
     setTimeout(function(){lock.runwithlock(_processQueueMessage, params);}, 
         sophia_config.QUEUE_NOT_LINKED_DELAY);;
 }
