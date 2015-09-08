@@ -1,1 +1,7 @@
-node node_modules\grunt-cli\bin\grunt run-E2E-tests-home --server-url=http://myd-vm06983.hpswlabs.adapps.hp.com:8082/qcbin/ --skip-update-npm=y --specs=./pre-flight/*js --force
+rem   node node_modules\grunt-cli\bin\grunt run-E2E-tests-home --server-url=http://myd-vm06983.hpswlabs.adapps.hp.com:8082/ --skip-update-npm=y --specs=./inbar/*.js --force
+
+for /l %%x in (1, 1, %1) do (
+   echo %%x
+   node node_modules\grunt-cli\bin\grunt run-E2E-tests-home --server-url=http://myd-vm06983.hpswlabs.adapps.hp.com:8082/ --skip-update-npm=y --specs=./inbar/*.js --force
+   timeout /t 30
+)
