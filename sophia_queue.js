@@ -110,14 +110,14 @@ function processNoLinkQueueMessage(msg) {
         sophia_config.QUEUE_NOT_LINKED_DELAY);;
 }
 
-function _processQueueMessage(msg) {
+function _processQueueMessage(msg, requeue_if_no_test) {
     var obj = JSON.parse(msg.data);
     var obj_type = obj.type.toLowerCase();
     console.log(" [x] New msg type is: " + obj_type);
     if (obj_type == "test")
         processTestEvent(obj);
     else
-        processDataEvent(obj);
+        processDataEvent(obj, requeue_if_no_test);
 };
 
 function processTestEvent(test_event) {
