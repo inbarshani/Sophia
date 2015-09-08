@@ -229,7 +229,7 @@ function processDataEvent(data_event, requeue_if_no_test) {
                     if (connection && requeue_if_no_test) {
                         console.log(" Sending to wait queue.")
                         connection.publish(sophia_config.QUEUE_NOT_LINKED_NAME, 
-                            data_event);
+                            {data: data_event});
                     }                    
                     lock.release();
                     return;
@@ -251,7 +251,7 @@ function processDataEvent(data_event, requeue_if_no_test) {
                     if (connection && requeue_if_no_test) {
                         console.log(" Sending to wait queue.")
                         connection.publish(sophia_config.QUEUE_NOT_LINKED_NAME, 
-                            data_event);
+                            {data: data_event});
                     }                    
                     lock.release();
                     return;
