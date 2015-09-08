@@ -225,9 +225,9 @@ function processDataEvent(data_event, requeue_if_no_test) {
                     console.log(" [x] New data of type " + data.type +
                         " and test id " + data.testID +
                         " and timestamp " + data.timestamp +
-                        " is not associated with any test. \n"+
-                        " Sending to wait queue,");
+                        " is not associated with any test. \n");
                     if (connection && requeue_if_no_test) {
+                        console.log(" Sending to wait queue.")
                         connection.publish(sophia_config.QUEUE_NOT_LINKED_NAME, 
                             data_event);
                     }                    
@@ -247,9 +247,9 @@ function processDataEvent(data_event, requeue_if_no_test) {
                     console.log(" [x] New data of type " + data.type +
                         " and test id " + data.testID +
                         " and timestamp " + data.timestamp +
-                        " is not associated with any test. \n"+
-                        " Sending to wait queue");
+                        " is not associated with any test.");
                     if (connection && requeue_if_no_test) {
+                        console.log(" Sending to wait queue.")
                         connection.publish(sophia_config.QUEUE_NOT_LINKED_NAME, 
                             data_event);
                     }                    
