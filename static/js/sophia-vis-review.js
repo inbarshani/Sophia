@@ -313,89 +313,104 @@ var listOrder=[];
 var countTests=0;
 
 function displayStats(lis, ul, stats) {
-
     var colors = ['red', 'blue', 'green', 'teal', 'rosybrown', 'tan', 'plum', 'saddlebrown'];
-	var div;
-	var li;
+    var div;
+    var li;
     var firstTime = false;
     countTests++;
     if(listOrder.length==0)
     {
         firstTime=true;
     }
-	var counter = 0;
+    var counter = 0;
 
     var tempOrderList = listOrder.slice();
-	for (var name in stats) {
-        var isSimilar = false;
-        div = $('<div class="divBetween">');
-        if (counter++ % 3 == 0) {
-        	li = $('<li class="stats">');
-	        li.insertBefore($(lis[i]));
-        }
-        div.css('background-color', colors[counter]);
-        li.append(div);
-        if(firstTime)
+    function displayStatsNodes(k, stats)
+    {
+        if(k>=Object.keys(stats).length )
         {
-            listOrder.push(name);
-            div.text(name + ':' + stats[name].length);
+            return;
         }
-        else
-        {
-            var isBreak=false;
-            for(var j=0;j<tempOrderList.length;j++)
-            {
-                for(var n in stats)
-                {
-                    if(tempOrderList[j]===n)
-                    {
-                        div.text(n + ':' + stats[n].length);
-                        var index = tempOrderList.indexOf(n);
-                        tempOrderList.splice(index, 1);
-                        isSimilar=true;
-                        isBreak=true;
-                        break;
+        else {
+
+        	//for (var name in stats) {
+
+                var isSimilar = false;
+                div = $('<div class="divBetween">');
+                if (counter++ % 3 == 0) {
+                    li = $('<li class="stats">');
+                    li.insertBefore($(lis[i]));
+                }
+                div.css('background-color', colors[counter]);
+                li.append(div);
+                if (firstTime) {
+                    listOrder.push(Object.keys(stats)[k]);
+                    div.text( Object.keys(stats)[k] + ':' + stats[Object.keys(stats)[k]].length);
+                }
+                else {
+                    var isBreak = false;
+                    for (var j = 0; j < tempOrderList.length; j++) {
+                        for (var n in stats) {
+                            if (tempOrderList[j] === n) {
+                                div.text(n + ':' + stats[n].length);
+                                var index = tempOrderList.indexOf(n);
+                                tempOrderList.splice(index, 1);
+                                isSimilar = true;
+                                isBreak = true;
+                                break;
+                            }
+                        }
+                        if (isBreak) {
+                            break;
+                        }
+                    }
+                    if (!isSimilar) {
+                        div.text(Object.keys(stats)[k] + ':' + stats[Object.keys(stats)[k]].length);
                     }
                 }
-                if(isBreak)
-                {
-                    break;
-                }
-            }
-            if(!isSimilar)
-            {
-                div.text(name + ':' + stats[name].length);
-            }
-        }
-        div.click( function (list, type) {
-            return function () {
-                function bringDataForNodes(i) {
-                	var found = false;
-                	if (i >= selectedBBsByTest.length) {
-                        searchBackBoneData(compareDataInfo, function(dataTests){
-                            buildCompareTable(dataTests);
-                        });
-                		return;
-                	}
-                    if(selectedBBsByTest[i].compareNodes!==null && selectedBBsByTest[i].compareNodes[type]!==undefined) {
-                    	for (var j = 0; j < compareDataInfo.length; j++) {
-                    		if (compareDataInfo[j].testId == selectedBBsByTest[i].testId) {
-                    			found = true;
-                    		}
-                    	}
-                    	if (!found) {
-	                        compareDataInfo.push({testId: selectedBBsByTest[i].testId,testName:selectedBBsByTest[i].testName, dataNodes: selectedBBsByTest[i].compareNodes[type]});
-                    	}
-                        bringDataForNodes(i+1);
-                    }
 
+                    div.click(function (list, type) {
 
-                }
-                
-                bringDataForNodes(0);
-		    };
-        }(ul, name));
-    }//callback in for
+                        return function () {
+                                    function bringDataForNodes(i) {
+                                        var found = false;
+                                        if (i >= selectedBBsByTest.length) {
+                                            searchBackBoneData(compareDataInfo, function (dataTests) {
+                                                buildCompareTable(dataTests);
+                                            });
+                                            return;
+                                        }
+                                        if (selectedBBsByTest[i].compareNodes !== null && selectedBBsByTest[i].compareNodes[type] !== undefined) {
+                                            for (var j = 0; j < compareDataInfo.length; j++) {
+                                                if (compareDataInfo[j].testId == selectedBBsByTest[i].testId) {
+                                                    found = true;
+                                                }
+                                            }
+                                            if (!found) {
+                                                compareDataInfo.push({
+                                                    testId: selectedBBsByTest[i].testId,
+                                                    testName: selectedBBsByTest[i].testName,
+                                                    dataNodes: selectedBBsByTest[i].compareNodes[type]
+                                                });
+                                            }
+                                            i++;
+                                            bringDataForNodes(i);
+                                        }
+                            }
+
+                            bringDataForNodes(0);
+
+                        };
+
+                        //   displayStatsNodes(k, stats);
+                    }(ul, Object.keys(stats)[k]));//(ul, Object.keys(stats)[k]));
+
+                k++;
+                displayStatsNodes(k, stats);
+            }
+    }
+    displayStatsNodes(0, stats);
+
 }
 function buildCompareTable(dataTests)
 {
