@@ -313,6 +313,7 @@ var listOrder=[];
 var countTests=0;
 
 function displayStats(lis, ul, stats) {
+
     var colors = ['red', 'blue', 'green', 'teal', 'rosybrown', 'tan', 'plum', 'saddlebrown'];
 	var div;
 	var li;
@@ -366,7 +367,7 @@ function displayStats(lis, ul, stats) {
                 div.text(name + ':' + stats[name].length);
             }
         }
-        div.on('click', function (list, type) {
+        div.click( function (list, type) {
             return function () {
                 function bringDataForNodes(i) {
                 	var found = false;
@@ -394,10 +395,11 @@ function displayStats(lis, ul, stats) {
                 bringDataForNodes(0);
 		    };
         }(ul, name));
-    }
+    }//callback in for
 }
 function buildCompareTable(dataTests)
 {
+    $("#compareTable").html('');
     $("#compareTable").load("html/listTable.html", function() {
         console.log(dataTests);
         dataTests = JSON.parse(dataTests);
@@ -446,7 +448,7 @@ function buildCompareTable(dataTests)
         table.append(trH);
         table.append(tr);
 
-        var options = {
+     /*   var options = {
             valueNames: [ 'caption', 'test' ],
             page: 3,
             plugins: [
@@ -454,7 +456,7 @@ function buildCompareTable(dataTests)
             ]
         };
 
-        var listObj = new List('listId', options);
+        var listObj = new List('listId', options);*/
         $('#tableId').paging({limit: 10, rowDisplayStyle: 'block', activePage: 0, rows: []});
     });
 }
