@@ -316,17 +316,22 @@ function displayStats(lis, ul, stats) {
     var colors = ['red', 'blue', 'green', 'teal', 'rosybrown', 'tan', 'plum', 'saddlebrown'];
     var div;
     var li;
-    var firstTime = false;
+  //  var firstTime = false;
     countTests++;
-    if(listOrder.length==0)
+ /*   if(listOrder.length==0)
     {
         firstTime=true;
-    }
+    }*/
     var counter = 0;
 
     var tempOrderList = listOrder.slice();
     function displayStatsNodes(k, stats)
     {
+        var firstTime = false;
+        if(listOrder.length==0)
+        {
+            firstTime=true;
+        }
         if(k>=Object.keys(stats).length )
         {
             return;
@@ -377,6 +382,7 @@ function displayStats(lis, ul, stats) {
                                         if (i >= selectedBBsByTest.length) {
                                             searchBackBoneData(compareDataInfo, function (dataTests) {
                                                 buildCompareTable(dataTests);
+                                                compareDataInfo=[];
                                             });
                                             return;
                                         }
