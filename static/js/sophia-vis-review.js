@@ -56,7 +56,7 @@ function showTestsForReview(data) {
 
 			// Buttons
 			forward: container.find('.forward'),
-			backward: container.find('.backward'),
+			backward: container.find('.backward')
 		//	prevPage: container.find('.prevPage'),
 		//	nextPage: container.find('.nextPage')
 		}).init();

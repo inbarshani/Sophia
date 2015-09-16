@@ -9,11 +9,11 @@ var isAjaxActive = 0;
 var searchTypes = {
     FLOWS: 0, 
     SCREENS: 1,
-    ISSUE: 2,
+    ISSUES: 2,
     TOPICS: 3,
     TRENDS: 4,
     SAVED: 5,
-    REVIEW: 6,
+    REVIEW: 6
 };
 var searchType = searchTypes.FLOWS;
 var user;
@@ -164,7 +164,7 @@ function switchSearch(newSearchType) {
         clearSavedTestsSearch();
     } else if (searchType == searchTypes.REVIEW) {
     }
-    else if (searchType == searchTypes.ISSUE) {
+    else if (searchType == searchTypes.ISSUES) {
     }
 
     // update searchType
@@ -186,7 +186,7 @@ function updateSearchNavigation()
         id_of_li = "#search-flows";
     else if (searchType == searchTypes.SCREENS)
         id_of_li = "#search-screens";
-    else if (searchType == searchTypes.ISSUE)
+    else if (searchType == searchTypes.ISSUES)
         id_of_li = "#search-issues";
     else if (searchType == searchTypes.TOPICS) {
         id_of_li = "#search-topics";
@@ -227,7 +227,7 @@ function search(query){
     } else if (searchType == searchTypes.REVIEW) {
         searchReview(query);
     }
-    else if (searchType == searchTypes.ISSUE) {
+    else if (searchType == searchTypes.ISSUES) {
         searchIssue(query);
     }
 }
@@ -318,7 +318,7 @@ function updateSearchResults() {
     } else {
         $('#review_results').removeClass('show').addClass('hidden');
     }
-    if (searchType == searchTypes.ISSUE && ($('#issue_results_row').has('li').length > 0)) {
+    if (searchType == searchTypes.ISSUES && ($('#issue_results_row').has('li').length > 0)) {
         $('#issue_results').removeClass('hidden').addClass('show');
     } else {
         $('#issue_results').removeClass('show').addClass('hidden');
