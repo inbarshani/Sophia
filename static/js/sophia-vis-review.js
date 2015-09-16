@@ -316,16 +316,16 @@ function displayStats(lis, ul, stats) {
     var colors = ['red', 'blue', 'green', 'teal', 'rosybrown', 'tan', 'plum', 'saddlebrown'];
     var div;
     var li;
-  //  var firstTime = false;
+    var firstTime = false;
     countTests++;
- /*   if(listOrder.length==0)
+    if(listOrder.length==0)
     {
         firstTime=true;
-    }*/
+    }
     var counter = 0;
 
     var tempOrderList = listOrder.slice();
-    function displayStatsNodes(k, stats)
+/*    function displayStatsNodes(k, stats)
     {
         var firstTime = false;
         if(listOrder.length==0)
@@ -336,9 +336,9 @@ function displayStats(lis, ul, stats) {
         {
             return;
         }
-        else {
+        else {*/
 
-        	//for (var name in stats) {
+        	for (var name in stats) {
 
                 var isSimilar = false;
                 div = $('<div class="divBetween">');
@@ -349,8 +349,8 @@ function displayStats(lis, ul, stats) {
                 div.css('background-color', colors[counter]);
                 li.append(div);
                 if (firstTime) {
-                    listOrder.push(Object.keys(stats)[k]);
-                    div.text( Object.keys(stats)[k] + ':' + stats[Object.keys(stats)[k]].length);
+                    listOrder.push(name);
+                    div.text( name + ':' + stats[name].length);
                 }
                 else {
                     var isBreak = false;
@@ -370,7 +370,7 @@ function displayStats(lis, ul, stats) {
                         }
                     }
                     if (!isSimilar) {
-                        div.text(Object.keys(stats)[k] + ':' + stats[Object.keys(stats)[k]].length);
+                        div.text(name + ':' + stats[name].length);
                     }
                 }
 
@@ -408,14 +408,13 @@ function displayStats(lis, ul, stats) {
 
                         };
 
-                        //   displayStatsNodes(k, stats);
-                    }(ul, Object.keys(stats)[k]));//(ul, Object.keys(stats)[k]));
+                    }(ul, name));//(ul, Object.keys(stats)[k]));
 
-                k++;
-                displayStatsNodes(k, stats);
-            }
+        //        k++;
+         //       displayStatsNodes(k, stats);
+         //   }
     }
-    displayStatsNodes(0, stats);
+//   displayStatsNodes(0, stats);
 
 }
 function buildCompareTable(dataTests)
