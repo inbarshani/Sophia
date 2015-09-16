@@ -146,7 +146,8 @@ SpecReporter.prototype = {
   reportRunnerStarting: function (runner) {
     this.started = true;
     console.log('*** Sophia instrument Runner started ');
-    sendSophiaParamsToBrowser(this.currentSuite.guid);
+    if (this.currentSuite && this.currentSuite.guid && this.currentSuite.guid > 0)
+        sendSophiaParamsToBrowser(this.currentSuite.guid);
   },
 
   reportRunnerResults: function (runner) {
@@ -157,7 +158,7 @@ SpecReporter.prototype = {
     {
         this.reportTest(this.currentSuite.done_timestamp, 
             this.currentSuite.description, 'stop');
-        this.currentSuite = null;    
+        this.currentSuite = {description: '', id: -1, guid: -1, done_timestamp: 0};    
     }
   },
 
@@ -176,7 +177,7 @@ SpecReporter.prototype = {
         {
             this.reportTest(this.currentSuite.done_timestamp, 
                 this.currentSuite.description, 'stop');
-            this.currentSuite = null;
+            this.currentSuite = {description: '', id: -1, guid: -1, done_timestamp: 0};
         }
     }
   },
@@ -192,12 +193,13 @@ SpecReporter.prototype = {
     else
     {
         // top suite, test start
-        if (this.currentSuite.id != suite.id ||
+        if (this.currentSuite == null ||
+            this.currentSuite.id != suite.id ||
             this.currentSuite.description != suite.description)
         {
             // a new suite starting = a new test 
             // report to Sophia of the previous test end, and new test start
-            if (this.currentSuite.id != -1)
+            if (this.currentSuite && this.currentSuite.id != -1)
             {
                 // report the end of the previous test
                 this.reportTest(this.currentSuite.done_timestamp, 
@@ -218,12 +220,13 @@ SpecReporter.prototype = {
   reportSpecStarting: function (spec) {
     console.log('*** Sophia instrument Spec start: '+spec.description);    
     var ts = new Date().getTime();
-    if (this.currentSuite.id != spec.suite.id ||
+    if (this.currentSuite ||
+        this.currentSuite.id != spec.suite.id ||
         this.currentSuite.description != spec.suite.description)
     {
         // a new suite starting = a new test 
         // report to Sophia of the previous test end, and new test start
-        if (this.currentSuite.id != -1)
+        if (this.currentSuite && this.currentSuite.id != -1)
         {
             // report the end of the previous test
             this.reportTest(this.currentSuite.done_timestamp, 
