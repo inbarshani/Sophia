@@ -16,7 +16,7 @@ module.exports = {
         return obj;
     },
 
-    extractDataFromIDOL: function(idol_document, formatted_result, includeHash) {
+    extractDataFromIDOL: function(idol_document, formatted_result, includeHash, isExpendedData) {
         //console.log('idol_document obj: '+require('util').inspect(idol_document, {depth:4}));
         formatted_result.caption = idol_document['DRETITLE'][0];
         if (includeHash && idol_document['HASH'])

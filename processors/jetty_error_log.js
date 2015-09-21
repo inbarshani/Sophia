@@ -13,7 +13,7 @@ module.exports = {
         return obj;
 	},
 
-	extractDataFromIDOL: function(idol_document, formatted_result){
+	extractDataFromIDOL: function(idol_document, formatted_result, isExpendedData){
 		formatted_result.caption = idol_document['MESSAGE'][0];
 		return formatted_result;		
 	}

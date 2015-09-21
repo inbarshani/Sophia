@@ -41,7 +41,7 @@ module.exports = {
         return obj;
 	},
 
-	extractDataFromIDOL: function(idol_document, formatted_result){
+	extractDataFromIDOL: function(idol_document, formatted_result, isExpendedData){
 		if (formatted_result.type == 'UI_Change'){
 			formatted_result.caption = 'UI change in '+idol_document['URL'][0];
 		}

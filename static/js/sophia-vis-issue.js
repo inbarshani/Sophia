@@ -1,5 +1,5 @@
 function showIssues(data) {
-    $( "#all_Issues" ).load( "html/issues.html", function(){
+    $( "#all_results" ).load( "html/issues.html", function(){
         var allTests = JSON.parse(data);
         var testsList = $('#issue_tests_list');
         $('#issue_results').removeClass('hidden');

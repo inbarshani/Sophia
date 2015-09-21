@@ -6,7 +6,7 @@ module.exports = {
         return obj;
 	},
 
-	extractDataFromIDOL: function(idol_document, formatted_result){		
+	extractDataFromIDOL: function(idol_document, formatted_result, isExpendedData){
 		formatted_result.caption = 'screen capture';
 		var keywords = idol_document['DRETITLE'][0];
 		if (keywords && keywords.length > 0)

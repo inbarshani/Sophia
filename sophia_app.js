@@ -243,7 +243,12 @@ app.use('/searchError', function(request, response) {
     var queryText = request.query.q;
     var dateCondition = (request.query.dateCondition) ? JSON.parse(request.query.dateCondition) : {};
     var results = {dataNodes: {}, backboneNodes:[]};
-    idol_queries.search(queryText, dateCondition, function(documents_hash) {
+    var isExpendedData = false;
+    if(request.query.isExpendedData!==null)
+    {
+        isExpendedData = request.query.isExpendedData;
+    }
+    idol_queries.search(queryText, dateCondition,isExpendedData ,function(documents_hash) {
         var idolResultNodes = Object.keys(documents_hash);
         var dataDocs = {};
         var dataResultsNodes = [];
