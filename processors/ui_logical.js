@@ -17,10 +17,20 @@ module.exports = {
     },
 
     extractDataFromIDOL: function(idol_document, formatted_result, includeHash, isExpendedData) {
-        //console.log('idol_document obj: '+require('util').inspect(idol_document, {depth:4}));
+        console.log('idol_document obj: '+require('util').inspect(idol_document, {depth:4}));
+
         formatted_result.caption = idol_document['DRETITLE'][0];
         if (includeHash && idol_document['HASH'])
             formatted_result.hash = idol_document['HASH'][0];
+        if(isExpendedData)
+        {
+
+            formatted_result.date = idol_document['DREDATE'][0];
+            formatted_result.timestamp = idol_document['TIMESTAMP'][0];
+            formatted_result.eventName = idol_document['EVENTNAME'][0];
+            formatted_result.content = idol_document['DRECONTENT'][0];
+
+        }
         return formatted_result;
     }
 };

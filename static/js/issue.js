@@ -7,7 +7,7 @@ var selectedBBsByTest = [];
 
 function searchIssue(query, callback) {
     var jqxhr = $.ajax("/searchError?q=" + fixedEncodeURIComponent(query) +
-    '&dateCondition=' + JSON.stringify(dateCondition))
+    '&dateCondition=' + JSON.stringify(dateCondition)+'&&isExpendedData=true')
         .done(function(data) {
             showIssues(data);
         })

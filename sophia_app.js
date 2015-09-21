@@ -243,7 +243,7 @@ app.use('/searchError', function(request, response) {
     var queryText = request.query.q;
     var dateCondition = (request.query.dateCondition) ? JSON.parse(request.query.dateCondition) : {};
     var results = {dataNodes: {}, backboneNodes:[]};
-    var isExpendedData = false;
+    var isExpendedData = true;
     if(request.query.isExpendedData!==null)
     {
         isExpendedData = request.query.isExpendedData;
