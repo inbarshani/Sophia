@@ -24,12 +24,10 @@ module.exports = {
             formatted_result.hash = idol_document['HASH'][0];
         if(isExpendedData)
         {
-
             formatted_result.date = idol_document['DREDATE'][0];
             formatted_result.timestamp = idol_document['TIMESTAMP'][0];
             formatted_result.eventName = idol_document['EVENTNAME'][0];
             formatted_result.content = idol_document['DRECONTENT'][0];
-
         }
         return formatted_result;
     }
