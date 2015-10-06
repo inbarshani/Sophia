@@ -38,7 +38,9 @@ CREATE TABLE `SOP_QUERY` (
 	`POSITION`	INTEGER,
 	`QUERY_TYPE`	INTEGER
 );
- 
+10. to support image hashing, need to install ImageMagick and add it to PATH env var
+	http://www.imagemagick.org/script/binary-releases.php
+	add the root of the installation to PATH
 
 B. Jetty and MQM log parser - REPEAT STEPS 3-4 AFTER MQM DEPLOYMENT!!!!
 ====
