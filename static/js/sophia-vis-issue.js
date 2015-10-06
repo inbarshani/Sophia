@@ -235,7 +235,7 @@ function showIssues(data) {
                     var zoomOutButton = chart.append("rect")
                         .attr("width", 50)
                         .attr("height", 50)
-                        .style("fill", colourBackground[4])
+                        .style("fill", "gray")
                         .style("opacity", 0.2)
                         .attr("transform", "translate(50,55)")
                         .style("cursor", "pointer")
@@ -270,7 +270,7 @@ function showIssues(data) {
                     var leftButton = chart.append("rect")
                         .attr("width", 50)
                         .attr("height", 50)
-               //         .style("fill", colourBackground[4])
+                        .style("fill", "gray")
                         .style("opacity", 0.2)
                         .attr("transform", "translate(0,0)")
                         .style("cursor", "pointer")
@@ -305,7 +305,7 @@ function showIssues(data) {
                     var rightButton = chart.append("rect")
                         .attr("width", 50)
                         .attr("height", 50)
-                //        .style("fill", colourBackground[4])
+                        .style("fill", "gray")
                         .style("opacity", 0.2)
                         .attr("transform", "translate(50,0)")
                         .style("cursor", "pointer")
@@ -349,7 +349,7 @@ function showIssues(data) {
                         .attr("y", (height - miniHeight))
                         .attr("width", width)
                         .attr("height", miniHeight)
-                //        .attr("fill", colourBackground[2])
+                        .attr("fill", "gray")
                         .style("opacity", 0.5);
 
                     var miniHolder = chart.append("g")
@@ -398,7 +398,7 @@ function showIssues(data) {
                     /* draw the static triangle to act as a pointer */
                     chart.append("path")
                         .attr("d", "M10,0 L20,20 L0,20z")
-                        .style("fill", colourBorder[0])
+                        .style("fill","red")
                         .style("pointer-events", "none")
                         .attr("transform", "translate(" + ((width / 2) - 10) + "," + height + ")");
 
