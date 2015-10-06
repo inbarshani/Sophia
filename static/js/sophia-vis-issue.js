@@ -35,8 +35,8 @@ function showIssues(data) {
                 /* Hides the table and shows the SVG if javascript is enabled */
                 // $("h2:contains('Dogs at work')").parent("section").parent("div").css({"display":"none"});
                 // $("h2:contains('Dogs at work') + table").css({"width":"630px"});
-                $(".outerwrapper span.timeline-heading").text(headline);
-                $(".outerwrapper p.timeline-standfirst").text(standfirst);
+             //   $(".outerwrapper span.timeline-heading").text(headline);
+             //   $(".outerwrapper p.timeline-standfirst").text(standfirst);
                 // $(".outerwrapper").css({"display":"block"});
 
                 /*	Push an object into the items array for each table row/point on the timeline */
