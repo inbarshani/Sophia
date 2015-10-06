@@ -665,7 +665,7 @@ function showIssues(data) {
                     showLocation();
 
                 }); /* End of getScript callback function */
-            }
+           }
         }); /* End of Ajax success function */
     });
 }
