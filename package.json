@@ -16,6 +16,7 @@
     "neo4j": "2.0.0-RC2",
     "node-offline-debug": "1.x.x",
     "padlock": "^1.1.2",
+    "phash-imagemagick": "^0.2.0",
     "sqlite3": "*",
     "step": "0.0.5",
     "when": "^3.6.4",
@@ -23,8 +24,7 @@
     "xmldom": "0.X.X",
     "xpath": "0.X.X"
   },
-  "scripts": {
-  },
+  "scripts": {},
   "author": {
     "name": "HP Software",
     "email": "inbar.shani@hp.com"
