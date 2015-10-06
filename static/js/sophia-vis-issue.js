@@ -629,7 +629,7 @@ function showIssues(data) {
                             });
 
                         /*	Fade out the next/prev and zoom buttons when they are not available */
-                        switch (counter) {
+                      /*  switch (counter) {
                             case 0:
                                 leftIcon.style("fill", colourText[7]);
                                 rightIcon.style("fill", colourText[1]);
@@ -657,7 +657,7 @@ function showIssues(data) {
                                 zoomInIcon.style("fill", colourText[1]);
                                 zoomOutIcon.style("fill", colourText[1]);
                                 break;
-                        }
+                        }*/
 
                     }
 
