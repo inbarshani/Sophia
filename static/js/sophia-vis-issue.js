@@ -10,15 +10,15 @@ function showIssues(data) {
         for(var key in obj)
         {
             var type = obj[key].type;
-            var timestamp = obj[key].timestamp;
+            var timestamp = new Date(obj[key].timestamp*1000);
             var date =  obj[key].date;
             var caption = obj[key].caption;
             var  tr =  '<tr>';
-            tr+='<td>' +date + '</td>';
-            tr+='<td>' +date + '</td>';
+            tr+='<td>' +timestamp + '</td>';
+            tr+='<td>' +timestamp+ '</td>';
             tr += '<td>'+ caption +'</td>';
             tr+='<td>' +type + '</td>';
-            tr+='<td>' +timestamp + '</td>';
+            tr+='<td>' +date + '</td>';
            // tr+='<td >' +date + '</td>';
             tr += '</tr>';
             table.append(tr);
@@ -49,7 +49,7 @@ function showIssues(data) {
                     }
                 }
 
-        //       var fullData = $(data);
+        //        var fullData = $(data);
         //        var table = $(data).find("table tbody tr");
 
                 /* Grab the tables headline and caption so that we can reproduce them in the widget */
