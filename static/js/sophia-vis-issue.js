@@ -1,3 +1,5 @@
+var fullData;
+var table;
 function showIssues(data) {
     $( "#all_results" ).load( "html/issues.html", function(){
         /*	An array to store all the data */
@@ -12,36 +14,25 @@ function showIssues(data) {
             var date =  obj[key].date;
             var caption = obj[key].caption;
             var  tr =  '<tr>';
-            tr += '<td >'+ caption +'</td>';
-            tr+='<td >' +type + '</td>';
-            tr+='<td >' +timestamp + '</td>';
-            tr+='<td >' +date + '</td>';
+            tr+='<td>' +date + '</td>';
+            tr+='<td>' +date + '</td>';
+            tr += '<td>'+ caption +'</td>';
+            tr+='<td>' +type + '</td>';
+            tr+='<td>' +timestamp + '</td>';
+           // tr+='<td >' +date + '</td>';
             tr += '</tr>';
             table.append(tr);
             table.hide();
         }
-        /* Helper function to format and parse date from data */
-        function getDate(d) {
-            /*	If d is a number or a string in the format Day Month Year
-             process it as normal. Other wise presume that it may be a string
-             in the format Month Year and add 1 to the start so that Firefox
-             and safari can parse the date */
-            if (typeof d === "number") {
-                return new Date(d);
-            } else if (Date.parse(d)) {
-                return new Date(d);
-            } else {
-                return new Date("1 " + d);
-            }
-        }
-        var fullData = table;
-        var table = $("#tableNodes");;
+
+         fullData = table;
+         table = $("#tableNodes").children();
 
         $.ajax({
-            url: "http://codepen.io/chris-creditdesign/pen/87c2848937b6962f4efd2a67e5ea2031.html",
+           url: "http://codepen.io/chris-creditdesign/pen/87c2848937b6962f4efd2a67e5ea2031.html",
             // url: "table-nih.html",
             dataType: 'text',
-            success: function(data) {
+           success: function(data) {
 
                 /* Helper function to format and parse date from data */
                 function getDate(d) {
@@ -58,13 +49,13 @@ function showIssues(data) {
                     }
                 }
 
-                var fullData = $(data);
-                var table = $(data).find("table tbody tr");
+        //       var fullData = $(data);
+        //        var table = $(data).find("table tbody tr");
 
                 /* Grab the tables headline and caption so that we can reproduce them in the widget */
                 var headline = $(fullData).find("h2.table-heading").text();
 
-                var standfirst = $(data).find("table caption p").text();
+       //         var standfirst = $(data).find("table caption p").text();
 
                 /* Hides the table and shows the SVG if javascript is enabled */
                 // $("h2:contains('Dogs at work')").parent("section").parent("div").css({"display":"none"});
