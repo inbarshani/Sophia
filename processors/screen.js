@@ -2,6 +2,8 @@ module.exports = {
 	getData: function (obj) {
         obj.high_priority_index = getLongWords(obj.text, 3).join(' ');
         obj.indexable_content = obj.text; // TBD: OCR the screen?
+        obj.phash = encodeURIComponent(JSON.stringify(obj.phash));
+        obj.text = obj.text.replace(/(\r\n|\n|\r|"|#)/gm,' ');
         //console.log('screen obj: '+require('util').inspect(obj, {depth:4}));
         return obj;
 	},
@@ -16,7 +18,7 @@ module.exports = {
         {
             formatted_result.date = idol_document['DREDATE'][0];
             formatted_result.timestamp = idol_document['TIMESTAMP'][0];
-            formatted_result.phash = decodeURIComponent(idol_document['PHASH'][0]);
+            formatted_result.phash = JSON.parse(decodeURIComponent(idol_document['PHASH'][0]));
         //    formatted_result.action = idol_document['ACTION'][0];
          //   formatted_result.status = idol_document['STATUS'][0];
         }
