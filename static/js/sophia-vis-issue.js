@@ -128,10 +128,10 @@ function showIssues(data) {
 
                     if (items[i].headline) {
                         $('.outerwrapper div[class="event-' + i + '"]')
-                            .append('<h4>' + items[i].headline + ' (' + (i + 1) + ' of ' + items.length + ')</h4>');
+                            .append('<h6>' + items[i].headline + ' (' + (i + 1) + ' of ' + items.length + ')</h6>');
                     } else {
                         $('.outerwrapper div[class="event-' + i + '"]')
-                            .append('<h4> (' + (i + 1) + ' of ' + items.length + ')</h4>');
+                            .append('<h6> (' + (i + 1) + ' of ' + items.length + ')</h6>');
                     }
 
                     if (items[i].text) {
