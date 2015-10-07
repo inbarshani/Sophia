@@ -2,6 +2,40 @@ function showIssues(data) {
     $( "#all_results" ).load( "html/issues.html", function(){
         /*	An array to store all the data */
         var items = [];
+        var dataObj = JSON.parse(data);
+        var table = $("#tableNodes");
+        var obj =  dataObj.dataNodes;
+        for(var key in obj)
+        {
+            var type = obj[key].type;
+            var timestamp = obj[key].timestamp;
+            var date =  obj[key].date;
+            var caption = obj[key].caption;
+            var  tr =  '<tr>';
+            tr += '<td >'+ caption +'</td>';
+            tr+='<td >' +type + '</td>';
+            tr+='<td >' +timestamp + '</td>';
+            tr+='<td >' +date + '</td>';
+            tr += '</tr>';
+            table.append(tr);
+            table.hide();
+        }
+        /* Helper function to format and parse date from data */
+        function getDate(d) {
+            /*	If d is a number or a string in the format Day Month Year
+             process it as normal. Other wise presume that it may be a string
+             in the format Month Year and add 1 to the start so that Firefox
+             and safari can parse the date */
+            if (typeof d === "number") {
+                return new Date(d);
+            } else if (Date.parse(d)) {
+                return new Date(d);
+            } else {
+                return new Date("1 " + d);
+            }
+        }
+        var fullData = table;
+        var table = $("#tableNodes");;
 
         $.ajax({
             url: "http://codepen.io/chris-creditdesign/pen/87c2848937b6962f4efd2a67e5ea2031.html",
@@ -627,37 +661,6 @@ function showIssues(data) {
                                     }
                                 }
                             });
-
-                        /*	Fade out the next/prev and zoom buttons when they are not available */
-                      /*  switch (counter) {
-                            case 0:
-                                leftIcon.style("fill", colourText[7]);
-                                rightIcon.style("fill", colourText[1]);
-                                break;
-                            case (items.length - 1):
-                                leftIcon.style("fill", colourText[1]);
-                                rightIcon.style("fill", colourText[7]);
-                                break;
-                            default:
-                                leftIcon.style("fill", colourText[1]);
-                                rightIcon.style("fill", colourText[1]);
-                                break;
-                        }
-
-                        switch (zoom) {
-                            case 1:
-                                zoomInIcon.style("fill", colourText[1]);
-                                zoomOutIcon.style("fill", colourText[7]);
-                                break;
-                            case maxZoom:
-                                zoomInIcon.style("fill", colourText[7]);
-                                zoomOutIcon.style("fill", colourText[1]);
-                                break;
-                            default:
-                                zoomInIcon.style("fill", colourText[1]);
-                                zoomOutIcon.style("fill", colourText[1]);
-                                break;
-                        }*/
 
                     }
 
