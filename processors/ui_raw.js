@@ -44,18 +44,38 @@ module.exports = {
 	extractDataFromIDOL: function(idol_document, formatted_result, isExpendedData){
 		if (formatted_result.type == 'UI_Change'){
 			formatted_result.caption = 'UI change in '+idol_document['URL'][0];
+            if(isExpendedData)
+            {
+                formatted_result.date = idol_document['DREDATE'][0];
+                formatted_result.timestamp = idol_document['TIMESTAMP'][0];
+            }
 		}
 		else if (formatted_result.type == 'UI_Transition'){
 			formatted_result.caption = 'UI transition for elemnt '+idol_document['ELEMENTID']+ 
 				' in '+idol_document['URL'][0];
+            if(isExpendedData)
+            {
+                formatted_result.date = idol_document['DREDATE'][0];
+                formatted_result.timestamp = idol_document['TIMESTAMP'][0];
+            }
 		}
 		else if (formatted_result.type == 'UI_Log'){
 			formatted_result.caption = 'UI log: '+idol_document['DRETITLE']+ 
 				' in '+idol_document['URL'][0];
+            if(isExpendedData)
+            {
+                formatted_result.date = idol_document['DREDATE'][0];
+                formatted_result.timestamp = idol_document['TIMESTAMP'][0];
+            }
 		}
 		else { // UI_Event
 			formatted_result.caption = idol_document['EVENTTYPE']+' on '+ idol_document['TAGNAME']+
 				' in '+idol_document['URL'][0];
+            if(isExpendedData)
+            {
+                formatted_result.date = idol_document['DREDATE'][0];
+                formatted_result.timestamp = idol_document['TIMESTAMP'][0];
+            }
 		}
 		return formatted_result;
 	}
