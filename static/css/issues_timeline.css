@@ -8,6 +8,7 @@ body {
     /*display: none;*/
     width: 630px;
     position: relative;
+    margin-left: 496px;
 }
 
 .outerwrapper .visually-hidden {
