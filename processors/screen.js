@@ -3,7 +3,7 @@ module.exports = {
         obj.high_priority_index = getLongWords(obj.text, 3).join(' ');
         obj.indexable_content = obj.text; // TBD: OCR the screen?
         obj.phash = encodeURIComponent(JSON.stringify(obj.phash));
-        obj.text = obj.text.replace(/(\r\n|\n|\r|"|#)/gm,' ');
+        obj.text = obj.text.replace(/(\r\n|\n|\r|"|#|[^\x00-\x7F])/gm,' ');
         //console.log('screen obj: '+require('util').inspect(obj, {depth:4}));
         return obj;
 	},
