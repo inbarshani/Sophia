@@ -19,7 +19,6 @@ function showIssues(data) {
             tr += '<td>'+ caption +'</td>';
             tr+='<td>' +type + '</td>';
             tr+='<td>' +date + '</td>';
-           // tr+='<td >' +date + '</td>';
             tr += '</tr>';
             table.append(tr);
             table.hide();
