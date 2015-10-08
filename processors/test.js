@@ -6,7 +6,7 @@ module.exports = {
 	},
 
 	extractDataFromIDOL: function(idol_document, formatted_result, includeHash, isExpendedData){
-        console.log('idol_document obj: '+require('util').inspect(idol_document, {depth:4}));
+        //console.log('idol_document obj: '+require('util').inspect(idol_document, {depth:4}));
         formatted_result.name = idol_document['DRETITLE'][0];
 		formatted_result.caption = idol_document['DESCRIPTION'][0];
 		if (includeHash && idol_document['HASH'])

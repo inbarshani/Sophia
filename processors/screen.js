@@ -1,15 +1,16 @@
 module.exports = {
 	getData: function (obj) {
         obj.high_priority_index = getLongWords(obj.text, 3).join(' ');
-        obj.indexable_content = obj.text; // TBD: OCR the screen?
-        obj.phash = encodeURIComponent(JSON.stringify(obj.phash));
+        obj.indexable_content = obj.text; 
+        if (obj.phash) // prepare for storing the hash in IDOL
+        	obj.phash = encodeURIComponent(JSON.stringify(obj.phash));
         obj.text = obj.text.replace(/(\r\n|\n|\r|"|#|[^\x00-\x7F])/gm,' ');
         //console.log('screen obj: '+require('util').inspect(obj, {depth:4}));
         return obj;
 	},
 
-	extractDataFromIDOL: function(idol_document, formatted_result, isExpendedData){
-        console.log('idol_document obj: '+require('util').inspect(idol_document, {depth:4}));
+	extractDataFromIDOL: function(idol_document, formatted_result, resultsWithHash, isExpendedData){
+        //console.log('idol_document obj: '+require('util').inspect(idol_document, {depth:4}));
 		formatted_result.caption = 'screen capture';
 		var keywords = idol_document['DRETITLE'][0];
 		if (keywords && keywords.length > 0)
@@ -18,9 +19,20 @@ module.exports = {
         {
             formatted_result.date = idol_document['DREDATE'][0];
             formatted_result.timestamp = idol_document['TIMESTAMP'][0];
-          //  formatted_result.phash = JSON.parse(decodeURIComponent(idol_document['PHASH'][0]));
-        //    formatted_result.action = idol_document['ACTION'][0];
+         //   formatted_result.action = idol_document['ACTION'][0];
          //   formatted_result.status = idol_document['STATUS'][0];
+        }
+        if (resultsWithHash)
+        {
+        	if (idol_document['PHASH'] && idol_document['PHASH'][0] &&
+        		idol_document['PHASH'][0]!='undefined')
+        	{
+        		//console.log('phash: '+idol_document['PHASH'][0]);
+        		//console.log('decoded phash: '+decodeURIComponent(idol_document['PHASH'][0]));
+            	formatted_result.phash = JSON.parse(decodeURIComponent(idol_document['PHASH'][0]));
+        	}
+            else
+            	formatted_result.phash = null;
         }
 		return formatted_result;		
 	}

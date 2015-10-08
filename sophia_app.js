@@ -6,6 +6,7 @@ var sophia_config = require('./lib/sophia_config');
 var idol_queries = require('./lib/idol_queries');
 var neo4j_queries = require('./lib/neo4j_queries');
 var tests_queries = require('./lib/tests_queries');
+var phash = require('phash-imagemagick');
 
 var app = express();
 app.use(bodyParser.json());
@@ -89,13 +90,39 @@ app.use('/searchFlows', function(request, response) {
 app.use('/searchScreens', function(request, response) {
     var queryText = request.query.q;
     var dateCondition = JSON.parse(request.query.dateCondition);
-    idol_queries.search(queryText, dateCondition, function(documents_hash) {
+    idol_queries.search(queryText, dateCondition, true, function(documents_hash) {
         var idolResultNodes = Object.keys(documents_hash);
         if (idolResultNodes.length > 0) {
             neo4j_queries.getNearestScreens(idolResultNodes,
-                function(prevScreenTimestamps, nextScreenTimestamps) {
-                    var allTimestamps = prevScreenTimestamps.concat(nextScreenTimestamps);
-                    response.send(JSON.stringify(allTimestamps));
+                function(prevScreenTimestamps, nextScreenTimestamps,
+                    prevScreenIDs, nextScreenIDs) {
+                    var referenceIds = prevScreenIDs.concat(nextScreenIDs);
+                    idol_queries.searchByReference(referenceIds, true, true, function(idolDocs) {
+                        var group_pivots = [];
+                        var groups = {
+                            "none": []
+                        };
+                        referenceIds.forEach(function(refID) {
+                            if (!idolDocs[refID].phash) {
+                                groups.none.push(idolDocs[refID].timestamp);
+                            } else {
+                                for (var i = 0; i < group_pivots.length; i++) {
+                                    if (phash.compare(idolDocs[refID].phash, group_pivots[i]) <
+                                        sophia_config.hashSimiliarityThreshold) {
+                                        // this result is similar to one of the previous ones
+                                        groups["" + i].push(idolDocs[refID].timestamp);
+                                        break;
+                                    }
+                                }
+                                if (i == group_pivots.length) {
+                                    // new result
+                                    groups["" + i] = [idolDocs[refID].timestamp];
+                                }
+                            }
+                        });
+                        console.log('grouped images: ' + JSON.stringify(groups));
+                        response.send(JSON.stringify(groups));
+                    });
                 });
         } else {
             response.send(JSON.stringify([]));
@@ -175,8 +202,7 @@ app.post('/saveTest', function(request, response) {
         tests_queries.save(user, name, type, '', request.body.queries, function(err, testId) {
             if (err)
                 response.send(err);
-            else
-            {
+            else {
                 // save test run, then send response
                 tests_queries.saveTestRun(testId, sophia_config.testRunTypes.USER, request.body.queries);
                 response.sendStatus(200);
@@ -185,12 +211,12 @@ app.post('/saveTest', function(request, response) {
     }
 });
 
-app.post('/tests/:id/runs', function(request, response){
+app.post('/tests/:id/runs', function(request, response) {
     //console.log('post test run: '+JSON.stringify(request.params)+' '+JSON.stringify(request.body));
     var id = request.params.id;
     var queries = request.body.queries;
     tests_queries.saveTestRun(id, sophia_config.testRunTypes.USER, queries,
-        function(err){
+        function(err) {
             if (err)
                 response.status(500).send(err);
             else
@@ -211,7 +237,7 @@ app.get('/tests/:id', function(request, response) {
 });
 
 app.get('/tests', function(request, response) {
-    console.log('get tests: '+JSON.stringify(request.query));
+    console.log('get tests: ' + JSON.stringify(request.query));
     var type = request.query.type;
     var name = request.query.name;
     tests_queries.getTestsByType(type, name, function(err, tests) {
@@ -226,8 +252,7 @@ app.get('/tests', function(request, response) {
 app.use('/searchReview', function(request, response) {
     var queryText = request.query.q;
     var testStepID = '';
-    if (queryText.match(/StepID=[0-9]{1,6}/))
-    {
+    if (queryText.match(/StepID=[0-9]{1,6}/)) {
         testStepID = queryText.split('=')[1];
     }
     var dateCondition = (request.query.dateCondition) ? JSON.parse(request.query.dateCondition) : {};
@@ -242,13 +267,15 @@ app.use('/searchReview', function(request, response) {
 app.use('/searchError', function(request, response) {
     var queryText = request.query.q;
     var dateCondition = (request.query.dateCondition) ? JSON.parse(request.query.dateCondition) : {};
-    var results = {dataNodes: {}, backboneNodes:[]};
+    var results = {
+        dataNodes: {},
+        backboneNodes: []
+    };
     var isExpendedData = true;
-    if(request.query.isExpendedData!==null)
-    {
+    if (request.query.isExpendedData !== null) {
         isExpendedData = request.query.isExpendedData;
     }
-    idol_queries.search(queryText, dateCondition,isExpendedData ,function(documents_hash) {
+    idol_queries.search(queryText, dateCondition, isExpendedData, function(documents_hash) {
         var idolResultNodes = Object.keys(documents_hash);
         var dataDocs = {};
         var dataResultsNodes = [];
@@ -263,18 +290,18 @@ app.use('/searchError', function(request, response) {
             }
             neo4j_queries.getBackboneNodesForDataNodes(dataResultsNodes, function(nodes) {
                 var referenceIds = [];
-                nodes.map(function(test){
-                    test.bbNodes.map(function(node){
+                nodes.map(function(test) {
+                    test.bbNodes.map(function(node) {
                         referenceIds.push(node.id);
                     });
                 });
-                idol_queries.searchByReference(referenceIds, false, function(idolDocs){
+                idol_queries.searchByReference(referenceIds, false, false, function(idolDocs) {
                     var idolResultNodes = Object.keys(idolDocs);
-                    nodes.map(function(test){
+                    nodes.map(function(test) {
                         //console.log('searchTestsByName bbNodes test: '+
                         //    require('util').inspect(test, {depth:4}));
-                        test.name = documents_hash[''+test.test.id].name;
-                        test.bbNodes.map(function(node){
+                        test.name = documents_hash['' + test.test.id].name;
+                        test.bbNodes.map(function(node) {
                             var doc = idolDocs[node.id];
                             if (doc) {
                                 node.caption = doc.caption;
@@ -292,13 +319,18 @@ app.use('/searchError', function(request, response) {
 app.use('/searchBackBoneData', function(request, response) {
     var compareObjData = JSON.parse(request.query.o);
     var results = [];
+
     function getIdolNodesData(i) {
         if (i >= compareObjData.length) {
             response.send(JSON.stringify(results));
         } else {
-            idol_queries.searchByReference(compareObjData[i].dataNodes, false, function(idolDocs){
-                results.push({testId: compareObjData[i].testId,testName: compareObjData[i].testName, dataNodes: idolDocs});
-                getIdolNodesData(i+1);
+            idol_queries.searchByReference(compareObjData[i].dataNodes, false, false, function(idolDocs) {
+                results.push({
+                    testId: compareObjData[i].testId,
+                    testName: compareObjData[i].testName,
+                    dataNodes: idolDocs
+                });
+                getIdolNodesData(i + 1);
             });
         }
     }
@@ -312,25 +344,24 @@ app.use('/testNodesData', function(request, response) {
     });
 });
 
-function searchTestsByName(queryText, dateCondition, response)
-{
+function searchTestsByName(queryText, dateCondition, response) {
     idol_queries.searchReview(queryText, dateCondition, function(documents_hash) {
         var idolResultNodes = Object.keys(documents_hash);
         if (idolResultNodes.length > 0) {
             neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {
                 var referenceIds = [];
-                bbNodes.map(function(test){
-                    test.bbNodes.map(function(node){
+                bbNodes.map(function(test) {
+                    test.bbNodes.map(function(node) {
                         referenceIds.push(node.id);
                     });
                 });
-                idol_queries.searchByReference(referenceIds, false, function(idolDocs){
+                idol_queries.searchByReference(referenceIds, false, false, function(idolDocs) {
                     var idolResultNodes = Object.keys(idolDocs);
-                    bbNodes.map(function(test){
+                    bbNodes.map(function(test) {
                         //console.log('searchTestsByName bbNodes test: '+
                         //    require('util').inspect(test, {depth:4}));
-                        test.name = documents_hash[''+test.test.id].name;
-                        test.bbNodes.map(function(node){
+                        test.name = documents_hash['' + test.test.id].name;
+                        test.bbNodes.map(function(node) {
                             var doc = idolDocs[node.id];
                             if (doc) {
                                 node.caption = doc.caption;
@@ -343,19 +374,18 @@ function searchTestsByName(queryText, dateCondition, response)
         } else { // no results from IDOL
             response.send(JSON.stringify([]));
         }
-    });    
+    });
 }
 
-function searchSimilarTestSteps(testStepID, dateCondition, response)
-{
+function searchSimilarTestSteps(testStepID, dateCondition, response) {
     idol_queries.searchSimilar(testStepID, dateCondition, function(documents_hash) {
         var testIDs = Object.keys(documents_hash);
         if (testIDs.length > 0) {
-            idol_queries.searchTestsByID(testIDs, function(test_documents_hash){
+            idol_queries.searchTestsByID(testIDs, function(test_documents_hash) {
                 var idolResultNodes = Object.keys(test_documents_hash);
                 // we need to user IDOL doc id instead of testIDs
-                idolResultNodes.forEach(function(idolResult){
-                    var similarTestID = test_documents_hash[idolResult].testID;                    
+                idolResultNodes.forEach(function(idolResult) {
+                    var similarTestID = test_documents_hash[idolResult].testID;
                     documents_hash[idolResult] = documents_hash[similarTestID];
                     documents_hash[similarTestID] = null;
                 });
@@ -363,35 +393,34 @@ function searchSimilarTestSteps(testStepID, dateCondition, response)
                 //    require('util').inspect(documents_hash, {depth:4}));
                 neo4j_queries.getBackboneNodes(idolResultNodes, function(bbNodes) {
                     var referenceIds = [];
-                    bbNodes.map(function(test){
-                        test.bbNodes.map(function(node){
+                    bbNodes.map(function(test) {
+                        test.bbNodes.map(function(node) {
                             referenceIds.push(node.id);
                         });
                     });
-                    idol_queries.searchByReference(referenceIds, false, function(idolDocs){
+                    idol_queries.searchByReference(referenceIds, false, false, function(idolDocs) {
                         var idolResultNodes = Object.keys(idolDocs);
                         // use the previous 'similar' search to mark
                         //  the backbone nodes that are similar, 
                         //  so UI can highlight them
-                        bbNodes.map(function(test){
-                            test.name = test_documents_hash[''+test.test.id].name;
+                        bbNodes.map(function(test) {
+                            test.name = test_documents_hash['' + test.test.id].name;
                             //console.log('searchSimilarTestSteps bbNodes test: '+
                             //    require('util').inspect(test, {depth:4}));
-                            var similarNodes = documents_hash[''+test.test.id];
+                            var similarNodes = documents_hash['' + test.test.id];
                             var similarNodesIDs = [];
-                            similarNodes.forEach(function(node){
+                            similarNodes.forEach(function(node) {
                                 similarNodesIDs.push(node.graph_node);
                             });
                             //console.log('searchSimilarTestSteps similarNodes for '+test.test.id+': '+
                             //    require('util').inspect(similarNodes, {depth:4}));
-                            test.bbNodes.map(function(node){
+                            test.bbNodes.map(function(node) {
                                 var doc = idolDocs[node.id];
                                 if (doc) {
                                     node.caption = doc.caption;
                                 }
-                                if (similarNodesIDs.indexOf(node.id) >= 0)
-                                {
-                                    console.log('similar node '+node.id+' for test '+test.test.id);
+                                if (similarNodesIDs.indexOf(node.id) >= 0) {
+                                    console.log('similar node ' + node.id + ' for test ' + test.test.id);
                                     if (node.id == testStepID)
                                         node.same = true;
                                     else

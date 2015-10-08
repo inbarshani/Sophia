@@ -64,7 +64,7 @@ function indexTestByIDs(testNodeIDsArray)
 					});
 					if (node_ids.length > 0)
 					{
-						idol_queries.searchByReference(node_ids, false, function(documents_hash){
+						idol_queries.searchByReference(node_ids, false, false, function(documents_hash){
 							var idolResultNodes = Object.keys(documents_hash);
 							//console.log('indexTestByID '+backbone_node.test_id+
 							//	' stats IDOL results: '+idolResultNodes.length);
