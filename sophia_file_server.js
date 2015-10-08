@@ -13,88 +13,77 @@ app.use(bodyParser.json())
 
 app.post('/file', function(request, response) {
     var data = null;
-    var busboy = new Busboy({ headers: request.headers });  
+    var busboy = new Busboy({
+        headers: request.headers
+    });
     busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated) {
-      //console.log('Field [' + fieldname + ']: value: ' + JSON.stringify(val));
-      if (fieldname == 'data')
-      {
-        data = JSON.parse(val);
-        console.log('Loaded file data: '+JSON.stringify(data));
-      }
-      else if (fieldname == 'file')
-      {
-        val = val.substring('data:image/jpeg;base64,'.length);
-        //console.log('file content for save: '+val);
-        if (!data)
-        {
-            console.log('no data for queue (yet), file is ready for save');
-            data = {
-                timestamp: new Date().getTime(),
-                type: "SCREEN",
-                file: fileName,
-                phash: {}
-            };
+        //console.log('Field [' + fieldname + ']: value: ' + JSON.stringify(val));
+        if (fieldname == 'data') {
+            data = JSON.parse(val);
+            console.log('Loaded file data: ' + JSON.stringify(data));
+        } else if (fieldname == 'file') {
+            val = val.substring('data:image/jpeg;base64,'.length);
+            //console.log('file content for save: '+val);
+            if (!data) {
+                console.log('no data for queue (yet), file is ready for save');
+                data = {
+                    timestamp: new Date().getTime(),
+                    type: "SCREEN",
+                    file: fileName,
+                    phash: {}
+                };
+            }
+            var fileName = data.timestamp + '.jpg';
+            fs.writeFile('./upload/' + fileName, val, {
+                encoding: 'base64'
+            }, function() {
+                // wait time, to make sure the file is accessible for IDOL
+                var absPath = fs.realpathSync('./upload/');
+                try {
+                    phash.get(absPath + '/' + fileName, function(err, phash_data) {
+                        if (err) throw err;
+                        console.log('Completed hash calc for image ' + absPath + '/' + fileName);
+                        data.phash = phash_data;
+                        try {
+                            idol_queries.analyzeImagePost(absPath + '/' + fileName, function(token) {
+                                if (token && token.length > 0) {
+                                    var interval = setInterval(function() {
+                                        try {
+                                            idol_queries.analyzeImageCheck(token, function(text) {
+                                                if (text && text.length) {
+                                                    clearInterval(interval);
+                                                    data.text = text;
+                                                    sendToQueue(data, response);
+                                                }
+                                            });
+                                        } catch (ex) {
+                                            console.log('Failed to check OCR of image, will continue trying: ' + ex);
+                                        }
+                                    }, 1000);
+                                } else {
+                                    data.text = '';
+                                    sendToQueue(data, response);
+                                }
+                            });
+                        } catch (ex) {
+                            console.log('Failed to analyze image: ' +
+                                absPath + '/' + fileName + ' due to exception:\n' + ex);
+                        }
+                    });
+                } catch (ex) {
+                    console.log('Failed to compute image hash: ' +
+                        absPath + '/' + fileName + ' due to exception:\n' + ex);
+                }
+            });
         }
-        var fileName = data.timestamp + '.jpg';
-        fs.writeFile('./upload/' + fileName, val, {encoding: 'base64'}, function() {
-            // wait time, to make sure the file is accessible for IDOL
-            var absPath = fs.realpathSync('./upload/');
-            try
-            {
-                phash.get(absPath + '/' + fileName, function(err, phash_data){
-                    if (err) throw err;
-                    console.log('Completed hash calc for image ' + absPath + '/' + fileName);
-                    data.phash = phash_data;
-                });
-            }
-            catch(ex)
-            {
-                console.log('Failed to compute image hash: '+
-                    absPath + '/' + fileName + ' due to exception:\n'+ex);
-            }
-            try
-            {
-                idol_queries.analyzeImagePost(absPath + '/' + fileName, function(token) {
-                    if (token && token.length > 0)
-                    {
-                        var interval = setInterval(function(){
-                            try
-                            {
-                                idol_queries.analyzeImageCheck(token, function(text){
-                                    if (text && text.length)
-                                    {
-                                        clearInterval(interval);
-                                        data.text = text;
-                                        sendToQueue(data, response);
-                                    }
-                                });
-                            }
-                            catch(ex)
-                            {
-                                console.log('Failed to check OCR of image, will continue trying: '+ex);
-                            }
-                        }, 1000);
-                    }
-                    else
-                    {
-                        data.text = '';
-                        sendToQueue(data, response);
-                    }
-                });
-            }
-            catch(ex)
-            {
-                console.log('Failed to analyze image: '+
-                    absPath + '/' + fileName + ' due to exception:\n'+ex);
-            }
-        });        
-      }
     });
     busboy.on('finish', function() {
-      console.log('Done parsing Sophia file upload!');
+        console.log('Done parsing Sophia file upload!');
     });
     request.pipe(busboy);
-    response.status(202).json({ value: 'OK' }); // 202 - accepted, not completed
+    response.status(202).json({
+        value: 'OK'
+    }); // 202 - accepted, not completed
 });
 
 app.listen(sophia_config.FILE_SERVER_PORT);
