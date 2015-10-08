@@ -16,8 +16,19 @@ function searchScreens(query) {
                 lastQuery = query;
                 reportString = reportString + 'Search: ' + query + '\n';
                 //console.log("Search returned: " + data);
-                var timestampsArray = JSON.parse(data);
-                if (timestampsArray.length > 0) {
+                var timestampsGroups = JSON.parse(data);
+                var groups = Object.keys(timestampsGroups);
+                var firstItem = true;
+                for (var j=0;j<groups.length;j++)
+                {
+                    var timestamps = timestampsGroups[groups[j]];
+                    var timestampsArray = [];
+                    if (groups[j] == 'none')
+                    {
+                        timestampsArray = timestamps;
+                    }
+                    else // just one result per group
+                        timestampsArray.push(timestamps[0]);
                     for(var i=0;i<timestampsArray.length;i++){
                         var timestamp = timestampsArray[i];
                         screens_results_row.append(
@@ -27,13 +38,15 @@ function searchScreens(query) {
                             '</li>'
                         );
                         var div_class = 'item';
-                        if (i==0) div_class = 'item active';
+                        if (firstItem) {div_class = 'item active'; firstItem = false;}
                         screens_carousel.append('<div class="'+div_class+'">'+
                             '<img src="'+screensServer+'/screen/' + timestamp + 
                             '"/></div>');
-                        $('#screensCarousel').carousel(); 
                     }
-                    reportString = reportString + 'Results #: ' + timestampsArray.length + '\n';
+                }
+                if (groups.length > 0) {
+                    $('#screensCarousel').carousel(); 
+                    reportString = reportString + 'Results #: ' + $('#screensCarousel img').length + '\n';
                 }
                 else {
                     screens_results_row.append(

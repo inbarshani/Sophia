@@ -117,6 +117,7 @@ app.use('/searchScreens', function(request, response) {
                                 if (i == group_pivots.length) {
                                     // new result
                                     groups["" + i] = [idolDocs[refID].timestamp];
+                                    group_pivots.push(idolDocs[refID].phash);
                                 }
                             }
                         });
