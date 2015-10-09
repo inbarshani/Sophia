@@ -18,6 +18,7 @@ var Step = require('Step');
 var sophia_config = require('./lib/sophia_config');
 var idol_queries = require('./lib/idol_queries');
 var neo4j_queries = require('./lib/neo4j_queries');
+var tests_queries = require('./lib/tests_queries');
 
 // connect to neo4j DB
 var db = new neo4j.GraphDatabase('http://' + sophia_config.NEO4J_DB_SERVER + ':' + sophia_config.NEO4J_DB_PORT);
@@ -42,6 +43,16 @@ test_record.prototype.node_id = null;
 test_record.prototype.start = null;
 
 var tests_history = [];
+tests_queries.getCapturedTestHistory(sophia_config.testsHistoryLimit, 
+    function(err, db_tests_history){
+        if (err)        
+            console.log('Failed recovering tests queue history');
+        else
+        {
+            console.log('Recovering tests queue history with '+db_tests_history.length+' tests');
+            tests_history = db_tests_history;
+        }
+});
 
 function indexOfTestByID(test_id) {
     console.log('Find test by ID, tests_history.length: '+tests_history.length);
@@ -132,6 +143,9 @@ function processTestEvent(test_event) {
             var indexOfTestInArray = indexOfTestByID(data.testID);
             if (indexOfTestInArray >= 0) {
                 tests_history[indexOfTestInArray].end = data.timestamp;
+                tests_queries.updateCapturedTestHistory(
+                    tests_history[indexOfTestInArray].id,
+                    data.timestamp);                
                 connection.publish(sophia_config.QUEUE_TESTS_NAME, {
                     TestNodeID: tests_history[indexOfTestInArray].node_id
                 });
@@ -174,6 +188,8 @@ function processTestEvent(test_event) {
                     var test_run = new test_record(current_test_id,
                         current_test_node_id, data.timestamp);
                     tests_history.push(test_run);
+                    tests_queries.saveCapturedTestHistory(current_test_id,
+                        current_test_node_id, data.timestamp);
                     lock.release();
                 }
                 else {
@@ -221,11 +237,8 @@ function processDataEvent(data_event, requeue_if_no_test) {
             if (current_test_id != null && data.testID == undefined) {
                 data.testID = current_test_id;
             } else if (data.testID && (data.testID.length == 36 /* guid length */ ) && (current_test_id != data.testID)) {
-                // TODO: bind current_test_id by id of node of type Test, if the current is not set
+                // bind current_test_id by id of node of type Test, if the current is not set
                 // this will recover from disruptions in processing incoming events
-                // TODO: the problem - need to get node id as well, which requires a query on neo4j...
-                //          conflicts with the async nature of execution.
-                // Workaround: just work within the current session, i.e. if the process goes down, will not support additional events
                 var indexOfTestInArray = indexOfTestByID(data.testID);
                 if (indexOfTestInArray >= 0) {
                     temp_test_id = tests_history[indexOfTestInArray].id;

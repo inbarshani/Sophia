@@ -34,7 +34,8 @@
         "DATA_SERVER_PORT": 8082,
         "FILE_SERVER_PORT": 8083,
         "WEB_APP_PORT": 8085,
-        "hashSimiliarityThreshold": 0.7
+        "hashSimiliarityThreshold": 0.7,
+        "testsHistoryLimit": 5
     },
     "development": {
       "IDOL_DB_NAME": "Sophia_dev",
