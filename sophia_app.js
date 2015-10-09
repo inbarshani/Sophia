@@ -103,6 +103,8 @@ app.use('/searchScreens', function(request, response) {
                             "none": []
                         };
                         referenceIds.forEach(function(refID) {
+                            if (!idolDocs[refID])
+                                break;
                             if (!idolDocs[refID].phash) {
                                 groups.none.push(idolDocs[refID].timestamp);
                             } else {
