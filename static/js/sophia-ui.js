@@ -151,6 +151,7 @@ function switchSearch(newSearchType) {
     // change results status
     if (searchType == searchTypes.SCREENS)
     {
+        clearScreensSearch();
     }
     else if (searchType == searchTypes.FLOWS) {       
         clearFlowsSearch();

@@ -42,7 +42,7 @@ app.use('/searchFlows', function(request, response) {
     var isFirstQuery = request.query.isFirstQuery;
     var currentNodes = JSON.parse(request.query.currentNodes);
 
-    idol_queries.search(queryText, dateCondition, function(documents_hash) {
+    idol_queries.search(queryText, dateCondition, false, function(documents_hash) {
         // verify that the nodes of the documents are connected after existing nodes
         //console.log('documents_hash keys: '+require('util').inspect(Object.keys(documents_hash), {depth: 2}));
         var idolResultNodes = Object.keys(documents_hash);
@@ -103,23 +103,24 @@ app.use('/searchScreens', function(request, response) {
                             "none": []
                         };
                         referenceIds.forEach(function(refID) {
-                            if (!idolDocs[refID])
-                                break;
-                            if (!idolDocs[refID].phash) {
-                                groups.none.push(idolDocs[refID].timestamp);
-                            } else {
-                                for (var i = 0; i < group_pivots.length; i++) {
-                                    if (phash.compare(idolDocs[refID].phash, group_pivots[i]) <
-                                        sophia_config.hashSimiliarityThreshold) {
-                                        // this result is similar to one of the previous ones
-                                        groups["" + i].push(idolDocs[refID].timestamp);
-                                        break;
+                            if (idolDocs[refID])
+                            {
+                                if (!idolDocs[refID].phash) {
+                                    groups.none.push(idolDocs[refID].timestamp);
+                                } else {
+                                    for (var i = 0; i < group_pivots.length; i++) {
+                                        if (phash.compare(idolDocs[refID].phash, group_pivots[i]) <
+                                            sophia_config.hashSimiliarityThreshold) {
+                                            // this result is similar to one of the previous ones
+                                            groups["" + i].push(idolDocs[refID].timestamp);
+                                            break;
+                                        }
                                     }
-                                }
-                                if (i == group_pivots.length) {
-                                    // new result
-                                    groups["" + i] = [idolDocs[refID].timestamp];
-                                    group_pivots.push(idolDocs[refID].phash);
+                                    if (i == group_pivots.length) {
+                                        // new result
+                                        groups["" + i] = [idolDocs[refID].timestamp];
+                                        group_pivots.push(idolDocs[refID].phash);
+                                    }
                                 }
                             }
                         });

@@ -13,7 +13,8 @@ module.exports = {
             formatted_result.date = idol_document['DREDATE'][0];
             formatted_result.timestamp = idol_document['TIMESTAMP'][0];
             formatted_result.action = idol_document['ACTION'][0];
-            formatted_result.status = idol_document['STATUS'][0];
+			if (idol_document['STATUS'])
+	            formatted_result.status = idol_document['STATUS'][0];
         }
 		if (idol_document['STATUS'])
 			formatted_result.caption += 'Status: ' + idol_document['STATUS'][0];
