@@ -44,51 +44,93 @@ function hashBackboneNodes(msg)
 	console.log('hashBackboneNodes with msg: '+require('util').inspect(msg));
 	var testNodeID = msg.TestNodeID;
 	console.log('hashBackboneNodes of testNodeID: '+testNodeID);
-	indexTestByIDs([testNodeID]);
+	indexTestByID(testNodeID);
 }
 
-function indexTestByIDs(testNodeIDsArray)
+function indexTestByID(testNodeID, callback)
 {
-	neo4j_queries.getBackboneNodes(testNodeIDsArray, function(backbone_nodes_results){		
-		//console.log('indexTestByID results: '+require('util').inspect(backbone_nodes_result));
-		backbone_nodes_results.forEach(function(backbone_nodes_result){
-			var backbone_nodes = backbone_nodes_result.bbNodes;
-			console.log('# of backbone nodes: '+backbone_nodes.length);
-			backbone_nodes.forEach(function(backbone_node){
-				neo4j_queries.getDataNodesStats([parseInt(backbone_node.id)], 
-					function(stats){
-					var hash_items = [];
-					var node_ids = [];
-					Object.keys(stats).forEach(function(key){
-						node_ids = node_ids.concat(stats[key]);
-					});
-					if (node_ids.length > 0)
+	neo4j_queries.getBackboneNodes([testNodeID], function(backbone_nodes_results){		
+		//console.log('indexTestByID results: '+require('util').inspect(backbone_nodes_results));
+		if (backbone_nodes_results.length == 0)
+		{
+			if (callback)
+				callback();
+		}
+		else
+		{
+			iterateBackboneNodes(backbone_nodes_results, 0, callback);
+		}
+	});
+}
+
+function iterateBackboneNodes(nodes, index, callback)
+{
+	if (index >= nodes.length)
+	{	
+		if (callback)
+			callback();
+		return;
+	}
+
+	var backbone_nodes = nodes[index].bbNodes;
+	console.log('# of backbone nodes: '+backbone_nodes.length);
+	if (backbone_nodes.length > 0)
+		indexBackboneNodeIterator(backbone_nodes, 0, function(){
+			iterateBackboneNodes(nodes, ++index, callback);
+		});
+	else 
+		iterateBackboneNodes(nodes, ++index, callback);
+}
+
+
+function indexBackboneNodeIterator(nodes, index, callback)
+{
+	if (index >= nodes.length)
+	{	
+		if (callback)
+			callback();
+		return;
+	}
+
+	var backbone_node = nodes[index];
+
+	neo4j_queries.getDataNodesStats([parseInt(backbone_node.id)], 
+		function(stats){
+		var hash_items = [];
+		var node_ids = [];
+		Object.keys(stats).forEach(function(key){
+			node_ids = node_ids.concat(stats[key]);
+		});
+		console.log('indexBackboneNodeIterator '+backbone_node.id+
+			' stats #: '+node_ids.length);
+		if (node_ids.length > 0)
+		{
+			idol_queries.searchByReference(node_ids, false, false, function(documents_hash){
+				var idolResultNodes = Object.keys(documents_hash);
+				console.log('indexBackboneNodeIterator '+backbone_node.id+
+					' stats IDOL results: '+idolResultNodes.length);
+				idolResultNodes.forEach(function(idolResult){
+					var result_caption = documents_hash[idolResult].caption;						
+					if (result_caption!='screen capture')
 					{
-						idol_queries.searchByReference(node_ids, false, false, function(documents_hash){
-							var idolResultNodes = Object.keys(documents_hash);
-							//console.log('indexTestByID '+backbone_node.test_id+
-							//	' stats IDOL results: '+idolResultNodes.length);
-							idolResultNodes.forEach(function(idolResult){
-								var result_caption = documents_hash[idolResult].caption;						
-								if (result_caption!='screen capture')
-								{
-									// check if we repeat existing additions
-									if (hash_items.indexOf(result_caption) < 0)
-									{
-										//console.log('indexTestByID '+backbone_node.test_id+
-										//	' adding to hash: '+result_caption);
-										hash_items.push(result_caption);
-									}
-								}
-							});
-							idol_queries.updateIdolDocument(null, backbone_node.id, 
-								{"hash": hash_items.join('\n')});
-							//console.log('node '+backbone_node.test_id+' hash:\n'+hash_string);
-						});
+						// check if we repeat existing additions
+						if (hash_items.indexOf(result_caption) < 0)
+						{
+							console.log('indexBackboneNodeIterator '+backbone_node.id+
+								' adding to hash: '+result_caption);
+							hash_items.push(result_caption);
+						}
 					}
 				});
+				var hash_string = encodeURIComponent(hash_items.join('\n'));
+				idol_queries.updateIdolDocument(null, backbone_node.id, 
+					{"hash": hash_string});
+				console.log('node '+backbone_node.id+' hash:\n'+hash_string);
+				indexBackboneNodeIterator(nodes, ++index, callback);
 			});
-		});
+		}
+		else 
+			indexBackboneNodeIterator(nodes, ++index, callback);
 	});
 }
 
@@ -96,16 +138,16 @@ function indexAll()
 {
 	// get all test nodes, then index them
 	neo4j_queries.getAllTestNodes(function(testIDs){
-		//console.log('indexAll getAllTestNodes results: '+require('util').inspect(testIDs));
-		var testNodeIDs = [];
-		testIDs.map(function(testIDObj){
-			testNodeIDs.push(testIDObj.TestNodeID);
-		});
-		//console.log('indexAll testNodeIDs: '+require('util').inspect(testNodeIDs));
-		indexTestByIDs(testNodeIDs);
+		console.log(require('util').inspect(testIDs, { showHidden: true, depth: 4 }));
+		var index = 0;
+		function indexTest(){
+			if (index >= testIDs.length)
+				return;
+			
+			var testID = testIDs[index];
+			index++;
+			indexTestByID(testID, indexTest);
+		};
+		indexTest();
 	});
 }
-
-process.on('uncaughtException', function (err) {
-  console.log('process uncaughtException: '+require('util').inspect(err));
-});
