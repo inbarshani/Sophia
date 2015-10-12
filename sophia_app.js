@@ -139,7 +139,7 @@ app.use('/getScreens', function(request, response) {
         var selectedNodeArray = [];
         selectedNodeArray.push(request.query.selectedNode);
         neo4j_queries.getNearestScreens(selectedNodeArray,
-            function(prevScreenTimestamps, nextScreenTimestamps) {
+            function(prevScreenTimestamps, nextScreenTimestamps, prevScreenIDs, nextScreenIDs) {
                 var prevScreenTimestamp = null,
                     nextScreenTimestamp = null;
                 if (prevScreenTimestamps.length > 0)
@@ -255,15 +255,15 @@ app.get('/tests', function(request, response) {
 
 app.use('/searchReview', function(request, response) {
     var queryText = request.query.q;
-    var testStepID = '';
-    if (queryText.match(/StepID=[0-9]{1,6}/)) {
-        testStepID = queryText.split('=')[1];
+    var nodeID = '';
+    if (queryText.match(/StepID=[0-9]{1,10}/)) {
+        nodeID = queryText.split('=')[1];
     }
     var dateCondition = (request.query.dateCondition) ? JSON.parse(request.query.dateCondition) : {};
-    if (testStepID.length == 0)
+    if (nodeID.length == 0)
         searchTestsByName(queryText, dateCondition, response);
     else
-        searchSimilarTestSteps(testStepID, dateCondition, response);
+        searchSimilarTestSteps(nodeID, dateCondition, response);
 
 });
 
@@ -359,7 +359,7 @@ function searchTestsByName(queryText, dateCondition, response) {
                         referenceIds.push(node.id);
                     });
                 });
-                idol_queries.searchByReference(referenceIds, false, false, function(idolDocs) {
+                idol_queries.searchByReference(referenceIds, true, true, function(idolDocs) {
                     var idolResultNodes = Object.keys(idolDocs);
                     bbNodes.map(function(test) {
                         //console.log('searchTestsByName bbNodes test: '+
@@ -368,7 +368,9 @@ function searchTestsByName(queryText, dateCondition, response) {
                         test.bbNodes.map(function(node) {
                             var doc = idolDocs[node.id];
                             if (doc) {
-                                node.caption = doc.caption;
+                                Object.keys(doc).forEach(function(key){
+                                    node[key] = doc[key];
+                                });
                             }
                         });
                     });
@@ -381,8 +383,8 @@ function searchTestsByName(queryText, dateCondition, response) {
     });
 }
 
-function searchSimilarTestSteps(testStepID, dateCondition, response) {
-    idol_queries.searchSimilar(testStepID, dateCondition, function(documents_hash) {
+function searchSimilarTestSteps(nodeID, dateCondition, response) {
+    idol_queries.searchSimilar(nodeID, dateCondition, function(documents_hash) {
         var testIDs = Object.keys(documents_hash);
         if (testIDs.length > 0) {
             idol_queries.searchTestsByID(testIDs, function(test_documents_hash) {
@@ -402,7 +404,7 @@ function searchSimilarTestSteps(testStepID, dateCondition, response) {
                             referenceIds.push(node.id);
                         });
                     });
-                    idol_queries.searchByReference(referenceIds, false, false, function(idolDocs) {
+                    idol_queries.searchByReference(referenceIds, true, true, function(idolDocs) {
                         var idolResultNodes = Object.keys(idolDocs);
                         // use the previous 'similar' search to mark
                         //  the backbone nodes that are similar, 
@@ -421,11 +423,13 @@ function searchSimilarTestSteps(testStepID, dateCondition, response) {
                             test.bbNodes.map(function(node) {
                                 var doc = idolDocs[node.id];
                                 if (doc) {
-                                    node.caption = doc.caption;
+                                    Object.keys(doc).forEach(function(key){
+                                        node[key] = doc[key];
+                                    });
                                 }
                                 if (similarNodesIDs.indexOf(node.id) >= 0) {
                                     console.log('similar node ' + node.id + ' for test ' + test.test.id);
-                                    if (node.id == testStepID)
+                                    if (node.id == nodeID)
                                         node.same = true;
                                     else
                                         node.similar = true;

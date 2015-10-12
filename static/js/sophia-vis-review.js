@@ -139,6 +139,14 @@ function createBBListForTest(test, ul) {
 	    div.css('height', '100%');
 	    ddUl = $('<ul class="dropdown-menu dd">');
 	    ddLi = $('<li class="dd">');
+        ddLi.text('Show details');
+        ddLi.on('click', function(node){
+            return function() {
+                showNodeDetails(node);
+            };            
+        }(node));
+        ddUl.append(ddLi);
+        ddLi = $('<li class="dd">');
 	    ddLi.text('Set as start');
 	    ddLi.on('click', function(item, n, id, name){
 	    	return function() {
@@ -239,8 +247,44 @@ function nodeSearchSimilar(node, test)
 		.val('LIKE Step \''+node.caption.substring(0,20)+
 			'\' of Test \''+test.name.substring(0,20)+'\'')
 		.css('font-style', 'italic');
-	searchReview('StepID='+node.id);
+	searchReview('StepID='+node.graph_node);
 }
+
+function showNodeDetails(node) {
+    $('#details #nodeType').text(node.type);
+    $('#details #nodeCaption').html(node.caption.replace('\n','<br/>'));
+    $('#details #nodeGraphID').text('Graph node: ' + node.graph_node);
+    $('#details #nodeDocID').text('Document ID: ' + node.id);
+    if (node.hash)
+        $('#details #nodeHash').text('Hash: ' + node.hash.replace('\n','<br/>'));
+    else
+        $('#details #nodeHash').text('Hash is not defined');
+
+    getScreens(node.graph_node, function(prevTimestamp, nextTimestamp){
+        if (prevTimestamp)
+        {
+            $('#details #nodeScreens #screenBefore').html('Before:<br/>' +
+                '<a target="_blank" href="'+ screensServer+'/screen/' + prevTimestamp + '">'+
+                '<img class="img-thumbnail" src="'+
+                screensServer+'/screen/' + prevTimestamp + '"></img></a>');
+        }
+        else
+            $('#details #nodeScreens #screenBefore').html('No pre-action screen');
+
+        if (nextTimestamp)
+        {
+            $('#details #nodeScreens #screenAfter').html('After:<br/>'+
+                '<a target="_blank" href="'+ screensServer+'/screen/' + nextTimestamp + '">'+
+                '<img class="img-thumbnail" src="' +
+                screensServer+'/screen/' + nextTimestamp + '"></img></a>');
+        }
+        else
+            $('#details #nodeScreens #screenAfter').html('No post-action screen');
+    });
+
+    $('#nodeDetailsModal').modal();
+}
+
 
 function collapseNodesAndGetStats(name, testId, ul) {
 	var lis = ul.children();
