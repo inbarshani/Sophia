@@ -132,44 +132,16 @@ function createBBListForTest(test, ul) {
 	var li, div, ddUl, ddLi, h6;
 	test.bbNodes.forEach(function (node) {
 	    li = $('<li class="dropdown small">');
-	    div = $('<div data-toggle="dropdown" data-toggle="tooltip"'+
+	    div = $('<div data-toggle="tooltip"'+
 	    	' data-placement="top" title="'+node.caption+' (ID: '+
 	    	node.id+')" class="teststep_caption">');
+	    div.click(function(item, n, t) {
+	    	return function () {
+	    		showMenu(item, n, t);
+	    	}
+	    }(li, node, test));
         h6 = $('<h6 style="margin-top: -2px">');
 	    div.css('height', '100%');
-	    ddUl = $('<ul class="dropdown-menu dd">');
-	    ddLi = $('<li class="dd">');
-        ddLi.text('Show details');
-        ddLi.on('click', function(node){
-            return function() {
-                showNodeDetails(node);
-            };            
-        }(node));
-        ddUl.append(ddLi);
-        ddLi = $('<li class="dd">');
-	    ddLi.text('Set as start');
-	    ddLi.on('click', function(item, n, id, name){
-	    	return function() {
-	    		bbNodeSelect(item, n, id, name, 'start');
-	    	};
-	    }(li, node, test.test.id, test.name));
-	    ddUl.append(ddLi);
-	    ddLi = $('<li class="dd">');
-	    ddLi.text('Set as end');
-	    ddLi.on('click', function(item, n, id, name){
-	    	return function() {
-	    		bbNodeSelect(item, n, id, name, 'end');
-	    	};
-	    }(li, node, test.test.id, test.name));
-	    ddUl.append(ddLi);
-	    ddLi = $('<li class="dd">');
-	    ddLi.text('Search similar');
-	    ddLi.on('click', function(node, test){
-	    	return function() {
-	    		nodeSearchSimilar(node, test);
-	    	};
-	    }(node, test));
-	    ddUl.append(ddLi);
 	    li.attr('data-bb-id', node.id);
 	    if (node.same)
 	    	li.addClass('same');
@@ -181,9 +153,53 @@ function createBBListForTest(test, ul) {
       //  div.title = node.caption;
         div.append(h6);
         li.append(div);
-	    li.append(ddUl);
 	    ul.append(li);
 	});
+}
+
+function showMenu(item, node, test) {
+	var ddUl = $('#entityDropDown');
+	var ddLi;
+	ddUl.html('');
+	ddLi = $('<li class="dd">');
+	ddLi.text('Show details');
+	ddLi.on('click', function(node){
+	    return function() {
+	    	ddUl.hide();
+	        showNodeDetails(node);
+	    };            
+	}(node));
+	ddUl.append(ddLi);
+	ddLi = $('<li class="dd">');
+	ddLi.text('Set as start');
+	ddLi.on('click', function(item, n, id, name){
+		return function() {
+	    	ddUl.css('display', 'none');
+			bbNodeSelect(item, n, id, name, 'start');
+		};
+	}(item, node, test.test.id, test.name));
+	ddUl.append(ddLi);
+	ddLi = $('<li class="dd">');
+	ddLi.text('Set as end');
+	ddLi.on('click', function(item, n, id, name){
+		return function() {
+	    	ddUl.css('display', 'none');
+			bbNodeSelect(item, n, id, name, 'end');
+		};
+	}(item, node, test.test.id, test.name));
+	ddUl.append(ddLi);
+	ddLi = $('<li class="dd">');
+	ddLi.text('Search similar');
+	ddLi.on('click', function(node, test){
+		return function() {
+	    	ddUl.css('display', 'none');
+			nodeSearchSimilar(node, test);
+		};
+	}(node, test));
+	ddUl.append(ddLi);
+	ddUl.css('top', event.y);
+	ddUl.css('left', event.x);
+  	ddUl.css('display', 'block');
 }
 
 function testOnClick(li, test) {

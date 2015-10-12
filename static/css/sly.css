@@ -44,14 +44,24 @@ div#review_flow{
 .small-22 {
   font-size: 22px !important;
 }
-
+#entityDropDown {
+  display: none;
+  position: absolute;
+  z-index: 10001;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  height: 88px;
+  display: none;
+}
 ul.dd {
 	top: 5px;
-  	left: 25px;
-  	height: 44px !important;
-  	min-width: 75px;
-  	line-height: 22px;
+  left: 25px;
+  height: 90px !important;
+  min-width: 75px;
+  line-height: 22px;
 	font-size: 10px !important;
+
 }
 
 li.dd {
@@ -61,6 +71,9 @@ li.dd {
   	padding: 0px 0px 0px 10px !important;
   	text-align: left !important;
   	border-bottom: 1px solid #ddd;
+    width: 100px;
+    color: #3a3c47;
+    cursor: pointer;
 }
 li.stats {
   padding-top: 0px !important;
