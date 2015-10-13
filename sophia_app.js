@@ -425,7 +425,7 @@ function searchSimilarTestSteps(nodeID, dateCondition, response) {
                             test.bbNodes.map(function(node) {
                                 var node_doc = backboneDocs[node.id];
                                 //console.log('searchSimilarTestSteps backbone node doc for '+node.id+': '+
-                                    require('util').inspect(node_doc, {depth:4}));
+                                //    require('util').inspect(node_doc, {depth:4}));
                                 if (node_doc) {
                                     Object.keys(node_doc).forEach(function(key){
                                         node[key] = node_doc[key];
