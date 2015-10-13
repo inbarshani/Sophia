@@ -45,7 +45,7 @@ function fillScreensCarousel(){
     screens_carousel.empty();
     //console.log("Search returned: " + data);
     var groups = Object.keys(screensTimestampsGroups);
-    var firstItem = true;
+    var itemCounter = 0;
     for (var j=0;j<groups.length;j++)
     {
         var timestamps = screensTimestampsGroups[groups[j]];
@@ -65,19 +65,20 @@ function fillScreensCarousel(){
             var timestamp = timestampsArray[i];
             screens_results_row.append(
                 '<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">' +
-                '  <img onclick="showModal('+i+');"' +
+                '  <img onclick="showModal('+itemCounter+');"' +
                 '       src="'+screensServer+'/screen/' + timestamp + '"/>' +
                 '</li>'
             );
             var div_class = 'item';
-            if (firstItem) {div_class = 'item active'; firstItem = false;}
+            if (itemCounter == 0) {div_class = 'item active'; firstItem = false;}
             screens_carousel.append('<div class="'+div_class+'">'+
                 '<img src="'+screensServer+'/screen/' + timestamp + 
                 '"/></div>');
+            itemCounter++;
         }
     }
     if (groups.length > 0) {
-        $('#screensCarousel').carousel(); 
+        $('#screensCarousel').carousel({interval: false, wrap: false}); 
     }
     else {
         screens_results_row.append(
