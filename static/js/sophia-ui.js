@@ -135,7 +135,12 @@ $(document).ajaxSend(function(event, xhr, settings ) {
         }, 500);
     }
 });
+$(document).ajaxError(function( event, xhr, settings, error ) {
+    console.log('Sophia ajaxError for: '+settings.url+
+        ', statusText: '+xhr.statusText+', error: '+error);
+});
 $(document).ajaxComplete(function( event, xhr, settings ) {
+    console.log('Sophia ajaxComplete for: '+settings.url+', statusText: '+xhr.statusText);
     //console.log('ajaxComplete for: '+settings.url+', before decrease, isAjaxActive: '+isAjaxActive);
     if (isAjaxActive > 0) isAjaxActive--;
     if (isAjaxActive == 0) {
