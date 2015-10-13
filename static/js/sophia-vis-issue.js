@@ -16,9 +16,9 @@ function showIssues(data) {
             var  tr =  '<tr>';
             tr+='<td>' +timestamp + '</td>';
             tr+='<td>' +timestamp+ '</td>';
-            tr += '<td>'+ caption +'</td>';
             tr+='<td>' +type + '</td>';
-            tr+='<td>' +date + '</td>';
+            tr += '<td>'+ caption +'</td>';
+            //tr+='<td>' +date + '</td>';
             tr += '</tr>';
             table.append(tr);
             table.hide();
@@ -122,12 +122,12 @@ function showIssues(data) {
                             .append('<h3>' + items[i].dateStart + ' - ' + items[i].dateEnd + '</h3>');
                     } else {
                         $('.outerwrapper div[class="event-' + i + '"]')
-                            .append('<h3>' + items[i].dateStart + '</h3>');
+                            .append('<h5>' + items[i].dateStart + '</h5>');
                     }
 
                     if (items[i].headline) {
                         $('.outerwrapper div[class="event-' + i + '"]')
-                            .append('<h6>' + items[i].headline + ' (' + (i + 1) + ' of ' + items.length + ')</h6>');
+                            .append('<h3>' + items[i].headline + ' (' + (i + 1) + ' of ' + items.length + ')</h3>');
                     } else {
                         $('.outerwrapper div[class="event-' + i + '"]')
                             .append('<h6> (' + (i + 1) + ' of ' + items.length + ')</h6>');
@@ -373,7 +373,7 @@ function showIssues(data) {
                         .attr("y", (height - miniHeight))
                         .attr("width", width)
                         .attr("height", miniHeight)
-                        .attr("fill", "gray")
+                        .attr("fill", "#D3D3D3")
                         .style("opacity", 0.5);
 
                     var miniHolder = chart.append("g")

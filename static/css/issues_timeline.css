@@ -3,7 +3,10 @@ body {
     font-family: Verdana,arial,Helvetica,sans-serif;
   /*  font-size: 90%;*/
 }
-
+h3{
+    color: #25aae1 !important;
+    font-weight: bold;
+}
 .outerwrapper {
     /*display: none;*/
     width: 630px;
