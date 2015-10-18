@@ -11,7 +11,7 @@ function loadFlows(){
     $("#application_area").load("html/flows.html", function () {
         // bind the search control
         $('#search-button').on('click', function(e) {
-            searchByText();
+            searchFlowsByText();
         });
 
         $('#search-text').on('focus', function(e) {
@@ -23,7 +23,7 @@ function loadFlows(){
 
         $('#search-text').keyup(function(e) {
             if (e.keyCode == 13) {
-                searchByText();
+                searchFlowsByText();
             }
         });        
 
@@ -42,7 +42,7 @@ function loadFlows(){
     });
 }
 
-function searchByText(){
+function searchFlowsByText(){
     var query = $('#search-text').val();
     searchFlows(query, testQueryTypes.QUERY);    
 }

@@ -134,8 +134,10 @@ function switchSearch(newSearchType) {
     } else if (searchType == searchTypes.SAVED) {
         clearSavedTestsSearch();
     } else if (searchType == searchTypes.REVIEW) {
+        clearReviewsSearch();
     }
     else if (searchType == searchTypes.ISSUES) {
+        clearIssuesSearch();
     }
 
     // update searchType
@@ -260,7 +262,7 @@ function updateView() {
         loadTrends(); 
     }
     else if (searchType == searchTypes.REVIEW){
-        loadReview();
+        loadReviews();
     }
     else if (searchType == searchTypes.ISSUES){
         loadIssues();

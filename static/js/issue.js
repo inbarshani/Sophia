@@ -1,17 +1,11 @@
 /**
  * Created by gazitn on 9/1/2015.
  */
-var allTests = [];
-var selectedReviewTests = [];
-var selectedBBsByTest = [];
-var issues_queries = [];
-
-
 function loadIssues(){
     $("#application_area").load("html/issues.html", function () {
         // bind the search control
         $('#search-button').on('click', function(e) {
-            searchByText();
+            searchIssuesByText();
         });
 
         $('#search-text').on('focus', function(e) {
@@ -23,7 +17,7 @@ function loadIssues(){
 
         $('#search-text').keyup(function(e) {
             if (e.keyCode == 13) {
-                searchByText();
+                searchIssuesByText();
             }
         });        
 
@@ -43,7 +37,7 @@ function loadIssues(){
     });
 }
 
-function searchByText(){
+function searchIssuesByText(){
     var query = $('#search-text').val();
     searchIssues(query);    
 }
@@ -60,9 +54,11 @@ function searchIssues(query, callback) {
             console.log("Search failed: " + err);
             reportString = reportString + 'Result: failed query\n';
 
-            // remove all nodes
-            allTests.length = 0;
-            selectedReviewTests.length = 0;
             update();
         });
+}
+
+function clearIssuesSearch()
+{
+    // remove all UI & data about searches
 }
