@@ -4,8 +4,52 @@
 var allTests = [];
 var selectedReviewTests = [];
 var selectedBBsByTest = [];
+var issues_queries = [];
 
-function searchIssue(query, callback) {
+
+function loadIssues(){
+    $("#application_area").load("html/issues.html", function () {
+        // bind the search control
+        $('#search-button').on('click', function(e) {
+            searchByText();
+        });
+
+        $('#search-text').on('focus', function(e) {
+            if ($('#search-text').css('font-style') == 'italic' ) {
+                $('#search-text').val('');
+                $('#search-text').css('font-style', 'normal');
+            }
+        });
+
+        $('#search-text').keyup(function(e) {
+            if (e.keyCode == 13) {
+                searchByText();
+            }
+        });        
+
+        $('#search-text').focus();
+        
+        $('#date-cond').on('click', function(e) {
+            openDateDialog();
+        });
+        /* Disable load/save until it's implemented for issues
+        $('#load-test').on('click', function(e) {
+            openLoadTestDialog();
+        });
+        $('#save-test').on('click', function(e) {
+            openSaveTestDialog();
+        });
+        */
+    });
+}
+
+function searchByText(){
+    var query = $('#search-text').val();
+    searchIssues(query);    
+}
+
+
+function searchIssues(query, callback) {
     var jqxhr = $.ajax("/searchError?q=" + fixedEncodeURIComponent(query) +
     '&dateCondition=' + JSON.stringify(dateCondition)+'&&isExpendedData=true')
         .done(function(data) {
