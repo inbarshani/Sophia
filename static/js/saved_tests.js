@@ -4,7 +4,7 @@ function searchSavedTests(query){
     //  + "&dateCondition=" + JSON.stringify(dateCondition)
     var jqxhr = $.ajax("/tests?type=" + searchTypes.FLOWS + "&name="+query)
         .done(function(savedTestsArray) {
-            $("#all_results").load("html/saved_tests.html", function () {
+            $("#application_area").load("html/saved_tests.html", function () {
                 var saved_tests_list = $('#saved-list');
                 lastQuery = query;
                 reportString = reportString + 'Search: ' + query + '\n';

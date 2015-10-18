@@ -1,7 +1,7 @@
 var fullData;
 var table;
 function showIssues(data) {
-    $( "#all_results" ).load( "html/issues.html", function(){
+    $( "#application_area" ).load( "html/issues.html", function(){
         /*	An array to store all the data */
         var items = [];
         var dataObj = JSON.parse(data);

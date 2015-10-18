@@ -12,7 +12,7 @@ function searchScreens(query) {
 
     var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query) + "&dateCondition=" + JSON.stringify(dateCondition))
         .done(function(data) {
-            $("#all_results").load("html/screens.html", function () {
+            $("#application_area").load("html/screens.html", function () {
                 $('#screens_toggle_groups').bootstrapSwitch();
                 $('#screens_toggle_groups').on('switchChange.bootstrapSwitch', function(event, state) {
                     screensShowGrouped = state;

@@ -1,5 +1,5 @@
 function showTestsForReview(data) {
-	$( "#all_results" ).load( "html/review.html", function(){
+	$( "#application_area" ).load( "html/review.html", function(){
 		var allTests = JSON.parse(data);
 		var testsList = $('#review_tests_list');
 		$('#review_results').removeClass('hidden');

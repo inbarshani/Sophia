@@ -64,7 +64,7 @@ function searchTopics(query, queryType, autoSelect, callback) {
                     }
                 }
                 else {
-                    $("#all_results").load("html/topics.html", function () {
+                    $("#application_area").load("html/topics.html", function () {
 
                         var available_topics_list = $('#available_topics_list');
                         available_topics_list.empty();

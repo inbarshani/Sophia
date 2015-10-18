@@ -19,7 +19,6 @@ var searchType = searchTypes.FLOWS;
 var user;
 var lastQuery = "";
 var selectedTestID;
-var queries = [];
 var dateCondition = {from: null, to: null};
 // TODO: extract to configuration by server (use REST to get it?) 
 //   the port is the one changing, maybe just calc it from this app
@@ -42,26 +41,7 @@ $(document).ready(function() {
 
     // restore last search type
     searchType = localStorage.getItem("sophiaSearchType");
-    if (!searchType)
-        searchType = searchTypes.FLOWS;
-    updateSearchNavigation();
-
-    $('#search-button').on('click', function(e) {
-        search();
-    });
-
-    $('#search-text').on('focus', function(e) {
-        if ($('#search-text').css('font-style') == 'italic' ) {
-            $('#search-text').val('');
-            $('#search-text').css('font-style', 'normal');
-        }
-    });
-
-    $('#search-text').keyup(function(e) {
-        if (e.keyCode == 13) {
-            search();
-        }
-    });
+    switchSearch(searchType);
 
     $('#navbar-logo').on('click', function(e) {
         clearSearch();
@@ -151,8 +131,8 @@ $(document).ajaxComplete(function( event, xhr, settings ) {
 
 function switchSearch(newSearchType) {
     queries = [];
-    if (searchType == newSearchType)
-        return false; // false = no click
+    //if (searchType == newSearchType)
+    //    return false; // false = no click
     // change results status
     if (searchType == searchTypes.SCREENS)
     {
@@ -175,13 +155,11 @@ function switchSearch(newSearchType) {
 
     // update searchType
     searchType = newSearchType;
-    $( "#all_results" ).html('');
+    $( "#application_area" ).html('');
     localStorage.setItem("sophiaSearchType", searchType);
 
     updateSearchNavigation();
-
-    // invoke search with last search term
-    search(lastQuery);
+    updateView();
 }
 
 function updateSearchNavigation()
@@ -210,7 +188,7 @@ function updateSearchNavigation()
     // change siblings style
     search_type_li.siblings().removeClass('selected_search').addClass('search');    
 }
-
+/*
 function search(query){
     $('#save-test').removeClass('disabled');
     if ($('#search-text').val().length > 0)
@@ -237,7 +215,7 @@ function search(query){
         searchIssue(query);
     }
 }
-
+*/
 function addRelation(relationsArray, sourceIndex, targetIndex, numOfLinks) {
     var relation = {
         sourceIndex: sourceIndex,
@@ -254,31 +232,19 @@ function addRelation(relationsArray, sourceIndex, targetIndex, numOfLinks) {
 
 function clearSearch(searchType) {
     queries = [];
-    $('#save-test').addClass('disabled');
-    $('#search-text').val('');
     reportString = '';
     lastQuery = '';
     if (!searchType) {
         searchType = searchTypes.FLOWS;
     }
-    clearFlowsSearch();
-    clearSavedTestsSearch();
-    $('#available_topics_list').empty();
-    $('#topics-vis-container').html('');
-    d3Topics.svg = null;
     switchSearch(searchType);
     update();
-    dateCondition = {from: null, to: null};
-    $('#search-text').focus();
 }
 
-function update(isTest) {
+function update() {
     reportAudit();
 
     updateNavigation();
-
-    updateSearchResults();
-
 }
 
 function updateNavigation() {    
@@ -295,7 +261,29 @@ function updateNavigation() {
     }
 }
 
-function updateSearchResults() {
+function updateView() {
+    if (searchType == searchTypes.FLOWS) {
+        loadFlows();
+    }
+    else if (searchType == searchTypes.SCREENS){
+        loadScreens(); 
+    }
+    else if (searchType == searchTypes.TOPICS){
+        loadTopics();
+    }
+    else if (searchType == searchTypes.TRENDS){
+        loadTrends(); 
+    }
+    else if (searchType == searchTypes.REVIEW){
+        loadReview();
+    }
+    else if (searchType == searchTypes.ISSUES){
+        loadIssues();
+    }
+}
+
+/*
+function updateView() {
     // clear last search term
     //$('#search-text').val('');
     if (searchType == searchTypes.FLOWS && ($('#flow-list').has('li').length > 0)) {
@@ -330,7 +318,7 @@ function updateSearchResults() {
         $('#issue_results').removeClass('show').addClass('hidden');
     }
 
-}
+}*/
 
 
 function reportAudit() {

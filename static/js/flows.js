@@ -4,9 +4,43 @@
 var currentBackboneNodes = [];
 var currentDataNodes = [];
 var currentPaths = [];
+var flow_queries = [];
 
+
+function loadFlows(){
+    $("#application_area").load("html/flows.html", function () {
+        // bind the search control
+        $('#search-button').on('click', function(e) {
+            searchByText();
+        });
+
+        $('#search-text').on('focus', function(e) {
+            if ($('#search-text').css('font-style') == 'italic' ) {
+                $('#search-text').val('');
+                $('#search-text').css('font-style', 'normal');
+            }
+        });
+
+        $('#search-text').keyup(function(e) {
+            if (e.keyCode == 13) {
+                searchByText();
+            }
+        });        
+
+        $('#search-text').focus();
+    });
+}
+
+function searchByText(){
+    var query = $('#search-text').val();
+    flow_queries.push({query:query, type: testQueryTypes.QUERY});
+    searchFlows(query);    
+}
 
 function searchFlows(query, callback) {
+    if (!query || query.length == 0)
+        return;
+
     if (currentPaths.length == 0) {
         reportString = 'Type: FLOWS\n';
     }
@@ -15,7 +49,7 @@ function searchFlows(query, callback) {
         isFirstQuery = '&isFirstQuery=true';
     }
     lastQuery = query;
-    var currentStepNumber = queries.length;
+    var currentStepNumber = flow_queries.length;
     reportString = reportString + 'Search: ' + query + '\n';
     var jqxhr = $.ajax("/searchFlows?q=" + fixedEncodeURIComponent(query) +
     '&currentNodes=' + JSON.stringify(currentBackboneNodes.concat(currentDataNodes)) +
@@ -25,8 +59,8 @@ function searchFlows(query, callback) {
             //console.log("Search returned: " + data);
             var responseData = JSON.parse(data);
             var li_html = '';
-            queries[queries.length-1].result = responseData.paths_to_nodes.length;
-            if (queries[queries.length -1].type == testQueryTypes.QUERY)
+            flow_queries[flow_queries.length-1].result = responseData.paths_to_nodes.length;
+            if (flow_queries[flow_queries.length -1].type == testQueryTypes.QUERY)
             {
                 updateCurrentPaths(responseData.paths_to_nodes);
                 currentBackboneNodes = responseData.last_backbone_nodes;
@@ -42,27 +76,26 @@ function searchFlows(query, callback) {
                 li_html = '<li class="list-group-item" style="margin-left: 40px;">' +
                     'Step ' + currentStepNumber + ': ' + query + ' <span class="badge">' + 
                     responseData.paths_to_nodes.length + '</span></li>';
-                queries[queries.length-1].pass = (responseData.paths_to_nodes.length > 0);
+                flow_queries[flow_queries.length-1].pass = (responseData.paths_to_nodes.length > 0);
             }
             // add query and number of results to the list
-            var loaded = $("#flow-list");
+            var loaded = $("#flow-list li");
             if(loaded.length==0) {
-                $("#all_results").load("html/flows.html"
-                    , function () {
-                        loaded = true;
-                        var new_item = $('#flow-list').append(li_html).find('li:last-child');
-                        reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
-                        update();
-                        addIconsToLast(new_item);
-                        if (callback) {
-                            callback();
-                        }
-                    });
+                // first item
+                var new_item = $('#flow-list').append(li_html).find('li:last-child');
+                reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
+                $('#save-test').removeClass('disabled');
+                addIconsToLast(new_item);
+                $('#flow_results').removeClass('hidden').addClass('show');
+                update();
+                visualize();
+                if (callback) {
+                    callback();
+                }
             }
             else {
                 var new_item = $('#flow-list').append(li_html).find('li:last-child');
                 reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
-                update();
                 addIconsToLast(new_item);
                 if (callback) {
                     callback();
@@ -79,7 +112,6 @@ function searchFlows(query, callback) {
             currentPaths.length = 0;
             currentBackboneNodes.length = 0;
             currentDataNodes.length = 0;
-            update();
         });
 }
 
@@ -104,23 +136,23 @@ function updateCurrentPaths(newPaths) {
 
 
 function addIconsToLast() {
-    var currentIndex = queries.length - 1;
+    var currentIndex = flow_queries.length - 1;
     var new_item = $('#flow-list > li:last-child');
 
     var spanRemove = $('<span>');
     spanRemove.attr('title', "Remove step");
     spanRemove.addClass('glyphicon glyphicon-trash flow-step-icons-start');
     spanRemove.on('click', function() {
-        queries.splice(currentIndex, 1);
+        flow_queries.splice(currentIndex, 1);
         reQueryFlows();
     });
     new_item.append(spanRemove);
 
     var spanIndent = $('<span>');
     spanIndent.addClass('glyphicon flow-step-icons');
-    if (queries[currentIndex].type == testQueryTypes.VERIFICATION)
+    if (flow_queries[currentIndex].type == testQueryTypes.VERIFICATION)
     {
-        if (queries[currentIndex].pass)
+        if (flow_queries[currentIndex].pass)
         {
             spanIndent.addClass('glyphicon-ok-circle');
             spanIndent.attr('title', "Verified");
@@ -138,7 +170,7 @@ function addIconsToLast() {
         spanIndent.addClass('glyphicon-check');
         spanIndent.attr('title', "Set verification");
         spanIndent.on('click', function() {
-            queries[currentIndex].type = testQueryTypes.VERIFICATION;
+            flow_queries[currentIndex].type = testQueryTypes.VERIFICATION;
             reQueryFlows();
         });
     }
@@ -147,7 +179,7 @@ function addIconsToLast() {
 }
 
 function reQueryFlows() {
-    var tempQueries = queries;
+    var tempQueries = flow_queries;
     clearSearch(searchTypes.FLOWS);
     var ul = $('#flow-list');
     ul.empty();
@@ -156,8 +188,8 @@ function reQueryFlows() {
     for (var i = tempQueries.length - 1; i >= 0; i--) {
         f[i] = (function(query, func) {
             return function() {
-                queries.push(query);
-                if (queries.length == 1) // single time enable the save button
+                flow_queries.push(query);
+                if (flow_queries.length == 1) // single time enable the save button
                     $('#save-test').removeClass('disabled');
                 timer = setInterval(function(){
                     if (completeVisualize == true) {
@@ -175,9 +207,12 @@ function reQueryFlows() {
 
 function clearFlowsSearch()
 {
-    // remove all nodes
+    // remove all UI & data about searches
     currentPaths.length = 0;
     currentBackboneNodes.length = 0;
-    currentDataNodes.length = 0;
-    $('#flow-list').empty();
+    currentDataNodes.length = 0;    
+    flow_queries.length = 0;
+    $('#flow-results').empty();
+    $('#flow-text').val('');
+    $('#save-test').addClass('disabled');
 }
