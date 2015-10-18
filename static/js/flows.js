@@ -28,19 +28,30 @@ function loadFlows(){
         });        
 
         $('#search-text').focus();
+
+        $('#date-cond').on('click', function(e) {
+            openDateDialog();
+        });
+        $('#load-test').on('click', function(e) {
+            openLoadTestDialog();
+        });
+        $('#save-test').on('click', function(e) {
+            openSaveTestDialog();
+        });
+
     });
 }
 
 function searchByText(){
     var query = $('#search-text').val();
-    flow_queries.push({query:query, type: testQueryTypes.QUERY});
-    searchFlows(query);    
+    searchFlows(query, testQueryTypes.QUERY);    
 }
 
-function searchFlows(query, callback) {
+function searchFlows(query, type, callback) {
     if (!query || query.length == 0)
         return;
 
+    flow_queries.push({query:query, type: type});
     if (currentPaths.length == 0) {
         reportString = 'Type: FLOWS\n';
     }
@@ -79,29 +90,19 @@ function searchFlows(query, callback) {
                 flow_queries[flow_queries.length-1].pass = (responseData.paths_to_nodes.length > 0);
             }
             // add query and number of results to the list
-            var loaded = $("#flow-list li");
-            if(loaded.length==0) {
+            var new_item = $('#flow-list').append(li_html).find('li:last-child');
+            reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
+            addIconsToLast();
+            if(flow_queries.length==1) {
                 // first item
-                var new_item = $('#flow-list').append(li_html).find('li:last-child');
-                reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
                 $('#save-test').removeClass('disabled');
-                addIconsToLast(new_item);
                 $('#flow_results').removeClass('hidden').addClass('show');
                 update();
-                visualize();
-                if (callback) {
-                    callback();
-                }
             }
-            else {
-                var new_item = $('#flow-list').append(li_html).find('li:last-child');
-                reportString = reportString + 'Results #: ' + currentPaths.length + '\n';
-                addIconsToLast(new_item);
-                if (callback) {
-                    callback();
-                }
+            visualize();
+            if (callback) {
+                callback();
             }
-
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
@@ -113,6 +114,10 @@ function searchFlows(query, callback) {
             currentBackboneNodes.length = 0;
             currentDataNodes.length = 0;
         });
+}
+
+function getFlowsQueries(){
+    return flow_queries;
 }
 
 function updateCurrentPaths(newPaths) {
@@ -194,7 +199,7 @@ function reQueryFlows() {
                 timer = setInterval(function(){
                     if (completeVisualize == true) {
                         clearInterval(timer);
-                        searchFlows(query.query, func);
+                        searchFlows(query.query, query.type, func);
                     }
                 }, 100);
             };

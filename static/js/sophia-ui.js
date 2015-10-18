@@ -49,21 +49,6 @@ $(document).ready(function() {
 
     update();
     
-    $('#date-cond').on('click', function(e) {
-        openDateDialog();
-    });
-    $('#load-test').on('click', function(e) {
-        openLoadTestDialog();
-    });
-    $('#save-test').on('click', function(e) {
-        openSaveTestDialog();
-    });
-    $('#flow-test-type-radio').on('change', function(e) {
-        showTests(searchTypes.FLOWS);
-    });
-    $('#topic-test-type-radio').on('change', function(e) {
-        showTests(searchTypes.TOPICS);
-    });
     $('#load-test-btn').on('click', function(e) {
         loadTest();
     });
@@ -105,7 +90,7 @@ $(document).ajaxSend(function(event, xhr, settings ) {
     }
     else
     {
-        //console.log('ajaxStart for: '+settings.url+', before increment, isAjaxActive: '+isAjaxActive);
+        console.log('Sophia ajaxSend for: '+settings.url+', before increment, isAjaxActive: '+isAjaxActive);
         isAjaxActive++;
         setTimeout(function() {
             //console.log('in timeout function for: '+settings.url+', isAjaxActive: '+isAjaxActive);
@@ -120,8 +105,8 @@ $(document).ajaxError(function( event, xhr, settings, error ) {
         ', statusText: '+xhr.statusText+', error: '+error);
 });
 $(document).ajaxComplete(function( event, xhr, settings ) {
-    console.log('Sophia ajaxComplete for: '+settings.url+', statusText: '+xhr.statusText);
-    //console.log('ajaxComplete for: '+settings.url+', before decrease, isAjaxActive: '+isAjaxActive);
+    //console.log('Sophia ajaxComplete for: '+settings.url+', statusText: '+xhr.statusText);
+    console.log('Sophia ajaxComplete for: '+settings.url+', before decrease, isAjaxActive: '+isAjaxActive);
     if (isAjaxActive > 0) isAjaxActive--;
     if (isAjaxActive == 0) {
         $("#busy").hide();
@@ -337,14 +322,7 @@ function openDateDialog() {
 
 function openLoadTestDialog() {
     $('#loadTestModal').modal('show');
-    if ($('#flow-test-type-radio').prop('checked')) {
-        showTests(searchTypes.FLOWS);
-    } else if ($('#topic-test-type-radio').prop('checked')) {
-        showTests(searchTypes.TOPICS);
-    } else {
-        $('#flow-test-type-radio').prop('checked', true);
-        showTests(searchTypes.FLOWS);
-    }
+    showTests(searchType);
 }
 
 function openSaveTestDialog() {
@@ -405,7 +383,6 @@ function loadTest() {
         return;
     }
     $('#loadTestModal').modal('hide');
-    $('#search-text').val('');
     // navigate to Flows or Topics based on type
     availableTopicsArray = [];
     selectedTopicsArray = [];
@@ -415,19 +392,13 @@ function loadTest() {
             queries = [];
             var ul;
             var type = test.type;
-            clearSearch(type);
-            if (type == searchTypes.FLOWS) {
-                ul = $('#flow-list');
-            } else if (type == searchTypes.TOPICS) {
-                ul = $('#available_topics_list');
-            }
-            ul.empty();
+            switchSearch(type);
             // chain all calls to search(query), and add a final call
             //  to save the test run
             var f = [];
             f[test.queries.length] = (function(){
                     var params = {
-                        queries: queries
+                        queries: getSearchQueries()
                     };
                     //console.log('save test on load');
                     $.ajax({  
@@ -442,11 +413,8 @@ function loadTest() {
                 f[i] = (function(query, func) {
                     return function() {
                         //console.log('run query #'+i);
-                        queries.push(query);
-                        if (queries.length == 1) // single time enable the save button
-                            $('#save-test').removeClass('disabled');
                         if (type == searchTypes.FLOWS) {
-                            searchFlows(query.query, func);
+                            searchFlows(query.query, query.type, func);
                         } else if (type == searchTypes.TOPICS) {
                             searchTopics(query.query, query.type, true, func);
                         }
@@ -467,7 +435,7 @@ function saveTest() {
         'user': user,
         'type': searchType,
         'name': testName,
-        'queries': queries
+        'queries': getSearchQueries()
     };
     $.ajax({  
         type: 'POST',  
@@ -509,6 +477,14 @@ function saveTest() {
             }, 5000);
         }
     });  
+}
+
+function getSearchQueries(){
+    if (searchType == searchTypes.FLOWS) {
+        return getFlowsQueries();
+    } else if (type == searchTypes.TOPICS) {
+        return getTopicsQueries();
+    }    
 }
 
 function setDateCondition() {
