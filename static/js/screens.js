@@ -1,7 +1,6 @@
-/**
- * Created by gazitn on 7/7/2015.
- */
-
+// TODO: extract to configuration by server (use REST to get it?) 
+//   the port is the one changing, maybe just calc it from this app
+var screensServer = 'http://myd-vm00366:8085';
 var screensTimestampsGroups = null;
 var screensShowGrouped = true;
 

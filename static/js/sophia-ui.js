@@ -1,7 +1,5 @@
 var reportString = '';
 var suggestionsArray = [];
-var availableTopicsArray = [];
-var selectedTopicsArray = [];
 var testQueryTypes = {QUERY: 0, 
     TOPIC: 1,
     VERIFICATION: 2};
@@ -20,9 +18,6 @@ var user;
 var lastQuery = "";
 var selectedTestID;
 var dateCondition = {from: null, to: null};
-// TODO: extract to configuration by server (use REST to get it?) 
-//   the port is the one changing, maybe just calc it from this app
-var screensServer = 'http://myd-vm00366:8085'
 
 
 function fixedEncodeURIComponent(str) {
@@ -115,9 +110,6 @@ $(document).ajaxComplete(function( event, xhr, settings ) {
 
 
 function switchSearch(newSearchType) {
-    queries = [];
-    //if (searchType == newSearchType)
-    //    return false; // false = no click
     // change results status
     if (searchType == searchTypes.SCREENS)
     {
@@ -126,10 +118,7 @@ function switchSearch(newSearchType) {
     else if (searchType == searchTypes.FLOWS) {       
         clearFlowsSearch();
     } else if (searchType == searchTypes.TOPICS) {       
-        availableTopicsArray.length = 0;
-        selectedTopicsArray.length = 0;
-        $('#available_topics_list').empty();
-        updateSelectedTopics();
+        clearTopicsSearch();
     } else if (searchType == searchTypes.TRENDS) {       
     } else if (searchType == searchTypes.SAVED) {
         clearSavedTestsSearch();
@@ -175,34 +164,7 @@ function updateSearchNavigation()
     // change siblings style
     search_type_li.siblings().removeClass('selected_search').addClass('search');    
 }
-/*
-function search(query){
-    $('#save-test').removeClass('disabled');
-    if ($('#search-text').val().length > 0)
-        query = $('#search-text').val();
-    if (!query || query.length==0){
-        // don't run without any query string
-        return false;
-    }
-    queries.push({query:query, type: testQueryTypes.QUERY});
-    if (searchType == searchTypes.FLOWS) {
-        searchFlows(query);
-    } else if (searchType == searchTypes.SCREENS) {
-        searchScreens(query);
-    } else if (searchType == searchTypes.TOPICS) {
-        searchTopics(query);
-    } else if (searchType == searchTypes.TRENDS) {
-        searchTrends(query);
-    } else if (searchType == searchTypes.SAVED) {
-        searchSavedTests(query);
-    } else if (searchType == searchTypes.REVIEW) {
-        searchReview(query);
-    }
-    else if (searchType == searchTypes.ISSUES) {
-        searchIssue(query);
-    }
-}
-*/
+
 function addRelation(relationsArray, sourceIndex, targetIndex, numOfLinks) {
     var relation = {
         sourceIndex: sourceIndex,
@@ -218,7 +180,6 @@ function addRelation(relationsArray, sourceIndex, targetIndex, numOfLinks) {
 }
 
 function clearSearch(searchType) {
-    queries = [];
     reportString = '';
     lastQuery = '';
     if (!searchType) {
@@ -271,45 +232,6 @@ function updateView() {
         loadSavedTests();
     }
 }
-
-/*
-function updateView() {
-    // clear last search term
-    //$('#search-text').val('');
-    if (searchType == searchTypes.FLOWS && ($('#flow-list').has('li').length > 0)) {
-        $('#flow_results').removeClass('hidden').addClass('show');
-        visualize();
-    } else { // no current flows search
-        $('#flow_results').removeClass('show').addClass('hidden');
-    }
-    if (searchType == searchTypes.SCREENS && ($('#screens_results_row').has('li').length > 0)) {
-        $('#screens_results').removeClass('hidden').addClass('show');
-    } else {
-        $('#screens_results').removeClass('show').addClass('hidden');
-    }
-    if (searchType == searchTypes.TOPICS && ($('#available_topics').has('li').length > 0 || selectedTopicsArray.length > 0)) {
-        $('#topics_results_row').removeClass('hidden').addClass('show');
-    } else {
-        $('#topics_results_row').removeClass('show').addClass('hidden');        
-    }
-    if (searchType == searchTypes.TRENDS && ($('#trends_results_row').has('li').length > 0)) {
-        $('#trends_results').removeClass('hidden').addClass('show');
-    } else {
-        $('#trends_results').removeClass('show').addClass('hidden');
-    }
-    if (searchType == searchTypes.REVIEW && ($('#review_results_row').has('li').length > 0)) {
-        $('#review_results').removeClass('hidden').addClass('show');
-    } else {
-        $('#review_results').removeClass('show').addClass('hidden');
-    }
-    if (searchType == searchTypes.ISSUES && ($('#issue_results_row').has('li').length > 0)) {
-        $('#issue_results').removeClass('hidden').addClass('show');
-    } else {
-        $('#issue_results').removeClass('show').addClass('hidden');
-    }
-
-}*/
-
 
 function reportAudit() {
     var jqxhr = $.ajax("/report?reportString=" + fixedEncodeURIComponent(reportString) +
@@ -388,13 +310,9 @@ function loadTest() {
         return;
     }
     $('#loadTestModal').modal('hide');
-    // navigate to Flows or Topics based on type
-    availableTopicsArray = [];
-    selectedTopicsArray = [];
 
     var jqxhr = $.ajax("/tests/" + selectedTestID)
         .done(function(test) {
-            queries = [];
             var ul;
             var type = test.type;
             switchSearch(type);
@@ -487,7 +405,7 @@ function saveTest() {
 function getSearchQueries(){
     if (searchType == searchTypes.FLOWS) {
         return getFlowsQueries();
-    } else if (type == searchTypes.TOPICS) {
+    } else if (searchType == searchTypes.TOPICS) {
         return getTopicsQueries();
     }    
 }
