@@ -678,16 +678,36 @@ function showIssues(data) {
         $('#results_table').removeClass('hidden');
         $('#results_timeline').removeClass('hidden');
         /*	An array to store all the data */
-        var testData = [
-            {times: [{"starting_time": 1355752800000, "ending_time": 1355759900000}, {"starting_time": 1355767900000, "ending_time": 1355774400000}]},
-            {times: [{"starting_time": 1355759910000, "ending_time": 1355761900000}, ]},
-            {times: [{"starting_time": 1355761910000, "ending_time": 1355763910000}]},
-        ];
+    var labelColorTestData = [
+        {label: "person a", times: [{"color":"green", "label":"Weeee", "starting_time": 1355752800000,"display": "circle"}, {"color":"blue", "label":"Weeee", "starting_time": 1355767900000, "ending_time": 1355774400000}]},
+        {label: "person b", times: [{"color":"pink", "label":"Weeee", "starting_time": 1355752800000,"display": "circle"}, ]},
+        {label: "person c", times: [{"color":"yellow", "label":"Weeee", "starting_time": 1355761910000, "ending_time": 1355763910000}]},
+    ];
+    var chart = d3.timeline()
+            .beginning(1355752800000) // we can optionally add beginning and ending times to speed up rendering a little
+            .ending(1355774400000)
+            .stack() // toggles graph stacking
+            .margin({left:70, right:30, top:0, bottom:0})
+        ;
         var width = 500;
-        var chart = d3.timeline();
-        var svg = d3.select("#timeline1").append("svg").attr("width", width)
-                .datum(testData).call(chart);
 
+        var svg = d3.select("#timeline6").append("svg").attr("width", width)
+                .datum(labelColorTestData).call(chart);
+
+         d3.timeline()
+             .click(function (d, i, datum) {
+            // d is the current rendering object
+            // i is the index during d3 rendering
+            // datum is the data object
+
+            });
+
+    d3.timeline()
+        .scroll(function (x, scale) {
+            // x is the current position of the scroll
+            // scale is the scale of the axis used
+        });
+    
         var items = [];
         var dataObj = JSON.parse(data);
         var table = $("#tableNodes");
