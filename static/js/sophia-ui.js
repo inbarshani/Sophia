@@ -119,7 +119,6 @@ function switchSearch(newSearchType) {
         clearFlowsSearch();
     } else if (searchType == searchTypes.TOPICS) {       
         clearTopicsSearch();
-    } else if (searchType == searchTypes.TRENDS) {       
     } else if (searchType == searchTypes.SAVED) {
         clearSavedTestsSearch();
     } else if (searchType == searchTypes.REVIEW) {
@@ -152,8 +151,7 @@ function updateSearchNavigation()
         id_of_li = "#search-topics";
         $("#topics-vis-container").html("");
         d3Topics.svg = null;
-    } else if (searchType == searchTypes.TRENDS)
-        id_of_li = "#search-trends";
+    } 
     else if (searchType == searchTypes.SAVED)
         id_of_li = "#search-saved";
     else if (searchType == searchTypes.REVIEW)
@@ -218,9 +216,6 @@ function updateView() {
     }
     else if (searchType == searchTypes.TOPICS){
         loadTopics();
-    }
-    else if (searchType == searchTypes.TRENDS){
-        loadTrends(); 
     }
     else if (searchType == searchTypes.REVIEW){
         loadReviews();
