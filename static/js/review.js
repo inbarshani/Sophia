@@ -49,6 +49,7 @@ function searchReviewByText(){
 }
 
 function searchReview(query, callback) {
+    clearReviewsSearch();
     var jqxhr = $.ajax("/searchreview?q=" + fixedEncodeURIComponent(query) +
     '&dateCondition=' + JSON.stringify(dateCondition))
         .done(function(data) {
