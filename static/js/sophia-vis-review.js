@@ -158,6 +158,7 @@ function createBBListForTest(test, ul) {
 }
 
 function showMenu(item, node, test) {
+	var modal = $('#entityDropDownModal');
 	var ddUl = $('#entityDropDown');
 	var ddLi;
 	ddUl.html('');
@@ -165,7 +166,7 @@ function showMenu(item, node, test) {
 	ddLi.text('Show details');
 	ddLi.on('click', function(node){
 	    return function() {
-	    	ddUl.hide();
+		modal.modal('hide');
 	        showNodeDetails(node);
 	    };            
 	}(node));
@@ -174,7 +175,7 @@ function showMenu(item, node, test) {
 	ddLi.text('Set as start');
 	ddLi.on('click', function(item, n, id, name){
 		return function() {
-	    	ddUl.css('display', 'none');
+		modal.modal('hide');
 			bbNodeSelect(item, n, id, name, 'start');
 		};
 	}(item, node, test.test.id, test.name));
@@ -183,7 +184,7 @@ function showMenu(item, node, test) {
 	ddLi.text('Set as end');
 	ddLi.on('click', function(item, n, id, name){
 		return function() {
-	    	ddUl.css('display', 'none');
+		modal.modal('hide');
 			bbNodeSelect(item, n, id, name, 'end');
 		};
 	}(item, node, test.test.id, test.name));
@@ -192,14 +193,14 @@ function showMenu(item, node, test) {
 	ddLi.text('Search similar');
 	ddLi.on('click', function(node, test){
 		return function() {
-	    	ddUl.css('display', 'none');
+		modal.modal('hide');
 			nodeSearchSimilar(node, test);
 		};
 	}(node, test));
 	ddUl.append(ddLi);
-	ddUl.css('top', event.y);
-	ddUl.css('left', event.x);
-  	ddUl.css('display', 'block');
+	ddUl.css('top', event.y - 50);
+	ddUl.css('left', event.x + 10);
+	modal.modal();
 }
 
 function testOnClick(li, test) {
