@@ -1,67 +1,65 @@
 function showTestsForReview(data) {
-	$( "#all_results" ).load( "html/review.html", function(){
-		var allTests = JSON.parse(data);
-		var testsList = $('#review_tests_list');
-		$('#review_results').removeClass('hidden');
-		var li, label, div, h5, span;
-		testsList.empty();
-		allTests.forEach(function (test) {
-		    li = $('<li '+
-			' data-toggle="tooltip"'+
-	    	' data-placement="top" title="'+test.name+' (ID: '+test.test.id+
-	    	')">');
-		    li.on('click', function(item, t){
-		        return function() {
-		            testOnClick(item, t);
-		        }
-		    }(li, test));
-		    li.attr('data-test-id', test.test.id);
-		    li.attr('data-toggle', 'buttons');
-            label = $('<label>');
-            div = $('<div class="test_caption">');
-            h5 = $('<h5>');
-            h5.text(test.name.substring(0,35));
-            span = $('<span>');
-            span.addClass('badge');
-            span.text(test.bbNodes.length);
-            div.append(span);
-            div.append(h5);
-            label.append(div);
-            li.append(label);
-		    testsList.append(li);
-		});
-
-		var frame = $('#review_tests_sly');
-		var container = $('#review_tests_container');
-		var sly = new Sly(frame, {
-			horizontal: 1,
-			itemNav: 'basic',
-			activateMiddle: true,
-			smart: true,
-			activateOn: 'click',
-			mouseDragging: true,
-			touchDragging: 1,
-			releaseSwing: 1,
-			startAt: 0,
-			scrollBar: container.find('.scrollbar'),
-			scrollBy: 1,
-			pagesBar: container.find('.pages'),
-			activatePageOn: 'click',
-			speed: 200,
-			moveBy: 600,
-			elasticBounds: 1,
-			dragHandle: 1,
-			dynamicHandle: 1,
-			clickBar: 1,
-
-			// Buttons
-			forward: container.find('.forward'),
-			backward: container.find('.backward')
-		//	prevPage: container.find('.prevPage'),
-		//	nextPage: container.find('.nextPage')
-		}).init();
-		$('li').removeClass('active');
+	allTests = JSON.parse(data);
+	var testsList = $('#review_tests_list');
+	$('#review_results').removeClass('hidden');
+	var li, label, div, h5, span;
+	testsList.empty();
+	allTests.forEach(function (test) {
+	    li = $('<li '+
+		' data-toggle="tooltip"'+
+    	' data-placement="top" title="'+test.name+' (ID: '+test.test.id+
+    	')">');
+	    li.on('click', function(item, t){
+	        return function() {
+	            testOnClick(item, t);
+	        }
+	    }(li, test));
+	    li.attr('data-test-id', test.test.id);
+	    li.attr('data-toggle', 'buttons');
+        label = $('<label>');
+        div = $('<div class="test_caption">');
+        h5 = $('<h5>');
+        h5.text(test.name.substring(0,35));
+        span = $('<span>');
+        span.addClass('badge');
+        span.text(test.bbNodes.length);
+        div.append(span);
+        div.append(h5);
+        label.append(div);
+        li.append(label);
+	    testsList.append(li);
 	});
+
+	var frame = $('#review_tests_sly');
+	var container = $('#review_tests_container');
+	var sly = new Sly(frame, {
+		horizontal: 1,
+		itemNav: 'basic',
+		activateMiddle: true,
+		smart: true,
+		activateOn: 'click',
+		mouseDragging: true,
+		touchDragging: 1,
+		releaseSwing: 1,
+		startAt: 0,
+		scrollBar: container.find('.scrollbar'),
+		scrollBy: 1,
+		pagesBar: container.find('.pages'),
+		activatePageOn: 'click',
+		speed: 200,
+		moveBy: 600,
+		elasticBounds: 1,
+		dragHandle: 1,
+		dynamicHandle: 1,
+		clickBar: 1,
+
+		// Buttons
+		forward: container.find('.forward'),
+		backward: container.find('.backward')
+	//	prevPage: container.find('.prevPage'),
+	//	nextPage: container.find('.nextPage')
+	}).init();
+	$('li').removeClass('active');
 }
 
 function visualizeReviewTest(test) {
@@ -131,6 +129,11 @@ function visualizeReviewTest(test) {
 function createBBListForTest(test, ul) {
 	var li, div, ddUl, ddLi, h6;
 	test.bbNodes.forEach(function (node) {
+		if (!node.caption)
+			node.caption = 'unknown';
+		if (!node.name)
+			node.name = 'unknown';
+
 	    li = $('<li class="dropdown small">');
 	    div = $('<div data-toggle="tooltip"'+
 	    	' data-placement="top" title="'+node.caption+' (ID: '+
@@ -158,6 +161,7 @@ function createBBListForTest(test, ul) {
 }
 
 function showMenu(item, node, test) {
+	var modal = $('#entityDropDownModal');
 	var ddUl = $('#entityDropDown');
 	var ddLi;
 	ddUl.html('');
@@ -165,7 +169,7 @@ function showMenu(item, node, test) {
 	ddLi.text('Show details');
 	ddLi.on('click', function(node){
 	    return function() {
-	    	ddUl.hide();
+		modal.modal('hide');
 	        showNodeDetails(node);
 	    };            
 	}(node));
@@ -174,7 +178,7 @@ function showMenu(item, node, test) {
 	ddLi.text('Set as start');
 	ddLi.on('click', function(item, n, id, name){
 		return function() {
-	    	ddUl.css('display', 'none');
+		modal.modal('hide');
 			bbNodeSelect(item, n, id, name, 'start');
 		};
 	}(item, node, test.test.id, test.name));
@@ -183,7 +187,7 @@ function showMenu(item, node, test) {
 	ddLi.text('Set as end');
 	ddLi.on('click', function(item, n, id, name){
 		return function() {
-	    	ddUl.css('display', 'none');
+		modal.modal('hide');
 			bbNodeSelect(item, n, id, name, 'end');
 		};
 	}(item, node, test.test.id, test.name));
@@ -192,14 +196,14 @@ function showMenu(item, node, test) {
 	ddLi.text('Search similar');
 	ddLi.on('click', function(node, test){
 		return function() {
-	    	ddUl.css('display', 'none');
+		modal.modal('hide');
 			nodeSearchSimilar(node, test);
 		};
 	}(node, test));
 	ddUl.append(ddLi);
-	ddUl.css('top', event.y);
-	ddUl.css('left', event.x);
-  	ddUl.css('display', 'block');
+	ddUl.css('top', event.y - 50);
+	ddUl.css('left', event.x + 10);
+	modal.modal();
 }
 
 function testOnClick(li, test) {
@@ -260,15 +264,16 @@ function bbNodeSelect(li, node, testId, name, type) {
 function nodeSearchSimilar(node, test)
 {
 	$("#search-text")
-		.val('LIKE Step \''+node.caption.substring(0,20)+
-			'\' of Test \''+test.name.substring(0,20)+'\'')
+		.val('LIKE Step \''+node.caption.toString().substring(0,20)+
+			'\' of Test \''+test.name.toString().substring(0,20)+'\'')
 		.css('font-style', 'italic');
+	clearReviewsSearch();
 	searchReview('StepID='+node.graph_node);
 }
 
 function showNodeDetails(node) {
-    $('#details #nodeType').text(node.type);
-    $('#details #nodeCaption').html(node.caption.replace('\n','<br/>'));
+    $('#details #nodeType').text(node.type.toString());
+    $('#details #nodeCaption').html(node.caption.toString().replace('\n','<br/>'));
     $('#details #nodeGraphID').text('Graph node: ' + node.graph_node);
     $('#details #nodeDocID').text('Document ID: ' + node.id);
     if (node.hash)

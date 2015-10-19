@@ -52,7 +52,7 @@
         </div>
         <div id="topbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><h4><span class="label label-info">v0.2</span></h4></li>
+            <li><h4><span class="label label-info">v0.21</span></h4></li>
           </ul>
         </div>
       </div>
@@ -70,34 +70,8 @@
         <div class="col-md-4">
         </div>
       </div>
-      <div class="row">
-        <div class="col-md-2">
-        </div>
-        <div class="col-md-8">
-          <div class="input-group input-group-lg">
-            <input type="text" autofocus="autofocus" autocomplete="off" placeholder="Search MQM" name="search" class="form-control" id="search-text">
-            <span class="input-group-btn">
-              <button class="btn btn-info" id="search-button">
-                <span class="glyphicon glyphicon-search"></span>
-              </button>
-              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Options <span class="caret"></span></button>
-              <ul class="dropdown-menu dropdown-menu-right">
-                <li><a href="#" id="date-cond">Date Condition</a></li>
-                <li><a href="#" id="load-test">Load Test</a></li>
-                <li class="disabled" id="save-test" role="button"><a href="#">Save Test</a></li>
-              </ul>
-            </span>
-          </div>
-        </div>
-        <span id="dateCondIndicator" class="glyphicon glyphicon-filter hidden" aria-hidden="true" data-toggle="tooltip" data-placement="right"></span>
-        <div class="col-md-2">
-        </div>
-      </div>
       <div class="row" role="navigation" id="search-options">
-        <div class="col-md-2">
-        </div>
-        <div class="col-md-8">
-          <div class="container">
+        <div class="col-md-6 col-md-offset-3">
             <ul class="nav nav-pills">
               <li role="presentation" class="search" id="search-flows">
                 <a href="#" onclick="switchSearch(searchTypes.FLOWS);">Flows</a>
@@ -111,9 +85,6 @@
               <li role="presentation" class="search" id="search-topics">
                 <a href="#" onclick="switchSearch(searchTypes.TOPICS);">Topics</a>
               </li>
-              <li role="presentation" class="search" id="search-trends">
-                <a href="#" onclick="switchSearch(searchTypes.TRENDS);">Trends</a>
-              </li>
               <li role="presentation" class="search" id="search-review">
                 <a href="#" onclick="switchSearch(searchTypes.REVIEW);">Review</a>
               </li>
@@ -123,9 +94,6 @@
             </ul>
           </div>
         </div>
-        <div class="col-md-2">
-        </div>
-      </div>
     </div> <!-- container of search area -->
       <!-- END the search area -->
 
@@ -133,11 +101,18 @@
 
     <div id="busy" class="busyindicator"></div>
 
-    <ul id="entityDropDown" class="dropdown-menu dd"></ul>
+    <!-- Modal entity drop down -->
+    <div class="modal fade" id="entityDropDownModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-sm" role="document">
+        <ul id="entityDropDown" class="dd" ></ul>
+      </div>
+    </div>
+    <!-- END Modal entity drop down -->
 
-
-      <!-- START results area -->
-    <div id = "all_results">
+    <!-- leave a space between app area and search options -->
+    <p/>
+      <!-- START mini app area -->
+    <div id = "application_area">
     </div>
 
     <!-- Modal date condition -->
@@ -188,20 +163,7 @@
           <div class="modal-body">
             <div class="container-fluid">
               <div class="row">
-                <div class="col-md-2">
-                  <div class="panel panel-default">
-                    <div class="panel-heading">Test Type</div>
-                    <div class="panel-body">
-                      <div class="radio">
-                        <label><input type="radio" name="testType" id="flow-test-type-radio" aria-label="Flows" value="flow">Flows</label>
-                      </div>
-                      <div class="radio">
-                        <label><input type="radio" name="testType" id="topic-test-type-radio" aria-label="Topics" value="topic">Topics</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                   <div class="panel panel-default">
                     <div class="panel-heading">Available Tests</div>
                     <div class="panel-body">
@@ -209,7 +171,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                   <div class="panel panel-default">
                     <div class="panel-heading">Test Details</div>
                     <div class="panel-body" id='test-details'></div>
@@ -258,9 +220,8 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="js/jquery-2.1.0.js"></script>
     <script src="http://d3js.org/d3.v3.min.js"></script>
-
     <script src="bootstrap-3.3.4-dist/js/bootstrap.min.js"></script>
     <script src="js/sophia-ui.js"></script>
     <script src="js/sophia-vis-flows.js"></script>
@@ -269,22 +230,23 @@
     <script src="js/bootstrap-datetimepicker.min.js"></script>
     <script src="js/bootstrap-switch.min.js"></script>
     <script src="js/sly.js"></script>
-    <script src="http://listjs.com/no-cdn/list.js"></script>
-    <script src="http://www.listjs.com/no-cdn/list.pagination.js"></script>
+    <script src="js/list.min.js"></script>
+    <script src="js/list.pagination.min.js"></script>
     <script src="http://tablesorter.com/addons/pager/jquery.tablesorter.pager.js"></script>
 
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+    <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
     <script src="js/paging.js"></script>
     <script src="js/d3-timeline.js"></script>
+    <script src="js/sophia-ui.js"></script>
     <script src="js/flows.js"></script>
     <script src="js/screens.js"></script>
     <script src="js/topics.js"></script>
-    <script src="js/trends.js"></script>
     <script src="js/review.js"></script>
     <script src="js/issue.js"></script>
-    <script src="js/sophia-vis-trends.js"></script>
+    <script src="js/saved_tests.js"></script>
+    <script src="js/sophia-vis-flows.js"></script>
+    <script src="js/sophia-vis-topics.js"></script>
     <script src="js/sophia-vis-review.js"></script>
     <script src="js/sophia-vis-issue.js"></script>
-    <script src="js/saved_tests.js"></script>
   </body>
 </html>

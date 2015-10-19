@@ -103,6 +103,17 @@
     font-weight: bold;
 }
 
+.nav-pills {
+    text-align:center;
+}
+
+.nav-pills > li {
+    float:none;
+    display:inline-block;
+    *display:inline; /* ie7 fix */
+     zoom:1; /* hasLayout ie7 trigger */
+}
+
 .nav-pills > li.selected_search > a {
     color: red;
     background-color: #fff;
