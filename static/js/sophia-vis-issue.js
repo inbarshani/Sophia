@@ -675,7 +675,8 @@ d3.timeline = function() {
     return timeline;
 };
 function showIssues(data) {
-    $( "#all_results" ).load( "html/issues.html", function(){
+        $('#results_table').removeClass('hidden');
+        $('#results_timeline').removeClass('hidden');
         /*	An array to store all the data */
         var testData = [
             {times: [{"starting_time": 1355752800000, "ending_time": 1355759900000}, {"starting_time": 1355767900000, "ending_time": 1355774400000}]},
@@ -1343,6 +1344,5 @@ function showIssues(data) {
 
                 }); /* End of getScript callback function */
            }
-        }); /* End of Ajax success function */
     });
 }
