@@ -267,6 +267,9 @@ function updateView() {
     else if (searchType == searchTypes.ISSUES){
         loadIssues();
     }
+    else if (searchType == searchTypes.SAVED){
+        loadSavedTests();
+    }
 }
 
 /*

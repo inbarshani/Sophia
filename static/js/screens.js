@@ -40,6 +40,13 @@ function loadScreens(){
             openSaveTestDialog();
         });*/
 
+        $('#screens_toggle_groups').bootstrapSwitch();
+        $('#screens_toggle_groups').on('switchChange.bootstrapSwitch', function(event, state) {
+            screensShowGrouped = state;
+            fillScreensCarousel();
+        });
+        // update button but skip event
+        $('#screens_toggle_groups').bootstrapSwitch('state', screensShowGrouped, true);
     });
 }
 
@@ -56,19 +63,12 @@ function searchScreens(query) {
 
     var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query) + "&dateCondition=" + JSON.stringify(dateCondition))
         .done(function(data) {
-            $('#screens_toggle_groups').bootstrapSwitch();
-            $('#screens_toggle_groups').on('switchChange.bootstrapSwitch', function(event, state) {
-                screensShowGrouped = state;
-                fillScreensCarousel();
-                update();
-            });
+            $('#group_images').removeClass('hidden');
             lastQuery = query;
             reportString = reportString + 'Search: ' + query + '\n';
             //console.log("Search returned: " + data);
             screensTimestampsGroups = JSON.parse(data);
             fillScreensCarousel();
-            // update button but skip event
-            $('#screens_toggle_groups').bootstrapSwitch('state', screensShowGrouped, true);
             reportString = reportString + 'Results #: ' + $('#screensCarousel img').length + '\n';
         })
         .fail(function(err) {
@@ -154,4 +154,5 @@ function clearScreensSearch()
     screensTimestampsGroups = null;
     $('#screens_results_row').empty();
     $('#screens_carousel_items').empty();
+    $('#group_images').addClass('hidden');
 }

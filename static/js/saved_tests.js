@@ -1,31 +1,70 @@
+var savedTestsIDs = [];
+
+
+function loadSavedTests(){
+    $("#application_area").load("html/saved_tests.html", function () {
+        // bind the search control
+        $('#search-button').on('click', function(e) {
+            searchSavedByText();
+        });
+
+        $('#search-text').placholder = 'Search Sophia Tests';
+
+        $('#search-text').on('focus', function(e) {
+            if ($('#search-text').css('font-style') == 'italic' ) {
+                $('#search-text').val('');
+                $('#search-text').css('font-style', 'normal');
+            }
+        });
+
+        $('#search-text').keyup(function(e) {
+            if (e.keyCode == 13) {
+                searchSavedByText();
+            }
+        });        
+
+        $('#search-text').focus();
+
+        $('#date-cond').on('click', function(e) {
+            openDateDialog();
+        });
+
+    });
+}
+
+function searchSavedByText(){
+    var query = $('#search-text').val();
+    searchSavedTests(query);    
+}
+
 function searchSavedTests(query){
     reportString = 'Type: SAVED_TESTS\n';
     clearSavedTestsSearch();
     //  + "&dateCondition=" + JSON.stringify(dateCondition)
     var jqxhr = $.ajax("/tests?type=" + searchTypes.FLOWS + "&name="+query)
         .done(function(savedTestsArray) {
-            $("#application_area").load("html/saved_tests.html", function () {
-                var saved_tests_list = $('#saved-list');
-                lastQuery = query;
-                reportString = reportString + 'Search: ' + query + '\n';
-                //console.log("Search returned: " + savedTestsArray);
-                if (savedTestsArray.length > 0) {
-                    for(var i=0;i<savedTestsArray.length;i++){                    	
-                        var test = savedTestsArray[i];
-                        updateTestStatus(test.id);
-                    }
-                    reportString = reportString + 'Results #: ' + savedTestsArray.length + '\n';
-                }
-                else {
-                    saved_tests_list.append(
-                        '<li class="">' +
-                        ' There are no saved tests.' +
-                        '</li>'
-                    );
-                }
+	        var saved_tests_list = $('#saved-list');
+	        lastQuery = query;
+	        reportString = reportString + 'Search: ' + query + '\n';
+	        //console.log("Search returned: " + savedTestsArray);
+	        if (savedTestsArray.length > 0) {
+	            for(var i=0;i<savedTestsArray.length;i++){                    	
+	                var test = savedTestsArray[i];
+	                updateTestStatus(test.id);
+	        		savedTestsIDs.push({testID: test.id,
+	        			intervalKey: setInterval(function(){updateTestStatus(test.id);}, 1000)});
+	            }
+	            reportString = reportString + 'Results #: ' + savedTestsArray.length + '\n';
+	        }
+	        else {
+	            saved_tests_list.append(
+	                '<li class="">' +
+	                ' There are no saved tests.' +
+	                '</li>'
+	            );
+	        }
 
-                update();
-            });
+	        update();
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
@@ -70,17 +109,18 @@ function updateTestStatus(testId){
 	    	saved_test_item.addClass(li_class);
 	    	saved_test_item.html(innerHtml);
 	    }
-
-	    setTimeout(function(){updateTestStatus(testId);},1000);
 	})
 	.fail(function(err){
 	    alert("Unable to complete search at this time, try again later");
 	    console.log("Search failed: " + err.responseText);
 	    reportString = reportString + 'Result: failed query\n';
-	    clearSavedTestsSearch();     						
 	});	
 }
 
 function clearSavedTestsSearch()
 {
+	savedTestsIDs.forEach(function(testView) {
+		clearInterval(testView.intervalKey);
+	});
+	$('#saved-list').empty();
 }
