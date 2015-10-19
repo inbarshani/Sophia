@@ -5,29 +5,71 @@
 var screensTimestampsGroups = null;
 var screensShowGrouped = true;
 
+function loadScreens(){
+    $("#application_area").load("html/screens.html", function () {
+        // bind the search control
+        $('#search-button').on('click', function(e) {
+            searchScreensByText();
+        });
+
+        $('#search-text').placholder = 'Search Screens';
+
+        $('#search-text').on('focus', function(e) {
+            if ($('#search-text').css('font-style') == 'italic' ) {
+                $('#search-text').val('');
+                $('#search-text').css('font-style', 'normal');
+            }
+        });
+
+        $('#search-text').keyup(function(e) {
+            if (e.keyCode == 13) {
+                searchScreensByText();
+            }
+        });        
+
+        $('#search-text').focus();
+
+        $('#date-cond').on('click', function(e) {
+            openDateDialog();
+        });
+        /* comment until implemented for Screens
+        $('#load-test').on('click', function(e) {
+            openLoadTestDialog();
+        });
+        $('#save-test').on('click', function(e) {
+            openSaveTestDialog();
+        });*/
+
+    });
+}
+
+function searchScreensByText(){
+    var query = $('#search-text').val();
+    searchScreens(query);    
+}
+
+
 function searchScreens(query) {
-    // change UI to show list of images instead of flows
+    // change UI to show list of images instead of Screens
     //  clear top level vars
     reportString = 'Type: SCREENS\n';
 
     var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query) + "&dateCondition=" + JSON.stringify(dateCondition))
         .done(function(data) {
-            $("#application_area").load("html/screens.html", function () {
-                $('#screens_toggle_groups').bootstrapSwitch();
-                $('#screens_toggle_groups').on('switchChange.bootstrapSwitch', function(event, state) {
-                    screensShowGrouped = state;
-                    fillScreensCarousel();
-                    update();
-                });
-                lastQuery = query;
-                reportString = reportString + 'Search: ' + query + '\n';
-                //console.log("Search returned: " + data);
-                screensTimestampsGroups = JSON.parse(data);
+            $('#screens_toggle_groups').bootstrapSwitch();
+            $('#screens_toggle_groups').on('switchChange.bootstrapSwitch', function(event, state) {
+                screensShowGrouped = state;
                 fillScreensCarousel();
-                // update button but skip event
-                $('#screens_toggle_groups').bootstrapSwitch('state', screensShowGrouped, true);
-                reportString = reportString + 'Results #: ' + $('#screensCarousel img').length + '\n';
+                update();
             });
+            lastQuery = query;
+            reportString = reportString + 'Search: ' + query + '\n';
+            //console.log("Search returned: " + data);
+            screensTimestampsGroups = JSON.parse(data);
+            fillScreensCarousel();
+            // update button but skip event
+            $('#screens_toggle_groups').bootstrapSwitch('state', screensShowGrouped, true);
+            reportString = reportString + 'Results #: ' + $('#screensCarousel img').length + '\n';
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");

@@ -8,6 +8,8 @@ function loadIssues(){
             searchIssuesByText();
         });
 
+        $('#search-text').placholder = 'Search Issues';
+
         $('#search-text').on('focus', function(e) {
             if ($('#search-text').css('font-style') == 'italic' ) {
                 $('#search-text').val('');

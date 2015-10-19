@@ -14,6 +14,8 @@ function loadFlows(){
             searchFlowsByText();
         });
 
+        $('#search-text').placholder = 'Search Flows';
+
         $('#search-text').on('focus', function(e) {
             if ($('#search-text').css('font-style') == 'italic' ) {
                 $('#search-text').val('');

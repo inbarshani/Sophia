@@ -12,6 +12,8 @@ function loadReviews(){
             searchReviewByText();
         });
 
+        $('#search-text').placholder = 'Search Test Executions';
+
         $('#search-text').on('focus', function(e) {
             if ($('#search-text').css('font-style') == 'italic' ) {
                 $('#search-text').val('');
