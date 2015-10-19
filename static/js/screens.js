@@ -5,29 +5,71 @@
 var screensTimestampsGroups = null;
 var screensShowGrouped = true;
 
+function loadScreens(){
+    $("#application_area").load("html/screens.html", function () {
+        // bind the search control
+        $('#search-button').on('click', function(e) {
+            searchScreensByText();
+        });
+
+        $('#search-text').placholder = 'Search Screens';
+
+        $('#search-text').on('focus', function(e) {
+            if ($('#search-text').css('font-style') == 'italic' ) {
+                $('#search-text').val('');
+                $('#search-text').css('font-style', 'normal');
+            }
+        });
+
+        $('#search-text').keyup(function(e) {
+            if (e.keyCode == 13) {
+                searchScreensByText();
+            }
+        });        
+
+        $('#search-text').focus();
+
+        $('#date-cond').on('click', function(e) {
+            openDateDialog();
+        });
+        /* comment until implemented for Screens
+        $('#load-test').on('click', function(e) {
+            openLoadTestDialog();
+        });
+        $('#save-test').on('click', function(e) {
+            openSaveTestDialog();
+        });*/
+
+        $('#screens_toggle_groups').bootstrapSwitch();
+        $('#screens_toggle_groups').on('switchChange.bootstrapSwitch', function(event, state) {
+            screensShowGrouped = state;
+            fillScreensCarousel();
+        });
+        // update button but skip event
+        $('#screens_toggle_groups').bootstrapSwitch('state', screensShowGrouped, true);
+    });
+}
+
+function searchScreensByText(){
+    var query = $('#search-text').val();
+    searchScreens(query);    
+}
+
+
 function searchScreens(query) {
-    // change UI to show list of images instead of flows
+    // change UI to show list of images instead of Screens
     //  clear top level vars
     reportString = 'Type: SCREENS\n';
 
     var jqxhr = $.ajax("/searchScreens?q=" + fixedEncodeURIComponent(query) + "&dateCondition=" + JSON.stringify(dateCondition))
         .done(function(data) {
-            $("#all_results").load("html/screens.html", function () {
-                $('#screens_toggle_groups').bootstrapSwitch();
-                $('#screens_toggle_groups').on('switchChange.bootstrapSwitch', function(event, state) {
-                    screensShowGrouped = state;
-                    fillScreensCarousel();
-                    update();
-                });
-                lastQuery = query;
-                reportString = reportString + 'Search: ' + query + '\n';
-                //console.log("Search returned: " + data);
-                screensTimestampsGroups = JSON.parse(data);
-                fillScreensCarousel();
-                // update button but skip event
-                $('#screens_toggle_groups').bootstrapSwitch('state', screensShowGrouped, true);
-                reportString = reportString + 'Results #: ' + $('#screensCarousel img').length + '\n';
-            });
+            $('#group_images').removeClass('hidden');
+            lastQuery = query;
+            reportString = reportString + 'Search: ' + query + '\n';
+            //console.log("Search returned: " + data);
+            screensTimestampsGroups = JSON.parse(data);
+            fillScreensCarousel();
+            reportString = reportString + 'Results #: ' + $('#screensCarousel img').length + '\n';
         })
         .fail(function(err) {
             alert("Unable to complete search at this time, try again later");
@@ -45,7 +87,7 @@ function fillScreensCarousel(){
     screens_carousel.empty();
     //console.log("Search returned: " + data);
     var groups = Object.keys(screensTimestampsGroups);
-    var firstItem = true;
+    var itemCounter = 0;
     for (var j=0;j<groups.length;j++)
     {
         var timestamps = screensTimestampsGroups[groups[j]];
@@ -65,19 +107,20 @@ function fillScreensCarousel(){
             var timestamp = timestampsArray[i];
             screens_results_row.append(
                 '<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">' +
-                '  <img onclick="showModal('+i+');"' +
+                '  <img onclick="showModal('+itemCounter+');"' +
                 '       src="'+screensServer+'/screen/' + timestamp + '"/>' +
                 '</li>'
             );
             var div_class = 'item';
-            if (firstItem) {div_class = 'item active'; firstItem = false;}
+            if (itemCounter == 0) {div_class = 'item active'; firstItem = false;}
             screens_carousel.append('<div class="'+div_class+'">'+
                 '<img src="'+screensServer+'/screen/' + timestamp + 
                 '"/></div>');
+            itemCounter++;
         }
     }
     if (groups.length > 0) {
-        $('#screensCarousel').carousel(); 
+        $('#screensCarousel').carousel({interval: false, wrap: false}); 
     }
     else {
         screens_results_row.append(
@@ -111,4 +154,5 @@ function clearScreensSearch()
     screensTimestampsGroups = null;
     $('#screens_results_row').empty();
     $('#screens_carousel_items').empty();
+    $('#group_images').addClass('hidden');
 }

@@ -1,13 +1,38 @@
+<div class="row">
+    <div class="col-md-3">
+    </div>
+    <div class="col-md-6">
+      <div class="input-group input-group-lg">
+        <input type="text" autofocus="autofocus" autocomplete="off" name="search" class="form-control" id="search-text">
+        <span class="input-group-btn">
+          <button class="btn btn-info" id="search-button">
+            <span class="glyphicon glyphicon-search"></span>
+          </button>
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Options <span class="caret"></span></button>
+          <ul class="dropdown-menu dropdown-menu-right">
+            <li><a href="#" id="date-cond">Date Condition</a></li>
+            <li><a href="#" id="load-test">Load Test</a></li>
+            <li class="disabled" id="save-test" role="button"><a href="#">Save Test</a></li>
+          </ul>
+        </span>
+      </div>
+    </div>
+    <span id="dateCondIndicator" class="glyphicon glyphicon-filter hidden" aria-hidden="true" data-toggle="tooltip" data-placement="right"></span>
+    <div class="col-md-3">
+    </div>
+</div>
+
+
 <div class="container hidden" id="flow_results">
     <div class="row">
             <div class="col-md-4">
-                <h4><span id="flow-title" class="legend">MQM flow</span></h4>
+                <h4><span id="flow-title" class="legend">Steps</span></h4>
                 <ul class="list-group" id="flow-list">
                 </ul>
             </div>
             <div class="col-md-8">
                 <!-- START visualization area -->
-                <h4><span id="vis-title" class="legend">MQM results</span></h4>
+                <h4><span id="vis-title" class="legend">Results</span></h4>
                 <div id="vis-container" class="panel panel-default">
                     <svg id="vis-svg">
                         <g id='g' />

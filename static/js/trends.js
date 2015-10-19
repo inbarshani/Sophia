@@ -8,7 +8,7 @@ function searchTrends(query, callback) {
     var jqxhr = $.ajax("/searchTrends?q=" + fixedEncodeURIComponent(query) +
     '&dateCondition=' + JSON.stringify(dateCondition))
         .done(function(data) {
-            $( "#all_results" ).load( "html/trends.html", function(){
+            $( "#application_area" ).load( "html/trends.html", function(){
                 var allTests = JSON.parse(data);
                 var testsList = $('#trends_tests_list');
                 $('#trends_results').removeClass('hidden');
