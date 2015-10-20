@@ -11,7 +11,8 @@ var searchTypes = {
     TOPICS: 3,
     TRENDS: 4,
     SAVED: 5,
-    REVIEW: 6
+    REVIEW: 6,
+    XP: 7
 };
 var searchType = searchTypes.FLOWS;
 var user;
@@ -123,9 +124,10 @@ function switchSearch(newSearchType) {
         clearSavedTestsSearch();
     } else if (searchType == searchTypes.REVIEW) {
         clearReviewsSearch();
-    }
-    else if (searchType == searchTypes.ISSUES) {
+    } else if (searchType == searchTypes.ISSUES) {
         clearIssuesSearch();
+    } else if (searchType == searchTypes.XP) {
+        clearXP();
     }
 
     // update searchType
@@ -156,25 +158,13 @@ function updateSearchNavigation()
         id_of_li = "#search-saved";
     else if (searchType == searchTypes.REVIEW)
         id_of_li = "#search-review";
+    else if (searchType == searchTypes.XP)
+        id_of_li = "#search-xp";
 
     var search_type_li = $(id_of_li);
     search_type_li.removeClass('search').addClass('selected_search');
     // change siblings style
     search_type_li.siblings().removeClass('selected_search').addClass('search');    
-}
-
-function addRelation(relationsArray, sourceIndex, targetIndex, numOfLinks) {
-    var relation = {
-        sourceIndex: sourceIndex,
-        targetIndex: targetIndex,
-        numOfLinks: numOfLinks
-    };
-    relationsArray.push(relation);
-
-    var numOfTopics = selectedTopicsArray.length;
-
-    if (relationsArray.length == ((numOfTopics +1) * numOfTopics / 2) )
-        d3Topics.loadTopics(selectedTopicsArray, relationsArray);
 }
 
 function clearSearch(searchType) {
@@ -225,6 +215,9 @@ function updateView() {
     }
     else if (searchType == searchTypes.SAVED){
         loadSavedTests();
+    }
+    else if (searchType == searchTypes.XP){
+        loadXP();
     }
 }
 
@@ -432,5 +425,4 @@ function removeDateCondition() {
     $('#dateModal').modal('hide');
     $('#dateCondIndicator').addClass('hidden');
     $('#dateCondIndicator').tooltip('destroy');
-
 }

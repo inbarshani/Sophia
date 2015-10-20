@@ -143,6 +143,20 @@ function toggleTopic(available_topic_id) {
     return true;
 }
 
+function addRelation(relationsArray, sourceIndex, targetIndex, numOfLinks) {
+    var relation = {
+        sourceIndex: sourceIndex,
+        targetIndex: targetIndex,
+        numOfLinks: numOfLinks
+    };
+    relationsArray.push(relation);
+
+    var numOfTopics = selectedTopicsArray.length;
+
+    if (relationsArray.length == ((numOfTopics +1) * numOfTopics / 2) )
+        d3Topics.loadTopics(selectedTopicsArray, relationsArray);
+}
+
 function updateSelectedTopics() {
     var relationsArray = [];
 
