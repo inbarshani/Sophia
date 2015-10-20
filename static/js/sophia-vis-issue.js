@@ -61,7 +61,7 @@ function showIssues(data) {
     }
 
     array.sort(compare);
-    var screen = 10;
+    var screen = 28;
     var isfirstkey = 1;
     var firstkeyTimeStemp;
      for(var key in obj)
@@ -109,7 +109,7 @@ function showIssues(data) {
             .stack() // toggles graph stacking
             .margin({left:70, right:30, top:0, bottom:0})
         ;
-    var width = 1000;
+    var width = 1500;
 
     var svg = d3.select("#timeline6").append("svg").attr("width", width)
         .datum(labelColorTestData).call(chart);
