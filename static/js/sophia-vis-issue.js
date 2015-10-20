@@ -64,6 +64,7 @@ function showIssues(data) {
     var screen = 28;
     var isfirstkey = 1;
     var firstkeyTimeStemp;
+    var count = 28;
      for(var key in obj)
         {
             if(isfirstkey>0)
@@ -71,23 +72,25 @@ function showIssues(data) {
                 firstkeyTimeStemp = obj[key].timestamp;
                 isfirstkey--;
             }
-            var type = obj[key].type;
-            var timestamp = new Date(obj[key].timestamp*1000);
-            var date =  obj[key].date;
-            var caption = obj[key].caption;
-            var  tr =  '<tr>';
-            tr+='<td>' +timestamp + '</td>';
-            tr+='<td>' +timestamp+ '</td>';
-            tr+='<td>' +type + '</td>';
-            tr += '<td>'+ caption +'</td>';
-            //tr+='<td>' +date + '</td>';
-            tr += '</tr>';
-            table.append(tr);
-            table.hide();
-          /*  var labelColorTestData = [
-                {label: "person a", times: [{"color":"green", "label":"Weeee", "starting_time": obj[key].timestamp,"display": "circle"}]}
-            ];*/
-
+            if(count>0) {
+                var type = obj[key].type;
+                var timestamp = new Date(obj[key].timestamp * 1000);
+                var date = obj[key].date;
+                var caption = obj[key].caption;
+                var tr = '<tr>';
+                tr += '<td>' + timestamp + '</td>';
+                tr += '<td>' + timestamp + '</td>';
+                tr += '<td>' + type + '</td>';
+                tr += '<td>' + caption + '</td>';
+                //tr+='<td>' +date + '</td>';
+                tr += '</tr>';
+                table.append(tr);
+                table.hide();
+                count--;
+                /*  var labelColorTestData = [
+                 {label: "person a", times: [{"color":"green", "label":"Weeee", "starting_time": obj[key].timestamp,"display": "circle"}]}
+                 ];*/
+            }
            if(screen>0) {
                 labelColorTestData.push({
                     label: "",
@@ -109,7 +112,7 @@ function showIssues(data) {
             .stack() // toggles graph stacking
             .margin({left:70, right:30, top:0, bottom:0})
         ;
-    var width = 1500;
+    var width = 1800;
 
     var svg = d3.select("#timeline6").append("svg").attr("width", width)
         .datum(labelColorTestData).call(chart);
@@ -257,7 +260,7 @@ function showIssues(data) {
 
                 var position = 0;
 
-                var panelWidth = eventWidth * items.length;
+                var panelWidth = eventWidth * (items.length+1);
 
                 $(".outerwrapper .info-box .panel").css({
                     "width": panelWidth + "px"
