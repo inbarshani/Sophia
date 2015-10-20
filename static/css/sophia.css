@@ -1,3 +1,17 @@
+/* change bootstrap btn color to fit Sophia/HP colors */
+
+.btn-primary {
+    color:#ffffff;
+    background-color:#25AAE1;
+ }
+
+.btn-primary:hover,.btn-primary:active,.btn-primary.active,.btn-primary.disabled,.btn-primary[disabled] {
+    color:#ffffff;
+    background-color:#1A77C7;
+ }
+
+/* end of bootstrap default changes */
+
 .clickable {
     cursor: pointer;
 }
@@ -349,4 +363,8 @@ span.input-group-addon {
 
 #review_vis_container {
     /* padding: 45px 15px 15px;*/
+}
+
+.draft {
+    font-style: italic;
 }

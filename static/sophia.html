@@ -71,8 +71,11 @@
         </div>
       </div>
       <div class="row" role="navigation" id="search-options">
-        <div class="col-md-6 col-md-offset-3">
+        <div class="col-md-8 col-md-offset-2">
             <ul class="nav nav-pills">
+              <li role="presentation" class="search" id="search-xp">
+                <a href="#" onclick="switchSearch(searchTypes.XP);">Experiences</a>
+              </li>
               <li role="presentation" class="search" id="search-flows">
                 <a href="#" onclick="switchSearch(searchTypes.FLOWS);">Flows</a>
               </li>
@@ -233,7 +236,8 @@
     <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
     <script src="js/paging.js"></script>
     <script src="js/d3-timeline.js"></script>
-    <script src="js/Underscore.js"></script>
+    <script src="js/jquery-quickedit.js"></script>
+
     <script src="js/sophia-ui.js"></script>
     <script src="js/flows.js"></script>
     <script src="js/screens.js"></script>
@@ -241,6 +245,7 @@
     <script src="js/review.js"></script>
     <script src="js/issue.js"></script>
     <script src="js/saved_tests.js"></script>
+    <script src="js/experiences.js"></script>
     <script src="js/sophia-vis-flows.js"></script>
     <script src="js/sophia-vis-topics.js"></script>
     <script src="js/sophia-vis-review.js"></script>
