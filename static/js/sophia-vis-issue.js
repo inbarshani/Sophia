@@ -4,50 +4,12 @@ var table;
 function showIssues(data) {
         $('#results_table').removeClass('hidden');
         $('#results_timeline').removeClass('hidden');
-        /*	An array to store all the data */
- /*   var labelColorTestData = [
-        {label: "person a", times: [{"color":"green", "label":"Weeee", "starting_time": 1355752800000,"display": "circle"}, {"color":"blue", "label":"Weeee", "starting_time": 1355767900000, "ending_time": 1355774400000}]},
-        {label: "person b", times: [{"color":"pink", "label":"Weeee", "starting_time": 1355752800000,"display": "circle"}, ]},
-        {label: "person c", times: [{"color":"yellow", "label":"Weeee", "starting_time": 1355761910000, "ending_time": 1355763910000}]},
-    ];
-    var chart = d3.timeline()
-            .beginning(1355752800000) // we can optionally add beginning and ending times to speed up rendering a little
-            .ending(1355774400000)
-            .stack() // toggles graph stacking
-            .margin({left:70, right:30, top:0, bottom:0})
-        ;
-        var width = 500;
 
-        var svg = d3.select("#timeline6").append("svg").attr("width", width)
-                .datum(labelColorTestData).call(chart);*/
-
-     /*    d3.timeline()
-             .click(function (d, i, datum) {
-            // d is the current rendering object
-            // i is the index during d3 rendering
-            // datum is the data object
-
-            });
-
-    d3.timeline()
-        .scroll(function (x, scale) {
-            // x is the current position of the scroll
-            // scale is the scale of the axis used
-        });*/
-         var labelColorTestData = [];
+        var labelColorTestData = [];
         var items = [];
         var dataObj = JSON.parse(data);
         var table = $("#tableNodes");
         var obj =  dataObj.dataNodes;
-     /*   function zipObj(obj) {
-            var keys = _.keys(obj);
-            var values = _.map(keys, function(k) { return obj[k]; });
-
-            // Transpose the values matrix
-            var valueSlices = _.zip.apply(_, values);
-            return _.map(valueSlices, _.partial(_.object, keys));
-        }
-         zipObj(obj);*/
 
         var array = $.map(obj, function(value, index) {
             return [value];
@@ -61,10 +23,11 @@ function showIssues(data) {
     }
 
     array.sort(compare);
-    var screen = 28;
+    var screen =4;
     var isfirstkey = 1;
     var firstkeyTimeStemp;
-    var count = 28;
+    var count = 4;
+    var colors = ['#CDCECE', '#A4A5A5', '#737373', '#505050'];
      for(var key in obj)
         {
             if(isfirstkey>0)
@@ -83,15 +46,13 @@ function showIssues(data) {
                 tr += '<td>' + type + '</td>';
                 tr += '<td>' + caption + '</td>';
                 //tr+='<td>' +date + '</td>';
+                tr+='<td>' +colors[count] + '</td>';
                 tr += '</tr>';
                 table.append(tr);
                 table.hide();
                 count--;
-                /*  var labelColorTestData = [
-                 {label: "person a", times: [{"color":"green", "label":"Weeee", "starting_time": obj[key].timestamp,"display": "circle"}]}
-                 ];*/
             }
-           if(screen>0) {
+        /*   if(screen>0) {
                 labelColorTestData.push({
                     label: "",
                     times: [{"color": "green", "label": type, "starting_time": obj[key].timestamp, "display": "circle"}]
@@ -101,12 +62,10 @@ function showIssues(data) {
                    var lasttimeStamp = obj[key].timestamp;
                }
                 screen--;
-            }
+            }*/
         }
-    //    var lastKey = Object.keys(dataObj.dataNodes).sort().pop();
-     //   var lasttimeStamp = obj[lastKey].timestamp;
 
-    var chart = d3.timeline()
+   /* var chart = d3.timeline()
             .beginning(firstkeyTimeStemp) // we can optionally add beginning and ending times to speed up rendering a little
             .ending(lasttimeStamp)
             .stack() // toggles graph stacking
@@ -115,7 +74,7 @@ function showIssues(data) {
     var width = 1800;
 
     var svg = d3.select("#timeline6").append("svg").attr("width", width)
-        .datum(labelColorTestData).call(chart);
+        .datum(labelColorTestData).call(chart);*/
 
 
    // dataObj.dataNodes
@@ -133,13 +92,7 @@ function showIssues(data) {
          fullData = table;
          table = $("#tableNodes").children();
 
-        $.ajax({
-           url: "http://codepen.io/chris-creditdesign/pen/87c2848937b6962f4efd2a67e5ea2031.html",
-            // url: "table-nih.html",
-            dataType: 'text',
-           success: function(data) {
-
-                /* Helper function to format and parse date from data */
+               /* Helper function to format and parse date from data */
                 function getDate(d) {
                     /*	If d is a number or a string in the format Day Month Year
                      process it as normal. Other wise presume that it may be a string
@@ -202,12 +155,12 @@ function showIssues(data) {
                     }
 
                     if ($(table).eq(i).children('td').eq(4).html() !== " ") {
-                        items[i].link = $(table).eq(i).children('td').eq(4).html();
+                 //       items[i].link = $(table).eq(i).children('td').eq(4).html();
                     }
 
                     if ($(table).eq(i).children('td').eq(5).html() !== " ") {
-                        items[i].img = $(table).eq(i).children('td').eq(5).html();
-                        items[i].credit = $(table).eq(i).children('td').eq(6).html();
+                 //       items[i].img = $(table).eq(i).children('td').eq(5).html();
+                 //       items[i].credit = $(table).eq(i).children('td').eq(6).html();
                     }
                 };
                 console.log(items);
@@ -255,7 +208,10 @@ function showIssues(data) {
                     }
 
                 };
-
+                var color = $(table).eq(i).children('td').eq(4).html();
+                $(".outerwrapper svg .locations:hover ").css({
+                    "fill":"'"+ color+"'"
+                });
                 var eventWidth = $('.outerwrapper .info-box').width();
 
                 var position = 0;
@@ -479,7 +435,7 @@ function showIssues(data) {
                         .attr("y", (height - miniHeight))
                         .attr("width", width)
                         .attr("height", miniHeight)
-                        .attr("fill", "#D3D3D3")
+                        .attr("fill", "white")
                         .style("opacity", 0.5);
 
                     var miniHolder = chart.append("g")
@@ -764,6 +720,4 @@ function showIssues(data) {
                     showLocation();
 
                 }); /* End of getScript callback function */
-           }
-    });
 }
