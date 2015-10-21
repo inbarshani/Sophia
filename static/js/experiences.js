@@ -80,19 +80,21 @@ function defineXPDone() {
 		var step = $(this).find('td:last').text();
 		xpStepsArray.push(step);
 	});
-	console.log('steps: '+JSON.stringify(xpStepsArray));
+	//console.log('steps: '+JSON.stringify(xpStepsArray));
 	// lock table editing and remove buttons
 	$('#xp_flow_name').editable('disable');
 	$('#xp_steps .editable').editable('disable');
 	$('#xp_create').addClass('disabled');
+	// get XP data
+	searchXP();
 }
 
 function searchXP() {
-    //reportString = 'Type: SAVED_TESTS\n';
-    clearXP();
+    reportString = 'Type: XP\n';
     //  + "&dateCondition=" + JSON.stringify(dateCondition)
-    /*
-    var jqxhr = $.ajax("/tests?type=" + searchTypes.FLOWS + "&name="+query)
+    var query = JSON.stringify({name: $('#xp_flow_name').text(), steps: xpStepsArray});
+    var jqxhr = $.ajax("/searchXP?name="+$('#xp_flow_name').text()+"&steps="
+    	+JSON.stringify(xpStepsArray))
         .done(function(data) {
 	        lastQuery = query;
 	        reportString = reportString + 'Search: ' + query + '\n';
@@ -108,7 +110,6 @@ function searchXP() {
 
             update();
         }); // end ajax err handling and ajax call for XP define
-    */
 }
 
 function clearXP() {

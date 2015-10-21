@@ -453,5 +453,12 @@ function searchSimilarTestSteps(nodeID, dateCondition, response) {
     });
 }
 
+app.get('/searchXP', function(request, response) {
+    // get steps of XP flow, returns sequence of images (details, timestamp)
+    var xp_flow_name = request.query.name;
+    var xp_flow_steps = request.query.steps;
+    console.log('searchXP, name: '+xp_flow_name+' steps: '+xp_flow_steps);
+    response.sendStatus(200);
+});
 
 app.listen(sophia_config.WEB_APP_PORT);
