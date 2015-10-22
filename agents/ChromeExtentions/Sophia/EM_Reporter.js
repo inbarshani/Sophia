@@ -124,7 +124,43 @@
 
         }, 50);
 
-    };
+        // capture all elements and report on them as well
+        var docObjects = document.getElementsByTagName('*');
+        ts = new Date().getTime();
+        var agentUIObjecs = [];
+        for(var i=0;i<docObjects.length;i++){
+            var ao = content.kitsManager.createAO(docObjects[i], content.frame.id);            
+            var sophia_ao = {};
+            sophia_ao.logical_name = ao.GetAttrSync('logical name');
+            sophia_ao.rect = ao.GetAttrSync('rect');
+            sophia_ao.micclass = ao.GetAttrSync('micclass');
+            sophia_ao.visible = ao.GetAttrSync('visible');
+            sophia_ao.font_family = ao.GetAttrSync('font');
+            sophia_ao.color = ao.GetAttrSync('color');
+            sophia_ao.background = ao.GetAttrSync('background color');
+            sophia_ao.font_size = ao.GetAttrSync('style', {_data: {style: 'font-size'}});
+            if (sophia_ao.visible)
+                agentUIObjecs.push(sophia_ao);
+        }
+
+        //console.log('agentUIObjecs: '+JSON.stringify(agentUIObjecs));
+        args = {
+            type: "UI_objects",
+            timestamp: ts,
+            testID: testId,
+            objects: agentUIObjecs
+        };
+        $.ajax({
+            url: dataUrl,
+            type: 'POST',
+            data: JSON.stringify(args),
+            dataType: 'json',
+            success: function (doc) {
+                //console.log("data posted: " + JSON.stringify(args));
+            }
+          });
+
+    };    
 
     var reportErrorToSophia = function (errObj) {
         var data =  JSON.stringify(errObj);
@@ -202,3 +238,14 @@
     });
 
 })();
+
+function xinspect(o,i){
+    if(typeof i=='undefined')i='';
+    if(i.length>50)return '[MAX ITERATIONS]';
+    var r=[];
+    for(var p in o){
+        var t=typeof o[p];
+        r.push(i+'"'+p+'" ('+t+') => '+(t=='object' ? 'object:'+xinspect(o[p],i+'  ')+'  /end of object '+p+'/ ' : o[p]+' '));
+    }
+    return r.join(i+'\n');
+}

@@ -12,6 +12,7 @@ var ui_logical = require("./processors/ui_logical");
 var screen = require("./processors/screen");
 var test = require("./processors/test");
 var teststep = require("./processors/test_step");
+var ui_objects = require("./processors/ui_objects");
 
 var Step = require('Step');
 
@@ -231,6 +232,8 @@ function processDataEvent(data_event, requeue_if_no_test) {
                 data = screen.getData(data);
             } else if (data_type == 'teststep') {
                 data = teststep.getData(data);
+            } else if (data_type == 'ui_objects') {
+                data = ui_objects.getData(data);
             }
             // for events that don't have built-in test ID, assume we're in context of the current test
             // this is a workaround which doesn't support multiple tests at the same time, will need to fix
