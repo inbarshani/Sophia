@@ -364,3 +364,30 @@ span.input-group-addon {
 #review_vis_container {
     /* padding: 45px 15px 15px;*/
 }
+
+.modal .aligned-container {
+  text-align:center; /* Align center inline elements */
+  font: 0/0 a;       /* Hide the characters like spaces */
+}
+
+.modal .aligned-container:before {
+  content: ' ';
+  display: inline-block;
+  vertical-align: middle;
+  height: 100%;
+}
+
+.modal .aligned-container img {
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.modal .aligned-container .aligned-text {
+  vertical-align: middle;
+  display: inline-block;
+  font: 16px/1 Arial sans-serif;
+}
+
+.modal .modal-content div {
+  height: 100%;
+}

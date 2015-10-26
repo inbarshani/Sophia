@@ -107,13 +107,13 @@ function fillScreensCarousel(){
             screens_results_row.append(
                 '<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">' +
                 '  <img onclick="showModal('+itemCounter+');"' +
-                '       src="'+screensServer+'/screen/' + timestamp + '"/>' +
+                '       src="'+screensServer+'/screens/' + timestamp + '"/>' +
                 '</li>'
             );
-            var div_class = 'item';
-            if (itemCounter == 0) {div_class = 'item active'; firstItem = false;}
+            var div_class = 'item aligned-container';
+            if (itemCounter == 0) {div_class = 'item active aligned-container'; firstItem = false;}
             screens_carousel.append('<div class="'+div_class+'">'+
-                '<img src="'+screensServer+'/screen/' + timestamp + 
+                '<img src="'+screensServer+'/screens/' + timestamp + 
                 '"/></div>');
             itemCounter++;
         }
