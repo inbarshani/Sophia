@@ -23,7 +23,7 @@
             "TRENDS": 4
         },
         "MAX_PATH_LENGTH": 5000,
-        "MAX_PATH_TO_SCREEN_LENGTH": 50,
+        "MAX_PATH_TO_DATA_LENGTH": 50,
         "NEO4J_DB_SERVER": "16.60.168.105",
         "NEO4J_DB_PORT": "7474",
         "QUEUE_HOST": "localhost",

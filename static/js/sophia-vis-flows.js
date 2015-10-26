@@ -202,9 +202,9 @@ function showDetails(x, y, node) {
         if (prevTimestamp)
         {
             $('#details #nodeScreens #screenBefore').html('Before:<br/>' +
-                '<a target="_blank" href="'+ screensServer+'/screen/' + prevTimestamp + '">'+
+                '<a target="_blank" href="'+ screensServer+'/screens/' + prevTimestamp + '">'+
                 '<img class="img-thumbnail" src="'+
-                screensServer+'/screen/' + prevTimestamp + '"></img></a>');
+                screensServer+'/screens/' + prevTimestamp + '"></img></a>');
         }
         else
             $('#details #nodeScreens #screenBefore').html('No pre-action screen');
@@ -212,9 +212,9 @@ function showDetails(x, y, node) {
         if (nextTimestamp)
         {
             $('#details #nodeScreens #screenAfter').html('After:<br/>'+
-                '<a target="_blank" href="'+ screensServer+'/screen/' + nextTimestamp + '">'+
+                '<a target="_blank" href="'+ screensServer+'/screens/' + nextTimestamp + '">'+
                 '<img class="img-thumbnail" src="' +
-                screensServer+'/screen/' + nextTimestamp + '"></img></a>');
+                screensServer+'/screens/' + nextTimestamp + '"></img></a>');
         }
         else
             $('#details #nodeScreens #screenAfter').html('No post-action screen');

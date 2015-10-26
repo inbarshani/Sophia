@@ -93,7 +93,7 @@ app.use('/searchScreens', function(request, response) {
     idol_queries.search(queryText, dateCondition, true, function(documents_hash) {
         var idolResultNodes = Object.keys(documents_hash);
         if (idolResultNodes.length > 0) {
-            neo4j_queries.getNearestScreens(idolResultNodes,
+            neo4j_queries.getNearestData(idolResultNodes, 'SCREEN',
                 function(prevScreenTimestamps, nextScreenTimestamps,
                     prevScreenIDs, nextScreenIDs) {
                     var referenceIds = prevScreenIDs.concat(nextScreenIDs);
@@ -138,7 +138,7 @@ app.use('/getScreens', function(request, response) {
     if (request.query.selectedNode) {
         var selectedNodeArray = [];
         selectedNodeArray.push(request.query.selectedNode);
-        neo4j_queries.getNearestScreens(selectedNodeArray,
+        neo4j_queries.getNearestData(selectedNodeArray,'SCREEN',
             function(prevScreenTimestamps, nextScreenTimestamps, prevScreenIDs, nextScreenIDs) {
                 var prevScreenTimestamp = null,
                     nextScreenTimestamp = null;
@@ -156,9 +156,9 @@ app.use('/getScreens', function(request, response) {
     }
 });
 
-app.use('/screen/:timestamp', function(request, response) {
+app.get('/screens/:timestamp', function(request, response) {
     var timestamp = request.params.timestamp;
-    //console.log('Get screen with timestamp: ' + timestamp);
+    console.log('Get screen with timestamp: ' + timestamp);
     if (timestamp) {
         try {
             var img = fs.readFileSync('./upload/' + timestamp + '.jpg');
@@ -169,6 +169,38 @@ app.use('/screen/:timestamp', function(request, response) {
         } catch (ex) {
             //console.log('Failed to load screen with timestamp: ' + timestamp);
             response.send('Failed to load screen with timestamp: ' + timestamp);
+        }
+    }
+});
+
+app.get('/screens/:graph_id/objects', function(request, response) {
+    var graph_id = request.params.graph_id;
+    console.log('Get screen with graph_id: ' + graph_id);
+    if (graph_id) {
+        try {
+            neo4j_queries.getNearestData([graph_id],'UI_Objects',
+                function(prevObjsTimestamps, nextObjsTimestamps, prevObjsIDs, nextObjsIDs) {
+                    // TODO: return just one objects to describe the screen
+                    //  for now, just return the id of the first one there is
+                    var ids = prevObjsIDs.concat(nextObjsIDs);
+                    if (ids.length == 0)
+                    {
+                        //console.log('No objects associated with screen graph_id: ' + graph_id);
+                        response.status(404).send('No objects associated with screen');
+                    }
+                    else
+                    {
+                        ids.length = 1; // trim down objects
+                        // get details of objects from IDOL
+                        idol_queries.searchByReference(ids, false, true, 
+                            function(idolDocs){
+                               response.status(200).send(idolDocs);
+                            });
+                    }
+                });
+        } catch (ex) {
+            //console.log('Failed to get screen objects per graph_id: ' + graph_id);
+            response.status(500).send('Failed to get screen objects per graph_id: ' + graph_id);
         }
     }
 });
