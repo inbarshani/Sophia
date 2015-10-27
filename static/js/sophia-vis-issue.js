@@ -1,5 +1,49 @@
 var fullData;
 var table;
+var items = [];
+var color;
+var eventWidth;
+var position = 0;
+var panelWidth;
+/*	Define the dimensions of the SVG */
+var duration = 200;
+var marginTop = 5;
+var marginRight = 0;
+var marginBottom = 40;
+var marginLeft = 0;
+var padding = 2;
+var width = 630 - marginRight - marginLeft;
+var height = 290 - marginTop - marginBottom;
+var miniHeight = 75;
+var mainHeight = height - miniHeight - 50;
+var zoom = 1;
+var maxZoom = 10;
+var zoomIncrement = 1;
+/*	A global variable to control which event/location to show */
+var counter = 0;
+/*	A global variable to control the amout of ticks visible */
+var ticks = 8;
+var timeFirst;
+var timeLast;
+var timeDiff;
+var timeBegin;
+var timeEnd;
+var x;
+var chart;
+var miniHolder;
+var mini;
+var xYearAxis;
+var yearAxis;
+var xMonthAxis;
+var monthAxis;
+var xDayAxis;
+var dayAxis;
+var locations;
+var eventLeft;
+var eventWidth;
+var eventTop;
+var tooltipHeight;
+
 function CreateTable(data)
 {
     var labelColorTestData = [];
@@ -250,49 +294,7 @@ function LeftIcon(chart, counter)
 
 
 }
-var items = [];
-var color;
-var eventWidth;
-var position = 0;
-var panelWidth;
-/*	Define the dimensions of the SVG */
-var duration = 200;
-var marginTop = 5;
-var marginRight = 0;
-var marginBottom = 40;
-var marginLeft = 0;
-var padding = 2;
-var width = 630 - marginRight - marginLeft;
-var height = 290 - marginTop - marginBottom;
-var miniHeight = 75;
-var mainHeight = height - miniHeight - 50;
-var zoom = 1;
-var maxZoom = 10;
-var zoomIncrement = 1;
-/*	A global variable to control which event/location to show */
-var counter = 0;
-/*	A global variable to control the amout of ticks visible */
-var ticks = 8;
-var timeFirst;
-var timeLast;
-var timeDiff;
-var timeBegin;
-var timeEnd;
-var x;
-var chart;
-var miniHolder;
-var mini;
-var xYearAxis;
-var yearAxis;
-var xMonthAxis;
-var monthAxis;
-var xDayAxis;
-var dayAxis;
-var locations;
-var eventLeft;
-var eventWidth;
-var eventTop;
-var tooltipHeight;
+
 function showIssues(data) {
     $('#results_table').removeClass('hidden');
     $('#results_timeline').removeClass('hidden');
