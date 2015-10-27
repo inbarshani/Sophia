@@ -1,8 +1,10 @@
 // TODO: extract to configuration by server (use REST to get it?) 
 //   the port is the one changing, maybe just calc it from this app
 var screensServer = 'http://myd-vm00366:8085';
-var screensTimestampsGroups = null;
+var screenGroups = null;
+var screensGraphIDsGroups = null;
 var screensShowGrouped = true;
+var screenUIObjects = [];
 
 function loadScreens(){
     $("#application_area").load("html/screens.html", function () {
@@ -27,6 +29,8 @@ function loadScreens(){
         });        
 
         $('#search-text').focus();
+
+        $('#show_objs').on('change',showHTMLLayout);
 
         $('#date-cond').on('click', function(e) {
             openDateDialog();
@@ -66,7 +70,7 @@ function searchScreens(query) {
             lastQuery = query;
             reportString = reportString + 'Search: ' + query + '\n';
             //console.log("Search returned: " + data);
-            screensTimestampsGroups = JSON.parse(data);
+            screenGroups = JSON.parse(data);
             fillScreensCarousel();
             reportString = reportString + 'Results #: ' + $('#screensCarousel img').length + '\n';
         })
@@ -85,25 +89,26 @@ function fillScreensCarousel(){
     screens_results_row.empty();
     screens_carousel.empty();
     //console.log("Search returned: " + data);
-    var groups = Object.keys(screensTimestampsGroups);
+    var groups = Object.keys(screenGroups);
     var itemCounter = 0;
     for (var j=0;j<groups.length;j++)
     {
-        var timestamps = screensTimestampsGroups[groups[j]];
-        var timestampsArray = [];
+        var screens = screenGroups[groups[j]];
+        var screensArray = [];
         if (groups[j] == 'none')
         {
-            timestampsArray = timestamps;
+            screensArray = screens;
         }
         else // if grouped, just one result per group
         {
             if (screensShowGrouped)
-                timestampsArray.push(timestamps[0]);
+                screensArray.push(screens[0]);
             else
-                timestampsArray = timestamps;       
+                screensArray = screens;       
         }
-        for(var i=0;i<timestampsArray.length;i++){
-            var timestamp = timestampsArray[i];
+        for(var i=0;i<screensArray.length;i++){
+            var timestamp = screensArray[i].timestamp;
+            var graph_id = screensArray[i].graph_id;
             screens_results_row.append(
                 '<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">' +
                 '  <img onclick="showModal('+itemCounter+');"' +
@@ -111,15 +116,18 @@ function fillScreensCarousel(){
                 '</li>'
             );
             var div_class = 'item aligned-container';
-            if (itemCounter == 0) {div_class = 'item active aligned-container'; firstItem = false;}
-            screens_carousel.append('<div class="'+div_class+'">'+
+            if (itemCounter == 0) {
+                div_class = 'item active aligned-container'; 
+            }
+            screens_carousel.append('<div class="'+div_class+'" graph_id="'+graph_id+'">'+
                 '<img src="'+screensServer+'/screens/' + timestamp + 
                 '"/></div>');
             itemCounter++;
         }
     }
     if (groups.length > 0) {
-        $('#screensCarousel').carousel({interval: false, wrap: false}); 
+        $('#screensCarousel').carousel({interval: false, wrap: false});
+        $('#screensCarousel').on('slid.bs.carousel', showHTMLLayout);
     }
     else {
         screens_results_row.append(
@@ -131,7 +139,7 @@ function fillScreensCarousel(){
 }
 
 function getScreens(node_id, callback) {
-    var jqxhr = $.ajax("/getScreens?selectedNode=" + node_id)
+    var jqxhr = $.ajax("/getNearScreens?selectedNode=" + node_id)
         .done(function(data) {
             //console.log("Search returned: " + data);
             var responseData = JSON.parse(data);
@@ -142,15 +150,26 @@ function getScreens(node_id, callback) {
         });
 }
 
-function showModal(item)
+function showHTMLLayout(){
+    //console.log('showHTMLLayout');
+    if ($('#show_objs')[0].checked)
+    {
+        // get the objects for the current screen
+        var graph_id =$('#screens_carousel_items div.active').attr('graph_id');
+        console.log('get objects for graph_id: '+graph_id);
+        
+    }
+}
+
+function showModal(itemIndex)
 {
     $('#screenModal').modal();
-    $('#screensCarousel').carousel(item);
+    $('#screensCarousel').carousel(itemIndex);
 }
 
 function clearScreensSearch()
 {
-    screensTimestampsGroups = null;
+    screenGroups = null;
     $('#screens_results_row').empty();
     $('#screens_carousel_items').empty();
     $('#group_images').addClass('hidden');
