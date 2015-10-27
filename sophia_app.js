@@ -105,20 +105,24 @@ app.use('/searchScreens', function(request, response) {
                         referenceIds.forEach(function(refID) {
                             if (idolDocs[refID])
                             {
+                                var result = {
+                                    timestamp: idolDocs[refID].timestamp,
+                                    graph_id: refID
+                                };
                                 if (!idolDocs[refID].phash) {
-                                    groups.none.push(idolDocs[refID].timestamp);
+                                    groups.none.push(result);
                                 } else {
                                     for (var i = 0; i < group_pivots.length; i++) {
                                         if (phash.compare(idolDocs[refID].phash, group_pivots[i]) <
                                             sophia_config.hashSimiliarityThreshold) {
                                             // this result is similar to one of the previous ones
-                                            groups["" + i].push(idolDocs[refID].timestamp);
+                                            groups["" + i].push(result);
                                             break;
                                         }
                                     }
                                     if (i == group_pivots.length) {
                                         // new result
-                                        groups["" + i] = [idolDocs[refID].timestamp];
+                                        groups["" + i] = [result];
                                         group_pivots.push(idolDocs[refID].phash);
                                     }
                                 }
@@ -134,24 +138,30 @@ app.use('/searchScreens', function(request, response) {
     });
 });
 
-app.use('/getScreens', function(request, response) {
+app.use('/getNearScreens', function(request, response) {
     if (request.query.selectedNode) {
         var selectedNodeArray = [];
         selectedNodeArray.push(request.query.selectedNode);
         neo4j_queries.getNearestData(selectedNodeArray,'SCREEN',
             function(prevScreenTimestamps, nextScreenTimestamps, prevScreenIDs, nextScreenIDs) {
-                var prevScreenTimestamp = null,
-                    nextScreenTimestamp = null;
-                if (prevScreenTimestamps.length > 0)
-                    prevScreenTimestamp = prevScreenTimestamps[0];
-                if (nextScreenTimestamps.length > 0)
-                    nextScreenTimestamp = nextScreenTimestamps[0];
-                var results = {
-                    prevScreenTimestamp: prevScreenTimestamp,
-                    nextScreenTimestamp: nextScreenTimestamp
+                var result = {
+                    prevScreenTimestamp: null,
+                    prevScreenID: null,
+                    nextScreenTimestamp: null,
+                    nextScreenID: null
                 };
-                console.log('getScreens returned: ' + JSON.stringify(results));
-                response.send(JSON.stringify(results));
+                if (prevScreenTimestamps.length > 0)
+                {
+                    result.prevScreenTimestamp = prevScreenTimestamps[0];
+                    result.prevScreenID = prevScreenIDs[0];
+                }
+                if (nextScreenTimestamps.length > 0)
+                {
+                    result.nextScreenTimestamp = nextScreenTimestamps[0];
+                    result.nextScreenID = nextScreenIDs[0];
+                }
+                console.log('getScreens returned: ' + JSON.stringify(result));
+                response.send(JSON.stringify(result));
             });
     }
 });
