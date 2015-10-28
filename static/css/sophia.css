@@ -391,3 +391,7 @@ span.input-group-addon {
 .modal .modal-content div {
   height: 100%;
 }
+
+#screens_carousel_items .ui_show {
+  border: solid 1px black; 
+}

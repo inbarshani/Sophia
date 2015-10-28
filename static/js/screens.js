@@ -4,7 +4,16 @@ var screensServer = 'http://myd-vm00366:8085';
 var screenGroups = null;
 var screensGraphIDsGroups = null;
 var screensShowGrouped = true;
-var screenUIObjects = [];
+var widthFactor = 1;
+var heightFactor = 1;
+var fonts_hashtable = {};
+var types_hashtable = {};
+var colors_hashtable = {};
+var HIGHLIGHT = {
+    FONT: 0,
+    TYPE: 1,
+    COLOR: 2
+};
 
 function loadScreens(){
     $("#application_area").load("html/screens.html", function () {
@@ -151,13 +160,156 @@ function getScreens(node_id, callback) {
 }
 
 function showHTMLLayout(){
+    clearDetails();
     //console.log('showHTMLLayout');
     if ($('#show_objs')[0].checked)
     {
+        var active_div =$('#screens_carousel_items div.active');
+        // calculate and store ratio of image to original image        
+        var img = $('#screens_carousel_items div.active img');
+        widthFactor = img[0].width / img[0].naturalWidth;
+        heightFactor = img[0].height / img[0].naturalHeight;
+        console.log('widthFactor: '+widthFactor);
+        console.log('heightFactor: '+heightFactor);
         // get the objects for the current screen
-        var graph_id =$('#screens_carousel_items div.active').attr('graph_id');
+        var graph_id =active_div.attr('graph_id');
         console.log('get objects for graph_id: '+graph_id);
-        
+        var jqxhr = $.ajax("/screens/" + graph_id+'/objects')
+            .done(function(uiObjectsData) {
+                //console.log("Search returned: " + uiObjectsData);
+                var screenUIObjects = uiObjectsData;
+                var anchor = img.position();
+                //console.log('screenUIObjects[0]: '+screenUIObjects[0]);
+                //console.log('screenUIObjects[0] json: '+JSON.stringify(screenUIObjects[0]));
+                var uiObjectsCounter = 0;
+                for(var i=0;i<screenUIObjects.length;i++)
+                {
+                    // get dimension and font of UI obj
+                    var rect = screenUIObjects[i].rect;
+                    // draw rect on image
+                    //console.log('add rect: '+JSON.stringify(rect));
+                    if (screenUIObjects[i].visible && addUIRect(active_div, anchor, rect,i))
+                    {
+                        uiObjectsCounter++;
+                        var font = screenUIObjects[i].font_family + ' ' + screenUIObjects[i].font_size;
+                        var object_type = 'n/a';
+                        if (screenUIObjects[i].micclass && screenUIObjects[i].micclass[0])
+                            object_type  = '' + screenUIObjects[i].micclass[0];
+                        var color = screenUIObjects[i].color;
+                        if (!fonts_hashtable[font])
+                        {
+                            fonts_hashtable[font] = {
+                                highlighted: false,
+                                rect_array: [i]
+                            };
+                        }
+                        else
+                            fonts_hashtable[font].rect_array.push(i);
+                        if (!types_hashtable[object_type])
+                        {
+                            types_hashtable[object_type] = {
+                                highlighted: false,
+                                rect_array: [i]
+                            };
+                        }
+                        else
+                            types_hashtable[object_type].rect_array.push(i);  
+                        if (color)                      
+                        {
+                            if (!colors_hashtable[color])
+                            {
+                                colors_hashtable[color] = {
+                                    highlighted: false,
+                                    rect_array: [i]
+                                };
+                            }
+                            else
+                                colors_hashtable[color].rect_array.push(i);  
+                        }
+                    }
+                }
+                var fonts = Object.keys(fonts_hashtable);
+                fonts.forEach(function(font_string){
+                    var item = $('<li><a href="#">'+font_string+'</a></li>');
+                    item.appendTo($('#fonts'))
+                        .find('a')
+                        .on('click', function() { toggleHighlightCategory(HIGHLIGHT.FONT,font_string);});
+                });    
+                var types=Object.keys(types_hashtable);
+                types.forEach(function(type_string){
+                    var item = $('<li><a href="#">'+type_string+'</a></li>');
+                    item.appendTo($('#types'))
+                        .find('a')
+                       .on('click',  function() { toggleHighlightCategory(HIGHLIGHT.TYPE, type_string);});
+                });                
+                var colors=Object.keys(colors_hashtable);
+                colors.forEach(function(color_string){
+                    var item = $('<li><a href="#">'+color_string+'</a></li>');
+                    item.appendTo($('#colors'))
+                        .find('a')
+                       .on('click',  function() { toggleHighlightCategory(HIGHLIGHT.COLOR, color_string);});
+                });                
+            })
+            .fail(function(err) {
+                console.log("Failed to get objects for screen "+graph_id+": " + err);
+            });
+
+    }
+}
+
+function addUIRect(container, anchor, rect, id) {
+    var left = rect.left * widthFactor + anchor.left;
+    var right = rect.right * widthFactor + anchor.left;
+    var top = rect.top * heightFactor + anchor.top;
+    var bottom = rect.bottom * heightFactor + anchor.top;
+    var width = (right-left);
+    var height = (bottom-top);
+    if (width > 0 && height > 0)
+    {
+        $('<div id="ui_rect_'+id+'" style="position: absolute" />')
+        .appendTo(container)
+        .css("left", left + "px")
+        .css("top", top + "px")
+        .css("width", width+"px")
+        .css("height", height+"px")
+        .on('click', function(){ toggleHighlightObject('ui_rect_'+id);});
+        return true;
+    }
+    return false;
+};
+
+function toggleHighlightCategory(target, hash)
+{
+    // find items and highlight
+    var hashtable = {};
+    if (target == HIGHLIGHT.FONT)
+        hashtable = fonts_hashtable;
+    else if (target == HIGHLIGHT.TYPE)
+        hashtable = types_hashtable;
+    else if (target == HIGHLIGHT.COLOR)
+        hashtable = colors_hashtable;
+    // toggle highlighted state
+    hashtable[hash].highlighted = !(hashtable[hash].highlighted);
+    var object_ids = hashtable[hash].rect_array;
+    object_ids.forEach(function(object_id){
+        if (hashtable[hash].highlighted)
+            $('#ui_rect_'+object_id).addClass('ui_show').tooltip("enable");
+        else
+            $('#ui_rect_'+object_id).removeClass('ui_show').tooltip("disable");
+    });
+}
+
+function toggleHighlightObject(id)
+{
+    var obj = $('#'+id)
+    var highlighted = obj.hasClass('ui_show');
+    if (!highlighted)
+    {
+        obj.addClass('ui_show');
+    }
+    else
+    {
+        obj.removeClass('ui_show');
     }
 }
 
@@ -173,4 +325,15 @@ function clearScreensSearch()
     $('#screens_results_row').empty();
     $('#screens_carousel_items').empty();
     $('#group_images').addClass('hidden');
+}
+
+function clearDetails()
+{
+    fonts_hashtable = {};
+    types_hashtable = {};
+    colors_hashtable = {};
+    $('#fonts').empty();
+    $('#types').empty();    
+    $('#colors').empty();  
+    $('#screens_carousel_items div.active div').remove();
 }

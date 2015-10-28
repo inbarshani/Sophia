@@ -204,7 +204,7 @@ app.get('/screens/:graph_id/objects', function(request, response) {
                         // get details of objects from IDOL
                         idol_queries.searchByReference(ids, false, true, 
                             function(idolDocs){
-                               response.status(200).send(idolDocs);
+                               response.status(200).send(idolDocs[''+ids[0]].objects);
                             });
                     }
                 });
