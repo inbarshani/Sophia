@@ -239,6 +239,7 @@ function showHTMLLayout(){
                 }
                 i = 0;
                 var fonts = Object.keys(fonts_hashtable);
+                $('#fonts').html('');
                 fonts.forEach(function(font_string){
                     li = $('<li>');
                     li.addClass('list-group-item');
@@ -265,6 +266,7 @@ function showHTMLLayout(){
                 });    
                 i = 0;
                 var types=Object.keys(types_hashtable);
+                $('#types').html('');
                 types.forEach(function(type_string){
                     li = $('<li>');
                     li.addClass('list-group-item');
@@ -291,6 +293,7 @@ function showHTMLLayout(){
                 });                
                 i = 0;
                 var colors=Object.keys(colors_hashtable);
+                $('#colors').html('');
                 colors.forEach(function(color_string){
                     li = $('<li>');
                     li.addClass('list-group-item');
