@@ -181,21 +181,28 @@ function showHTMLLayout(){
                 var anchor = img.position();
                 //console.log('screenUIObjects[0]: '+screenUIObjects[0]);
                 //console.log('screenUIObjects[0] json: '+JSON.stringify(screenUIObjects[0]));
-                var uiObjectsCounter = 0;
                 for(var i=0;i<screenUIObjects.length;i++)
                 {
                     // get dimension and font of UI obj
                     var rect = screenUIObjects[i].rect;
                     // draw rect on image
                     //console.log('add rect: '+JSON.stringify(rect));
-                    if (screenUIObjects[i].visible && addUIRect(active_div, anchor, rect,i))
+                    var font = screenUIObjects[i].font_family + ' ' + screenUIObjects[i].font_size;
+                    // replace leading font 'null' with 'no font'
+                    font = font.replace(/^null/, 'no font');
+                    var object_type = 'n/a';
+                    if (screenUIObjects[i].micclass && screenUIObjects[i].micclass[0])
+                        object_type  = '' + screenUIObjects[i].micclass[0];
+                    var color = screenUIObjects[i].color;
+                    var all_props_string = '{ left: '+rect.left+', top: '+
+                        rect.top+', width: '+(rect.right - rect.left)+
+                        ', height: '+(rect.bottom - rect.top)+'} '+ 
+                        font;
+                    if (color)
+                        all_props_string += ' ' + color;
+                    if (screenUIObjects[i].visible && 
+                        addUIRect(active_div, anchor, i, rect, all_props_string))
                     {
-                        uiObjectsCounter++;
-                        var font = screenUIObjects[i].font_family + ' ' + screenUIObjects[i].font_size;
-                        var object_type = 'n/a';
-                        if (screenUIObjects[i].micclass && screenUIObjects[i].micclass[0])
-                            object_type  = '' + screenUIObjects[i].micclass[0];
-                        var color = screenUIObjects[i].color;
                         if (!fonts_hashtable[font])
                         {
                             fonts_hashtable[font] = {
@@ -230,21 +237,24 @@ function showHTMLLayout(){
                 }
                 var fonts = Object.keys(fonts_hashtable);
                 fonts.forEach(function(font_string){
-                    var item = $('<li><a href="#">'+font_string+'</a></li>');
+                    var item = $('<li><a href="#">'+font_string+'</a> ('+
+                        fonts_hashtable[font_string].rect_array.length+')</li>');
                     item.appendTo($('#fonts'))
                         .find('a')
                         .on('click', function() { toggleHighlightCategory(HIGHLIGHT.FONT,font_string);});
                 });    
                 var types=Object.keys(types_hashtable);
                 types.forEach(function(type_string){
-                    var item = $('<li><a href="#">'+type_string+'</a></li>');
+                    var item = $('<li><a href="#">'+type_string+'</a> ('+
+                        types_hashtable[type_string].rect_array.length+')</li>');
                     item.appendTo($('#types'))
                         .find('a')
                        .on('click',  function() { toggleHighlightCategory(HIGHLIGHT.TYPE, type_string);});
                 });                
                 var colors=Object.keys(colors_hashtable);
                 colors.forEach(function(color_string){
-                    var item = $('<li><a href="#">'+color_string+'</a></li>');
+                    var item = $('<li><a href="#">'+color_string+'</a> ('+
+                        colors_hashtable[color_string].rect_array.length+')</li>');
                     item.appendTo($('#colors'))
                         .find('a')
                        .on('click',  function() { toggleHighlightCategory(HIGHLIGHT.COLOR, color_string);});
@@ -257,7 +267,7 @@ function showHTMLLayout(){
     }
 }
 
-function addUIRect(container, anchor, rect, id) {
+function addUIRect(container, anchor, id, rect, all_props_string) {
     var left = rect.left * widthFactor + anchor.left;
     var right = rect.right * widthFactor + anchor.left;
     var top = rect.top * heightFactor + anchor.top;
@@ -266,7 +276,8 @@ function addUIRect(container, anchor, rect, id) {
     var height = (bottom-top);
     if (width > 0 && height > 0)
     {
-        $('<div id="ui_rect_'+id+'" style="position: absolute" />')
+        $('<div id="ui_rect_'+id+'" '+
+            'style="position: absolute" title="'+all_props_string+'"/>')
         .appendTo(container)
         .css("left", left + "px")
         .css("top", top + "px")
@@ -293,9 +304,9 @@ function toggleHighlightCategory(target, hash)
     var object_ids = hashtable[hash].rect_array;
     object_ids.forEach(function(object_id){
         if (hashtable[hash].highlighted)
-            $('#ui_rect_'+object_id).addClass('ui_show').tooltip("enable");
+            $('#ui_rect_'+object_id).addClass('ui_show');
         else
-            $('#ui_rect_'+object_id).removeClass('ui_show').tooltip("disable");
+            $('#ui_rect_'+object_id).removeClass('ui_show');
     });
 }
 
@@ -315,7 +326,7 @@ function toggleHighlightObject(id)
 
 function showModal(itemIndex)
 {
-    $('#screenModal').modal();
+    $('#screenModal').modal();    
     $('#screensCarousel').carousel(itemIndex);
 }
 
