@@ -7,22 +7,29 @@ var screensShowGrouped = true;
 var widthFactor = 1;
 var heightFactor = 1;
 var fonts_hashtable = {};
-var types_hashtable = {};
 var colors_hashtable = {};
+var backgrounds_hashtable = {};
 var HIGHLIGHT = {
     FONT: 0,
-    TYPE: 1,
-    COLOR: 2
+    COLOR: 1,
+    BACKGROUND: 2
 };
 var color_palette = {};
 
 function componentToHex(c) {
-    var hex = c.toString(16);
+    var hex = c.toString(16).toUpperCase();
     return hex.length == 1 ? "0" + hex : hex;
 }
 
 function rgbToHex(rgbString) {
-    var rgb = rgbString.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+    var rgb = '';
+    var isAlpha = rgbString.match(/^rgba/);
+    if (isAlpha)
+        rgb = rgbString.match(/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)$/);
+    else
+        rgb = rgbString.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+    if (isAlpha && parseInt(rgb[4])==0)
+        return null;
     return "#" + componentToHex(parseInt(rgb[1])) 
         + componentToHex(parseInt(rgb[2])) + componentToHex(parseInt(rgb[3]));
 }
@@ -50,8 +57,6 @@ function loadScreens() {
         });
 
         $('#search-text').focus();
-
-        $('#show_objs').on('change', showHTMLLayout);
 
         $('#date-cond').on('click', function(e) {
             openDateDialog();
@@ -185,163 +190,166 @@ function getScreens(node_id, callback) {
 function showHTMLLayout() {
     clearDetails();
     //console.log('showHTMLLayout');
-    if ($('#show_objs')[0].checked) {
-        $('#accordion').removeClass('hidden');
-        var active_div = $('#screens_carousel_items div.active');
-        // calculate and store ratio of image to original image        
-        var img = $('#screens_carousel_items div.active img');
-        widthFactor = img[0].width / img[0].naturalWidth;
-        heightFactor = img[0].height / img[0].naturalHeight;
-        console.log('widthFactor: ' + widthFactor);
-        console.log('heightFactor: ' + heightFactor);
-        // get the objects for the current screen
-        var graph_id = active_div.attr('graph_id');
-        console.log('get objects for graph_id: ' + graph_id);
-        var jqxhr = $.ajax("/screens/" + graph_id + '/objects')
-            .done(function(uiObjectsData) {
-                //console.log("Search returned: " + uiObjectsData);
-                var li, label, input, checkbox, a, span;
-                var screenUIObjects = uiObjectsData;
-                var anchor = img.position();
-                //console.log('screenUIObjects[0]: '+screenUIObjects[0]);
-                //console.log('screenUIObjects[0] json: '+JSON.stringify(screenUIObjects[0]));
-                for (var i = 0; i < screenUIObjects.length; i++) {
-                    // get dimension and font of UI obj
-                    var rect = screenUIObjects[i].rect;
-                    // draw rect on image
-                    //console.log('add rect: '+JSON.stringify(rect));
-                    var font = screenUIObjects[i].font_family + ' ' + screenUIObjects[i].font_size;
-                    // replace leading font 'null' with 'no font'
-                    font = font.replace(/^null/, 'no font');
-                    var object_type = 'n/a';
-                    if (screenUIObjects[i].micclass && screenUIObjects[i].micclass[0])
-                        object_type = '' + screenUIObjects[i].micclass[0];
-                    var color = screenUIObjects[i].color;
-                    var all_props_string = '{ left: ' + rect.left + ', top: ' +
-                        rect.top + ', width: ' + (rect.right - rect.left) +
-                        ', height: ' + (rect.bottom - rect.top) + '} ' +
-                        font;
+    $('#accordion').removeClass('hidden');
+    var active_div = $('#screens_carousel_items div.active');
+    // calculate and store ratio of image to original image        
+    var img = $('#screens_carousel_items div.active img');
+    widthFactor = img[0].width / img[0].naturalWidth;
+    heightFactor = img[0].height / img[0].naturalHeight;
+    console.log('widthFactor: ' + widthFactor);
+    console.log('heightFactor: ' + heightFactor);
+    // get the objects for the current screen
+    var graph_id = active_div.attr('graph_id');
+    console.log('get objects for graph_id: ' + graph_id);
+    var jqxhr = $.ajax("/screens/" + graph_id + '/objects')
+        .done(function(uiObjectsData) {
+            //console.log("Search returned: " + uiObjectsData);
+            var li, label, input, checkbox, a, span;
+            var screenUIObjects = uiObjectsData;
+            var anchor = img.position();
+            //console.log('screenUIObjects[0]: '+screenUIObjects[0]);
+            //console.log('screenUIObjects[0] json: '+JSON.stringify(screenUIObjects[0]));
+            for (var i = 0; i < screenUIObjects.length; i++) {
+                // get dimension and font of UI obj
+                var rect = screenUIObjects[i].rect;
+                // draw rect on image
+                //console.log('add rect: '+JSON.stringify(rect));
+                var font = screenUIObjects[i].font_family + ' ' + screenUIObjects[i].font_size;
+                // replace leading font 'null' with 'no font'
+                font = font.replace(/^null/, 'no font');
+                var color = screenUIObjects[i].color;
+                var background = screenUIObjects[i].background;
+                var all_props_string = '{ left: ' + rect.left + ', top: ' +
+                    rect.top + ', width: ' + (rect.right - rect.left) +
+                    ', height: ' + (rect.bottom - rect.top) + '} ' +
+                    font;
+                if (color) {
+                    color = rgbToHex(color);
+                    if (color_palette[color])
+                        color = color_palette[color];
+                    all_props_string += ' ' + color;
+                }
+                if (background) {
+                    background = rgbToHex(background);
+                    if (background && color_palette[background])
+                        background = color_palette[background];
+                    if (background)
+                        all_props_string += ' ' + background;
+                }
+                if (screenUIObjects[i].visible &&
+                    addUIRect(active_div, anchor, i, rect, all_props_string)) {
+                    if (!fonts_hashtable[font]) {
+                        fonts_hashtable[font] = {
+                            highlighted: false,
+                            rect_array: [i]
+                        };
+                    } else
+                        fonts_hashtable[font].rect_array.push(i);
                     if (color) {
-                        color = rgbToHex(color);
-                        if (color_palette[color])
-                            color = color_palette[color];
-                        all_props_string += ' ' + color;
+                        if (!colors_hashtable[color]) {
+                            colors_hashtable[color] = {
+                                highlighted: false,
+                                rect_array: [i]
+                            };
+                        } else
+                            colors_hashtable[color].rect_array.push(i);
                     }
-                    if (screenUIObjects[i].visible &&
-                        addUIRect(active_div, anchor, i, rect, all_props_string)) {
-                        if (!fonts_hashtable[font]) {
-                            fonts_hashtable[font] = {
+                    if (background) {
+                        if (!backgrounds_hashtable[background]) {
+                            backgrounds_hashtable[background] = {
                                 highlighted: false,
                                 rect_array: [i]
                             };
                         } else
-                            fonts_hashtable[font].rect_array.push(i);
-                        if (!types_hashtable[object_type]) {
-                            types_hashtable[object_type] = {
-                                highlighted: false,
-                                rect_array: [i]
-                            };
-                        } else
-                            types_hashtable[object_type].rect_array.push(i);
-                        if (color) {
-                            if (!colors_hashtable[color]) {
-                                colors_hashtable[color] = {
-                                    highlighted: false,
-                                    rect_array: [i]
-                                };
-                            } else
-                                colors_hashtable[color].rect_array.push(i);
-                        }
+                            backgrounds_hashtable[background].rect_array.push(i);
                     }
                 }
-                i = 0;
-                var fonts = Object.keys(fonts_hashtable);
-                $('#fonts').html('');
-                fonts.forEach(function(font_string) {
-                    li = $('<li>');
-                    li.addClass('list-group-item');
-                    label = $('<label>');
-                    label.addClass('checkbox-inline');
-                    input = $('<input>');
-                    input.attr('type', 'checkbox');
-                    input.attr('id', 'cb_font_' + i++);
-                    a = $('<a>');
-                    a.attr('href', '#');
-                    a.text(font_string);
-                    span = $('<span>');
-                    span.text('(' + fonts_hashtable[font_string].rect_array.length + ')');
-                    label.click(function(fs, cb) {
-                        return function() {
-                            toggleHighlightCategory(HIGHLIGHT.FONT, fs, cb);
-                        }
-                    }(font_string, input));
-                    label.append(input);
-                    label.append(a);
-                    label.append(span);
-                    li.append(label);
-                    $('#fonts').append(li);
-                });
-                i = 0;
-                var types = Object.keys(types_hashtable);
-                $('#types').html('');
-                types.forEach(function(type_string) {
-                    li = $('<li>');
-                    li.addClass('list-group-item');
-                    label = $('<label>');
-                    label.addClass('checkbox-inline');
-                    input = $('<input>');
-                    input.attr('type', 'checkbox');
-                    input.attr('id', 'cb_type_' + i++);
-                    a = $('<a>');
-                    a.attr('href', '#');
-                    a.text(type_string);
-                    span = $('<span>');
-                    span.text('(' + types_hashtable[type_string].rect_array.length + ')');
-                    label.click(function(fs, cb) {
-                        return function() {
-                            toggleHighlightCategory(HIGHLIGHT.TYPE, fs, cb);
-                        }
-                    }(type_string, input));
-                    label.append(input);
-                    label.append(a);
-                    label.append(span);
-                    li.append(label);
-                    $('#types').append(li);
-                });
-                i = 0;
-                var colors = Object.keys(colors_hashtable);
-                $('#colors').html('');
-                colors.forEach(function(color_string) {
-                    li = $('<li>');
-                    li.addClass('list-group-item');
-                    label = $('<label>');
-                    label.addClass('checkbox-inline');
-                    input = $('<input>');
-                    input.attr('type', 'checkbox');
-                    input.attr('id', 'cb_color_' + i++);
-                    a = $('<a>');
-                    a.attr('href', '#');
-                    a.text(color_string);
-                    span = $('<span>');
-                    span.text('(' + colors_hashtable[color_string].rect_array.length + ')');
-                    label.click(function(fs, cb) {
-                        return function() {
-                            toggleHighlightCategory(HIGHLIGHT.COLOR, fs, cb);
-                        }
-                    }(color_string, input));
-                    label.append(input);
-                    label.append(a);
-                    label.append(span);
-                    li.append(label);
-                    $('#colors').append(li);
-                });
-            })
-            .fail(function(err) {
-                console.log("Failed to get objects for screen " + graph_id + ": " + err);
+            }
+            i = 0;
+            var fonts = Object.keys(fonts_hashtable);
+            $('#fonts').html('');
+            fonts.forEach(function(font_string) {
+                li = $('<li>');
+                li.addClass('list-group-item');
+                label = $('<label>');
+                label.addClass('checkbox-inline');
+                input = $('<input>');
+                input.attr('type', 'checkbox');
+                input.attr('id', 'cb_font_' + i++);
+                a = $('<a>');
+                a.attr('href', '#');
+                a.text(font_string);
+                span = $('<span>');
+                span.text('(' + fonts_hashtable[font_string].rect_array.length + ')');
+                label.click(function(fs, cb) {
+                    return function() {
+                        toggleHighlightCategory(HIGHLIGHT.FONT, fs, cb);
+                    }
+                }(font_string, input));
+                label.append(input);
+                label.append(a);
+                label.append(span);
+                li.append(label);
+                $('#fonts').append(li);
             });
-    } else {
-        $('#accordion').addClass('hidden');
-    }
+            i = 0;
+            var colors = Object.keys(colors_hashtable);
+            $('#colors').html('');
+            colors.forEach(function(color_string) {
+                li = $('<li>');
+                li.addClass('list-group-item');
+                label = $('<label>');
+                label.addClass('checkbox-inline');
+                input = $('<input>');
+                input.attr('type', 'checkbox');
+                input.attr('id', 'cb_color_' + i++);
+                a = $('<a>');
+                a.attr('href', '#');
+                a.text(color_string);
+                span = $('<span>');
+                span.text('(' + colors_hashtable[color_string].rect_array.length + ')');
+                label.click(function(fs, cb) {
+                    return function() {
+                        toggleHighlightCategory(HIGHLIGHT.COLOR, fs, cb);
+                    }
+                }(color_string, input));
+                label.append(input);
+                label.append(a);
+                label.append(span);
+                li.append(label);
+                $('#colors').append(li);
+            });
+            i = 0;
+            var backgrounds = Object.keys(backgrounds_hashtable);
+            $('#backgrounds').html('');
+            backgrounds.forEach(function(background_string) {
+                li = $('<li>');
+                li.addClass('list-group-item');
+                label = $('<label>');
+                label.addClass('checkbox-inline');
+                input = $('<input>');
+                input.attr('type', 'checkbox');
+                input.attr('id', 'cb_type_' + i++);
+                a = $('<a>');
+                a.attr('href', '#');
+                a.text(background_string);
+                span = $('<span>');
+                span.text('(' + backgrounds_hashtable[background_string].rect_array.length + ')');
+                label.click(function(fs, cb) {
+                    return function() {
+                        toggleHighlightCategory(HIGHLIGHT.BACKGROUND, fs, cb);
+                    }
+                }(background_string, input));
+                label.append(input);
+                label.append(a);
+                label.append(span);
+                li.append(label);
+                $('#backgrounds').append(li);
+            });
+        })
+        .fail(function(err) {
+            console.log("Failed to get objects for screen " + graph_id + ": " + err);
+        });
 }
 
 function addUIRect(container, anchor, id, rect, all_props_string) {
@@ -406,8 +414,8 @@ function toggleHighlightCategory(target, hash, checkbox) {
     var hashtable = {};
     if (target == HIGHLIGHT.FONT)
         hashtable = fonts_hashtable;
-    else if (target == HIGHLIGHT.TYPE)
-        hashtable = types_hashtable;
+    else if (target == HIGHLIGHT.BACKGROUND)
+        hashtable = backgrounds_hashtable;
     else if (target == HIGHLIGHT.COLOR)
         hashtable = colors_hashtable;
     // toggle highlighted state
