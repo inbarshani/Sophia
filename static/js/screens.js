@@ -14,9 +14,21 @@ var HIGHLIGHT = {
     TYPE: 1,
     COLOR: 2
 };
+var color_palette = {};
 
-function loadScreens(){
-    $("#application_area").load("html/screens.html", function () {
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(rgbString) {
+    var rgb = rgbString.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+    return "#" + componentToHex(parseInt(rgb[1])) 
+        + componentToHex(parseInt(rgb[2])) + componentToHex(parseInt(rgb[3]));
+}
+
+function loadScreens() {
+    $("#application_area").load("html/screens.html", function() {
         // bind the search control
         $('#search-button').on('click', function(e) {
             searchScreensByText();
@@ -25,7 +37,7 @@ function loadScreens(){
         $('#search-text').placholder = 'Search Screens';
 
         $('#search-text').on('focus', function(e) {
-            if ($('#search-text').css('font-style') == 'italic' ) {
+            if ($('#search-text').css('font-style') == 'italic') {
                 $('#search-text').val('');
                 $('#search-text').css('font-style', 'normal');
             }
@@ -35,11 +47,11 @@ function loadScreens(){
             if (e.keyCode == 13) {
                 searchScreensByText();
             }
-        });        
+        });
 
         $('#search-text').focus();
 
-        $('#show_objs').on('change',showHTMLLayout);
+        $('#show_objs').on('change', showHTMLLayout);
 
         $('#date-cond').on('click', function(e) {
             openDateDialog();
@@ -59,12 +71,23 @@ function loadScreens(){
         });
         // update button but skip event
         $('#screens_toggle_groups').bootstrapSwitch('state', screensShowGrouped, true);
+
+        // fill color palette
+        $.ajax("/screen-colors")
+            .done(function(data) {
+                color_palette = data;
+                console.log('Color palette returned: '+JSON.stringify(color_palette));
+            })
+            .fail(function(err) {
+                console.log("Failed to retrieve color palette: " + err);
+            });
+
     });
 }
 
-function searchScreensByText(){
+function searchScreensByText() {
     var query = $('#search-text').val();
-    searchScreens(query);    
+    searchScreens(query);
 }
 
 
@@ -92,7 +115,7 @@ function searchScreens(query) {
         });
 }
 
-function fillScreensCarousel(){
+function fillScreensCarousel() {
     var screens_results_row = $('#screens_results_row');
     var screens_carousel = $('#screens_carousel_items');
     screens_results_row.empty();
@@ -100,45 +123,44 @@ function fillScreensCarousel(){
     //console.log("Search returned: " + data);
     var groups = Object.keys(screenGroups);
     var itemCounter = 0;
-    for (var j=0;j<groups.length;j++)
-    {
+    for (var j = 0; j < groups.length; j++) {
         var screens = screenGroups[groups[j]];
         var screensArray = [];
-        if (groups[j] == 'none')
-        {
+        if (groups[j] == 'none') {
             screensArray = screens;
-        }
-        else // if grouped, just one result per group
+        } else // if grouped, just one result per group
         {
             if (screensShowGrouped)
                 screensArray.push(screens[0]);
             else
-                screensArray = screens;       
+                screensArray = screens;
         }
-        for(var i=0;i<screensArray.length;i++){
+        for (var i = 0; i < screensArray.length; i++) {
             var timestamp = screensArray[i].timestamp;
             var graph_id = screensArray[i].graph_id;
             screens_results_row.append(
                 '<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">' +
-                '  <img onclick="showModal('+itemCounter+');"' +
-                '       src="'+screensServer+'/screens/' + timestamp + '"/>' +
+                '  <img onclick="showModal(' + itemCounter + ');"' +
+                '       src="' + screensServer + '/screens/' + timestamp + '"/>' +
                 '</li>'
             );
             var div_class = 'item aligned-container';
             if (itemCounter == 0) {
-                div_class = 'item active aligned-container'; 
+                div_class = 'item active aligned-container';
             }
-            screens_carousel.append('<div class="'+div_class+'" graph_id="'+graph_id+'">'+
-                '<img src="'+screensServer+'/screens/' + timestamp + 
+            screens_carousel.append('<div class="' + div_class + '" graph_id="' + graph_id + '">' +
+                '<img src="' + screensServer + '/screens/' + timestamp +
                 '" class="screen-image-full" /></div>');
             itemCounter++;
         }
     }
     if (groups.length > 0) {
-        $('#screensCarousel').carousel({interval: false, wrap: false});
+        $('#screensCarousel').carousel({
+            interval: false,
+            wrap: false
+        });
         $('#screensCarousel').on('slid.bs.carousel', showHTMLLayout);
-    }
-    else {
+    } else {
         screens_results_row.append(
             '<li class="">' +
             ' No screens found.' +
@@ -160,22 +182,22 @@ function getScreens(node_id, callback) {
         });
 }
 
-function showHTMLLayout(){
+function showHTMLLayout() {
     clearDetails();
     //console.log('showHTMLLayout');
     if ($('#show_objs')[0].checked) {
         $('#accordion').removeClass('hidden');
-        var active_div =$('#screens_carousel_items div.active');
+        var active_div = $('#screens_carousel_items div.active');
         // calculate and store ratio of image to original image        
         var img = $('#screens_carousel_items div.active img');
         widthFactor = img[0].width / img[0].naturalWidth;
         heightFactor = img[0].height / img[0].naturalHeight;
-        console.log('widthFactor: '+widthFactor);
-        console.log('heightFactor: '+heightFactor);
+        console.log('widthFactor: ' + widthFactor);
+        console.log('heightFactor: ' + heightFactor);
         // get the objects for the current screen
-        var graph_id =active_div.attr('graph_id');
-        console.log('get objects for graph_id: '+graph_id);
-        var jqxhr = $.ajax("/screens/" + graph_id+'/objects')
+        var graph_id = active_div.attr('graph_id');
+        console.log('get objects for graph_id: ' + graph_id);
+        var jqxhr = $.ajax("/screens/" + graph_id + '/objects')
             .done(function(uiObjectsData) {
                 //console.log("Search returned: " + uiObjectsData);
                 var li, label, input, checkbox, a, span;
@@ -183,7 +205,7 @@ function showHTMLLayout(){
                 var anchor = img.position();
                 //console.log('screenUIObjects[0]: '+screenUIObjects[0]);
                 //console.log('screenUIObjects[0] json: '+JSON.stringify(screenUIObjects[0]));
-                for(var i=0;i<screenUIObjects.length;i++) {
+                for (var i = 0; i < screenUIObjects.length; i++) {
                     // get dimension and font of UI obj
                     var rect = screenUIObjects[i].rect;
                     // draw rect on image
@@ -193,53 +215,49 @@ function showHTMLLayout(){
                     font = font.replace(/^null/, 'no font');
                     var object_type = 'n/a';
                     if (screenUIObjects[i].micclass && screenUIObjects[i].micclass[0])
-                        object_type  = '' + screenUIObjects[i].micclass[0];
+                        object_type = '' + screenUIObjects[i].micclass[0];
                     var color = screenUIObjects[i].color;
-                    var all_props_string = '{ left: '+rect.left+', top: '+
-                        rect.top+', width: '+(rect.right - rect.left)+
-                        ', height: '+(rect.bottom - rect.top)+'} '+ 
+                    var all_props_string = '{ left: ' + rect.left + ', top: ' +
+                        rect.top + ', width: ' + (rect.right - rect.left) +
+                        ', height: ' + (rect.bottom - rect.top) + '} ' +
                         font;
-                    if (color)
+                    if (color) {
+                        color = rgbToHex(color);
+                        if (color_palette[color])
+                            color = color_palette[color];
                         all_props_string += ' ' + color;
-                    if (screenUIObjects[i].visible && 
-                        addUIRect(active_div, anchor, i, rect, all_props_string))
-                    {
-                        if (!fonts_hashtable[font])
-                        {
+                    }
+                    if (screenUIObjects[i].visible &&
+                        addUIRect(active_div, anchor, i, rect, all_props_string)) {
+                        if (!fonts_hashtable[font]) {
                             fonts_hashtable[font] = {
                                 highlighted: false,
                                 rect_array: [i]
                             };
-                        }
-                        else
+                        } else
                             fonts_hashtable[font].rect_array.push(i);
-                        if (!types_hashtable[object_type])
-                        {
+                        if (!types_hashtable[object_type]) {
                             types_hashtable[object_type] = {
                                 highlighted: false,
                                 rect_array: [i]
                             };
-                        }
-                        else
-                            types_hashtable[object_type].rect_array.push(i);  
-                        if (color)                      
-                        {
-                            if (!colors_hashtable[color])
-                            {
+                        } else
+                            types_hashtable[object_type].rect_array.push(i);
+                        if (color) {
+                            if (!colors_hashtable[color]) {
                                 colors_hashtable[color] = {
                                     highlighted: false,
                                     rect_array: [i]
                                 };
-                            }
-                            else
-                                colors_hashtable[color].rect_array.push(i);  
+                            } else
+                                colors_hashtable[color].rect_array.push(i);
                         }
                     }
                 }
                 i = 0;
                 var fonts = Object.keys(fonts_hashtable);
                 $('#fonts').html('');
-                fonts.forEach(function(font_string){
+                fonts.forEach(function(font_string) {
                     li = $('<li>');
                     li.addClass('list-group-item');
                     label = $('<label>');
@@ -252,7 +270,7 @@ function showHTMLLayout(){
                     a.text(font_string);
                     span = $('<span>');
                     span.text('(' + fonts_hashtable[font_string].rect_array.length + ')');
-                    label.click(function(fs, cb){
+                    label.click(function(fs, cb) {
                         return function() {
                             toggleHighlightCategory(HIGHLIGHT.FONT, fs, cb);
                         }
@@ -262,11 +280,11 @@ function showHTMLLayout(){
                     label.append(span);
                     li.append(label);
                     $('#fonts').append(li);
-                });    
+                });
                 i = 0;
-                var types=Object.keys(types_hashtable);
+                var types = Object.keys(types_hashtable);
                 $('#types').html('');
-                types.forEach(function(type_string){
+                types.forEach(function(type_string) {
                     li = $('<li>');
                     li.addClass('list-group-item');
                     label = $('<label>');
@@ -279,7 +297,7 @@ function showHTMLLayout(){
                     a.text(type_string);
                     span = $('<span>');
                     span.text('(' + types_hashtable[type_string].rect_array.length + ')');
-                    label.click(function(fs, cb){
+                    label.click(function(fs, cb) {
                         return function() {
                             toggleHighlightCategory(HIGHLIGHT.TYPE, fs, cb);
                         }
@@ -289,11 +307,11 @@ function showHTMLLayout(){
                     label.append(span);
                     li.append(label);
                     $('#types').append(li);
-                });                
+                });
                 i = 0;
-                var colors=Object.keys(colors_hashtable);
+                var colors = Object.keys(colors_hashtable);
                 $('#colors').html('');
-                colors.forEach(function(color_string){
+                colors.forEach(function(color_string) {
                     li = $('<li>');
                     li.addClass('list-group-item');
                     label = $('<label>');
@@ -306,9 +324,9 @@ function showHTMLLayout(){
                     a.text(color_string);
                     span = $('<span>');
                     span.text('(' + colors_hashtable[color_string].rect_array.length + ')');
-                    label.click(function(fs, cb){
+                    label.click(function(fs, cb) {
                         return function() {
-                            toggleHighlightCategory(HIGHLIGHT.COLOR,fs, cb);
+                            toggleHighlightCategory(HIGHLIGHT.COLOR, fs, cb);
                         }
                     }(color_string, input));
                     label.append(input);
@@ -316,10 +334,10 @@ function showHTMLLayout(){
                     label.append(span);
                     li.append(label);
                     $('#colors').append(li);
-                });                
+                });
             })
             .fail(function(err) {
-                console.log("Failed to get objects for screen "+graph_id+": " + err);
+                console.log("Failed to get objects for screen " + graph_id + ": " + err);
             });
     } else {
         $('#accordion').addClass('hidden');
@@ -332,17 +350,17 @@ function addUIRect(container, anchor, id, rect, all_props_string) {
     var right = rect.right * widthFactor + anchor.left;
     var top = rect.top * heightFactor + anchor.top;
     var bottom = rect.bottom * heightFactor + anchor.top;
-    var width = (right-left);
-    var height = (bottom-top);
+    var width = (right - left);
+    var height = (bottom - top);
     if (width > 0 && height > 0) {
         div = $('<div>');
         div.attr('id', 'ui_rect_' + id);
         div.css('position', 'absolute');
         div.css('left', left + "px");
         div.css('top', top + "px");
-        div.css('width', width+"px");
-        div.css('height', height+"px");
-        div.click(function(ID){ 
+        div.css('width', width + "px");
+        div.css('height', height + "px");
+        div.click(function(ID) {
             return function() {
                 toggleHighlightObject('ui_rect_' + ID);
             }
@@ -353,9 +371,9 @@ function addUIRect(container, anchor, id, rect, all_props_string) {
         div.attr('title', 'UI Element');
         container.append(div);
         div.hover(function() {
-                 $( this ).popover('show');
-            }, function() {
-                 $( this ).popover('hide');
+            $(this).popover('show');
+        }, function() {
+            $(this).popover('hide');
         });
 
         return true;
@@ -363,7 +381,7 @@ function addUIRect(container, anchor, id, rect, all_props_string) {
     return false;
 };
 
-function toggleHighlightCategory(target, hash, checkbox) {   
+function toggleHighlightCategory(target, hash, checkbox) {
     // find items and highlight
     var hashtable = {};
     if (target == HIGHLIGHT.FONT)
@@ -375,52 +393,45 @@ function toggleHighlightCategory(target, hash, checkbox) {
     // toggle highlighted state
     hashtable[hash].highlighted = !(hashtable[hash].highlighted);
     var object_ids = hashtable[hash].rect_array;
-    object_ids.forEach(function(object_id){
+    object_ids.forEach(function(object_id) {
         if (hashtable[hash].highlighted) {
             checkbox.prop('checked', true);
-            $('#ui_rect_'+object_id).addClass('ui_show');
+            $('#ui_rect_' + object_id).addClass('ui_show');
         } else {
             checkbox.prop('checked', false);
-            $('#ui_rect_'+object_id).removeClass('ui_show');
+            $('#ui_rect_' + object_id).removeClass('ui_show');
         }
     });
 }
 
-function toggleHighlightObject(id)
-{
-    var obj = $('#'+id)
+function toggleHighlightObject(id) {
+    var obj = $('#' + id)
     var highlighted = obj.hasClass('ui_show');
-    if (!highlighted)
-    {
+    if (!highlighted) {
         obj.addClass('ui_show');
-    }
-    else
-    {
+    } else {
         obj.removeClass('ui_show');
     }
 }
 
-function showModal(itemIndex)
-{
-    $('#screenModal').modal();    
+function showModal(itemIndex) {
+    $('#screenModal').modal();
     $('#screensCarousel').carousel(itemIndex);
 }
 
-function clearScreensSearch()
-{
+function clearScreensSearch() {
     screenGroups = null;
     $('#screens_results_row').empty();
     $('#screens_carousel_items').empty();
     $('#group_images').addClass('hidden');
 }
 
-function clearDetails()
-{
+function clearDetails() {
     fonts_hashtable = {};
     types_hashtable = {};
     colors_hashtable = {};
     $('#fonts').empty();
-    $('#types').empty();    
-    $('#colors').empty();  
+    $('#types').empty();
+    $('#colors').empty();
     $('#screens_carousel_items div.active div').remove();
 }
