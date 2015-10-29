@@ -368,6 +368,7 @@ span.input-group-addon {
 .modal .aligned-container {
   text-align:center; /* Align center inline elements */
   font: 0/0 a;       /* Hide the characters like spaces */
+  height: 100%;
 }
 
 .modal .aligned-container:before {
@@ -388,10 +389,26 @@ span.input-group-addon {
   font: 16px/1 Arial sans-serif;
 }
 
-.modal .modal-content div {
-  height: 100%;
+#screensCarousel {
+    height: 100%;
+}
+#screens_carousel_items {
+    height: 100%;
 }
 
 #screens_carousel_items .ui_show {
   border: solid 1px black; 
+}
+
+#screenDetails{
+    margin-top: 90px;
+}
+
+.screen-image-full {
+    width: 95%;    
+}
+.carousel-control.screen-carousel-control {
+    width: 20px !important;
+    margin-right: 10px;
+    margin-left: 10px;
 }

@@ -49,13 +49,42 @@
   			</div>
         <div class="col-md-2" id="screenDetails">
           <div id="details_text">
-            <input type="checkbox" id="show_objs"/>Show UI layout<p/>
-            Fonts:<br/>
-            <ul id="fonts"/>
-            <p/>Type of UI objects:<br/>
-            <ul id="types"/>
-            <p/>Colors:<br/>
-            <ul id="colors"/>
+            <label class="checkbox-inline">
+              <input type="checkbox" id="show_objs"/>Show UI layout
+            </label>
+            
+            <div class="panel-group hidden" id="accordion" role="tablist" aria-multiselectable="true">
+              <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingFonts">
+                  <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFonts" aria-expanded="true" aria-controls="collapseFonts">Fonts</a>
+                  </h4>
+                </div>
+                <div id="collapseFonts" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingFonts">
+                  <ul id="fonts" class="list-group"></ul>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingTypes">
+                  <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTypes" aria-expanded="true" aria-controls="collapseTypes">Type of UI objects</a>
+                  </h4>
+                </div>
+                <div id="collapseTypes" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTypes">
+                  <ul id="types" class="list-group"></ul>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingColors">
+                  <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseColors" aria-expanded="true" aria-controls="collapseColors">Colors</a>
+                  </h4>
+                </div>
+                <div id="collapseColors" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingColors">
+                  <ul id="colors" class="list-group"></ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div><!-- /.modal-content -->

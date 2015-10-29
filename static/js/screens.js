@@ -130,7 +130,7 @@ function fillScreensCarousel(){
             }
             screens_carousel.append('<div class="'+div_class+'" graph_id="'+graph_id+'">'+
                 '<img src="'+screensServer+'/screens/' + timestamp + 
-                '"/></div>');
+                '" class="screen-image-full" /></div>');
             itemCounter++;
         }
     }
@@ -145,6 +145,7 @@ function fillScreensCarousel(){
             '</li>'
         );
     }
+    $('.carousel-control').addClass('screen-carousel-control');
 }
 
 function getScreens(node_id, callback) {
@@ -162,8 +163,8 @@ function getScreens(node_id, callback) {
 function showHTMLLayout(){
     clearDetails();
     //console.log('showHTMLLayout');
-    if ($('#show_objs')[0].checked)
-    {
+    if ($('#show_objs')[0].checked) {
+        $('#accordion').removeClass('hidden');
         var active_div =$('#screens_carousel_items div.active');
         // calculate and store ratio of image to original image        
         var img = $('#screens_carousel_items div.active img');
@@ -177,6 +178,7 @@ function showHTMLLayout(){
         var jqxhr = $.ajax("/screens/" + graph_id+'/objects')
             .done(function(uiObjectsData) {
                 //console.log("Search returned: " + uiObjectsData);
+                var li, label, input, checkbox, a, span;
                 var screenUIObjects = uiObjectsData;
                 var anchor = img.position();
                 //console.log('screenUIObjects[0]: '+screenUIObjects[0]);
@@ -235,35 +237,90 @@ function showHTMLLayout(){
                         }
                     }
                 }
+                i = 0;
                 var fonts = Object.keys(fonts_hashtable);
                 fonts.forEach(function(font_string){
-                    var item = $('<li><a href="#">'+font_string+'</a> ('+
-                        fonts_hashtable[font_string].rect_array.length+')</li>');
-                    item.appendTo($('#fonts'))
-                        .find('a')
-                        .on('click', function() { toggleHighlightCategory(HIGHLIGHT.FONT,font_string);});
+                    li = $('<li>');
+                    li.addClass('list-group-item');
+                    label = $('<label>');
+                    label.addClass('checkbox-inline');
+                    input = $('<input>');
+                    input.attr('type', 'checkbox');
+                    input.attr('id', 'cb_font_' + i++);
+                    a = $('<a>');
+                    a.attr('href', '#');
+                    a.text(font_string);
+                    span = $('<span>');
+                    span.text('(' + fonts_hashtable[font_string].rect_array.length + ')');
+                    label.click(function(fs, cb){
+                        return function() {
+                            toggleHighlightCategory(HIGHLIGHT.FONT, fs, cb);
+                        }
+                    }(font_string, input));
+                    label.append(input);
+                    label.append(a);
+                    label.append(span);
+                    li.append(label);
+                    $('#fonts').append(li);
                 });    
+                i = 0;
                 var types=Object.keys(types_hashtable);
                 types.forEach(function(type_string){
-                    var item = $('<li><a href="#">'+type_string+'</a> ('+
-                        types_hashtable[type_string].rect_array.length+')</li>');
-                    item.appendTo($('#types'))
-                        .find('a')
-                       .on('click',  function() { toggleHighlightCategory(HIGHLIGHT.TYPE, type_string);});
+                    li = $('<li>');
+                    li.addClass('list-group-item');
+                    label = $('<label>');
+                    label.addClass('checkbox-inline');
+                    input = $('<input>');
+                    input.attr('type', 'checkbox');
+                    input.attr('id', 'cb_type_' + i++);
+                    a = $('<a>');
+                    a.attr('href', '#');
+                    a.text(type_string);
+                    span = $('<span>');
+                    span.text('(' + types_hashtable[type_string].rect_array.length + ')');
+                    label.click(function(fs, cb){
+                        return function() {
+                            toggleHighlightCategory(HIGHLIGHT.TYPE, fs, cb);
+                        }
+                    }(type_string, input));
+                    label.append(input);
+                    label.append(a);
+                    label.append(span);
+                    li.append(label);
+                    $('#types').append(li);
                 });                
+                i = 0;
                 var colors=Object.keys(colors_hashtable);
                 colors.forEach(function(color_string){
-                    var item = $('<li><a href="#">'+color_string+'</a> ('+
-                        colors_hashtable[color_string].rect_array.length+')</li>');
-                    item.appendTo($('#colors'))
-                        .find('a')
-                       .on('click',  function() { toggleHighlightCategory(HIGHLIGHT.COLOR, color_string);});
+                    li = $('<li>');
+                    li.addClass('list-group-item');
+                    label = $('<label>');
+                    label.addClass('checkbox-inline');
+                    input = $('<input>');
+                    input.attr('type', 'checkbox');
+                    input.attr('id', 'cb_color_' + i++);
+                    a = $('<a>');
+                    a.attr('href', '#');
+                    a.text(color_string);
+                    span = $('<span>');
+                    span.text('(' + colors_hashtable[color_string].rect_array.length + ')');
+                    label.click(function(fs, cb){
+                        return function() {
+                            toggleHighlightCategory(HIGHLIGHT.COLOR,fs, cb);
+                        }
+                    }(color_string, input));
+                    label.append(input);
+                    label.append(a);
+                    label.append(span);
+                    li.append(label);
+                    $('#colors').append(li);
                 });                
             })
             .fail(function(err) {
                 console.log("Failed to get objects for screen "+graph_id+": " + err);
             });
-
+    } else {
+        $('#accordion').addClass('hidden');
     }
 }
 
@@ -289,8 +346,7 @@ function addUIRect(container, anchor, id, rect, all_props_string) {
     return false;
 };
 
-function toggleHighlightCategory(target, hash)
-{
+function toggleHighlightCategory(target, hash, checkbox) {   
     // find items and highlight
     var hashtable = {};
     if (target == HIGHLIGHT.FONT)
@@ -303,10 +359,13 @@ function toggleHighlightCategory(target, hash)
     hashtable[hash].highlighted = !(hashtable[hash].highlighted);
     var object_ids = hashtable[hash].rect_array;
     object_ids.forEach(function(object_id){
-        if (hashtable[hash].highlighted)
+        if (hashtable[hash].highlighted) {
+            checkbox.prop('checked', true);
             $('#ui_rect_'+object_id).addClass('ui_show');
-        else
+        } else {
+            checkbox.prop('checked', false);
             $('#ui_rect_'+object_id).removeClass('ui_show');
+        }
     });
 }
 
