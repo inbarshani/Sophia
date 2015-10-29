@@ -183,8 +183,7 @@ function showHTMLLayout(){
                 var anchor = img.position();
                 //console.log('screenUIObjects[0]: '+screenUIObjects[0]);
                 //console.log('screenUIObjects[0] json: '+JSON.stringify(screenUIObjects[0]));
-                for(var i=0;i<screenUIObjects.length;i++)
-                {
+                for(var i=0;i<screenUIObjects.length;i++) {
                     // get dimension and font of UI obj
                     var rect = screenUIObjects[i].rect;
                     // draw rect on image
@@ -328,22 +327,37 @@ function showHTMLLayout(){
 }
 
 function addUIRect(container, anchor, id, rect, all_props_string) {
+    var div;
     var left = rect.left * widthFactor + anchor.left;
     var right = rect.right * widthFactor + anchor.left;
     var top = rect.top * heightFactor + anchor.top;
     var bottom = rect.bottom * heightFactor + anchor.top;
     var width = (right-left);
     var height = (bottom-top);
-    if (width > 0 && height > 0)
-    {
-        $('<div id="ui_rect_'+id+'" '+
-            'style="position: absolute" title="'+all_props_string+'"/>')
-        .appendTo(container)
-        .css("left", left + "px")
-        .css("top", top + "px")
-        .css("width", width+"px")
-        .css("height", height+"px")
-        .on('click', function(){ toggleHighlightObject('ui_rect_'+id);});
+    if (width > 0 && height > 0) {
+        div = $('<div>');
+        div.attr('id', 'ui_rect_' + id);
+        div.css('position', 'absolute');
+        div.css('left', left + "px");
+        div.css('top', top + "px");
+        div.css('width', width+"px");
+        div.css('height', height+"px");
+        div.click(function(ID){ 
+            return function() {
+                toggleHighlightObject('ui_rect_' + ID);
+            }
+        }(id));
+        div.attr('data-toggle', 'popover');
+        div.attr('data-content', all_props_string);
+        div.attr('data-placement', 'left');
+        div.attr('title', 'UI Element');
+        container.append(div);
+        div.hover(function() {
+                 $( this ).popover('show');
+            }, function() {
+                 $( this ).popover('hide');
+        });
+
         return true;
     }
     return false;
