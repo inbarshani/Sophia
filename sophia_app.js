@@ -103,8 +103,7 @@ app.use('/searchScreens', function(request, response) {
                             "none": []
                         };
                         referenceIds.forEach(function(refID) {
-                            if (idolDocs[refID])
-                            {
+                            if (idolDocs[refID]) {
                                 var result = {
                                     timestamp: idolDocs[refID].timestamp,
                                     graph_id: refID
@@ -142,7 +141,7 @@ app.use('/getNearScreens', function(request, response) {
     if (request.query.selectedNode) {
         var selectedNodeArray = [];
         selectedNodeArray.push(request.query.selectedNode);
-        neo4j_queries.getNearestData(selectedNodeArray,'SCREEN',
+        neo4j_queries.getNearestData(selectedNodeArray, 'SCREEN',
             function(prevScreenTimestamps, nextScreenTimestamps, prevScreenIDs, nextScreenIDs) {
                 var result = {
                     prevScreenTimestamp: null,
@@ -150,13 +149,11 @@ app.use('/getNearScreens', function(request, response) {
                     nextScreenTimestamp: null,
                     nextScreenID: null
                 };
-                if (prevScreenTimestamps.length > 0)
-                {
+                if (prevScreenTimestamps.length > 0) {
                     result.prevScreenTimestamp = prevScreenTimestamps[0];
                     result.prevScreenID = prevScreenIDs[0];
                 }
-                if (nextScreenTimestamps.length > 0)
-                {
+                if (nextScreenTimestamps.length > 0) {
                     result.nextScreenTimestamp = nextScreenTimestamps[0];
                     result.nextScreenID = nextScreenIDs[0];
                 }
@@ -165,6 +162,16 @@ app.use('/getNearScreens', function(request, response) {
             });
     }
 });
+
+app.get('/screen-colors', function(request, response) {
+    console.log('Get screen colors');
+    if (sophia_config.color_palette) {
+        response.status(200).send(sophia_config.color_palette);
+    } else {
+        response.status(404).send('Color palette is not defined');
+    }
+});
+
 
 app.get('/screens/:timestamp', function(request, response) {
     var timestamp = request.params.timestamp;
@@ -188,26 +195,23 @@ app.get('/screens/:graph_id/objects', function(request, response) {
     console.log('Get screen with graph_id: ' + graph_id);
     if (graph_id) {
         try {
-            neo4j_queries.getNearestData([graph_id],'UI_Objects',
+            neo4j_queries.getNearestData([graph_id], 'UI_Objects',
                 function(prevObjsTimestamps, nextObjsTimestamps, prevObjsIDs, nextObjsIDs) {
                     // TODO: return just one objects to describe the screen
                     //  for now, just return the id of the first one there is
                     var ids = prevObjsIDs.concat(nextObjsIDs);
-                    if (ids.length == 0)
-                    {
+                    if (ids.length == 0) {
                         //console.log('No objects associated with screen graph_id: ' + graph_id);
                         response.status(404).send('No objects associated with screen');
-                    }
-                    else
-                    {
+                    } else {
                         ids.length = 1; // trim down objects
                         // get details of objects from IDOL
-                        idol_queries.searchByReference(ids, false, true, 
-                            function(idolDocs){
-                                if (idolDocs[''+ids[0]] && idolDocs[''+ids[0]].objects)
-                                    response.status(200).send(idolDocs[''+ids[0]].objects);
+                        idol_queries.searchByReference(ids, false, true,
+                            function(idolDocs) {
+                                if (idolDocs['' + ids[0]] && idolDocs['' + ids[0]].objects)
+                                    response.status(200).send(idolDocs['' + ids[0]].objects);
                                 else
-                                    response.status(500).send('Failed to get screen objects per graph_id: ' + graph_id);    
+                                    response.status(500).send('Failed to get screen objects per graph_id: ' + graph_id);
                             });
                     }
                 });
@@ -413,7 +417,7 @@ function searchTestsByName(queryText, dateCondition, response) {
                         test.bbNodes.map(function(node) {
                             var doc = idolDocs[node.id];
                             if (doc) {
-                                Object.keys(doc).forEach(function(key){
+                                Object.keys(doc).forEach(function(key) {
                                     node[key] = doc[key];
                                 });
                             }
@@ -456,8 +460,10 @@ function searchSimilarTestSteps(nodeID, dateCondition, response) {
                         //  so UI can highlight them
                         bbNodes.map(function(test) {
                             test.name = test_documents_hash['' + test.test.id].name;
-                            console.log('searchSimilarTestSteps bbNodes test: '+
-                                require('util').inspect(test, {depth:4}));
+                            console.log('searchSimilarTestSteps bbNodes test: ' +
+                                require('util').inspect(test, {
+                                    depth: 4
+                                }));
                             var similarNodes = similar_docs_hash['' + test.test.id];
                             var similarNodesIDs = [];
                             similarNodes.forEach(function(node) {
@@ -472,7 +478,7 @@ function searchSimilarTestSteps(nodeID, dateCondition, response) {
                                 //console.log('searchSimilarTestSteps backbone node doc for '+node.id+': '+
                                 //    require('util').inspect(node_doc, {depth:4}));
                                 if (node_doc) {
-                                    Object.keys(node_doc).forEach(function(key){
+                                    Object.keys(node_doc).forEach(function(key) {
                                         node[key] = node_doc[key];
                                     });
                                 }
@@ -502,7 +508,7 @@ app.get('/searchXP', function(request, response) {
     // get steps of XP flow, returns sequence of images (details, timestamp)
     var xp_flow_name = request.query.name;
     var xp_flow_steps = request.query.steps;
-    console.log('searchXP, name: '+xp_flow_name+' steps: '+xp_flow_steps);
+    console.log('searchXP, name: ' + xp_flow_name + ' steps: ' + xp_flow_steps);
     response.sendStatus(200);
 });
 
