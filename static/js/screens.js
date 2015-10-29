@@ -348,20 +348,41 @@ function addUIRect(container, anchor, id, rect, all_props_string) {
             }
         }(id));
         div.attr('data-toggle', 'popover');
-        div.attr('data-content', all_props_string);
-        div.attr('data-placement', 'left');
+        div.attr('data-content', createPopoverHtml(all_props_string));
+        div.attr('data-placement', 'top');
         div.attr('title', 'UI Element');
         container.append(div);
-        div.hover(function() {
-                 $( this ).popover('show');
-            }, function() {
-                 $( this ).popover('hide');
-        });
+        div.hover(function(e) {
+            var options = {html: true};
+            var poWidth = 360;
+            var poHeight = 300;
 
+            var offset = $(this).offset();
+            var left = e.pageX;
+            var top = e.pageY;
+            if (top - poHeight < 0) {
+                $( this ).attr('data-placement', 'bottom');
+                top = top - height;
+            } else {
+                top = top - poHeight / 2;
+            }
+            $( this ).popover(options).popover('show');
+            $('.popover').css('left', (left - poWidth) + 'px');
+            $('.popover').css('top', top + 'px');                 
+        }, function() {
+            $( this ).popover('hide');
+        });
         return true;
     }
     return false;
 };
+
+function createPopoverHtml(props) {
+    var html = '<p>';
+    html += props;
+    html += '</p>';
+    return html;
+}
 
 function toggleHighlightCategory(target, hash, checkbox) {   
     // find items and highlight
