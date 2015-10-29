@@ -126,6 +126,12 @@ function TrackRequest(info) {
                     request.send(formData);
                     console.log('Screenshot sent with timestamp: '+ts);
                 });
+                // also, let the content script know we need to track the UI objects
+                console.log('Send message to content to capture UI');
+                chrome.tabs.sendMessage(tabs[0].id, {sophia_captureUI: true}, 
+                    function(response) {
+                        console.log('Got response for capturing UI objects: '+response);
+                    });
             }
         });
     }

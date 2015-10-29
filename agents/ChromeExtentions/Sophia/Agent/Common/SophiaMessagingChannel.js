@@ -228,6 +228,13 @@ Util.inherit(SophiaMessagingChannel, EventDispatcher, {
                     });
                 });
             }
+            // also, let the content script know we need to track the UI objects
+            console.log('SophiaMessagingChannel Send message to content to capture UI, tab[0].id: '+tabs[0].id);
+            chrome.tabs.sendMessage(tabs[0].id, {sophia_captureUI: true}, 
+                function(response) {
+                    console.log('SophiaMessagingChannel Got response for capturing UI objects: '+response);
+                });
+
         });
     },
 

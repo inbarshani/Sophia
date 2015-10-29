@@ -1,3 +1,13 @@
+function isElementInViewport (rect) {
+
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /*or $(window).height() */
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth) /*or $(window).width() */
+    );
+}
+
 (function () {
     if (window.__eumRumService) return;
 
@@ -34,6 +44,16 @@
             }
         }
     });
+
+    chrome.runtime.onMessage.addListener(
+        function(message, sender, sendResponse) {
+            console.log('sophia content got message: ' + JSON.stringify(message));
+            if (message && message.sophia_captureUI)
+            {
+               reportUIObjects(); 
+            }
+        });
+
         
     var lastSrcLength;
     var reportEventToSophia = function (action, document_root, event) {
@@ -124,27 +144,62 @@
 
         }, 50);
 
+        reportUIObjects();
+    };    
+
+    var reportErrorToSophia = function (errObj) {
+        var data =  JSON.stringify(errObj);
+        $.ajax({
+            url: dataUrl,
+            type: 'POST',
+            data: data,
+            dataType: 'json',
+            success: function (doc) {
+    ////                    console.log("data posted: " + doc);
+            }
+        });
+    };
+
+    var reportUIObjects = function() {
         // capture all elements and report on them as well
+        var dataUrl = window.__eumRumService.dataUrl;
+        var testId = window.__eumRumService.testId;
+        var kitsManager = null;
+        if (content)
+        {
+            kitsManager = content.kitsManager;            
+            window.__eumRumService.content = content;
+        }
+        else if (window.__eumRumService.content)
+            kitsManager = window.__eumRumService.content.kitsManager;
+        else
+        {
+            console.log('Sophia reportUIObjects failed: no content');
+            return;
+        }
+
         var docObjects = document.getElementsByTagName('*');
-        ts = new Date().getTime();
+        var ts = new Date().getTime();
         var agentUIObjecs = [];
         for(var i=0;i<docObjects.length;i++){
-            var ao = content.kitsManager.createAO(docObjects[i], content.frame.id);            
+            var ao = kitsManager.createAO(docObjects[i], content.frame.id);            
             var sophia_ao = {};
             sophia_ao.logical_name = ao.GetAttrSync('logical name');
             sophia_ao.rect = ao.GetAttrSync('rect');
             sophia_ao.micclass = ao.GetAttrSync('micclass');
             sophia_ao.visible = ao.GetAttrSync('visible');
-            sophia_ao.font_family = ao.GetAttrSync('font');
-            sophia_ao.color = ao.GetAttrSync('color');
-            sophia_ao.background = ao.GetAttrSync('background color');
+            sophia_ao.font_family = ao.GetAttrSync('style', {_data: {style: 'font-family'}});;
+            sophia_ao.text = ao.GetAttrSync('text');
+            sophia_ao.title = ao.GetAttrSync('title');
+            sophia_ao.color = ao.GetAttrSync('style', {_data: {style: 'color'}});
+            sophia_ao.background = ao.GetAttrSync('style', {_data: {style: 'background-color'}});
             sophia_ao.font_size = ao.GetAttrSync('style', {_data: {style: 'font-size'}});
-            if (sophia_ao.visible)
+            if (sophia_ao.visible && isElementInViewport(sophia_ao.rect))
                 agentUIObjecs.push(sophia_ao);
         }
 
-        //console.log('agentUIObjecs: '+JSON.stringify(agentUIObjecs));
-        args = {
+        console.log('agentUIObjecs #: '+agentUIObjecs.length);
+        var args = {
             type: "UI_objects",
             timestamp: ts,
             testID: testId,
@@ -159,20 +214,6 @@
                 //console.log("data posted: " + JSON.stringify(args));
             }
           });
-
-    };    
-
-    var reportErrorToSophia = function (errObj) {
-        var data =  JSON.stringify(errObj);
-        $.ajax({
-            url: dataUrl,
-            type: 'POST',
-            data: data,
-            dataType: 'json',
-            success: function (doc) {
-    ////                    console.log("data posted: " + doc);
-            }
-        });
     };
 
     var reportTestStartToSophia = function (testId) {
