@@ -101,6 +101,7 @@ function searchScreensByText() {
     searchScreens(query);
 }
 
+
 function searchScreens(query) {
     // change UI to show list of images instead of Screens
     //  clear top level vars
@@ -138,7 +139,8 @@ function fillScreensCarousel() {
         var screensArray = [];
         if (groups[j] == 'none') {
             screensArray = screens;
-        } else {// if grouped, just one result per group
+        } else {
+        // if grouped, just one result per group
             if (screensShowGrouped)
                 screensArray.push(screens[0]);
             else
@@ -440,7 +442,6 @@ function toggleHighlightAll() {
         $('#distance_panel').removeClass('hidden');
     } else // not enough highlighted objects
         $('#distance_panel').addClass('hidden');    
-
 }
 
 function toggleHighlightCategory(target, hash, checkbox) {
@@ -455,8 +456,7 @@ function toggleHighlightCategory(target, hash, checkbox) {
     // toggle highlighted state
     hashtable[hash].highlighted = !(hashtable[hash].highlighted);
     // handle 'select all' checkbox
-    if ($('#select_all')[0].checked && !(hashtable[hash].highlighted))
-    {
+    if ($('#select_all')[0].checked && !(hashtable[hash].highlighted)) {
         // no longer selecting all, as this category is now checked off
         $('#select_all').prop('checked', false);
     }
@@ -474,18 +474,18 @@ function toggleHighlightCategory(target, hash, checkbox) {
 
 function toggleHighlightObject(obj) {
     var highlighted = obj.hasClass('ui_show');
+    var highlighted_objects = $('.ui_show');
     if (!highlighted) {
         // check if there is another highlighted object, and if so, compute distance
         //  do that before highlighting this object, so it will not be returned as
         //  part of the selector
-        var highlighted_objects = $('.ui_show');
         if (highlighted_objects.length > 0) {
             // get original location of highlighted object
             // get the id from 'ui_rect_x' where x is the id
-            var obj_id = highlighted_objects[0].id.substring(8);
-            var first_rect = rects[obj_id];
-            var second_rect = rects[obj.attr('id').substring(8)];
-            var distance = calcDistance(first_rect, second_rect);
+            var obj_id=highlighted_objects[0].id.substring(8);
+            var current_rect = rects[obj_id];
+            var new_rect = rects[obj.attr('id').substring(8)];
+            var distance = calcDistance(current_rect, new_rect);
             // now, add the distance information to the overlay
             //  TODO: use on-image popup instead of the side bar
             $('#distance_panel .panel-body').html(distance.toHTML());
@@ -502,6 +502,21 @@ function toggleHighlightObject(obj) {
         showObjTooltip(obj);
     } else {
         obj.removeClass('ui_show');
+        // re-calc distance as needed
+        if (highlighted_objects.length >= 2) {
+            var first_obj_id=highlighted_objects[0].id.substring(8);
+            var second_obj_id=highlighted_objects[1].id.substring(8);
+            var first_rect = rects[first_obj_id];
+            var second_rect = rects[second_obj_id];
+            var distance = calcDistance(first_rect, second_rect);
+            // now, add the distance information to the overlay
+            //  TODO: use on-image popup instead of the side bar
+            $('#distance_panel .panel-body').html(distance.toHTML());
+            $('#distance_panel').removeClass('hidden');
+        }        
+        else // not enough highlighted objects
+            $('#distance_panel').addClass('hidden');    
+
         obj.popover('hide');
         obj.off();
         obj.click(function(o) {
@@ -530,23 +545,7 @@ function showObjTooltip(obj) {
     }
     obj.popover(options).popover('show');
     if (tooHigh) {
-        $('.popover').css('top', (poY + 10) + 'px');                 
-    } else {
-        obj.removeClass('ui_show');
-        // re-calc distance as needed
-        var highlighted_objects = $('.ui_show');
-        if (highlighted_objects.length >= 2) {
-            var first_obj_id=highlighted_objects[0].id.substring(8);
-            var second_obj_id=highlighted_objects[1].id.substring(8);
-            var first_rect = rects[first_obj_id];
-            var second_rect = rects[second_obj_id];
-            var distance = calcDistance(first_rect, second_rect);
-            // now, add the distance information to the overlay
-            //  TODO: use on-image popup instead of the side bar
-            $('#distance_panel .panel-body').html(distance.toHTML());
-            $('#distance_panel').removeClass('hidden');
-        } else // not enough highlighted objects
-            $('#distance_panel').addClass('hidden');    
+        $('.popover').css('top', (poY + 10) + 'px');
     }
 }
 
@@ -575,7 +574,7 @@ function calcDistance(first_rect, second_rect) {
     } else {
         distance.left = second_rect.right;
         distance.right = first_rect.left;
-    }
+    } 
     if (first_rect.top < second_rect.top) {
         distance.top = first_rect.bottom;
         distance.bottom = second_rect.top;
