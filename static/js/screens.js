@@ -15,6 +15,7 @@ var HIGHLIGHT = {
     BACKGROUND: 2
 };
 var color_palette = {};
+var rects = {};
 
 function componentToHex(c) {
     var hex = c.toString(16).toUpperCase();
@@ -77,11 +78,16 @@ function loadScreens() {
         // update button but skip event
         $('#screens_toggle_groups').bootstrapSwitch('state', screensShowGrouped, true);
 
+        // toggle screen elements in modal
+        $('#select_all').on('change', function(){
+            toggleHighlightAll();
+        });
+
         // fill color palette
         $.ajax("/screen-colors")
             .done(function(data) {
                 color_palette = data;
-                console.log('Color palette returned: '+JSON.stringify(color_palette));
+                //console.log('Color palette returned: '+JSON.stringify(color_palette));
             })
             .fail(function(err) {
                 console.log("Failed to retrieve color palette: " + err);
@@ -94,7 +100,6 @@ function searchScreensByText() {
     var query = $('#search-text').val();
     searchScreens(query);
 }
-
 
 function searchScreens(query) {
     // change UI to show list of images instead of Screens
@@ -133,8 +138,7 @@ function fillScreensCarousel() {
         var screensArray = [];
         if (groups[j] == 'none') {
             screensArray = screens;
-        } else // if grouped, just one result per group
-        {
+        } else {// if grouped, just one result per group
             if (screensShowGrouped)
                 screensArray.push(screens[0]);
             else
@@ -211,7 +215,7 @@ function showHTMLLayout() {
             //console.log('screenUIObjects[0] json: '+JSON.stringify(screenUIObjects[0]));
             for (var i = 0; i < screenUIObjects.length; i++) {
                 // get dimension and font of UI obj
-                var rect = screenUIObjects[i].rect;
+                var rect = screenUIObjects[i].rect;                
                 // draw rect on image
                 //console.log('add rect: '+JSON.stringify(rect));
                 var font = screenUIObjects[i].font_family + ' ' + screenUIObjects[i].font_size;
@@ -238,6 +242,11 @@ function showHTMLLayout() {
                 }
                 if (screenUIObjects[i].visible &&
                     addUIRect(active_div, anchor, i, rect, all_props_string)) {
+                    // save the rect original position for computing distance
+                    //  use i as the locator, as it was added to the id of the HTML
+                    //  element
+                    rects[''+i] = rect;
+                    // add rect id to the relevant categories
                     if (!fonts_hashtable[font]) {
                         fonts_hashtable[font] = {
                             highlighted: false,
@@ -390,6 +399,50 @@ function createPopoverHtml(props) {
     return html;
 }
 
+function toggleHighlightAll() {   
+    // find items and highlight
+    var checked = $('#select_all')[0].checked;
+    if (checked) {
+        // select all elements
+        $('#screens_carousel_items div.active div').addClass('ui_show');
+        // align all checkboxes
+        $('#accordion li :checkbox').prop('checked', true);
+    } else {
+        // un-select all elements
+        $('#screens_carousel_items div.active div').removeClass('ui_show');
+        // align all checkboxes
+        $('#accordion li :checkbox').prop('checked', false);
+    }
+    // update all categories hashes
+    var fonts = Object.keys(fonts_hashtable);
+    fonts.forEach(function(font_string) {
+        fonts_hashtable[font_string].highlighted = checked;
+    });
+    var colors = Object.keys(colors_hashtable);
+    colors.forEach(function(color_string) {
+        colors_hashtable[color_string].highlighted = checked;
+    });
+    var backgrounds = Object.keys(backgrounds_hashtable);
+    backgrounds.forEach(function(background_string) {
+        backgrounds_hashtable[background_string].highlighted = checked;
+    });
+    // align distance label
+    var highlighted_objects = $('.ui_show');
+    if (highlighted_objects.length >= 2) {
+        var first_obj_id=highlighted_objects[0].id.substring(8);
+        var second_obj_id=highlighted_objects[1].id.substring(8);
+        var first_rect = rects[first_obj_id];
+        var second_rect = rects[second_obj_id];
+        var distance = calcDistance(first_rect, second_rect);
+        // now, add the distance information to the overlay
+        //  TODO: use on-image popup instead of the side bar
+        $('#distance_panel .panel-body').html(distance.toHTML());
+        $('#distance_panel').removeClass('hidden');
+    } else // not enough highlighted objects
+        $('#distance_panel').addClass('hidden');    
+
+}
+
 function toggleHighlightCategory(target, hash, checkbox) {
     // find items and highlight
     var hashtable = {};
@@ -401,6 +454,12 @@ function toggleHighlightCategory(target, hash, checkbox) {
         hashtable = colors_hashtable;
     // toggle highlighted state
     hashtable[hash].highlighted = !(hashtable[hash].highlighted);
+    // handle 'select all' checkbox
+    if ($('#select_all')[0].checked && !(hashtable[hash].highlighted))
+    {
+        // no longer selecting all, as this category is now checked off
+        $('#select_all').prop('checked', false);
+    }
     var object_ids = hashtable[hash].rect_array;
     object_ids.forEach(function(object_id) {
         if (hashtable[hash].highlighted) {
@@ -416,6 +475,24 @@ function toggleHighlightCategory(target, hash, checkbox) {
 function toggleHighlightObject(obj) {
     var highlighted = obj.hasClass('ui_show');
     if (!highlighted) {
+        // check if there is another highlighted object, and if so, compute distance
+        //  do that before highlighting this object, so it will not be returned as
+        //  part of the selector
+        var highlighted_objects = $('.ui_show');
+        if (highlighted_objects.length > 0) {
+            // get original location of highlighted object
+            // get the id from 'ui_rect_x' where x is the id
+            var obj_id = highlighted_objects[0].id.substring(8);
+            var first_rect = rects[obj_id];
+            var second_rect = rects[obj.attr('id').substring(8)];
+            var distance = calcDistance(first_rect, second_rect);
+            // now, add the distance information to the overlay
+            //  TODO: use on-image popup instead of the side bar
+            $('#distance_panel .panel-body').html(distance.toHTML());
+            $('#distance_panel').removeClass('hidden');
+        } else // no other highlighted objects
+            $('#distance_panel').addClass('hidden');    
+        // finally, add class to highlight object
         obj.addClass('ui_show');
         obj.hover(function(e) {
             showObjTooltip(obj);
@@ -454,7 +531,63 @@ function showObjTooltip(obj) {
     obj.popover(options).popover('show');
     if (tooHigh) {
         $('.popover').css('top', (poY + 10) + 'px');                 
+    } else {
+        obj.removeClass('ui_show');
+        // re-calc distance as needed
+        var highlighted_objects = $('.ui_show');
+        if (highlighted_objects.length >= 2) {
+            var first_obj_id=highlighted_objects[0].id.substring(8);
+            var second_obj_id=highlighted_objects[1].id.substring(8);
+            var first_rect = rects[first_obj_id];
+            var second_rect = rects[second_obj_id];
+            var distance = calcDistance(first_rect, second_rect);
+            // now, add the distance information to the overlay
+            //  TODO: use on-image popup instead of the side bar
+            $('#distance_panel .panel-body').html(distance.toHTML());
+            $('#distance_panel').removeClass('hidden');
+        } else // not enough highlighted objects
+            $('#distance_panel').addClass('hidden');    
     }
+}
+
+function calcDistance(first_rect, second_rect) {
+    var distance = {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        left_align: 0,
+        right_align: 0,
+        top_align: 0,
+        bottom_align: 0,
+        toHTML: function(){
+            return 'Width = ' + (this.right-this.left) + '<br/>' +
+                'Height = ' +(this.bottom-this.top) + '<br/>' +
+                'Left alignment = ' +(this.left_align) + '<br/>' +
+                'Right alignment = ' +(this.right_align) + '<br/>' +
+                'Top alignment = ' +(this.top_align) + '<br/>' +
+                'Bottom alignment = ' +(this.bottom_align) + '<br/>';
+        }
+    };
+    if (first_rect.left < second_rect.left) {
+        distance.left = first_rect.right;
+        distance.right = second_rect.left;
+    } else {
+        distance.left = second_rect.right;
+        distance.right = first_rect.left;
+    }
+    if (first_rect.top < second_rect.top) {
+        distance.top = first_rect.bottom;
+        distance.bottom = second_rect.top;
+    } else {
+        distance.top = second_rect.bottom;
+        distance.bottom = first_rect.top;
+    }    
+    distance.left_align = Math.abs(first_rect.left - second_rect.left);
+    distance.top_align = Math.abs(first_rect.top - second_rect.top);
+    distance.right_align = Math.abs(first_rect.right - second_rect.right);
+    distance.bottom_align = Math.abs(first_rect.bottom - second_rect.bottom);
+    return distance;
 }
 
 function showModal(itemIndex) {
@@ -473,6 +606,8 @@ function clearDetails() {
     fonts_hashtable = {};
     types_hashtable = {};
     colors_hashtable = {};
+    $('#distance_panel').addClass('hidden');    
+    $('#distance_panel .panel-body').empty();
     $('#fonts').empty();
     $('#types').empty();
     $('#colors').empty();
