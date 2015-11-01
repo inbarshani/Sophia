@@ -368,35 +368,16 @@ function addUIRect(container, anchor, id, rect, all_props_string) {
         div.css('top', top + "px");
         div.css('width', width + "px");
         div.css('height', height + "px");
-        div.click(function(ID) {
+        div.click(function(obj) {
             return function() {
-                toggleHighlightObject('ui_rect_' + ID);
+                toggleHighlightObject(obj);
             }
-        }(id));
+        }(div));
         div.attr('data-toggle', 'popover');
         div.attr('data-content', createPopoverHtml(all_props_string));
         div.attr('data-placement', 'top');
         div.attr('title', 'UI Element');
         container.append(div);
-        div.hover(function(e) {
-            var options = {html: true};
-            var poWidth = 360;
-            var poHeight = 300;
-            var offset = $(this).offset();
-            var left = e.pageX;
-            var top = e.pageY;
-            if (top - poHeight < 0) {
-                $( this ).attr('data-placement', 'bottom');
-                top = top - height;
-            } else {
-                top = top - poHeight / 2;
-            }
-            $( this ).popover(options).popover('show');
-            $('.popover').css('left', (left - poWidth) + 'px');
-            $('.popover').css('top', top + 'px');                 
-        }, function() {
-            $( this ).popover('hide');
-        });
         return true;
     }
     return false;
@@ -432,13 +413,47 @@ function toggleHighlightCategory(target, hash, checkbox) {
     });
 }
 
-function toggleHighlightObject(id) {
-    var obj = $('#' + id)
+function toggleHighlightObject(obj) {
     var highlighted = obj.hasClass('ui_show');
     if (!highlighted) {
         obj.addClass('ui_show');
+        obj.hover(function(e) {
+            showObjTooltip(obj);
+        }, function() {
+            obj.popover('hide');
+        });
+        showObjTooltip(obj);
     } else {
         obj.removeClass('ui_show');
+        obj.popover('hide');
+        obj.off();
+        obj.click(function(o) {
+            return function() {
+                toggleHighlightObject(o);
+            }
+        }(obj));
+    }
+}
+
+function showObjTooltip(obj) {
+    var poX = obj.width() / 2;
+    var poY = obj.height() / 2;
+    var pos = obj.position();
+    var options = {html: true};
+    var poWidth = 360;
+    var poHeight = 300;
+    var tooHigh = false;
+    poX += pos.left;
+    poY = pos.top;
+    if (poX < poWidth) {
+        options.placement = 'right';
+    } else if (poY < poHeight) {
+        options.placement = 'bottom';
+        tooHigh = true;
+    }
+    obj.popover(options).popover('show');
+    if (tooHigh) {
+        $('.popover').css('top', (poY + 10) + 'px');                 
     }
 }
 
