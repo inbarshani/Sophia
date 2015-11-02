@@ -44,17 +44,7 @@ function isElementInViewport (rect) {
             }
         }
     });
-
-    chrome.runtime.onMessage.addListener(
-        function(message, sender, sendResponse) {
-            console.log('sophia content got message: ' + JSON.stringify(message));
-            if (message && message.sophia_captureUI)
-            {
-               reportUIObjects(); 
-            }
-        });
-
-        
+       
     var lastSrcLength;
     var reportEventToSophia = function (action, document_root, event) {
         var dataUrl = window.__eumRumService.dataUrl;
@@ -144,6 +134,13 @@ function isElementInViewport (rect) {
 
         }, 50);
 
+        // tell background to capture image and report to Sophia
+        //  chrome.tabs in inaccessible in content script
+        chrome.runtime.sendMessage({sophiaCaptureUI: true},
+            function(response) {
+                console.log('Got response for capturing UI objects: '+response);
+            });
+
         reportUIObjects();
     };    
 
@@ -194,11 +191,12 @@ function isElementInViewport (rect) {
             sophia_ao.color = ao.GetAttrSync('style', {_data: {style: 'color'}});
             sophia_ao.background = ao.GetAttrSync('style', {_data: {style: 'background-color'}});
             sophia_ao.font_size = ao.GetAttrSync('style', {_data: {style: 'font-size'}});
+            sophia_ao.classNames = ao.GetAttrSync('class');
             if (sophia_ao.visible && isElementInViewport(sophia_ao.rect))
                 agentUIObjecs.push(sophia_ao);
         }
 
-        console.log('agentUIObjecs #: '+agentUIObjecs.length);
+        console.log('Sophia reporting on UI objects, #: '+agentUIObjecs.length);
         var args = {
             type: "UI_objects",
             timestamp: ts,

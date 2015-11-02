@@ -3,7 +3,7 @@ var testGuid = null;
 
 
 function regsiterHandler() {
-    console.log('Registering Sophia screenshot agent for baseUrl: ' + baseUrl);
+    console.log('Registering Sophia requests agent for baseUrl: ' + baseUrl);
     var trackUrl = baseUrl;
     if (trackUrl.lastIndexOf("/") != trackUrl.length - 1) {
         trackUrl += "/";
@@ -32,12 +32,19 @@ chrome.runtime.onMessageExternal.addListener(
 
 chrome.runtime.onMessage.addListener(
     function(message, sender, sendResponse) {
-        console.log('background got message with test Id: ' + message);
-        chrome.storage.local.set({
-            'sophiaTestId': message.sophiaTestId
-        }, function() {
-            console.log('New test GUID saved');
-        });
+        console.log('background got message: ' + JSON.stringify(message));
+        if (message.sophiaTestId)
+        {
+            chrome.storage.local.set({
+                'sophiaTestId': message.sophiaTestId
+            }, function() {
+                console.log('New test GUID saved');
+            });
+        }
+        else if (message.sophiaCaptureUI)
+        {
+            reportScreenshotToSophia();
+        }
     });
 
 // init the configuraiton of the file server
@@ -101,38 +108,40 @@ function TrackRequest(info) {
         console.log('Test GUID not defined. Exiting...');
         return;
     }
-    console.log('Sending screenshot to server: '+fileUrl);
     var type = info.type.toLowerCase();
     if (type == 'xmlhttprequest' || type == 'main_frame' || type == 'sub_frame') {
-        chrome.tabs.query({
-            active: true
-        }, function(tabs) {
-            if (tabs[0].url.indexOf(baseUrl) == 0) {
-                chrome.tabs.captureVisibleTab(function(screenshotUrl) {
-                    var ts = new Date().getTime();
-                    //console.log(screenshotUrl);
-                    //			var blob = screenshotUrl.replace('data:image/jpeg;base64,', '');
-                    var data = {
-                        timestamp: ts,
-                        type: "SCREEN",
-                        testID: testGuid
-                    };
-                    var formData = new FormData();
-                    formData.append("data", JSON.stringify(data));
-                    formData.append("file", screenshotUrl);
-
-                    var request = new XMLHttpRequest();
-                    request.open("POST", fileUrl);
-                    request.send(formData);
-                    console.log('Screenshot sent with timestamp: '+ts);
-                });
-                // also, let the content script know we need to track the UI objects
-                console.log('Send message to content to capture UI');
-                chrome.tabs.sendMessage(tabs[0].id, {sophia_captureUI: true}, 
-                    function(response) {
-                        console.log('Got response for capturing UI objects: '+response);
-                    });
-            }
-        });
+        // TODO: report to Sophia on request completion
     }
 }
+
+function reportScreenshotToSophia(){
+    if (testGuid == null) {
+        console.log('Test GUID not defined. Exiting...');
+        return;
+    }
+
+    chrome.tabs.query({
+        active: true
+    }, function(tabs) {
+        if (tabs[0].url.indexOf(baseUrl) == 0) {
+            chrome.tabs.captureVisibleTab(function(screenshotUrl) {
+                var ts = new Date().getTime();
+                //console.log(screenshotUrl);
+                //          var blob = screenshotUrl.replace('data:image/jpeg;base64,', '');
+                var data = {
+                    timestamp: ts,
+                    type: "SCREEN",
+                    testID: testGuid
+                };
+                var formData = new FormData();
+                formData.append("data", JSON.stringify(data));
+                formData.append("file", screenshotUrl);
+
+                var request = new XMLHttpRequest();
+                request.open("POST", fileUrl);
+                request.send(formData);
+                console.log('Sophia report on screenshot sent with timestamp: '+ts);
+            });
+        }
+    });
+};
