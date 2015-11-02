@@ -28,7 +28,7 @@ module.exports = {
             formatted_result.font_size = idol_document['FONT_SIZE'][0];
             */
         }
-        console.log('formatted_result ui_objects: '+require('util').inspect(formatted_result, {depth:4}));
+        //console.log('formatted_result ui_objects: '+require('util').inspect(formatted_result, {depth:4}));
         return formatted_result;
     }
 };
