@@ -7,7 +7,8 @@ module.exports = {
 
 	extractDataFromIDOL: function(idol_document, formatted_result, includeHash, isExpendedData){
 		//console.log('idol_document obj: '+require('util').inspect(idol_document, {depth:4}));
-		formatted_result.caption = idol_document['DESCRIPTION'][0] + '\n';
+		if (idol_document['DESCRIPTION'] && idol_document['DESCRIPTION'][0])
+			formatted_result.caption = idol_document['DESCRIPTION'][0] + '\n';
         if(isExpendedData)
         {
             formatted_result.date = idol_document['DREDATE'][0];
