@@ -198,18 +198,23 @@ app.get('/screens/:graph_id/objects', function(request, response) {
             neo4j_queries.getNearestData([graph_id], 'UI_Objects',
                 function(prevObjsTimestamps, nextObjsTimestamps, prevObjsIDs, nextObjsIDs) {
                     // TODO: return just one objects to describe the screen
-                    //  for now, just return the id of the first one there is
-                    var ids = prevObjsIDs.concat(nextObjsIDs);
-                    if (ids.length == 0) {
+                    //  for now, return the closest timestemp
+                    if (prevObjsIDs.length == 0 && nextObjsIDs.length == 0) {
                         //console.log('No objects associated with screen graph_id: ' + graph_id);
                         response.status(404).send('No objects associated with screen');
                     } else {
-                        ids.length = 1; // trim down objects
+                        var item_id = -1;
+                        // TODO: find item with timestamp closest to the screen
+                        //   meanwhile: find last prev or first next
+                        if (prevObjsIDs.length > 0)
+                            item_id = prevObjsIDs[prevObjsIDs.length -1];
+                        else
+                            item_id = nextObjsIDs[0];
                         // get details of objects from IDOL
-                        idol_queries.searchByReference(ids, false, true,
+                        idol_queries.searchByReference([item_id], false, true,
                             function(idolDocs) {
-                                if (idolDocs['' + ids[0]] && idolDocs['' + ids[0]].objects)
-                                    response.status(200).send(idolDocs['' + ids[0]].objects);
+                                if (idolDocs['' + item_id] && idolDocs['' + item_id].objects)
+                                    response.status(200).send(idolDocs['' + item_id].objects);
                                 else
                                     response.status(500).send('Failed to get screen objects per graph_id: ' + graph_id);
                             });
