@@ -2,7 +2,7 @@ var fullData;
 var table;
 var items = [];
 var color;
-var eventWidth;
+//var eventWidth;
 var position = 0;
 var panelWidth;
 /*	Define the dimensions of the SVG */
@@ -557,7 +557,7 @@ function showIssues(data) {
                             }
 
                             eventLeft = parseInt(d3.select(this).attr("x"));
-                            eventWidth = parseInt(d3.select(this).attr("width"));
+                           // eventWidth = parseInt(d3.select(this).attr("width"));
 
                             eventTop = parseInt(d3.select(this).attr("y"));
 
