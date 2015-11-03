@@ -41,7 +41,7 @@ chrome.runtime.onMessage.addListener(
                 console.log('New test GUID saved');
             });
         }
-        else if (message.sophiaCaptureUI)
+        else if (message.sophiaScreenshot)
         {
             reportScreenshotToSophia();
         }
@@ -124,10 +124,11 @@ function reportScreenshotToSophia(){
         active: true
     }, function(tabs) {
         if (tabs[0].url.indexOf(baseUrl) == 0) {
+            var ts = new Date().getTime(); // get time before taking the screenshot
             chrome.tabs.captureVisibleTab(function(screenshotUrl) {
-                var ts = new Date().getTime();
                 //console.log(screenshotUrl);
                 //          var blob = screenshotUrl.replace('data:image/jpeg;base64,', '');
+                //console.log('before send screenshot time: '+ts+' and after: '+new Date().getTime());
                 var data = {
                     timestamp: ts,
                     type: "SCREEN",

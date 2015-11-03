@@ -188,54 +188,23 @@ Util.inherit(SophiaMessagingChannel, EventDispatcher, {
 
     _recordScreenshot: function(){
         console.log('SophiaMessagingChannel recordScreenshot');
-        var baseAppUrl = this._baseAppUrl;
-        var fileUrl = this._fileUrl;
-        var sophiaTestId = this._sophiaTestId;
-
+        console.log('SophiaMessagingChannel Send message to capture UI and screenshot');
+        // tell content script to capture UI objects and report to Sophia
         chrome.tabs.query({
             active: true
         }, function(tabs) {
-            console.log('SophiaMessagingChannel recordScreenshot got tabs');
-            console.log('SophiaMessagingChannel tabs[0].url: '+tabs[0].url + 
-                ' with baseAppUrl: '+baseAppUrl);
-            if (tabs[0].url.indexOf(baseAppUrl) == 0) {
-                chrome.tabs.captureVisibleTab(function(screenshotUrl) {
-                    console.log('SophiaMessagingChannel recordScreenshot captureVisibleTab');
-                    var ts = new Date().getTime();
-                    //console.log(screenshotUrl);
-                    //          var blob = screenshotUrl.replace('data:image/jpeg;base64,', '');
-                    var data = {
-                        timestamp: ts,
-                        type: "SCREEN",
-                        testID: sophiaTestId
-                    };
-                    var formData = new FormData();
-                    formData.append("data", JSON.stringify(data));
-                    formData.append("file", screenshotUrl);
-
-                    console.log('SophiaMessagingChannel sending screenshot with timestamp: '+ ts + 
-                        ' to: '+fileUrl);
-                    $.ajax({
-                        url: fileUrl,
-                        type: 'POST',
-                        data: formData,
-                        dataType: 'multipart/form-data',
-                        contentType: false,
-                        processData: false,
-                        success: function (doc) {
-                            console.log("SophiaMessagingChannel sendMessage screenshot posted: " + doc);
-                        }
-                    });
-                });
-            }
-            // also, let the content script know we need to track the UI objects
-            console.log('SophiaMessagingChannel Send message to content to capture UI, tab[0].id: '+tabs[0].id);
-            chrome.tabs.sendMessage(tabs[0].id, {sophia_captureUI: true}, 
+            chrome.tabs.sendMessage(tabs[0].id, {sophiaCaptureUI: true}, 
                 function(response) {
                     console.log('SophiaMessagingChannel Got response for capturing UI objects: '+response);
                 });
-
         });
+
+        // tell background to capture image and report to Sophia
+        chrome.runtime.sendMessage({sophiaScreenshot: true},
+            function(response) {
+                console.log('SophiaMessagingChannel Got response for capturing screenshot: '+response);
+            });
+
     },
 
     _setValuesFromStorage: function(result)

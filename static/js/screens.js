@@ -591,7 +591,15 @@ function calcDistance(first_rect, second_rect) {
 
 function showModal(itemIndex) {
     $('#screenModal').modal();
-    $('#screensCarousel').carousel(itemIndex);
+    if ($('#screens_carousel_items div.active').index() == itemIndex)
+    {
+        // handle edge case where there is no 'slid' event:
+        //  launch of modal and using the active image (first time is 0)
+        $('#screensCarousel').carousel(itemIndex);
+        showHTMLLayout();
+    }
+    else
+        $('#screensCarousel').carousel(itemIndex);
 }
 
 function clearScreensSearch() {
