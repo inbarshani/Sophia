@@ -5,10 +5,8 @@ var currentStep = -1;
 $(document).ready(function() {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', chrome.extension.getURL('tests.json'), true);
-    xhr.onreadystatechange = function()
-    {
-        if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200)
-        {
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
             testScripts = JSON.parse(xhr.responseText);
             console.log('loaded tests from extension json file.');
             //chrome.storage.local.set({'sophiaTests', testScripts}, function() {
@@ -16,15 +14,14 @@ $(document).ready(function() {
             //});
             // load list of tests
             var tests = Object.keys(testScripts);
-            for(var i=0;i<tests.length;i++)
-            {
-               $("#testsSelect").append('<option value="'+i+'">'+tests[i]+'</option>'); 
+            for (var i = 0; i < tests.length; i++) {
+                $("#testsSelect").append('<option value="' + i + '">' + tests[i] + '</option>');
             }
         }
     };
     xhr.send();
 
-    chrome.storage.local.get(['sophiaTestId','sophiaCurrentTest', 'sophiaCurrentStep'], 
+    chrome.storage.local.get(['sophiaTestId', 'sophiaCurrentTest', 'sophiaCurrentStep'],
         function(result) {
             if (result.sophiaTestId == null) {
                 // test not running
@@ -32,36 +29,45 @@ $(document).ready(function() {
                 setEnableByID(false, ["#reportStepFail", "#reportStepPass", "#endTestBtn"]);
                 $("#instructions").text('Press "Start Test" to begin execution');
                 $("#currentStep").text('');
+                $("#currentManualStep").css('visibility', 'hidden');
             } else {
                 setEnableByID(false, ["#startTestBtn", "#testsSelect"]);
                 setEnableByID(true, ["#reportStepFail", "#reportStepPass", "#endTestBtn"]);
                 currentTest = parseInt(result.sophiaCurrentTest);
                 currentStep = parseInt(result.sophiaCurrentStep);
                 var test_desc = 'Manual test';
-                var step_desc = 'Manual step '+currentStep;
-                if (currentTest >= 0)
-                {
+                var step_desc = 'Manual step ' + currentStep;
+                if (currentTest >= 0) {
                     test_desc = Object.keys(testScripts)[currentTest];
                     step_desc = testScripts[test_desc][currentStep];
                 }
-                $("#instructions").text('Test '+test_desc+' with GUID ' + result.sophiaTestId + ' running...');
-                if (!step_desc)
-                {
+                $("#instructions").text('Test ' + test_desc + ' with GUID ' + result.sophiaTestId + ' running...');
+                if (!step_desc) {
                     step_desc = '<<test done>>';
                     setEnableByID(false, ["#reportStepFail", "#reportStepPass"]);
-                }                        
-                $("#currentStep").text(step_desc);
+                }
+                if (currentTest >= 0) // built-in test
+                {
+                    $("#currentStep").text(step_desc);
+                } else // manual ad-hoc test, enable description
+                {
+                    $("#currentManualStep").css('visibility', '');
+                }
             }
-    });
+        });
 });
 
 $("#startTestBtn").click(function() {
     setEnableByID(false, ["#startTestBtn", "#testsSelect"]);
     setEnableByID(true, ["#reportStepFail", "#reportStepPass", "#endTestBtn"]);
     var selectedTest = $("#testsSelect").val();
-    if (selectedTest != 'new')
-    {
+    if (selectedTest != 'new') {
         currentTest = parseInt(selectedTest);
+    }
+    else
+    {
+        $('#stepDesc').val('Manual step '+currentStep);
+        $('#currentManualStep').css('visibility', '');
     }
     currentStep = 1;
     var ts = new Date().getTime();
@@ -98,16 +104,16 @@ $("#startTestBtn").click(function() {
             dataType: 'json',
             success: function(doc) {
                 // setup first step, and report it as well
-                $("#instructions").text('Test '+description+' with GUID ' + guid + ' running...');
+                $("#instructions").text('Test ' + description + ' with GUID ' + guid + ' running...');
                 var step_desc = '';
-                if (currentTest >= 0){
+                if (currentTest >= 0) {
                     var test = Object.keys(testScripts)[currentTest];
                     step_desc = testScripts[test][currentStep];
+                    $("#currentStep").text(step_desc);
+                } else
+                {
+                    step_desc = $('#stepDesc').val();
                 }
-                else
-                    step_desc ='Manual step '+currentStep;
-
-                $("#currentStep").text(step_desc);
 
                 args = {
                     type: "TestStep",
@@ -117,6 +123,7 @@ $("#startTestBtn").click(function() {
                     stepNumber: currentStep,
                     description: step_desc
                 }
+                console.log('Sophia report teststep: '+JSON.stringify(args));
                 var data = JSON.stringify(args);
                 $.ajax({
                     url: dataUrl,
@@ -140,11 +147,13 @@ $("#endTestBtn").click(function() {
     if (currentTest >= 0)
         description = Object.keys(testScripts)[currentTest];
     var step_desc = '';
-    if (currentTest >= 0){
+    if (currentTest >= 0) {
         step_desc = testScripts[description][currentStep];
+    } else
+    {
+        step_desc = $('#stepDesc').val();
+        $('#currentManualStep').css('visibility', 'hidden');
     }
-    else
-        step_desc ='Manual step '+currentStep;
     var ts = new Date().getTime();
     chrome.storage.local.get('dataUrl', function(result) {
         var dataUrl = result.dataUrl;
@@ -159,8 +168,7 @@ $("#endTestBtn").click(function() {
                 console.log("Sophia extension GUID not defined");
                 return;
             }
-            if (step_desc)
-            {
+            if (step_desc) {
                 // there is an active test step, so fail it before reporting end test
                 var step_args = {
                     type: "TestStep",
@@ -200,7 +208,7 @@ $("#endTestBtn").click(function() {
                 }
             });
             // clear variables
-            currentTest = -1; 
+            currentTest = -1;
             currentStep = -1;
             chrome.storage.local.set({
                 'sophiaTestId': null,
@@ -213,9 +221,8 @@ $("#endTestBtn").click(function() {
     });
 });
 
-function setEnableByID(isEnabled, ids)
-{
-    ids.forEach(function(id){
+function setEnableByID(isEnabled, ids) {
+    ids.forEach(function(id) {
         if (isEnabled)
             $(id).removeAttr("disabled");
         else
@@ -223,11 +230,11 @@ function setEnableByID(isEnabled, ids)
     });
 }
 
-$("#reportStepPass").click(function(){
+$("#reportStepPass").click(function() {
     reportStep('passed');
 });
 
-$("#reportStepFail").click(function(){
+$("#reportStepFail").click(function() {
     reportStep('failed');
 });
 
@@ -236,14 +243,11 @@ function reportStep(status) {
     console.log("TestStep event");
     var ts = new Date().getTime();
     var step_desc = '';
-    if (currentTest >= 0)
-    {
+    if (currentTest >= 0) {
         var test = Object.keys(testScripts)[currentTest];
         step_desc = testScripts[test][currentStep];
-    }
-    else
-    {
-        step_desc = 'Manual step '+currentStep;
+    } else {
+        step_desc = $('#stepDesc').val();
     }
     chrome.storage.local.get('dataUrl', function(result) {
         var dataUrl = result.dataUrl;
@@ -280,19 +284,18 @@ function reportStep(status) {
                     setEnableByID(true, ["#reportStepFail", "#reportStepPass"]);
                     console.log("TestStep reported");
                     currentStep++;
-                    if (currentTest >= 0)
-                    {
+                    if (currentTest >= 0) {
                         var test = Object.keys(testScripts)[currentTest];
                         step_desc = testScripts[test][currentStep];
-                        if (!step_desc)
-                        {
+                        if (!step_desc) {
                             step_desc = '<<test done>>';
                             setEnableByID(false, ["#reportStepFail", "#reportStepPass"]);
-                        }                        
-                    }
-                    else
+                        }
+                        $("#currentStep").text(step_desc);
+                    } else {
                         step_desc = 'Manual step '+currentStep;
-                    $("#currentStep").text(step_desc);
+                        $('#stepDesc').val(step_desc);
+                    }
 
                     var step_args = {
                         type: "TestStep",

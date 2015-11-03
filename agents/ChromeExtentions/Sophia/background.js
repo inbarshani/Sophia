@@ -41,7 +41,7 @@ chrome.runtime.onMessage.addListener(
                 console.log('New test GUID saved');
             });
         }
-        else if (message.sophiaCaptureUI)
+        else if (message.sophiaScreenshot)
         {
             reportScreenshotToSophia();
         }

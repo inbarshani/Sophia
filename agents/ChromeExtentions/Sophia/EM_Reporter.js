@@ -11,6 +11,18 @@ function isElementInViewport (rect) {
 (function () {
     if (window.__eumRumService) return;
 
+    // respond to messages from extension (SophiaMessagingChannel)
+    //  so that when a logical UI action is captured, UI objects are captured
+    chrome.runtime.onMessage.addListener(
+    function(message, sender, sendResponse) {
+        console.log('Sophia content script got message: ' + JSON.stringify(message));
+        if (message.sophiaCaptureUI)
+        {
+            reportUIObjects();
+        }
+    });
+
+
     chrome.storage.onChanged.addListener(function (changes, namespace) {
         console.log('Sophia reporter, update changes in storage: '+JSON.stringify(changes));
         for (key in changes) {
@@ -58,6 +70,9 @@ function isElementInViewport (rect) {
             console.log ('no active test');
             return;
         }
+
+        reportUIObjects();
+
         var docUrl = document_root.URL;
         var ts = new Date().getTime();
         var args = {
@@ -136,12 +151,10 @@ function isElementInViewport (rect) {
 
         // tell background to capture image and report to Sophia
         //  chrome.tabs in inaccessible in content script
-        chrome.runtime.sendMessage({sophiaCaptureUI: true},
+        chrome.runtime.sendMessage({sophiaScreenshot: true},
             function(response) {
                 console.log('Got response for capturing UI objects: '+response);
             });
-
-        reportUIObjects();
     };    
 
     var reportErrorToSophia = function (errObj) {
