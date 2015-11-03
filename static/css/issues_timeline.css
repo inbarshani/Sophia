@@ -171,7 +171,7 @@ h3{
 }
 
 .outerwrapper svg .locations {
-    fill: #999999;
+   /* fill: #999999;*/
     cursor: pointer;
     -webkit-transition: all 0.2s ease;
     -moz-transition: all 0.2s ease;
@@ -180,12 +180,13 @@ h3{
     transition: all 0.2s ease;
 }
 
+
 .outerwrapper svg .locations:hover {
     fill: #EE8361;
 }
 
 .outerwrapper svg .selected {
-    fill: #E85338;
+    fill: #E85338 !important;
 }
 /*for the timeline*/
 .axis path,
