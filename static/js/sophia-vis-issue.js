@@ -73,7 +73,8 @@ function CreateTable(data)
             firstkeyTimeStemp = obj[key].timestamp;
             isfirstkey--;
         }
-        if(count>0) {
+        if(count>0)
+        {
             var type = obj[key].type;
             var timestamp = new Date(obj[key].timestamp * 1000);
             var date = obj[key].date;
@@ -84,7 +85,7 @@ function CreateTable(data)
             tr += '<td>' + type + '</td>';
             tr += '<td>' + caption + '</td>';
             //tr+='<td>' +date + '</td>';
-            tr+='<td>' +colors[count] + '</td>';
+            tr+='<td>' +colors[count-1] + '</td>';
             tr += '</tr>';
             table.append(tr);
             table.hide();
@@ -139,11 +140,10 @@ function AddProperties(table, items)
         if ($(table).eq(i).children('td').eq(4).html() !== " ") {
             //       items[i].link = $(table).eq(i).children('td').eq(4).html();
         }
-
-        if ($(table).eq(i).children('td').eq(5).html() !== " ") {
-            //       items[i].img = $(table).eq(i).children('td').eq(5).html();
-            //       items[i].credit = $(table).eq(i).children('td').eq(6).html();
+        if ($(table).eq(i).children('td').eq(4).html() !== " ") {
+            items[i].color = $(table).eq(i).children('td').eq(4).html();
         }
+
     };
 }
 function InsertEventsDiv(items)
@@ -189,7 +189,6 @@ function InsertEventsDiv(items)
             $('.outerwrapper div[class="event-' + i + '"]')
                 .append('<p class="credit">PICTURE CREDIT: ' + items[i].credit + '</p>')
         }
-
     };
 }
 function ZoomInIcon(chart)
@@ -294,7 +293,6 @@ function LeftIcon(chart, counter)
 
 
 }
-
 function showIssues(data) {
     $('#results_table').removeClass('hidden');
     $('#results_timeline').removeClass('hidden');
@@ -308,12 +306,16 @@ function showIssues(data) {
         items.push(newObject);
     };
     AddProperties(table, items);
+
     InsertEventsDiv(items)
     /*	Insert an .event div for each event */
-    color = $(table).eq(i).children('td').eq(4).html();
-    $(".outerwrapper svg .locations:hover ").css({
-        "fill":"'"+ color+"'"
-    });
+
+   /* $(".outerwrapper svg.chart .locations:hover ").css({
+        "fill": color
+    });*/
+ /* $(".outerwrapper svg.chart .locations").css({
+        fill: '#CDCECE'
+    });*/
     eventWidth = $('.outerwrapper .info-box').width();
 
     panelWidth = eventWidth * (items.length+1);
@@ -419,6 +421,7 @@ function showIssues(data) {
                                 .duration(duration)
                                 .style("opacity", 0.2);
                         });
+
     miniHolder = ClippingPath(chart, height, miniHeight, width, marginBottom, marginTop);
     /*	Prepare a cliping path to stop the locations and scales breaking spilling over the edges
      of the SVG in IE */
@@ -472,8 +475,9 @@ function showIssues(data) {
                             if (i === counter) {
                                 return "locations selected";
                             } else {
-                                return "locations";
+                                return "locations"+i;
                             };
+
                         })
                         .attr("x", function(d, i) {
                             return x(d.date1);
@@ -486,7 +490,6 @@ function showIssues(data) {
                             if (i > 0) {
                                 prev = i - 1;
                             }
-
                             if (i === 0) {
                                 return 0;
                             } else if (items[prev].date2 < items[i].date1) {
@@ -495,6 +498,7 @@ function showIssues(data) {
                                 return (miniHeight - 10) / 2;
                             }
                         })
+
                         .attr("width", function(d) {
                             if (d.date1 < d.date2) {
                                 /* 	decide the width of the rect based on the range of dates */
@@ -512,6 +516,7 @@ function showIssues(data) {
                                 }
                             }
                         })
+
                         .attr("height", function(d, i) {
                             /*	Work out if the first date of the current range overlaps the last date of the previous
                              if so half the height of the block to accomadate */
@@ -590,6 +595,7 @@ function showIssues(data) {
                             return false;
                         })
 
+
                     /*	Function to add the info for the next selected location
                      Adds the relevent content to info-box and provides a new value for xPosition
                      to center the timeline on the selected location*/
@@ -616,34 +622,34 @@ function showLocation() {
 
     /*	Adjust the ticks for each x axis depening on the time range */
     /* ticks for than 5 years, 157,788,000,000 milliseconds */
-    if ((timeEnd - timeBegin) > 157788000000) {
+  /*  if ((timeEnd - timeBegin) > 157788000000) {
         xMonthAxis.ticks(d3.time.years, 1).tickFormat(function(d) {
             return '';
         });
         xDayAxis.ticks(d3.time.years, 1);
     }
     /* ticks for than a year, 31,557,600,000 milliseconds */
-    else if ((timeEnd - timeBegin) > 31557600000) {
+  /*  else if ((timeEnd - timeBegin) > 31557600000) {
         xMonthAxis.ticks(d3.time.months, 3).tickFormat(d3.time.format('%d %b'));
         xDayAxis.ticks(d3.time.months, 1);
     }
     /* ticks for than six months 31,557,600,000 milliseconds divided by 2 */
-    else if ((timeEnd - timeBegin) > 15778800000) {
+  /*  else if ((timeEnd - timeBegin) > 15778800000) {
         xMonthAxis.ticks(d3.time.months, 1).tickFormat(d3.time.format('%d %b'));
         xDayAxis.ticks(d3.time.weeks, 1);
     }
     /* ticks for than two months 31,557,600,000 milliseconds divided by 6 */
-    else if ((timeEnd - timeBegin) > 5259600000) {
+  /*  else if ((timeEnd - timeBegin) > 5259600000) {
         xMonthAxis.ticks(d3.time.months, 1).tickFormat(d3.time.format('%d %b'));
         xDayAxis.ticks(d3.time.days, 1);
     }
     /* ticks for than a month 31,557,600,000 milliseconds divided by 12 */
-    else if ((timeEnd - timeBegin) > 2629800000) {
+  /*  else if ((timeEnd - timeBegin) > 2629800000) {
         xMonthAxis.ticks(d3.time.weeks, 1).tickFormat(d3.time.format('%d %b'));
         xDayAxis.ticks(d3.time.days, 1);
     }
     /* ticks for a day */
-    else {
+ /*   else {
         xMonthAxis.ticks(d3.time.days, 4).tickFormat(d3.time.format('%d %b'));
         xDayAxis.ticks(d3.time.days, 1);
     }
@@ -668,12 +674,15 @@ function showLocation() {
             if (i === counter) {
                 return "locations selected";
             } else {
-                return "locations";
+                return "locations"+i;
             };
         })
         .transition()
         .duration(duration)
         .attr("x", function(d, i) {
+            $(".outerwrapper svg.chart .locations"+i).css({
+                fill: items[i].color// '#CDCECE'
+            });
             return x(d.date1);
         })
         .attr("width", function(d) {
