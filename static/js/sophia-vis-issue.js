@@ -2,7 +2,7 @@ var fullData;
 var table;
 var items = [];
 var color;
-var eventWidth;
+//var eventWidth;
 var position = 0;
 var panelWidth;
 /*	Define the dimensions of the SVG */
@@ -61,11 +61,10 @@ function CreateTable(data)
         return 0;
     }
     array.sort(compare);
-    var screen =4;
     var isfirstkey = 1;
     var firstkeyTimeStemp;
-    var count = 4;
-    var colors = ['#CDCECE', '#A4A5A5', '#737373', '#505050'];
+    var count = 14;
+    var colors = ['#000000','#606060' ,'#CDCECE', '#A4A5A5', '#737373', '#505050', '#989898', '#D8D8D8','#B8B8B8','#787878','#505050','#383838','#484848','#B8B8B8'];
     for(var key in obj)
     {
         if(isfirstkey>0)
@@ -73,10 +72,10 @@ function CreateTable(data)
             firstkeyTimeStemp = obj[key].timestamp;
             isfirstkey--;
         }
-        if(count>0)
-        {
+      //  if(count>0)
+      //  {
             var type = obj[key].type;
-            var timestamp = new Date(obj[key].timestamp * 1000);
+            var timestamp = new Date(Number(obj[key].timestamp));
             var date = obj[key].date;
             var caption = obj[key].caption;
             var tr = '<tr>';
@@ -90,7 +89,7 @@ function CreateTable(data)
             table.append(tr);
             table.hide();
             count--;
-        }
+     //   }
 
     }
     return table;
@@ -557,7 +556,7 @@ function showIssues(data) {
                             }
 
                             eventLeft = parseInt(d3.select(this).attr("x"));
-                            eventWidth = parseInt(d3.select(this).attr("width"));
+                           // eventWidth = parseInt(d3.select(this).attr("width"));
 
                             eventTop = parseInt(d3.select(this).attr("y"));
 
