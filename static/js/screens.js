@@ -9,10 +9,12 @@ var heightFactor = 1;
 var fonts_hashtable = {};
 var colors_hashtable = {};
 var backgrounds_hashtable = {};
+var styles_hashtable = {};
 var HIGHLIGHT = {
     FONT: 0,
     COLOR: 1,
-    BACKGROUND: 2
+    BACKGROUND: 2,
+    STYLE: 3
 };
 var color_palette = {};
 var rects = {};
@@ -225,22 +227,30 @@ function showHTMLLayout() {
                 font = font.replace(/^null/, 'no font');
                 var color = screenUIObjects[i].color;
                 var background = screenUIObjects[i].background;
+                var styleClasses = screenUIObjects[i].classNames;
+                var styleClassesArray = [];
                 var all_props_string = '{ left: ' + rect.left + ', top: ' +
                     rect.top + ', width: ' + (rect.right - rect.left) +
                     ', height: ' + (rect.bottom - rect.top) + '} ' +
                     font;
+                if (styleClasses && (typeof styleClasses == 'string'))
+                {
+                    styleClasses = styleClasses.trim();
+                    all_props_string += ', classes: '+styleClasses;
+                    styleClassesArray = styleClasses.split(' ');
+                }
                 if (color) {
                     color = rgbToHex(color);
                     if (color_palette[color])
                         color = color_palette[color];
-                    all_props_string += ' ' + color;
+                    all_props_string += ', color: ' + color;
                 }
                 if (background) {
                     background = rgbToHex(background);
                     if (background && color_palette[background])
                         background = color_palette[background];
                     if (background)
-                        all_props_string += ' ' + background;
+                        all_props_string += ', background color: ' + background;
                 }
                 if (screenUIObjects[i].visible &&
                     addUIRect(active_div, anchor, i, rect, all_props_string)) {
@@ -274,93 +284,71 @@ function showHTMLLayout() {
                         } else
                             backgrounds_hashtable[background].rect_array.push(i);
                     }
+                    styleClassesArray.forEach(function(style){
+                        if (!styles_hashtable[style]) {
+                            styles_hashtable[style] = {
+                                highlighted: false,
+                                rect_array: [i]
+                            };
+                        } else
+                            styles_hashtable[style].rect_array.push(i);
+                    });
                 }
             }
-            i = 0;
-            var fonts = Object.keys(fonts_hashtable);
-            $('#fonts').html('');
-            fonts.forEach(function(font_string) {
-                li = $('<li>');
-                li.addClass('list-group-item');
-                label = $('<label>');
-                label.addClass('checkbox-inline');
-                input = $('<input>');
-                input.attr('type', 'checkbox');
-                input.attr('id', 'cb_font_' + i++);
-                a = $('<a>');
-                a.attr('href', '#');
-                a.text(font_string);
-                span = $('<span>');
-                span.text('(' + fonts_hashtable[font_string].rect_array.length + ')');
-                label.click(function(fs, cb) {
-                    return function() {
-                        toggleHighlightCategory(HIGHLIGHT.FONT, fs, cb);
-                    }
-                }(font_string, input));
-                label.append(input);
-                label.append(a);
-                label.append(span);
-                li.append(label);
-                $('#fonts').append(li);
-            });
-            i = 0;
-            var colors = Object.keys(colors_hashtable);
-            $('#colors').html('');
-            colors.forEach(function(color_string) {
-                li = $('<li>');
-                li.addClass('list-group-item');
-                label = $('<label>');
-                label.addClass('checkbox-inline');
-                input = $('<input>');
-                input.attr('type', 'checkbox');
-                input.attr('id', 'cb_color_' + i++);
-                a = $('<a>');
-                a.attr('href', '#');
-                a.text(color_string);
-                span = $('<span>');
-                span.text('(' + colors_hashtable[color_string].rect_array.length + ')');
-                label.click(function(fs, cb) {
-                    return function() {
-                        toggleHighlightCategory(HIGHLIGHT.COLOR, fs, cb);
-                    }
-                }(color_string, input));
-                label.append(input);
-                label.append(a);
-                label.append(span);
-                li.append(label);
-                $('#colors').append(li);
-            });
-            i = 0;
-            var backgrounds = Object.keys(backgrounds_hashtable);
-            $('#backgrounds').html('');
-            backgrounds.forEach(function(background_string) {
-                li = $('<li>');
-                li.addClass('list-group-item');
-                label = $('<label>');
-                label.addClass('checkbox-inline');
-                input = $('<input>');
-                input.attr('type', 'checkbox');
-                input.attr('id', 'cb_type_' + i++);
-                a = $('<a>');
-                a.attr('href', '#');
-                a.text(background_string);
-                span = $('<span>');
-                span.text('(' + backgrounds_hashtable[background_string].rect_array.length + ')');
-                label.click(function(fs, cb) {
-                    return function() {
-                        toggleHighlightCategory(HIGHLIGHT.BACKGROUND, fs, cb);
-                    }
-                }(background_string, input));
-                label.append(input);
-                label.append(a);
-                label.append(span);
-                li.append(label);
-                $('#backgrounds').append(li);
-            });
+            addCategoryItems($('#fonts'), HIGHLIGHT.FONT);
+            addCategoryItems($('#colors'), HIGHLIGHT.COLOR);
+            addCategoryItems($('#backgrounds'), HIGHLIGHT.BACKGROUND);
+            addCategoryItems($('#styles'), HIGHLIGHT.STYLE);
         })
         .fail(function(err) {
             console.log("Failed to get objects for screen " + graph_id + ": " + err);
         });
+}
+
+function getHashtableByCategory(category)
+{
+    if (category == HIGHLIGHT.FONT)
+        return fonts_hashtable;
+    else if (category == HIGHLIGHT.BACKGROUND)
+        return backgrounds_hashtable;
+    else if (category == HIGHLIGHT.COLOR)
+        return colors_hashtable;
+    else if (category == HIGHLIGHT.STYLE)
+        return styles_hashtable;
+    else
+        return null;
+}
+
+function addCategoryItems(root_element, category)
+{
+    var hashtable = getHashtableByCategory(category);
+    root_element.html('');
+    var keys = Object.keys(hashtable);
+    var index = 0;
+    keys.forEach(function(key) {
+        li = $('<li>');
+        li.addClass('list-group-item');
+        label = $('<label>');
+        label.addClass('checkbox-inline');
+        input = $('<input>');
+        input.attr('type', 'checkbox');
+        input.attr('id', 'cb_type_' + index++);
+        a = $('<a>');
+        a.attr('href', '#');
+        a.text(key);
+        span = $('<span>');
+        span.text('(' + hashtable[key].rect_array.length + ')');
+        label.click(function(fs, cb) {
+            return function() {
+                toggleHighlightCategory(category, fs, cb);
+            }
+        }(key, input));
+        label.append(input);
+        label.append(a);
+        label.append(span);
+        li.append(label);
+        root_element.append(li);
+    });
 }
 
 function addUIRect(container, anchor, id, rect, all_props_string) {
@@ -444,15 +432,9 @@ function toggleHighlightAll() {
         $('#distance_panel').addClass('hidden');    
 }
 
-function toggleHighlightCategory(target, hash, checkbox) {
+function toggleHighlightCategory(category, hash, checkbox) {
     // find items and highlight
-    var hashtable = {};
-    if (target == HIGHLIGHT.FONT)
-        hashtable = fonts_hashtable;
-    else if (target == HIGHLIGHT.BACKGROUND)
-        hashtable = backgrounds_hashtable;
-    else if (target == HIGHLIGHT.COLOR)
-        hashtable = colors_hashtable;
+    var hashtable = getHashtableByCategory(category);
     // toggle highlighted state
     hashtable[hash].highlighted = !(hashtable[hash].highlighted);
     // handle 'select all' checkbox
@@ -613,10 +595,12 @@ function clearDetails() {
     fonts_hashtable = {};
     types_hashtable = {};
     colors_hashtable = {};
+    styles_hashtable = {};
     $('#distance_panel').addClass('hidden');    
     $('#distance_panel .panel-body').empty();
     $('#fonts').empty();
     $('#types').empty();
     $('#colors').empty();
+    $('#styles').empty();
     $('#screens_carousel_items div.active div').remove();
 }
