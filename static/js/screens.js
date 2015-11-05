@@ -18,6 +18,10 @@ var HIGHLIGHT = {
 };
 var color_palette = {};
 var rects = {};
+var ACCORDION_SIZE = {
+    LARGE: '400px',
+    SMALL: '250px'
+};
 
 function componentToHex(c) {
     var hex = c.toString(16).toUpperCase();
@@ -428,8 +432,13 @@ function toggleHighlightAll() {
         //  TODO: use on-image popup instead of the side bar
         $('#distance_panel .panel-body').html(distance.toHTML());
         $('#distance_panel').removeClass('hidden');
-    } else // not enough highlighted objects
-        $('#distance_panel').addClass('hidden');    
+        $('.panel-collapse').css('max-height', ACCORDION_SIZE.SMALL);
+    } 
+    else // not enough highlighted objects
+    {
+        $('#distance_panel').addClass('hidden'); 
+        $('.panel-collapse').css('max-height', ACCORDION_SIZE.LARGE);   
+    }
 }
 
 function toggleHighlightCategory(category, hash, checkbox) {
@@ -472,8 +481,12 @@ function toggleHighlightObject(obj) {
             //  TODO: use on-image popup instead of the side bar
             $('#distance_panel .panel-body').html(distance.toHTML());
             $('#distance_panel').removeClass('hidden');
-        } else // no other highlighted objects
-            $('#distance_panel').addClass('hidden');    
+            $('.panel-collapse').css('max-height', ACCORDION_SIZE.SMALL);
+        } 
+        else {// no other highlighted objects
+            $('#distance_panel').addClass('hidden');  
+            $('.panel-collapse').css('max-height', ACCORDION_SIZE.LARGE);  
+        }
         // finally, add class to highlight object
         obj.addClass('ui_show');
         obj.hover(function(e) {
@@ -495,10 +508,12 @@ function toggleHighlightObject(obj) {
             //  TODO: use on-image popup instead of the side bar
             $('#distance_panel .panel-body').html(distance.toHTML());
             $('#distance_panel').removeClass('hidden');
+            $('.panel-collapse').css('max-height', ACCORDION_SIZE.SMALL);
         }        
-        else // not enough highlighted objects
-            $('#distance_panel').addClass('hidden');    
-
+        else {// not enough highlighted objects
+            $('#distance_panel').addClass('hidden');
+            $('.panel-collapse').css('max-height', ACCORDION_SIZE.LARGE);
+        }
         obj.popover('hide');
         obj.off();
         obj.click(function(o) {
@@ -602,5 +617,6 @@ function clearDetails() {
     $('#types').empty();
     $('#colors').empty();
     $('#styles').empty();
+    $('.panel-collapse').css('max-height', ACCORDION_SIZE.LARGE);
     $('#screens_carousel_items div.active div').remove();
 }
