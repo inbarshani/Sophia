@@ -1,11 +1,11 @@
 module.exports = {
 	getData: function (obj) {
-		var d = new Date(Date.parse(obj.alm_date));
-        d.setFullYear(new Date().getFullYear());
+	var d = new Date(obj.timestamp);
         obj.timestamp = d.getTime();
         obj.high_priority_index = obj.message;
-        obj.indexable_content = obj.level + ' ' + obj.username + ' ' + obj.alm_date + ' ' +
-        	obj.db_date + ' ' + obj.err_type + ' ' + obj.message;
+        // currently, data is unparsed, just save raw data
+        /*obj.indexable_content = obj.level + ' ' + obj.username + ' ' + obj.alm_date + ' ' +
+        	obj.db_date + ' ' + obj.err_type + ' ' + obj.message;*/
         return obj;
 	},
 

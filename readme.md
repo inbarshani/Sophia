@@ -59,8 +59,10 @@ B. Jetty and MQM log parser - REPEAT STEPS 3-4 AFTER MQM DEPLOYMENT!!!!
 	add the next line:
     <Set name="logDateFormat">dd/MMM/yyyy:HH:mm:ss.SSS</Set>
 5. create folder /DATA/ads_slave/deployments/8082/hp/mqm/server/logs
-6. copy <Sophia>\agents\jetty\logging\sophia to \logstash-1.4.2\patterns
+6. copy <Sophia>\agents\jetty\logging\sophia to /var/opt/logstash-1.4.2/patterns
 7. Restart Jetty
+	7.1 go to MQM install /DATA/ads_slave/deployments/8082/hp/mqm/wrapper
+	7.2 do ./HPALM restart (or stop and then start)
 8. running logstash in the background:
 	cd /var/opt/logstash-1.4.2/bin
 	./logstash -f log.conf &

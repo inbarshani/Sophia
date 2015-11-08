@@ -1,6 +1,6 @@
 module.exports = {
 	getData: function (obj) {
-		var logDate = new Date(obj.date);
+		var logDate = new Date(obj.timestamp);
 		var currDate = new Date();
 		if (logDate.getFullYear() > currDate.getFullYear()) {
 	        logDate.setFullYear(currDate.getFullYear());
