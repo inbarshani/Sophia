@@ -199,7 +199,7 @@ function isElementInViewport (rect) {
             sophia_ao.micclass = ao.GetAttrSync('micclass');
             sophia_ao.visible = ao.GetAttrSync('visible');
             sophia_ao.font_family = ao.GetAttrSync('style', {_data: {style: 'font-family'}});;
-            sophia_ao.text = ao.GetAttrSync('text');
+            //sophia_ao.text = ao.GetAttrSync('text');
             sophia_ao.title = ao.GetAttrSync('title');
             sophia_ao.color = ao.GetAttrSync('style', {_data: {style: 'color'}});
             sophia_ao.background = ao.GetAttrSync('style', {_data: {style: 'background-color'}});

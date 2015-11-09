@@ -203,18 +203,46 @@ app.get('/screens/:graph_id/objects', function(request, response) {
                         //console.log('No objects associated with screen graph_id: ' + graph_id);
                         response.status(404).send('No objects associated with screen');
                     } else {
-                        var item_id = -1;
-                        // TODO: find item with timestamp closest to the screen
-                        //   meanwhile: find last prev or first next
-                        if (prevObjsIDs.length > 0)
-                            item_id = prevObjsIDs[prevObjsIDs.length -1];
-                        else
-                            item_id = nextObjsIDs[0];
-                        // get details of objects from IDOL
-                        idol_queries.searchByReference([item_id], false, true,
+                        // get screen timestamp
+                        idol_queries.searchByReference([graph_id], false, true,
                             function(idolDocs) {
-                                if (idolDocs['' + item_id] && idolDocs['' + item_id].objects)
-                                    response.status(200).send(idolDocs['' + item_id].objects);
+                                if (idolDocs['' + graph_id] && idolDocs['' + graph_id].timestamp)
+                                    {
+                                        var item_id = -1;
+                                        var timestamp_dist = -1;
+                                        var screen_timestamp = idolDocs['' + graph_id].timestamp;
+                                        // find item with timestamp closest to the screen
+                                        for(var k=0;k<prevObjsIDs.length;k++)
+                                        {
+                                            if ((item_id == -1) ||
+                                                (Math.abs(screen_timestamp - prevObjsTimestamps[k]) < timestamp_dist))
+                                            {
+                                                item_id = prevObjsIDs[k];
+                                                timestamp_dist = Math.abs(screen_timestamp - prevObjsTimestamps[k]);
+                                            }
+                                        }
+                                        if (item_id == -1) // no previous items
+                                        {
+                                            for(var k=0;k<nextObjsIDs.length;k++)
+                                            {
+                                                if ((item_id == -1) ||
+                                                    (Math.abs(screen_timestamp - nextObjsTimestamps[k]) < timestamp_dist))
+                                                {
+                                                    item_id = nextObjsIDs[k];
+                                                    timestamp_dist = Math.abs(nextObjsTimestamps[k] - screen_timestamp);
+                                                }
+                                            }
+                                        }
+                                        // get details of objects from IDOL
+                                        idol_queries.searchByReference([item_id], false, true,
+                                            function(idolDocs) {
+                                                if (idolDocs['' + item_id] && idolDocs['' + item_id].objects)
+                                                    response.status(200).send(idolDocs['' + item_id].objects);
+                                                else
+                                                    response.status(500).send('Failed to get screen objects per graph_id: ' + graph_id);
+                                            });
+
+                                    }
                                 else
                                     response.status(500).send('Failed to get screen objects per graph_id: ' + graph_id);
                             });
