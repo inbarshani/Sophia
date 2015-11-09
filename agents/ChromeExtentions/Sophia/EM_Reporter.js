@@ -204,9 +204,20 @@ function isElementInViewport (rect) {
             sophia_ao.color = ao.GetAttrSync('style', {_data: {style: 'color'}});
             sophia_ao.background = ao.GetAttrSync('style', {_data: {style: 'background-color'}});
             sophia_ao.font_size = ao.GetAttrSync('style', {_data: {style: 'font-size'}});
+            sophia_ao['margin-left'] = ao.GetAttrSync('style', {_data: {style: 'margin-left'}});
+            sophia_ao['margin-right'] = ao.GetAttrSync('style', {_data: {style: 'margin-right'}});
+            sophia_ao['margin-top'] = ao.GetAttrSync('style', {_data: {style: 'margin-top'}});
+            sophia_ao['margin-bottom'] = ao.GetAttrSync('style', {_data: {style: 'margin-bottom'}});
+            sophia_ao['padding-left'] = ao.GetAttrSync('style', {_data: {style: 'padding-left'}});
+            sophia_ao['padding-right'] = ao.GetAttrSync('style', {_data: {style: 'padding-right'}});
+            sophia_ao['padding-top'] = ao.GetAttrSync('style', {_data: {style: 'padding-top'}});
+            sophia_ao['padding-bottom'] = ao.GetAttrSync('style', {_data: {style: 'padding-bottom'}});
             sophia_ao.classNames = ao.GetAttrSync('class');
             if (sophia_ao.visible && isElementInViewport(sophia_ao.rect))
+            {
+                //console.log('Sophia AO: '+JSON.stringify(sophia_ao));
                 agentUIObjecs.push(sophia_ao);
+            }
         }
 
         console.log('Sophia reporting on UI objects, #: '+agentUIObjecs.length);
