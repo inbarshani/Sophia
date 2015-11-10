@@ -440,9 +440,16 @@ function createPopoverHtml(props) {
 }
 
 function selectHoverObject(){
-    $('#screens_carousel_items div div:hover').addClass('ui_select');
+    var obj =$('#screens_carousel_items div div:hover');
+    if (obj.hasClass('ui_select'))
+        obj.removeClass('ui_select');
+    else
+        obj.addClass('ui_select');
+    updateSelection();
 }
 
+/* OBSOLETE: remove after November, if there is no need to select objects this way*/
+/*
 function selectAtPoint(x, y){
     // highlight all rects at point x,y
     var keys = Object.keys(rects);
@@ -460,7 +467,7 @@ function selectAtPoint(x, y){
         }
     };
 }
-
+*/
 function toggleHighlightAll() {   
     // find items and highlight
     var checked = $('#select_all')[0].checked;
@@ -531,67 +538,24 @@ function toggleHighlightCategory(category, hash, checkbox) {
     });
 }
 
-function toggleHighlightObject(obj) {
-    // if the object is in hover mode, it is being selected
-    var highlighted = obj.hasClass('ui_show');
-    var highlighted_objects = $('.ui_show');
-    if (!highlighted) {
-        // check if there is another highlighted object, and if so, compute distance
-        //  do that before highlighting this object, so it will not be returned as
-        //  part of the selector
-        if (highlighted_objects.length > 0) {
-            // get original location of highlighted object
-            // get the id from 'ui_rect_x' where x is the id
-            var obj_id=highlighted_objects[0].id.substring(8);
-            var current_rect = rects[obj_id].original;
-            var new_rect = rects[obj.attr('id').substring(8)].original;
-            var distance = calcDistance(current_rect, new_rect);
-            // now, add the distance information to the overlay
-            //  TODO: use on-image popup instead of the side bar
-            $('#distance_panel .panel-body').html(distance.toHTML());
-            $('#distance_panel').removeClass('hidden');
-            $('.panel-collapse').css('max-height', ACCORDION_SIZE.SMALL);
-        } 
-        else {// no other highlighted objects
-            $('#distance_panel').addClass('hidden');  
-            $('.panel-collapse').css('max-height', ACCORDION_SIZE.LARGE);  
-        }
-        // finally, add class to highlight object
-        obj.addClass('ui_show');
-        obj.hover(function(e) {
-            showObjTooltip(obj);
-        }, function() {
-            obj.popover('hide');
-        });
-        showObjTooltip(obj);
-        return true;
-    } else {
-        obj.removeClass('ui_show');
-        // re-calc distance as needed
-        if (highlighted_objects.length >= 2) {
-            var first_obj_id=highlighted_objects[0].id.substring(8);
-            var second_obj_id=highlighted_objects[1].id.substring(8);
-            var first_rect = rects[first_obj_id].original;
-            var second_rect = rects[second_obj_id].original;
-            var distance = calcDistance(first_rect, second_rect);
-            // now, add the distance information to the overlay
-            //  TODO: use on-image popup instead of the side bar
-            $('#distance_panel .panel-body').html(distance.toHTML());
-            $('#distance_panel').removeClass('hidden');
-            $('.panel-collapse').css('max-height', ACCORDION_SIZE.SMALL);
-        }        
-        else {// not enough highlighted objects
-            $('#distance_panel').addClass('hidden');
-            $('.panel-collapse').css('max-height', ACCORDION_SIZE.LARGE);
-        }
-        obj.popover('hide');
-        obj.off();
-        obj.click(function(o) {
-            return function() {
-                toggleHighlightObject(o);
-            }
-        }(obj));
-        return false;
+function updateSelection() {
+    var selected_objects = $('.ui_select');
+    // check if there are at least 2 selected objects, and if so, compute distance
+    if (selected_objects.length > 1) {
+        // get original location of selected object
+        // get the id from 'ui_rect_x' where x is the id
+        var obj_id=selected_objects[0].id.substring(8);
+        var current_rect = rects[obj_id].original;
+        var new_rect = rects[selected_objects[1].id.substring(8)].original;
+        var distance = calcDistance(current_rect, new_rect);
+        // now, add the distance information to the overlay
+        $('#distance_panel .panel-body').html(distance.toHTML());
+        $('#distance_panel').removeClass('hidden');
+        $('.panel-collapse').css('max-height', ACCORDION_SIZE.SMALL);
+    } 
+    else {// not enough selected
+        $('#distance_panel').addClass('hidden');  
+        $('.panel-collapse').css('max-height', ACCORDION_SIZE.LARGE);  
     }
 }
 
