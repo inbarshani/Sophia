@@ -400,6 +400,18 @@ span.input-group-addon {
   border: solid 1px black; 
 }
 
+
+#screens_carousel_items .ui_show:hover {
+  box-shadow: 3px 3px 15px #666;
+  border: solid 2px red;
+  background: #F8F8FF;
+  
+  /*Opacity*/
+  zoom: 1;
+  filter: alpha(opacity=60);
+  opacity: 0.6;
+}
+
 #screenDetails{
     margin-top: 90px;
 }

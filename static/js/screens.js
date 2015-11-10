@@ -22,6 +22,7 @@ var ACCORDION_SIZE = {
     LARGE: '400px',
     SMALL: '250px'
 };
+var selected_rect = null;
 
 function componentToHex(c) {
     var hex = c.toString(16).toUpperCase();
@@ -176,7 +177,14 @@ function fillScreensCarousel() {
             interval: false,
             wrap: false
         });
-        $('#screensCarousel').on('slid.bs.carousel', showHTMLLayout);
+        $('#screensCarousel')
+            .on('slide.bs.carousel', clearDetails) // before slide
+            .on('slid.bs.carousel', showHTMLLayout); // after slide
+        $('#screens_carousel_items')
+            .on('click', function(e) {
+                var offset = $(this).offset();
+                toggleHighlightPoint(e.pageX - offset.left,e.pageY - offset.top);
+              });
     } else {
         screens_results_row.append(
             '<li class="">' +
@@ -200,7 +208,6 @@ function getScreens(node_id, callback) {
 }
 
 function showHTMLLayout() {
-    clearDetails();
     //console.log('showHTMLLayout');
     $('#accordion').removeClass('hidden');
     var active_div = $('#screens_carousel_items div.active');
@@ -256,12 +263,12 @@ function showHTMLLayout() {
                     if (background)
                         all_props_string += ', background color: ' + background;
                 }
-                if (screenUIObjects[i].visible &&
-                    addUIRect(active_div, anchor, i, rect, all_props_string)) {
+                var computed_rect = addUIRect(active_div, anchor, i, rect, all_props_string);
+                if (screenUIObjects[i].visible && computed_rect) {
                     // save the rect original position for computing distance
                     //  use i as the locator, as it was added to the id of the HTML
                     //  element
-                    rects[''+i] = rect;
+                    rects[''+i] = {original: rect, computed: computed_rect};
                     // add rect id to the relevant categories
                     if (!fonts_hashtable[font]) {
                         fonts_hashtable[font] = {
@@ -371,19 +378,14 @@ function addUIRect(container, anchor, id, rect, all_props_string) {
         div.css('top', top + "px");
         div.css('width', width + "px");
         div.css('height', height + "px");
-        div.click(function(obj) {
-            return function() {
-                toggleHighlightObject(obj);
-            }
-        }(div));
-        div.attr('data-toggle', 'popover');
-        div.attr('data-content', createPopoverHtml(all_props_string));
-        div.attr('data-placement', 'top');
+        //div.attr('data-toggle', 'popover');
+        //div.attr('data-content', createPopoverHtml(all_props_string));
+        //div.attr('data-placement', 'top');
         div.attr('title', 'UI Element');
         container.append(div);
-        return true;
+        return {left: left, right: right, top: top, bottom: bottom};
     }
-    return false;
+    return null;
 };
 
 function createPopoverHtml(props) {
@@ -391,6 +393,51 @@ function createPopoverHtml(props) {
     html += props;
     html += '</p>';
     return html;
+}
+
+function toggleHighlightPoint(x, y){
+    // highlight all rects at point x,y
+    var keys = Object.keys(rects);
+    var rects_z_order = []; 
+    for(var k=0;k<keys.length;k++) {
+        var computed_rect = rects[keys[k]].computed;
+        if ((computed_rect.left <= x && computed_rect.right >= x) &&
+            (computed_rect.top <= y && computed_rect.bottom >= y))
+        {
+            var obj_rect = $('#ui_rect_'+keys[k]);
+            if (toggleHighlightObject(obj_rect))
+            {
+                computed_rect.id = keys[k];
+                // object is now highlighted, locate it at the right z-order
+                //  by comparing its intersection with other rects
+                var index = 0;
+                var smaller = true;
+                while(index < rects_z_order.length && smaller)
+                {
+                    // compare with rect
+                    var target_rect = rects_z_order[index];
+                    if ((computed_rect.left >= target_rect.left) &&
+                        (computed_rect.right <= target_rect.right) &&
+                        (computed_rect.top >= target_rect.top) &&
+                        (computed_rect.bottom <= target_rect.bottom))
+                    {
+                        index++;
+                    }
+                    else
+                        smaller = false;
+                }
+                if (!smaller)
+                    rects_z_order.splice(index, 0, computed_rect);
+                else
+                    rects_z_order.push(computed_rect);
+            }
+        }
+    };
+    // go over z-order and assign the appropriate style
+    for(var z=0;z<rects_z_order.length;z++)
+    {
+        $('#ui_rect_'+rects_z_order[z].id).css('z-index', (z+1));
+    }
 }
 
 function toggleHighlightAll() {   
@@ -425,8 +472,8 @@ function toggleHighlightAll() {
     if (highlighted_objects.length >= 2) {
         var first_obj_id=highlighted_objects[0].id.substring(8);
         var second_obj_id=highlighted_objects[1].id.substring(8);
-        var first_rect = rects[first_obj_id];
-        var second_rect = rects[second_obj_id];
+        var first_rect = rects[first_obj_id].original;
+        var second_rect = rects[second_obj_id].original;
         var distance = calcDistance(first_rect, second_rect);
         // now, add the distance information to the overlay
         //  TODO: use on-image popup instead of the side bar
@@ -474,8 +521,8 @@ function toggleHighlightObject(obj) {
             // get original location of highlighted object
             // get the id from 'ui_rect_x' where x is the id
             var obj_id=highlighted_objects[0].id.substring(8);
-            var current_rect = rects[obj_id];
-            var new_rect = rects[obj.attr('id').substring(8)];
+            var current_rect = rects[obj_id].original;
+            var new_rect = rects[obj.attr('id').substring(8)].original;
             var distance = calcDistance(current_rect, new_rect);
             // now, add the distance information to the overlay
             //  TODO: use on-image popup instead of the side bar
@@ -495,14 +542,15 @@ function toggleHighlightObject(obj) {
             obj.popover('hide');
         });
         showObjTooltip(obj);
+        return true;
     } else {
         obj.removeClass('ui_show');
         // re-calc distance as needed
         if (highlighted_objects.length >= 2) {
             var first_obj_id=highlighted_objects[0].id.substring(8);
             var second_obj_id=highlighted_objects[1].id.substring(8);
-            var first_rect = rects[first_obj_id];
-            var second_rect = rects[second_obj_id];
+            var first_rect = rects[first_obj_id].original;
+            var second_rect = rects[second_obj_id].original;
             var distance = calcDistance(first_rect, second_rect);
             // now, add the distance information to the overlay
             //  TODO: use on-image popup instead of the side bar
@@ -521,10 +569,12 @@ function toggleHighlightObject(obj) {
                 toggleHighlightObject(o);
             }
         }(obj));
+        return false;
     }
 }
 
 function showObjTooltip(obj) {
+    return;
     var poX = obj.width() / 2;
     var poY = obj.height() / 2;
     var pos = obj.position();
