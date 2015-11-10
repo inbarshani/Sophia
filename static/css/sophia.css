@@ -427,6 +427,10 @@ span.input-group-addon {
     margin-top: 90px;
 }
 
+#screenDetails .disabled{
+    color: LightGray;
+}
+
 .screen-image-full {
     width: 95%;    
 }

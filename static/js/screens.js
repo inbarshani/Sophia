@@ -209,6 +209,9 @@ function getScreens(node_id, callback) {
 
 function showHTMLLayout() {
     //console.log('showHTMLLayout');
+    $('#screenDetails').addClass('disabled');
+    $('#screenDetails .panel-body').addClass('disabled');
+    $('#screenDetails .panel-title').addClass('disabled');
     $('#accordion').removeClass('hidden');
     var active_div = $('#screens_carousel_items div.active');
     // calculate and store ratio of image to original image        
@@ -220,8 +223,12 @@ function showHTMLLayout() {
     // get the objects for the current screen
     var graph_id = active_div.attr('graph_id');
     console.log('get objects for graph_id: ' + graph_id);
+
     var jqxhr = $.ajax("/screens/" + graph_id + '/objects')
         .done(function(uiObjectsData) {
+            $('#screenDetails').removeClass('disabled');
+            $('#screenDetails .panel-body').removeClass('disabled');
+            $('#screenDetails .panel-title').removeClass('disabled');
             //console.log("Search returned: " + uiObjectsData);
             var li, label, input, checkbox, a, span;
             var screenUIObjects = uiObjectsData;
