@@ -2,109 +2,134 @@
     <div class="col-md-3">
     </div>
     <div class="col-md-6">
-      <div class="input-group input-group-lg">
-        <input type="text" autofocus="autofocus" autocomplete="off" name="search" class="form-control" id="search-text">
-        <span class="input-group-btn">
+        <div class="input-group input-group-lg">
+            <input type="text" autofocus="autofocus" autocomplete="off" name="search" class="form-control" id="search-text">
+            <span class="input-group-btn">
           <button class="btn btn-info" id="search-button">
             <span class="glyphicon glyphicon-search"></span>
-          </button>
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Options <span class="caret"></span></button>
-          <ul class="dropdown-menu dropdown-menu-right">
-            <li><a href="#" id="date-cond">Date Condition</a></li>
-            <!-- comment until implementing save/load screens test
+            </button>
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Options <span class="caret"></span></button>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li><a href="#" id="date-cond">Date Condition</a></li>
+                <!-- comment until implementing save/load screens test
             <li><a href="#" id="load-test">Load Test</a></li>
             <li class="disabled" id="save-test" role="button"><a href="#">Save Test</a></li>-->
-          </ul>
-        </span>
-      </div>
+            </ul>
+            </span>
+        </div>
     </div>
     <span id="dateCondIndicator" class="glyphicon glyphicon-filter hidden" aria-hidden="true" data-toggle="tooltip" data-placement="right"></span>
     <div class="col-md-3">
     </div>
 </div>
-
 <div class="container" id="screens_results" class="hidden">
-	<div class="btn-group hidden" id="group_images" role="group">
-	  <input type="checkbox" id="screens_toggle_groups" checked="true"/>
-	  Group images
-	</div>
-	<p/>
+    <div class="btn-group hidden" id="group_images" role="group">
+        <input type="checkbox" id="screens_toggle_groups" checked="true" /> Group images
+    </div>
+    <p/>
     <ul class="row" id="screens_results_row">
     </ul>
-</div> <!-- end screens results -->
+</div>
+<!-- end screens results -->
 <div class="modal fade" id="screenModal" tabindex="-1" role="dialog" aria-labelledby="screenModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content big-modal">
-        <div id="screensCarousel" class="carousel slide col-md-10" data-ride="carousel">
-  			  <!-- Carousel items -->
-  			  <div class="carousel-inner" id="screens_carousel_items">	
-  			  </div>
-  			  <!-- Carousel nav -->
-  			  <a class="carousel-control left" href="#screensCarousel" data-slide="prev">
-  			  	<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-    		  </a>
-  			  <a class="carousel-control right" href="#screensCarousel" data-slide="next">
-    			  <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-  		    </a>
-  			</div>
-        <div class="col-md-2" id="screenDetails">
-          <div id="details_text">
-            <div class="panel">
-              <div class="panel-body">
-                <input id="select_all" type="checkbox"/> All UI Elements
-              </div>
+        <div class="modal-content big-modal container">
+            <div class="row">
+                <div class="col-md-10">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="screensCarousel" class="carousel slide row" data-ride="carousel">
+                                <!-- Carousel items -->
+                                <div class="carousel-inner" id="screens_carousel_items">
+                                </div>
+                                <!-- Carousel nav -->
+                                <a class="carousel-control left" href="#screensCarousel" data-slide="prev">
+                                    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                                </a>
+                                <a class="carousel-control right" href="#screensCarousel" data-slide="next">
+                                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="selected_panel" class="panel panel-info" >
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Selected element properties</h3>
+                                </div>
+                                <div class="panel-body" style="overflow-y:scroll;max-height: 130px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="distance_panel" class="panel panel-info">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Distance between selected</h3>
+                                </div>
+                                <div class="panel-body">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div id="screenDetails">
+                        <div id="details_text">
+                            <div class="panel">
+                                <div class="panel-body">
+                                    <input id="select_all" type="checkbox" /> All UI Elements
+                                </div>
+                            </div>
+                            <div class="panel-group hidden" id="accordion" role="tablist" aria-multiselectable="true">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab" id="headingFonts">
+                                        <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFonts" aria-expanded="true" aria-controls="collapseFonts">Font</a>
+                      </h4>
+                                    </div>
+                                    <div id="collapseFonts" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFonts" style="overflow-y:scroll;">
+                                        <ul id="fonts" class="list-group"></ul>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab" id="headingColors">
+                                        <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseColors" aria-expanded="true" aria-controls="collapseColors">Text Color</a>
+                      </h4>
+                                    </div>
+                                    <div id="collapseColors" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingColors" style="overflow-y:scroll;">
+                                        <ul id="colors" class="list-group"></ul>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab" id="headingBackgrounds">
+                                        <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseBackgrounds" aria-expanded="true" aria-controls="collapseBackgrounds">Background Color</a>
+                      </h4>
+                                    </div>
+                                    <div id="collapseBackgrounds" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingBackgrounds" style="overflow-y:scroll;">
+                                        <ul id="backgrounds" class="list-group"></ul>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab" id="headingStyles">
+                                        <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseStyles" aria-expanded="true" aria-controls="collapseStyles">Styles</a>
+                      </h4>
+                                    </div>
+                                    <div id="collapseStyles" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingStyles" style="overflow-y:scroll;">
+                                        <ul id="styles" class="list-group"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div id="distance_panel" class="panel panel-info hidden">
-              <div class="panel-heading">
-                <h3 class="panel-title">Distance</h3>
-              </div>
-              <div class="panel-body">
-              </div>
-            </div>
-            <div class="panel-group hidden" id="accordion" role="tablist" aria-multiselectable="true">
-              <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingFonts">
-                  <h4 class="panel-title">
-                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFonts" aria-expanded="true" aria-controls="collapseFonts">Font</a>
-                  </h4>
-                </div>
-                <div id="collapseFonts" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFonts" style="overflow-y:scroll;">
-                  <ul id="fonts" class="list-group"></ul>
-                </div>
-              </div>
-              <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingColors" >
-                  <h4 class="panel-title">
-                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseColors" aria-expanded="true" aria-controls="collapseColors">Text Color</a>
-                  </h4>
-                </div>
-                <div id="collapseColors" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingColors" style="overflow-y:scroll;">
-                  <ul id="colors" class="list-group"></ul>
-                </div>
-              </div>
-              <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingBackgrounds">
-                  <h4 class="panel-title">
-                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseBackgrounds" aria-expanded="true" aria-controls="collapseBackgrounds">Background Color</a>
-                  </h4>
-                </div>
-                <div id="collapseBackgrounds" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingBackgrounds" style="overflow-y:scroll;">
-                  <ul id="backgrounds" class="list-group"></ul>
-                </div>
-              </div>
-              <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingStyles">
-                  <h4 class="panel-title">
-                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseStyles" aria-expanded="true" aria-controls="collapseStyles">Styles</a>
-                  </h4>
-                </div>
-                <div id="collapseStyles" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingStyles" style="overflow-y:scroll;">
-                  <ul id="styles" class="list-group"></ul>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->

@@ -84,6 +84,11 @@ function loadScreens() {
         // update button but skip event
         $('#screens_toggle_groups').bootstrapSwitch('state', screensShowGrouped, true);
 
+        // update UI objects once modal shows up
+        $('#screenModal').on('shown.bs.modal', function(){
+            showHTMLLayout();
+        });
+
         // toggle screen elements in modal
         $('#select_all').on('change', function(){
             toggleHighlightAll();
@@ -276,7 +281,21 @@ function showHTMLLayout() {
                     // save the rect original position for computing distance
                     //  use i as the locator, as it was added to the id of the HTML
                     //  element
-                    rects[''+i] = {original: rect, computed: computed_rect};
+                    rects[''+i] = {original: rect, computed: computed_rect, 
+                        props: {
+                            font: font,
+                            classes: styleClasses,
+                            color: color,
+                            background: background,
+                            'margin-left': screenUIObjects[i]['margin-left'],
+                            'margin-right': screenUIObjects[i]['margin-right'],
+                            'margin-top': screenUIObjects[i]['margin-top'],
+                            'margin-bottom': screenUIObjects[i]['margin-bottom'],
+                            'padding-left': screenUIObjects[i]['padding-left'],
+                            'padding-right': screenUIObjects[i]['padding-right'],
+                            'padding-top': screenUIObjects[i]['padding-top'],
+                            'padding-bottom': screenUIObjects[i]['padding-bottom']
+                        }};
                     // add the rect at the right z-order
                     computed_rect.id = i;
                     addToZOrder(rects_z_order, computed_rect);
@@ -429,10 +448,6 @@ function addUIRect(container, anchor, id, rect, all_props_string) {
         div.css('top', top + "px");
         div.css('width', width + "px");
         div.css('height', height + "px");
-        //div.attr('data-toggle', 'popover');
-        //div.attr('data-content', createPopoverHtml(all_props_string));
-        //div.attr('data-placement', 'top');
-        div.attr('title', 'UI Element');
         container.append(div);
         return {left: left, right: right, top: top, bottom: bottom};
     }
@@ -449,9 +464,16 @@ function createPopoverHtml(props) {
 function selectHoverObject(){
     var obj =$('#screens_carousel_items div div:hover');
     if (obj.hasClass('ui_select'))
+    {
         obj.removeClass('ui_select');
+        // clear selected
+        $('#selected_panel .panel-body').empty();
+    }
     else
+    {        
         obj.addClass('ui_select');
+        showUIProperties(obj.attr('id').substring(8));
+    }
     updateSelection();
 }
 
@@ -502,25 +524,6 @@ function toggleHighlightAll() {
     backgrounds.forEach(function(background_string) {
         backgrounds_hashtable[background_string].highlighted = checked;
     });
-    // align distance label
-    var highlighted_objects = $('.ui_show');
-    if (highlighted_objects.length >= 2) {
-        var first_obj_id=highlighted_objects[0].id.substring(8);
-        var second_obj_id=highlighted_objects[1].id.substring(8);
-        var first_rect = rects[first_obj_id].original;
-        var second_rect = rects[second_obj_id].original;
-        var distance = calcDistance(first_rect, second_rect);
-        // now, add the distance information to the overlay
-        //  TODO: use on-image popup instead of the side bar
-        $('#distance_panel .panel-body').html(distance.toHTML());
-        $('#distance_panel').removeClass('hidden');
-        $('.panel-collapse').css('max-height', ACCORDION_SIZE.SMALL);
-    } 
-    else // not enough highlighted objects
-    {
-        $('#distance_panel').addClass('hidden'); 
-        $('.panel-collapse').css('max-height', ACCORDION_SIZE.LARGE);   
-    }
 }
 
 function toggleHighlightCategory(category, hash, checkbox) {
@@ -557,36 +560,73 @@ function updateSelection() {
         var distance = calcDistance(current_rect, new_rect);
         // now, add the distance information to the overlay
         $('#distance_panel .panel-body').html(distance.toHTML());
-        $('#distance_panel').removeClass('hidden');
-        $('.panel-collapse').css('max-height', ACCORDION_SIZE.SMALL);
-    } 
-    else {// not enough selected
-        $('#distance_panel').addClass('hidden');  
-        $('.panel-collapse').css('max-height', ACCORDION_SIZE.LARGE);  
     }
+    else
+        $('#distance_panel .panel-body').empty();
 }
 
-function showObjTooltip(obj) {
-    return;
-    var poX = obj.width() / 2;
-    var poY = obj.height() / 2;
-    var pos = obj.position();
-    var options = {html: true};
-    var poWidth = 360;
-    var poHeight = 300;
-    var tooHigh = false;
-    poX += pos.left;
-    poY = pos.top;
-    if (poX < poWidth) {
-        options.placement = 'right';
-    } else if (poY < poHeight) {
-        options.placement = 'bottom';
-        tooHigh = true;
+function showUIProperties(id) {
+    var ui_props = rects[id].props;
+    var rect = rects[id].original;
+    var html = '';
+    if (rect)
+        html += '<b>Dimensions</b>: {left: '+rect.left+', right: '+rect.right +
+            ', top: '+rect.top+', bottom: '+rect.bottom+'}<br/>';
+    if (ui_props.font)
+        html += '<b>Font</b>: '+ui_props.font+'<br/>';
+    if (ui_props.color)
+        html += '<b>Text color</b>: '+ui_props.color+'<br/>';
+    if (ui_props.background)
+        html += '<b>Background color</b>: '+ui_props.background+'<br/>';
+    if (ui_props.classes)
+        html += '<b>Style classes</b>: '+ui_props.classes+'<br/>';
+    var margins_string = '';
+    if (ui_props['margin-left'])
+        margins_string += 'left: '+ui_props['margin-left'];
+    if (ui_props['margin-right'])
+    {
+        if (margins_string.length > 0)
+            margins_string += ', ';
+        margins_string += 'right: '+ui_props['margin-right'];
     }
-    obj.popover(options).popover('show');
-    if (tooHigh) {
-        $('.popover').css('top', (poY + 10) + 'px');
+    if (ui_props['margin-top'])
+    {
+        if (margins_string.length > 0)
+            margins_string += ', ';
+        margins_string += 'top: '+ui_props['margin-top'];
     }
+    if (ui_props['margin-bottom'])
+    {
+        if (margins_string.length > 0)
+            margins_string += ', ';
+        margins_string += 'bottom: '+ui_props['margin-bottom'];
+    }
+    if (margins_string.length > 0)
+        html += '<b>Margins</b>: {'+margins_string+'}<br/>';
+    var paddings_string = '';
+    if (ui_props['padding-left'])
+        paddings_string += 'left: '+ui_props['padding-left'];
+    if (ui_props['padding-right'])
+    {
+        if (paddings_string.length > 0)
+            paddings_string += ', ';
+        paddings_string += 'right: '+ui_props['padding-right'];
+    }
+    if (ui_props['padding-top'])
+    {
+        if (paddings_string.length > 0)
+            paddings_string += ', ';
+        paddings_string += 'top: '+ui_props['padding-top'];
+    }
+    if (ui_props['padding-bottom'])
+    {
+        if (paddings_string.length > 0)
+            paddings_string += ', ';
+        paddings_string += 'bottom: '+ui_props['padding-bottom'];
+    }
+    if (paddings_string.length > 0)
+        html += '<b>Padding</b>: {'+paddings_string+'}<br/>';
+    $('#selected_panel .panel-body').html(html);
 }
 
 function calcDistance(first_rect, second_rect) {
@@ -600,12 +640,20 @@ function calcDistance(first_rect, second_rect) {
         top_align: 0,
         bottom_align: 0,
         toHTML: function(){
-            return 'Width = ' + (this.right-this.left) + '<br/>' +
-                'Height = ' +(this.bottom-this.top) + '<br/>' +
-                'Left alignment = ' +(this.left_align) + '<br/>' +
-                'Right alignment = ' +(this.right_align) + '<br/>' +
-                'Top alignment = ' +(this.top_align) + '<br/>' +
-                'Bottom alignment = ' +(this.bottom_align) + '<br/>';
+            var html = '';
+            if (this.right-this.left > 0)
+                html += '<b>Horizontal</b>: '+ (this.right-this.left) + '<br/>';
+            if (this.bottom-this.top > 0)
+                html += '<b>Vertical</b>: '+ (this.bottom-this.top) + '<br/>';
+            if (this.left_align == 0)
+                html += '<b>Left aligned</b><br/>';
+            if (this.right_align == 0)
+                html += '<b>Right aligned</b><br/>';
+            if (this.top_align == 0)
+                html += '<b>Top aligned</b><br/>';
+            if (this.bottom_align == 0)
+                html += '<b>Bottom aligned</b><br/>';
+            return html;
         }
     };
     if (first_rect.left < second_rect.left) {
@@ -631,15 +679,7 @@ function calcDistance(first_rect, second_rect) {
 
 function showModal(itemIndex) {
     $('#screenModal').modal();
-    if ($('#screens_carousel_items div.active').index() == itemIndex)
-    {
-        // handle edge case where there is no 'slid' event:
-        //  launch of modal and using the active image (first time is 0)
-        $('#screensCarousel').carousel(itemIndex);
-        showHTMLLayout();
-    }
-    else
-        $('#screensCarousel').carousel(itemIndex);
+    $('#screensCarousel').carousel(itemIndex);
 }
 
 function clearScreensSearch() {
@@ -654,8 +694,8 @@ function clearDetails() {
     types_hashtable = {};
     colors_hashtable = {};
     styles_hashtable = {};
-    $('#distance_panel').addClass('hidden');    
     $('#distance_panel .panel-body').empty();
+    $('#selected_panel .panel-body').empty();
     $('#fonts').empty();
     $('#types').empty();
     $('#colors').empty();
