@@ -22,7 +22,6 @@ var ACCORDION_SIZE = {
     LARGE: '400px',
     SMALL: '250px'
 };
-var selected_rect = null;
 
 function componentToHex(c) {
     var hex = c.toString(16).toUpperCase();
@@ -182,8 +181,9 @@ function fillScreensCarousel() {
             .on('slid.bs.carousel', showHTMLLayout); // after slide
         $('#screens_carousel_items')
             .on('click', function(e) {
-                var offset = $(this).offset();
-                toggleHighlightPoint(e.pageX - offset.left,e.pageY - offset.top);
+                //var offset = $(this).offset();
+                //selectAtPoint(e.pageX - offset.left,e.pageY - offset.top);
+                selectHoverObject();
               });
     } else {
         screens_results_row.append(
@@ -228,6 +228,7 @@ function showHTMLLayout() {
             var anchor = img.position();
             //console.log('screenUIObjects[0]: '+screenUIObjects[0]);
             //console.log('screenUIObjects[0] json: '+JSON.stringify(screenUIObjects[0]));
+            var rects_z_order = [];            
             for (var i = 0; i < screenUIObjects.length; i++) {
                 // get dimension and font of UI obj
                 var rect = screenUIObjects[i].rect;                
@@ -269,6 +270,9 @@ function showHTMLLayout() {
                     //  use i as the locator, as it was added to the id of the HTML
                     //  element
                     rects[''+i] = {original: rect, computed: computed_rect};
+                    // add the rect at the right z-order
+                    computed_rect.id = i;
+                    addToZOrder(rects_z_order, computed_rect);
                     // add rect id to the relevant categories
                     if (!fonts_hashtable[font]) {
                         fonts_hashtable[font] = {
@@ -306,6 +310,12 @@ function showHTMLLayout() {
                     });
                 }
             }
+            // go over z-order and assign the appropriate style
+            for(var z=0;z<rects_z_order.length;z++)
+            {
+                $('#ui_rect_'+rects_z_order[z].id).css('z-index', (z+1));
+            }
+
             addCategoryItems($('#fonts'), HIGHLIGHT.FONT);
             addCategoryItems($('#colors'), HIGHLIGHT.COLOR);
             addCategoryItems($('#backgrounds'), HIGHLIGHT.BACKGROUND);
@@ -314,6 +324,40 @@ function showHTMLLayout() {
         .fail(function(err) {
             console.log("Failed to get objects for screen " + graph_id + ": " + err);
         });
+}
+
+function addToZOrder(rects_z_order, computed_rect){
+    var index = 0;
+    var smaller = true;
+    while(index < rects_z_order.length && smaller)
+    {
+        // compare with rect
+        var target_rect = rects_z_order[index];
+        // if this rect is inside the z-order rect, advancce
+        // else if this rect is outside the z-order rect, advancce
+        // else this rect intersect with the z-order rect and is not smaller
+        //      so add it to at this position
+        if ((computed_rect.left >= target_rect.left) &&
+            (computed_rect.right <= target_rect.right) &&
+            (computed_rect.top >= target_rect.top) &&
+            (computed_rect.bottom <= target_rect.bottom))
+        {
+            index++;
+        }
+        else if ((computed_rect.left > target_rect.right) || 
+           (computed_rect.right < target_rect.left) || 
+           (computed_rect.top > target_rect.bottom) ||
+           (computed_rect.bottom < target_rect.top))
+        {
+            index++;
+        }
+        else
+            smaller = false;
+    }
+    if (!smaller)
+        rects_z_order.splice(index, 0, computed_rect);
+    else
+        rects_z_order.push(computed_rect);    
 }
 
 function getHashtableByCategory(category)
@@ -395,49 +439,26 @@ function createPopoverHtml(props) {
     return html;
 }
 
-function toggleHighlightPoint(x, y){
+function selectHoverObject(){
+    $('#screens_carousel_items div div:hover').addClass('ui_select');
+}
+
+function selectAtPoint(x, y){
     // highlight all rects at point x,y
     var keys = Object.keys(rects);
-    var rects_z_order = []; 
     for(var k=0;k<keys.length;k++) {
         var computed_rect = rects[keys[k]].computed;
         if ((computed_rect.left <= x && computed_rect.right >= x) &&
             (computed_rect.top <= y && computed_rect.bottom >= y))
         {
             var obj_rect = $('#ui_rect_'+keys[k]);
-            if (toggleHighlightObject(obj_rect))
-            {
-                computed_rect.id = keys[k];
-                // object is now highlighted, locate it at the right z-order
-                //  by comparing its intersection with other rects
-                var index = 0;
-                var smaller = true;
-                while(index < rects_z_order.length && smaller)
-                {
-                    // compare with rect
-                    var target_rect = rects_z_order[index];
-                    if ((computed_rect.left >= target_rect.left) &&
-                        (computed_rect.right <= target_rect.right) &&
-                        (computed_rect.top >= target_rect.top) &&
-                        (computed_rect.bottom <= target_rect.bottom))
-                    {
-                        index++;
-                    }
-                    else
-                        smaller = false;
-                }
-                if (!smaller)
-                    rects_z_order.splice(index, 0, computed_rect);
-                else
-                    rects_z_order.push(computed_rect);
+            if (obj_rect.css('box-shadow').length > 0)
+            {                
+                // select the obj
+                obj_rect.addClass('ui_select');
             }
         }
     };
-    // go over z-order and assign the appropriate style
-    for(var z=0;z<rects_z_order.length;z++)
-    {
-        $('#ui_rect_'+rects_z_order[z].id).css('z-index', (z+1));
-    }
 }
 
 function toggleHighlightAll() {   
@@ -511,6 +532,7 @@ function toggleHighlightCategory(category, hash, checkbox) {
 }
 
 function toggleHighlightObject(obj) {
+    // if the object is in hover mode, it is being selected
     var highlighted = obj.hasClass('ui_show');
     var highlighted_objects = $('.ui_show');
     if (!highlighted) {

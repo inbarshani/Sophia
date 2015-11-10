@@ -400,10 +400,21 @@ span.input-group-addon {
   border: solid 1px black; 
 }
 
-
-#screens_carousel_items .ui_show:hover {
+#screens_carousel_items .ui_select {
   box-shadow: 3px 3px 15px #666;
-  border: solid 2px red;
+  border: solid 2px #87CEFA;
+  background: #FFFACD;
+  
+  /*Opacity*/
+  zoom: 1;
+  filter: alpha(opacity=40);
+  opacity: 0.4;
+}
+
+/* highlighting on hover the UI elements */
+#screens_carousel_items div div:hover:not(.ui_select) {
+  box-shadow: 3px 3px 15px #666;
+  border: solid 2px #87CEFA;
   background: #F8F8FF;
   
   /*Opacity*/
