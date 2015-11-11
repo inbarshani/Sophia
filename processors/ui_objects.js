@@ -3,7 +3,7 @@ module.exports = {
         obj.type = "UI_Objects";
         obj.high_priority_index = '';
         obj.description = '';
-        obj.indexable_content = JSON.stringify(obj.objects);
+        obj.indexable_content = JSON.stringify(obj.objects).replace(/(\r\n|\n|\r|#|\t)/gm,'');
         obj.objects = null;
 
         return obj;
