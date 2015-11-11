@@ -1,10 +1,10 @@
 module.exports = {
 	getData: function (obj) {
+        obj.text = obj.text.replace(/(\r\n|\n|\r|"|#|[^\x00-\x7F])/gm,' ');
         obj.high_priority_index = getLongWords(obj.text, 3).join(' ');
         obj.indexable_content = obj.text; 
         if (obj.phash) // prepare for storing the hash in IDOL
         	obj.phash = encodeURIComponent(JSON.stringify(obj.phash));
-        obj.text = obj.text.replace(/(\r\n|\n|\r|"|#|[^\x00-\x7F])/gm,' ');
         //console.log('screen obj: '+require('util').inspect(obj, {depth:4}));
         return obj;
 	},
