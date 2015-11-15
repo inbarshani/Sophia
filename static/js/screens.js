@@ -84,9 +84,11 @@ function loadScreens() {
         // update button but skip event
         $('#screens_toggle_groups').bootstrapSwitch('state', screensShowGrouped, true);
 
-        // update UI objects once modal shows up
+        // update UI objects once modal shows up or hidden
         $('#screenModal').on('shown.bs.modal', function(){
             showHTMLLayout();
+        }).on('hide.bs.modal', function(){
+            clearDetails();
         });
 
         // toggle screen elements in modal
