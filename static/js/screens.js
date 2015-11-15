@@ -193,7 +193,7 @@ function fillScreensCarousel() {
                 selectHoverObject();
             })
             .keypress(function(e){
-               if(e.keyCode == 32){
+               if(e.keyCode == 32 || e.keyCode == 13){
                    // user has pressed space
                    selectFocusObject();
                }
