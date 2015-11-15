@@ -22,6 +22,8 @@ var ACCORDION_SIZE = {
     LARGE: '400px',
     SMALL: '250px'
 };
+var rects_z_order = [];
+
 
 function componentToHex(c) {
     var hex = c.toString(16).toUpperCase();
@@ -35,10 +37,9 @@ function rgbToHex(rgbString) {
         rgb = rgbString.match(/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)$/);
     else
         rgb = rgbString.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-    if (isAlpha && parseInt(rgb[4])==0)
+    if (isAlpha && parseInt(rgb[4]) == 0)
         return null;
-    return "#" + componentToHex(parseInt(rgb[1])) 
-        + componentToHex(parseInt(rgb[2])) + componentToHex(parseInt(rgb[3]));
+    return "#" + componentToHex(parseInt(rgb[1])) + componentToHex(parseInt(rgb[2])) + componentToHex(parseInt(rgb[3]));
 }
 
 function loadScreens() {
@@ -85,14 +86,14 @@ function loadScreens() {
         $('#screens_toggle_groups').bootstrapSwitch('state', screensShowGrouped, true);
 
         // update UI objects once modal shows up or hidden
-        $('#screenModal').on('shown.bs.modal', function(){
+        $('#screenModal').on('shown.bs.modal', function() {
             showHTMLLayout();
-        }).on('hide.bs.modal', function(){
+        }).on('hide.bs.modal', function() {
             clearDetails();
         });
 
         // toggle screen elements in modal
-        $('#select_all').on('change', function(){
+        $('#select_all').on('change', function() {
             toggleHighlightAll();
         });
 
@@ -153,7 +154,7 @@ function fillScreensCarousel() {
         if (groups[j] == 'none') {
             screensArray = screens;
         } else {
-        // if grouped, just one result per group
+            // if grouped, just one result per group
             if (screensShowGrouped)
                 screensArray.push(screens[0]);
             else
@@ -184,14 +185,16 @@ function fillScreensCarousel() {
             wrap: false
         });
         $('#screensCarousel')
-            .on('slide.bs.carousel', clearDetails) // before slide
             .on('slid.bs.carousel', showHTMLLayout); // after slide
         $('#screens_carousel_items')
             .on('click', function(e) {
                 //var offset = $(this).offset();
                 //selectAtPoint(e.pageX - offset.left,e.pageY - offset.top);
                 selectHoverObject();
-              });
+            })
+            .keypress(function() {
+                selectFocusObject();
+            });
     } else {
         screens_results_row.append(
             '<li class="">' +
@@ -233,6 +236,9 @@ function showHTMLLayout() {
 
     var jqxhr = $.ajax("/screens/" + graph_id + '/objects')
         .done(function(uiObjectsData) {
+            // clear previous status
+            clearDetails();
+            // fill in new data
             $('#screenDetails').removeClass('disabled');
             $('#screenDetails .panel-body').removeClass('disabled');
             $('#screenDetails .panel-title').removeClass('disabled');
@@ -242,10 +248,9 @@ function showHTMLLayout() {
             var anchor = img.position();
             //console.log('screenUIObjects[0]: '+screenUIObjects[0]);
             //console.log('screenUIObjects[0] json: '+JSON.stringify(screenUIObjects[0]));
-            var rects_z_order = [];            
             for (var i = 0; i < screenUIObjects.length; i++) {
                 // get dimension and font of UI obj
-                var rect = screenUIObjects[i].rect;                
+                var rect = screenUIObjects[i].rect;
                 // draw rect on image
                 //console.log('add rect: '+JSON.stringify(rect));
                 var font = screenUIObjects[i].font_family + ' ' + screenUIObjects[i].font_size;
@@ -255,93 +260,93 @@ function showHTMLLayout() {
                 var background = screenUIObjects[i].background;
                 var styleClasses = screenUIObjects[i].classNames;
                 var styleClassesArray = [];
-                var all_props_string = '{ left: ' + rect.left + ', top: ' +
-                    rect.top + ', width: ' + (rect.right - rect.left) +
-                    ', height: ' + (rect.bottom - rect.top) + '} ' +
-                    font;
-                if (styleClasses && (typeof styleClasses == 'string'))
-                {
+                if (styleClasses && (typeof styleClasses == 'string')) {
                     styleClasses = styleClasses.trim();
-                    all_props_string += ', classes: '+styleClasses;
                     styleClassesArray = styleClasses.split(' ');
                 }
                 if (color) {
                     color = rgbToHex(color);
                     if (color_palette[color])
                         color = color_palette[color];
-                    all_props_string += ', color: ' + color;
                 }
                 if (background) {
                     background = rgbToHex(background);
                     if (background && color_palette[background])
                         background = color_palette[background];
-                    if (background)
-                        all_props_string += ', background color: ' + background;
                 }
-                var computed_rect = addUIRect(active_div, anchor, i, rect, all_props_string);
-                if (screenUIObjects[i].visible && computed_rect) {
-                    // save the rect original position for computing distance
-                    //  use i as the locator, as it was added to the id of the HTML
-                    //  element
-                    rects[''+i] = {original: rect, computed: computed_rect, 
-                        props: {
-                            font: font,
-                            classes: styleClasses,
-                            color: color,
-                            background: background,
-                            'margin-left': screenUIObjects[i]['margin-left'],
-                            'margin-right': screenUIObjects[i]['margin-right'],
-                            'margin-top': screenUIObjects[i]['margin-top'],
-                            'margin-bottom': screenUIObjects[i]['margin-bottom'],
-                            'padding-left': screenUIObjects[i]['padding-left'],
-                            'padding-right': screenUIObjects[i]['padding-right'],
-                            'padding-top': screenUIObjects[i]['padding-top'],
-                            'padding-bottom': screenUIObjects[i]['padding-bottom']
-                        }};
-                    // add the rect at the right z-order
-                    computed_rect.id = i;
-                    addToZOrder(rects_z_order, computed_rect);
-                    // add rect id to the relevant categories
-                    if (!fonts_hashtable[font]) {
-                        fonts_hashtable[font] = {
-                            highlighted: false,
-                            rect_array: [i]
+                if (screenUIObjects[i].visible) {
+                    var computed_rect = addUIRect(active_div, anchor, i, rect);
+                    if (computed_rect) {
+                        // save the rect original position for computing distance
+                        //  use i as the locator, as it was added to the id of the HTML
+                        //  element
+                        rects['' + i] = {
+                            original: rect,
+                            computed: computed_rect,
+                            props: {
+                                font: font,
+                                classes: styleClasses,
+                                color: color,
+                                background: background,
+                                'margin-left': screenUIObjects[i]['margin-left'],
+                                'margin-right': screenUIObjects[i]['margin-right'],
+                                'margin-top': screenUIObjects[i]['margin-top'],
+                                'margin-bottom': screenUIObjects[i]['margin-bottom'],
+                                'padding-left': screenUIObjects[i]['padding-left'],
+                                'padding-right': screenUIObjects[i]['padding-right'],
+                                'padding-top': screenUIObjects[i]['padding-top'],
+                                'padding-bottom': screenUIObjects[i]['padding-bottom']
+                            }
                         };
-                    } else
-                        fonts_hashtable[font].rect_array.push(i);
-                    if (color) {
-                        if (!colors_hashtable[color]) {
-                            colors_hashtable[color] = {
+                        // add the rect at the right z-order
+                        computed_rect.id = i;
+                        addToZOrder(rects_z_order, computed_rect);
+                        // add rect id to the relevant categories
+                        if (!fonts_hashtable[font]) {
+                            fonts_hashtable[font] = {
                                 highlighted: false,
                                 rect_array: [i]
                             };
                         } else
-                            colors_hashtable[color].rect_array.push(i);
+                            fonts_hashtable[font].rect_array.push(i);
+                        if (color) {
+                            if (!colors_hashtable[color]) {
+                                colors_hashtable[color] = {
+                                    highlighted: false,
+                                    rect_array: [i]
+                                };
+                            } else
+                                colors_hashtable[color].rect_array.push(i);
+                        }
+                        if (background) {
+                            if (!backgrounds_hashtable[background]) {
+                                backgrounds_hashtable[background] = {
+                                    highlighted: false,
+                                    rect_array: [i]
+                                };
+                            } else
+                                backgrounds_hashtable[background].rect_array.push(i);
+                        }
+                        styleClassesArray.forEach(function(style) {
+                            if (!styles_hashtable[style]) {
+                                styles_hashtable[style] = {
+                                    highlighted: false,
+                                    rect_array: [i]
+                                };
+                            } else
+                                styles_hashtable[style].rect_array.push(i);
+                        });
                     }
-                    if (background) {
-                        if (!backgrounds_hashtable[background]) {
-                            backgrounds_hashtable[background] = {
-                                highlighted: false,
-                                rect_array: [i]
-                            };
-                        } else
-                            backgrounds_hashtable[background].rect_array.push(i);
-                    }
-                    styleClassesArray.forEach(function(style){
-                        if (!styles_hashtable[style]) {
-                            styles_hashtable[style] = {
-                                highlighted: false,
-                                rect_array: [i]
-                            };
-                        } else
-                            styles_hashtable[style].rect_array.push(i);
-                    });
                 }
             }
             // go over z-order and assign the appropriate style
-            for(var z=0;z<rects_z_order.length;z++)
-            {
-                $('#ui_rect_'+rects_z_order[z].id).css('z-index', (z+1));
+            // use the same order for TAB navigation as well
+            for (var z = 0; z < rects_z_order.length; z++) {
+                //console.log('Setting Z and TAB index for id: '+rects_z_order[z].id+' as z='+z);
+                $('#ui_rect_' + rects_z_order[z].id).css('z-index', (z + 1));
+                // add 100 to tabs to make sure they are not inteferring with other 
+                //  elements on page
+                $('#ui_rect_' + rects_z_order[z].id).prop('tabindex', (100 + z + 1));
             }
 
             addCategoryItems($('#fonts'), HIGHLIGHT.FONT);
@@ -354,11 +359,10 @@ function showHTMLLayout() {
         });
 }
 
-function addToZOrder(rects_z_order, computed_rect){
+function addToZOrder(rects_z_order, computed_rect) {
     var index = 0;
     var smaller = true;
-    while(index < rects_z_order.length && smaller)
-    {
+    while (index < rects_z_order.length && smaller) {
         // compare with rect
         var target_rect = rects_z_order[index];
         // if this rect is inside the z-order rect, advancce
@@ -368,28 +372,23 @@ function addToZOrder(rects_z_order, computed_rect){
         if ((computed_rect.left >= target_rect.left) &&
             (computed_rect.right <= target_rect.right) &&
             (computed_rect.top >= target_rect.top) &&
-            (computed_rect.bottom <= target_rect.bottom))
-        {
+            (computed_rect.bottom <= target_rect.bottom)) {
             index++;
-        }
-        else if ((computed_rect.left > target_rect.right) || 
-           (computed_rect.right < target_rect.left) || 
-           (computed_rect.top > target_rect.bottom) ||
-           (computed_rect.bottom < target_rect.top))
-        {
+        } else if ((computed_rect.left > target_rect.right) ||
+            (computed_rect.right < target_rect.left) ||
+            (computed_rect.top > target_rect.bottom) ||
+            (computed_rect.bottom < target_rect.top)) {
             index++;
-        }
-        else
+        } else
             smaller = false;
     }
     if (!smaller)
         rects_z_order.splice(index, 0, computed_rect);
     else
-        rects_z_order.push(computed_rect);    
+        rects_z_order.push(computed_rect);
 }
 
-function getHashtableByCategory(category)
-{
+function getHashtableByCategory(category) {
     if (category == HIGHLIGHT.FONT)
         return fonts_hashtable;
     else if (category == HIGHLIGHT.BACKGROUND)
@@ -402,8 +401,7 @@ function getHashtableByCategory(category)
         return null;
 }
 
-function addCategoryItems(root_element, category)
-{
+function addCategoryItems(root_element, category) {
     var hashtable = getHashtableByCategory(category);
     root_element.html('');
     var keys = Object.keys(hashtable);
@@ -434,7 +432,7 @@ function addCategoryItems(root_element, category)
     });
 }
 
-function addUIRect(container, anchor, id, rect, all_props_string) {
+function addUIRect(container, anchor, id, rect) {
     var div;
     var left = rect.left * widthFactor + anchor.left;
     var right = rect.right * widthFactor + anchor.left;
@@ -451,33 +449,42 @@ function addUIRect(container, anchor, id, rect, all_props_string) {
         div.css('width', width + "px");
         div.css('height', height + "px");
         container.append(div);
-        return {left: left, right: right, top: top, bottom: bottom};
+        return {
+            left: left,
+            right: right,
+            top: top,
+            bottom: bottom
+        };
     }
     return null;
 };
 
-function createPopoverHtml(props) {
-    var html = '<p>';
-    html += props;
-    html += '</p>';
-    return html;
-}
-
-function selectHoverObject(){
-    var obj =$('#screens_carousel_items div div:hover');
-    if (obj.hasClass('ui_select'))
-    {
+function selectHoverObject() {
+    var obj = $('#screens_carousel_items div div:hover');
+    if (obj.hasClass('ui_select')) {
         obj.removeClass('ui_select');
         // clear selected
         $('#selected_panel .panel-body').empty();
-    }
-    else
-    {        
+    } else {
         obj.addClass('ui_select');
         showUIProperties(obj.attr('id').substring(8));
     }
     updateSelection();
 }
+
+function selectFocusObject() {
+    var obj = $('#screens_carousel_items div div:focus');
+    if (obj.hasClass('ui_select')) {
+        obj.removeClass('ui_select');
+        // clear selected
+        $('#selected_panel .panel-body').empty();
+    } else {
+        obj.addClass('ui_select');
+        showUIProperties(obj.attr('id').substring(8));
+    }
+    updateSelection();
+}
+
 
 /* OBSOLETE: remove after November, if there is no need to select objects this way*/
 /*
@@ -499,17 +506,21 @@ function selectAtPoint(x, y){
     };
 }
 */
-function toggleHighlightAll() {   
+function toggleHighlightAll() {
     // find items and highlight
     var checked = $('#select_all')[0].checked;
     if (checked) {
         // select all elements
-        $('#screens_carousel_items div.active div').addClass('ui_show');
+        $('#screens_carousel_items div.active div')
+            .addClass('ui_show')
+            .removeClass('disabled');
         // align all checkboxes
         $('#accordion li :checkbox').prop('checked', true);
     } else {
         // un-select all elements
-        $('#screens_carousel_items div.active div').removeClass('ui_show');
+        $('#screens_carousel_items div.active div')
+            .removeClass('ui_show')
+            .removeClass('disabled');
         // align all checkboxes
         $('#accordion li :checkbox').prop('checked', false);
     }
@@ -528,7 +539,7 @@ function toggleHighlightAll() {
     });
 }
 
-function toggleHighlightCategory(category, hash, checkbox) {
+function toggleHighlightCategory(category, hash, checkbox) {    
     // find items and highlight
     var hashtable = getHashtableByCategory(category);
     // toggle highlighted state
@@ -539,15 +550,22 @@ function toggleHighlightCategory(category, hash, checkbox) {
         $('#select_all').prop('checked', false);
     }
     var object_ids = hashtable[hash].rect_array;
+    // toggle ui_show for category items
     object_ids.forEach(function(object_id) {
         if (hashtable[hash].highlighted) {
             checkbox.prop('checked', true);
-            $('#ui_rect_' + object_id).addClass('ui_show');
+            $('#ui_rect_' + object_id).addClass('ui_show').removeClass('disabled');
         } else {
             checkbox.prop('checked', false);
             $('#ui_rect_' + object_id).removeClass('ui_show');
         }
     });
+    // if there is any checkbox left checked, everything that doesn't have ui_show
+    //  should be disabled
+    if ($('#screenDetails :checked').length > 0)
+        $('#screens_carousel_items div.item div:not(.ui_show)').addClass('disabled');
+    else
+        $('#screens_carousel_items div.item div').removeClass('disabled');
 }
 
 function updateSelection() {
@@ -556,14 +574,13 @@ function updateSelection() {
     if (selected_objects.length > 1) {
         // get original location of selected object
         // get the id from 'ui_rect_x' where x is the id
-        var obj_id=selected_objects[0].id.substring(8);
+        var obj_id = selected_objects[0].id.substring(8);
         var current_rect = rects[obj_id].original;
         var new_rect = rects[selected_objects[1].id.substring(8)].original;
         var distance = calcDistance(current_rect, new_rect);
         // now, add the distance information to the overlay
         $('#distance_panel .panel-body').html(distance.toHTML());
-    }
-    else
+    } else
         $('#distance_panel .panel-body').empty();
 }
 
@@ -572,62 +589,56 @@ function showUIProperties(id) {
     var rect = rects[id].original;
     var html = '';
     if (rect)
-        html += '<b>Dimensions</b>: {left: '+rect.left+', right: '+rect.right +
-            ', top: '+rect.top+', bottom: '+rect.bottom+'}<br/>';
+        html += '<b>Dimensions</b>: {left: ' + rect.left + ', right: ' + rect.right +
+        ', top: ' + rect.top + ', bottom: ' + rect.bottom + '}<br/>';
     if (ui_props.font)
-        html += '<b>Font</b>: '+ui_props.font+'<br/>';
+        html += '<b>Font</b>: ' + ui_props.font + '<br/>';
     if (ui_props.color)
-        html += '<b>Text color</b>: '+ui_props.color+'<br/>';
+        html += '<b>Text color</b>: ' + ui_props.color + '<br/>';
     if (ui_props.background)
-        html += '<b>Background color</b>: '+ui_props.background+'<br/>';
+        html += '<b>Background color</b>: ' + ui_props.background + '<br/>';
     if (ui_props.classes)
-        html += '<b>Style classes</b>: '+ui_props.classes+'<br/>';
+        html += '<b>Style classes</b>: ' + ui_props.classes + '<br/>';
     var margins_string = '';
     if (ui_props['margin-left'])
-        margins_string += 'left: '+ui_props['margin-left'];
-    if (ui_props['margin-right'])
-    {
+        margins_string += 'left: ' + ui_props['margin-left'];
+    if (ui_props['margin-right']) {
         if (margins_string.length > 0)
             margins_string += ', ';
-        margins_string += 'right: '+ui_props['margin-right'];
+        margins_string += 'right: ' + ui_props['margin-right'];
     }
-    if (ui_props['margin-top'])
-    {
+    if (ui_props['margin-top']) {
         if (margins_string.length > 0)
             margins_string += ', ';
-        margins_string += 'top: '+ui_props['margin-top'];
+        margins_string += 'top: ' + ui_props['margin-top'];
     }
-    if (ui_props['margin-bottom'])
-    {
+    if (ui_props['margin-bottom']) {
         if (margins_string.length > 0)
             margins_string += ', ';
-        margins_string += 'bottom: '+ui_props['margin-bottom'];
+        margins_string += 'bottom: ' + ui_props['margin-bottom'];
     }
     if (margins_string.length > 0)
-        html += '<b>Margins</b>: {'+margins_string+'}<br/>';
+        html += '<b>Margins</b>: {' + margins_string + '}<br/>';
     var paddings_string = '';
     if (ui_props['padding-left'])
-        paddings_string += 'left: '+ui_props['padding-left'];
-    if (ui_props['padding-right'])
-    {
+        paddings_string += 'left: ' + ui_props['padding-left'];
+    if (ui_props['padding-right']) {
         if (paddings_string.length > 0)
             paddings_string += ', ';
-        paddings_string += 'right: '+ui_props['padding-right'];
+        paddings_string += 'right: ' + ui_props['padding-right'];
     }
-    if (ui_props['padding-top'])
-    {
+    if (ui_props['padding-top']) {
         if (paddings_string.length > 0)
             paddings_string += ', ';
-        paddings_string += 'top: '+ui_props['padding-top'];
+        paddings_string += 'top: ' + ui_props['padding-top'];
     }
-    if (ui_props['padding-bottom'])
-    {
+    if (ui_props['padding-bottom']) {
         if (paddings_string.length > 0)
             paddings_string += ', ';
-        paddings_string += 'bottom: '+ui_props['padding-bottom'];
+        paddings_string += 'bottom: ' + ui_props['padding-bottom'];
     }
     if (paddings_string.length > 0)
-        html += '<b>Padding</b>: {'+paddings_string+'}<br/>';
+        html += '<b>Padding</b>: {' + paddings_string + '}<br/>';
     $('#selected_panel .panel-body').html(html);
 }
 
@@ -641,12 +652,12 @@ function calcDistance(first_rect, second_rect) {
         right_align: 0,
         top_align: 0,
         bottom_align: 0,
-        toHTML: function(){
+        toHTML: function() {
             var html = '';
-            if (this.right-this.left > 0)
-                html += '<b>Horizontal</b>: '+ (this.right-this.left) + '<br/>';
-            if (this.bottom-this.top > 0)
-                html += '<b>Vertical</b>: '+ (this.bottom-this.top) + '<br/>';
+            if (this.right - this.left > 0)
+                html += '<b>Horizontal</b>: ' + (this.right - this.left) + '<br/>';
+            if (this.bottom - this.top > 0)
+                html += '<b>Vertical</b>: ' + (this.bottom - this.top) + '<br/>';
             if (this.left_align == 0)
                 html += '<b>Left aligned</b><br/>';
             if (this.right_align == 0)
@@ -664,14 +675,14 @@ function calcDistance(first_rect, second_rect) {
     } else {
         distance.left = second_rect.right;
         distance.right = first_rect.left;
-    } 
+    }
     if (first_rect.top < second_rect.top) {
         distance.top = first_rect.bottom;
         distance.bottom = second_rect.top;
     } else {
         distance.top = second_rect.bottom;
         distance.bottom = first_rect.top;
-    }    
+    }
     distance.left_align = Math.abs(first_rect.left - second_rect.left);
     distance.top_align = Math.abs(first_rect.top - second_rect.top);
     distance.right_align = Math.abs(first_rect.right - second_rect.right);
@@ -680,8 +691,8 @@ function calcDistance(first_rect, second_rect) {
 }
 
 function showModal(itemIndex) {
-    $('#screenModal').modal();
     $('#screensCarousel').carousel(itemIndex);
+    $('#screenModal').modal();
 }
 
 function clearScreensSearch() {
@@ -692,10 +703,12 @@ function clearScreensSearch() {
 }
 
 function clearDetails() {
+    console.log('clearDetails');
     fonts_hashtable = {};
     types_hashtable = {};
     colors_hashtable = {};
     styles_hashtable = {};
+    rects_z_order.length = 0;
     $('#distance_panel .panel-body').empty();
     $('#selected_panel .panel-body').empty();
     $('#fonts').empty();
@@ -703,5 +716,5 @@ function clearDetails() {
     $('#colors').empty();
     $('#styles').empty();
     $('.panel-collapse').css('max-height', ACCORDION_SIZE.LARGE);
-    $('#screens_carousel_items div.active div').remove();
+    $('#screens_carousel_items div.item div').remove();
 }
