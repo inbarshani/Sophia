@@ -192,8 +192,11 @@ function fillScreensCarousel() {
                 //selectAtPoint(e.pageX - offset.left,e.pageY - offset.top);
                 selectHoverObject();
             })
-            .keypress(function() {
-                selectFocusObject();
+            .keypress(function(e){
+               if(e.keyCode == 32){
+                   // user has pressed space
+                   selectFocusObject();
+               }
             });
     } else {
         screens_results_row.append(
