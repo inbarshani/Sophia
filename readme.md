@@ -53,11 +53,12 @@ B. Jetty and MQM log parser - REPEAT STEPS 3-4 AFTER MQM DEPLOYMENT!!!!
 	jetty-rewrite.xml
 	jetty-stats.xml
 	jetty-logging.xml
-	See <Sophia>\agents\jetty\logging\start.ini for an example. 
+	See <Sophia>\agents\jetty\server\conf\start.ini for an example. 
 4. edit /DATA/ads_slave/deployments/8082/hp/mqm/server/conf/jetty-requestlog.xml
 	after the line <Set name="LogTimeZone"><Property name="requestlog.timezone" default="GMT"/></Set>
 	add the next line:
     <Set name="logDateFormat">dd/MMM/yyyy:HH:mm:ss.SSS</Set>
+    See <Sophia>\agents\jetty\server\conf\jetty-requestlog.xml for an example.
 5. create folder /DATA/ads_slave/deployments/8082/hp/mqm/server/logs
 6. copy <Sophia>\agents\jetty\logging\sophia to /var/opt/logstash-1.4.2/patterns
 7. Restart Jetty
