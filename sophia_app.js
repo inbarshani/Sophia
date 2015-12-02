@@ -87,23 +87,45 @@ app.use('/searchFlows', function(request, response) {
     });
 });
 
+function trimPatterns(patterns, keyword)
+{
+    if (patterns)
+    {
+        for(var i=0;i<patterns.length;i++)
+        {
+            console.log('trimPatterns Trim pattern: '+
+                patterns[i]+' into '+
+                patterns[i].substring(0,
+                patterns[i].length - keyword.length));
+            patterns[i] = patterns[i].substring(0,
+                patterns[i].length - keyword.length);
+        }
+    }
+}
+
 app.use('/searchScreens', function(request, response) {
     var queryText = request.query.q;
     var dateCondition = JSON.parse(request.query.dateCondition);
-    var elementSearches = queryText.match(/\b[\w-.#$%&'!]+:Element\b|'[\w-.#$%&'!\s]+':Element\b/g);
-    if (elementSearches && elementSearches.length > 0)
+    // for each type of element-search (e.g. font, style, color)
+    //  need to search the query string for occurences
+    var styleSearches = queryText.match(/\b[\w-.#$%&'!]+:Style\b|'[\w-.#$%&'!\s]+':Style\b/gi);
+    var fontSearches = queryText.match(/\b[\w-.#$%&'!]+:Font\b|'[\w-.#$%&'!\s]+':Font\b/gi);
+    var colorSearches = queryText.match(/\b[\w-.#$%&'!]+:Color\b|'[\w-.#$%&'!\s]+':Color\b/gi);
+
+    var numOfSearches = (styleSearches ? styleSearches.length : 0) +
+        (fontSearches ? fontSearches.length : 0) +
+        (colorSearches ? colorSearches.length : 0);
+    if (numOfSearches > 0)
     {
-        console.log('searchScreens Found '+elementSearches.length+' patterns');
-        // remove the ':Element' pattern from each match
-        for(var i=0;i<elementSearches.length;i++)
-        {
-            console.log('searchScreens Trim pattern: '+
-                elementSearches[i]+' into '+
-                elementSearches[i].substring(0,
-                elementSearches[i].length - ':Element'.length));
-            elementSearches[i] = elementSearches[i].substring(0,
-                elementSearches[i].length - ':Element'.length);
-        }
+        console.log('searchScreens Found '+numOfSearches+' patterns');
+        trimPatterns(styleSearches, ':Style');
+        trimPatterns(fontSearches, ':Font');
+        trimPatterns(colorSearches, ':Color');
+        var elementSearches = {
+            styleSearches: styleSearches,
+            fontSearches: fontSearches,
+            colorSearches: colorSearches            
+        };
         searchScreensByElements(response, elementSearches, dateCondition);        
     }
     else
@@ -563,9 +585,8 @@ function searchScreensByKeywords(response, keywords, dateCondition)
 
 function searchScreensByElements(response, elementSearches, dateCondition)
 {
-    var query = '"'+elementSearches.join('"+"')+'"';
-    console.log('searchScreensByElements query string: '+query);
-    idol_queries.searchUIObjects(query, dateCondition, function(documents_hash) {
+    // for each type of elementSearch, need to fromat a specific query
+    idol_queries.searchUIObjects(elementSearches, dateCondition, function(documents_hash) {
         var idolResultNodes = Object.keys(documents_hash);
         if (idolResultNodes.length > 0) {
             neo4j_queries.getNearestData(idolResultNodes, 'SCREEN',

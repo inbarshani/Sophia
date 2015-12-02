@@ -408,6 +408,8 @@ function addCategoryItems(root_element, category) {
     var hashtable = getHashtableByCategory(category);
     root_element.html('');
     var keys = Object.keys(hashtable);
+    // alphabetically sort keys
+    keys.sort();
     var index = 0;
     keys.forEach(function(key) {
         li = $('<li>');
