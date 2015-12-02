@@ -102,7 +102,7 @@ app.use('/searchScreens', function(request, response) {
                 elementSearches[i].substring(0,
                 elementSearches[i].length - ':Element'.length));
             elementSearches[i] = elementSearches[i].substring(0,
-                elementSearches[i].length - ':Element '.length);
+                elementSearches[i].length - ':Element'.length);
         }
         searchScreensByElements(response, elementSearches, dateCondition);        
     }
@@ -563,7 +563,53 @@ function searchScreensByKeywords(response, keywords, dateCondition)
 
 function searchScreensByElements(response, elementSearches, dateCondition)
 {
-    response.send(JSON.stringify([]));    
+    var query = '"'+elementSearches.join('"+"')+'"';
+    console.log('searchScreensByElements query string: '+query);
+    idol_queries.searchUIObjects(query, dateCondition, function(documents_hash) {
+        var idolResultNodes = Object.keys(documents_hash);
+        if (idolResultNodes.length > 0) {
+            neo4j_queries.getNearestData(idolResultNodes, 'SCREEN',
+                function(prevScreenTimestamps, nextScreenTimestamps,
+                    prevScreenIDs, nextScreenIDs) {
+                    var referenceIds = prevScreenIDs.concat(nextScreenIDs);
+                    idol_queries.searchByReference(referenceIds, true, true, function(idolDocs) {
+                        var group_pivots = [];
+                        var groups = {
+                            "none": []
+                        };
+                        referenceIds.forEach(function(refID) {
+                            if (idolDocs[refID]) {
+                                var result = {
+                                    timestamp: idolDocs[refID].timestamp,
+                                    graph_id: refID
+                                };
+                                if (!idolDocs[refID].phash) {
+                                    groups.none.push(result);
+                                } else {
+                                    for (var i = 0; i < group_pivots.length; i++) {
+                                        if (phash.compare(idolDocs[refID].phash, group_pivots[i]) <
+                                            sophia_config.hashSimiliarityThreshold) {
+                                            // this result is similar to one of the previous ones
+                                            groups["" + i].push(result);
+                                            break;
+                                        }
+                                    }
+                                    if (i == group_pivots.length) {
+                                        // new result
+                                        groups["" + i] = [result];
+                                        group_pivots.push(idolDocs[refID].phash);
+                                    }
+                                }
+                            }
+                        });
+                        console.log('grouped images: ' + JSON.stringify(groups));
+                        response.send(JSON.stringify(groups));
+                    });
+                });
+        } else {
+            response.send(JSON.stringify([]));
+        }
+    });    
 }
 
 app.get('/searchXP', function(request, response) {

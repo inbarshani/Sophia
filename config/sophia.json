@@ -2,6 +2,7 @@
     "default": {
         "backboneRoot": ["Test"],
         "backboneTypes": ["Test", "TestStep", "UI"],
+        "uiObjectsTypes": ["UI_Objects"],
         "backboneLinkType": "FOLLOWED_BY",
         "dataLinkType": "LINKED_TO",
         "IDOL_DB_NAME": "Sophia",
