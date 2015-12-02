@@ -2,6 +2,7 @@
 //   the port is the one changing, maybe just calc it from this app
 var screensServer = 'http://myd-vm00366:8085';
 var screenGroups = null;
+var screenSearchedTerms = null;
 var screensGraphIDsGroups = null;
 var screensShowGrouped = true;
 var widthFactor = 1;
@@ -40,6 +41,24 @@ function rgbToHex(rgbString) {
     if (isAlpha && parseInt(rgb[4]) == 0)
         return null;
     return "#" + componentToHex(parseInt(rgb[1])) + componentToHex(parseInt(rgb[2])) + componentToHex(parseInt(rgb[3]));
+}
+
+function colorToHex(color) {
+    if (color.match(/^rgb/))
+        return rgbToHex(color);
+    else if (color.match(/^#/))
+        return color.toUpperCase(); // already hex
+    else // color is a color-palette name
+    {
+        var colors_hex = Object.keys(color_palette);
+        for(var i=0;i<colors_hex.length;i++)
+        {
+            if (color_palette[colors_hex[i]] == color)
+                return colors_hex[i].toUpperCase();            
+        }
+    }
+    
+    return ''; // not found
 }
 
 function loadScreens() {
@@ -127,7 +146,9 @@ function searchScreens(query) {
             lastQuery = query;
             reportString = reportString + 'Search: ' + query + '\n';
             //console.log("Search returned: " + data);
-            screenGroups = JSON.parse(data);
+            var results = JSON.parse(data);
+            screenGroups = results.groups;
+            screenSearchedTerms = results.terms;
             fillScreensCarousel();
             reportString = reportString + 'Results #: ' + $('#screensCarousel img').length + '\n';
         })
@@ -146,7 +167,9 @@ function fillScreensCarousel() {
     screens_results_row.empty();
     screens_carousel.empty();
     //console.log("Search returned: " + data);
-    var groups = Object.keys(screenGroups);
+    var groups = [];
+    if (screenGroups) 
+        groups = Object.keys(screenGroups);
     var itemCounter = 0;
     for (var j = 0; j < groups.length; j++) {
         var screens = screenGroups[groups[j]];
@@ -268,12 +291,12 @@ function showHTMLLayout() {
                     styleClassesArray = styleClasses.split(' ');
                 }
                 if (color) {
-                    color = rgbToHex(color);
+                    color = colorToHex(color);
                     if (color_palette[color])
                         color = color_palette[color];
                 }
                 if (background) {
-                    background = rgbToHex(background);
+                    background = colorToHex(background);
                     if (background && color_palette[background])
                         background = color_palette[background];
                 }
@@ -356,6 +379,15 @@ function showHTMLLayout() {
             addCategoryItems($('#colors'), HIGHLIGHT.COLOR);
             addCategoryItems($('#backgrounds'), HIGHLIGHT.BACKGROUND);
             addCategoryItems($('#styles'), HIGHLIGHT.STYLE);
+
+            if (screenSearchedTerms)
+            {
+                // highlight search terms of UI elements
+                selectCategoryItems(screenSearchedTerms.styleSearches, HIGHLIGHT.STYLE);
+                selectCategoryItems(screenSearchedTerms.fontSearches, HIGHLIGHT.FONT);
+                selectCategoryItems(screenSearchedTerms.colorSearches, HIGHLIGHT.COLOR);
+                selectCategoryItems(screenSearchedTerms.colorSearches, HIGHLIGHT.BACKGROUND);
+            }
         })
         .fail(function(err) {
             console.log("Failed to get objects for screen " + graph_id + ": " + err);
@@ -410,7 +442,6 @@ function addCategoryItems(root_element, category) {
     var keys = Object.keys(hashtable);
     // alphabetically sort keys
     keys.sort();
-    var index = 0;
     keys.forEach(function(key) {
         li = $('<li>');
         li.addClass('list-group-item');
@@ -418,15 +449,18 @@ function addCategoryItems(root_element, category) {
         label.addClass('checkbox-inline');
         input = $('<input>');
         input.attr('type', 'checkbox');
-        input.attr('id', 'cb_type_' + index++);
+        input.attr('id', 'cb_' + category + '_' + key.toLowerCase().replace(' ', '_'));
+        input.attr('hash', key);
+        if (category == HIGHLIGHT.COLOR || category == HIGHLIGHT.BACKGROUND)
+            input.attr('hex_color',colorToHex(key));
         a = $('<a>');
         a.attr('href', '#');
         a.text(key);
         span = $('<span>');
         span.text('(' + hashtable[key].rect_array.length + ')');
-        label.click(function(fs, cb) {
+        label.click(function(hash, checkbox) {
             return function() {
-                toggleHighlightCategory(category, fs, cb);
+                toggleHighlightCategory(category, hash, checkbox);
             }
         }(key, input));
         label.append(input);
@@ -435,6 +469,43 @@ function addCategoryItems(root_element, category) {
         li.append(label);
         root_element.append(li);
     });
+}
+
+function selectCategoryItems(terms, category)
+{
+    if (terms)
+    {
+        terms.forEach(function(term) {            
+            var checkbox = $('#cb_'+ category + '_' + term.toLowerCase().replace(' ', '_'));
+            if (checkbox.length > 0)
+                toggleHighlightCategory(category, term, checkbox);
+            else
+            {
+                if (category == HIGHLIGHT.FONT)
+                {
+                    // could be the term is just partial:
+                    //  just font family or just size or just one of many font families
+                    // search for partial match with the hash attribute
+                    var checkboxes = $('[hash*="'+term+'"]');
+                    checkboxes.each(function(){
+                        var new_term = $(this).attr('hash');
+                        toggleHighlightCategory(category, new_term, $(this));
+                    });
+                }
+                else if (category == HIGHLIGHT.COLOR || category == HIGHLIGHT.BACKGROUND)
+                {
+                    // could be the term is in different color format:
+                    //  rgb vs. hex vs. color-pallatte
+                    // convert and search using the 'hex' attribute
+                    var checkboxes = $('[hex_color="'+colorToHex(term)+'"]');
+                    checkboxes.each(function(){
+                        var new_term = $(this).attr('hash');
+                        toggleHighlightCategory(category, new_term, $(this));
+                    });
+                }
+            }
+        });
+    }
 }
 
 function addUIRect(container, anchor, id, rect) {
@@ -546,7 +617,10 @@ function toggleHighlightAll() {
 
 function toggleHighlightCategory(category, hash, checkbox) {    
     // find items and highlight
+    //  make sure the hash key is valid (i.e. there's an hashed rect)
     var hashtable = getHashtableByCategory(category);
+    if (!hashtable[hash])
+        return;
     // toggle highlighted state
     hashtable[hash].highlighted = !(hashtable[hash].highlighted);
     // handle 'select all' checkbox
@@ -702,6 +776,7 @@ function showModal(itemIndex) {
 
 function clearScreensSearch() {
     screenGroups = null;
+    screenSearchedTerms = null;
     $('#screens_results_row').empty();
     $('#screens_carousel_items').empty();
     $('#group_images').addClass('hidden');

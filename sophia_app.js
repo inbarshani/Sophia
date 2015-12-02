@@ -110,7 +110,7 @@ app.use('/searchScreens', function(request, response) {
     //  need to search the query string for occurences
     var styleSearches = queryText.match(/\b[\w-.#$%&'!]+:Style\b|'[\w-.#$%&'!\s]+':Style\b/gi);
     var fontSearches = queryText.match(/\b[\w-.#$%&'!]+:Font\b|'[\w-.#$%&'!\s]+':Font\b/gi);
-    var colorSearches = queryText.match(/\b[\w-.#$%&'!]+:Color\b|'[\w-.#$%&'!\s]+':Color\b/gi);
+    var colorSearches = queryText.match(/\b[\w-.#$%&'!]+:Color\b|'[\w-.#$%&'!\s]+':Color|#[0-9A-Fa-f]{6}:Color\b/gi);
 
     var numOfSearches = (styleSearches ? styleSearches.length : 0) +
         (fontSearches ? fontSearches.length : 0) +
@@ -573,8 +573,11 @@ function searchScreensByKeywords(response, keywords, dateCondition)
                                 }
                             }
                         });
-                        console.log('grouped images: ' + JSON.stringify(groups));
-                        response.send(JSON.stringify(groups));
+                        //console.log('grouped images: ' + JSON.stringify(groups));
+                        var response_data = {
+                            groups: groups
+                        };
+                        response.send(JSON.stringify(response_data));
                     });
                 });
         } else {
@@ -623,8 +626,12 @@ function searchScreensByElements(response, elementSearches, dateCondition)
                                 }
                             }
                         });
-                        console.log('grouped images: ' + JSON.stringify(groups));
-                        response.send(JSON.stringify(groups));
+                        //console.log('grouped images: ' + JSON.stringify(groups));
+                        var response_data = {
+                            groups: groups,
+                            terms: elementSearches
+                        };
+                        response.send(JSON.stringify(response_data));
                     });
                 });
         } else {
