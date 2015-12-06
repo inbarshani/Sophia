@@ -451,13 +451,19 @@ function addCategoryItems(root_element, category) {
         input.attr('type', 'checkbox');
         input.attr('id', 'cb_' + category + '_' + key.toLowerCase().replace(' ', '_'));
         input.attr('hash', key);
-        if (category == HIGHLIGHT.COLOR || category == HIGHLIGHT.BACKGROUND)
-            input.attr('hex_color',colorToHex(key));
         a = $('<a>');
         a.attr('href', '#');
         a.text(key);
         span = $('<span>');
         span.text('(' + hashtable[key].rect_array.length + ')');
+        if (category == HIGHLIGHT.COLOR || category == HIGHLIGHT.BACKGROUND)
+        {
+            var hex = colorToHex(key);
+            input.attr('hex_color_'+category, hex);
+            // add the hex code to the label as well
+            if (key != hex)
+                a.text(hex + ' ' + key);
+        }
         label.click(function(hash, checkbox) {
             return function() {
                 toggleHighlightCategory(category, hash, checkbox);
@@ -497,7 +503,7 @@ function selectCategoryItems(terms, category)
                     // could be the term is in different color format:
                     //  rgb vs. hex vs. color-pallatte
                     // convert and search using the 'hex' attribute
-                    var checkboxes = $('[hex_color="'+colorToHex(term)+'"]');
+                    var checkboxes = $('[hex_color_'+category+'="'+colorToHex(term)+'"]');
                     checkboxes.each(function(){
                         var new_term = $(this).attr('hash');
                         toggleHighlightCategory(category, new_term, $(this));
