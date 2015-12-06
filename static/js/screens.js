@@ -202,6 +202,10 @@ function fillScreensCarousel() {
             itemCounter++;
         }
     }
+    // reset event handlers on search results
+    $('#screens_carousel_items')
+        .off('click')
+        .off('keypress');
     if (groups.length > 0) {
         $('#screensCarousel').carousel({
             interval: false,
@@ -214,6 +218,7 @@ function fillScreensCarousel() {
                 //var offset = $(this).offset();
                 //selectAtPoint(e.pageX - offset.left,e.pageY - offset.top);
                 selectHoverObject();
+                return false; // stop propagation
             })
             .keypress(function(e){
                if(e.keyCode == 32 || e.keyCode == 13){
