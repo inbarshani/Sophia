@@ -1,0 +1,2 @@
+# setup Sophia's neo4j
+FROM neo4j

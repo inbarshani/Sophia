@@ -1,0 +1,7 @@
+*/.settings/*
+*/agents/*
+*/Neo4j scripts/*
+*/recording*/*
+.gitignore
+*.log
+*.txt
