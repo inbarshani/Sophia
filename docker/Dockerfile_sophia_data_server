@@ -9,7 +9,7 @@ ENV https_proxy $HTTPS_PROXY
 
 # make sure all dependencies are installed
 COPY package.json /sophia/
-RUN npm install
+RUN cd sophia && npm install
 
 # expose the port for the sophia_data_server
 ARG SOPHIA_DATA_SERVER_PORT
