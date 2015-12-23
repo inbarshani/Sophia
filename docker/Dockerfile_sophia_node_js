@@ -18,14 +18,8 @@ RUN cd sophia && \
 	npm config ls -l && \
 	npm install
 
-# expose the port for the sophia_data_server
-ARG SOPHIA_DATA_SERVER_PORT
-EXPOSE ${SOPHIA_DATA_SERVER_PORT:-8082}
-
-# start the data server
+# copy the sophia code
 COPY . /sophia/
-WORKDIR /sophia/
-ENTRYPOINT ["node", "sophia_data_server.js"]
 
 # reset ENV
 ENV HTTP_PROXY ""
