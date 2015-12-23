@@ -1,0 +1,2 @@
+# setup Sophia's RabbitMQ
+FROM rabbitmq:3.5.7-management
