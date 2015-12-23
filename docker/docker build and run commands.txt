@@ -1,0 +1,5 @@
+docker build -f docker/Dockerfile_sophia_data_server --build-arg HTTP_PROXY=http://web-proxy.il.hpecorp.net:8080 --build-arg HTTPS_PROXY=https://web-proxy.il.hpecorp.net:8080 https://github.com/inbarshani/Sophia.git
+
+docker run --detach --name neo4j_sophia --publish 7474:7474 --volume $HOME/neo4j/data:/data --env=NEO4J_AUTH=none neo4j
+
+docker run --detach --name sophia_data_server --publish 8082:8082 --env=NODE_ENV=production sophia_data_server
