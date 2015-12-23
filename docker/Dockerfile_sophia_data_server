@@ -14,6 +14,7 @@ RUN cd sophia && \
 	npm config set proxy $HTTP_PROXY && \
 	npm config set http-proxy $HTTP_PROXY && \
 	npm config set https-proxy $HTTPS_PROXY && \
+	npm config set registry http://registry.npmjs.org/ && \
 	npm config ls -l && \
 	npm install
 
