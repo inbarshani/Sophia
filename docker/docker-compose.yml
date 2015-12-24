@@ -1,6 +1,5 @@
  sophia_neo4j:
-   build: https://github.com/inbarshani/Sophia.git
-   dockerfile: docker/Dockerfile_neo4j
+   build: docker/Dockerfile_neo4j
    container_name: sophia_neo4j
    environment:
     NEO4J_AUTH: none
@@ -9,15 +8,13 @@
    volumes:
     - $HOME/neo4j/data:/data
 sophia_rabbitmq:
-   build: https://github.com/inbarshani/Sophia.git
-   dockerfile: docker/Dockerfile_neo4j
+   build: docker/Dockerfile_neo4j
    container_name: sophia_rabbitmq
    ports:
     - "5672:5672"
     - "15672:15672"
 sophia_app:
-   build: https://github.com/inbarshani/Sophia.git
-   dockerfile: docker/Dockerfile_sophia_node_js
+   build: docker/Dockerfile_sophia_node_js
    container_name: sophia_app
    environment:
     NODE_ENV: production
@@ -27,8 +24,7 @@ sophia_app:
    links:
     - sophia_neo4j
 sophia_data_server:
-   build: https://github.com/inbarshani/Sophia.git
-   dockerfile: docker/Dockerfile_sophia_node_js
+   build: docker/Dockerfile_sophia_node_js
    container_name: sophia_data_server
    environment:
     NODE_ENV: production
@@ -42,8 +38,7 @@ sophia_data_server:
     - sophia_neo4j
     - sophia_rabbitmq
 sophia_file_server:
-   build: https://github.com/inbarshani/Sophia.git
-   dockerfile: docker/Dockerfile_sophia_node_js
+   build: docker/Dockerfile_sophia_node_js
    container_name: sophia_file_server
    environment:
     NODE_ENV: production
@@ -55,8 +50,7 @@ sophia_file_server:
    links:
     - sophia_rabbitmq
 sophia_queue_server:
-   build: https://github.com/inbarshani/Sophia.git
-   dockerfile: docker/Dockerfile_sophia_node_js
+   build: docker/Dockerfile_sophia_node_js
    container_name: sophia_queue_server
    environment:
     NODE_ENV: production
@@ -68,8 +62,7 @@ sophia_queue_server:
     - sophia_neo4j
     - sophia_rabbitmq
 sophia_indexer_server:
-   build: https://github.com/inbarshani/Sophia.git
-   dockerfile: docker/Dockerfile_sophia_node_js
+   build: docker/Dockerfile_sophia_node_js
    container_name: sophia_indexer_server
    environment:
     NODE_ENV: production
