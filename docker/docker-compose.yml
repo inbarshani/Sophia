@@ -32,7 +32,7 @@ sophia_data_server:
     NEO4J_DB_SERVER: sophia_neo4j
    ports:
     - "8082:8082"
-   working_dir: /sophia
+   working_dir: /Sophia
    command: node sophia_data_server.js
    links:
     - sophia_neo4j
@@ -45,7 +45,7 @@ sophia_file_server:
     QUEUE_HOST: sophia_rabbitmq
    ports:
     - "8083:8083"
-   working_dir: /sophia
+   working_dir: /Sophia
    command: node sophia_file_server.js
    links:
     - sophia_rabbitmq
@@ -56,7 +56,7 @@ sophia_queue_server:
     NODE_ENV: production
     QUEUE_HOST: sophia_rabbitmq
     NEO4J_DB_SERVER: sophia_neo4j
-   working_dir: /sophia
+   working_dir: /Sophia
    command: node sophia_queue.js
    links:
     - sophia_neo4j
@@ -68,7 +68,7 @@ sophia_indexer_server:
     NODE_ENV: production
     QUEUE_HOST: sophia_rabbitmq
     NEO4J_DB_SERVER: sophia_neo4j
-   working_dir: /sophia
+   working_dir: /Sophia
    command: node sophia_indexer.js
    links:
     - sophia_neo4j
