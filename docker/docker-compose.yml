@@ -1,0 +1,81 @@
+ sophia_neo4j:
+   build: docker/Dockerfile_neo4j
+   container_name: sophia_neo4j
+   environment:
+    NEO4J_AUTH: none
+   ports:
+    - "7474:7474"
+   volumes:
+    - "$HOME/neo4j/data:/data"
+
+sophia_rabbitmq:
+   build: docker/Dockerfile_neo4j
+   container_name: sophia_rabbitmq
+   ports:
+    - "5672:5672"
+    - "15672:15672"
+
+sophia_app:
+   build: docker/Dockerfile_sophia_node_js
+   container_name: sophia_app
+   environment:
+    NODE_ENV: production
+    NEO4J_DB_SERVER: sophia_neo4j
+   ports:
+    - "8085:8085"
+   links:
+    - sophia_neo4j
+
+sophia_data_server:
+   build: docker/Dockerfile_sophia_node_js
+   container_name: sophia_data_server
+   environment:
+    NODE_ENV: production
+    QUEUE_HOST: sophia_rabbitmq
+    NEO4J_DB_SERVER: sophia_neo4j
+   ports:
+    - "8082:8082"
+   working_dir: /Sophia
+   command: node sophia_data_server.js
+   links:
+    - sophia_neo4j
+    - sophia_rabbitmq
+
+sophia_file_server:
+   build: docker/Dockerfile_sophia_node_js
+   container_name: sophia_file_server
+   environment:
+    NODE_ENV: production
+    QUEUE_HOST: sophia_rabbitmq
+   ports:
+    - "8083:8083"
+   working_dir: /Sophia
+   command: node sophia_file_server.js
+   links:
+    - sophia_rabbitmq
+
+sophia_queue_server:
+   build: docker/Dockerfile_sophia_node_js
+   container_name: sophia_queue_server
+   environment:
+    NODE_ENV: production
+    QUEUE_HOST: sophia_rabbitmq
+    NEO4J_DB_SERVER: sophia_neo4j
+   working_dir: /Sophia
+   command: node sophia_queue.js
+   links:
+    - sophia_neo4j
+    - sophia_rabbitmq
+
+sophia_indexer_server:
+   build: docker/Dockerfile_sophia_node_js
+   container_name: sophia_indexer_server
+   environment:
+    NODE_ENV: production
+    QUEUE_HOST: sophia_rabbitmq
+    NEO4J_DB_SERVER: sophia_neo4j
+   working_dir: /Sophia
+   command: node sophia_indexer.js
+   links:
+    - sophia_neo4j
+    - sophia_rabbitmq
