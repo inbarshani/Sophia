@@ -1,12 +1,12 @@
 docker build -t sophia_neo4j -f docker/Dockerfile_neo4j --build-arg HTTP_PROXY=http://web-proxy.il.hpecorp.net:8080 --build-arg HTTPS_PROXY=https://web-proxy.il.hpecorp.net:8080 https://github.com/inbarshani/Sophia.git
 
-docker build -t sophia_rabbitMQ -f docker/Dockerfile_rabbitMQ --build-arg HTTP_PROXY=http://web-proxy.il.hpecorp.net:8080 --build-arg HTTPS_PROXY=https://web-proxy.il.hpecorp.net:8080 https://github.com/inbarshani/Sophia.git
+docker build -t sophia_rabbitmq -f docker/Dockerfile_rabbitMQ --build-arg HTTP_PROXY=http://web-proxy.il.hpecorp.net:8080 --build-arg HTTPS_PROXY=https://web-proxy.il.hpecorp.net:8080 https://github.com/inbarshani/Sophia.git
 
 docker build -t sophia_node_server -f docker/Dockerfile_sophia_node_js --build-arg HTTP_PROXY=http://web-proxy.il.hpecorp.net:8080 --build-arg HTTPS_PROXY=https://web-proxy.il.hpecorp.net:8080 https://github.com/inbarshani/Sophia.git
 
 docker run --detach --name sophia_neo4j --publish 7474:7474 --volume $HOME/neo4j/data:/data --env=NEO4J_AUTH=none neo4j
 
-docker run --detach --name sophia_rabbitMQ --hostname sophia-rabbit -p 15672:15672 -p 5672:5672 sophia_rabbitMQ
+docker run --detach --name sophia_rabbitmq --hostname sophia-rabbit -p 15672:15672 -p 5672:5672 sophia_rabbitmq
 
 docker run --detach --name sophia_data_server -p 8082:8082 -e=NODE_ENV=production -w /sophia/ sophia_node_server node sophia_data_server.js
 
