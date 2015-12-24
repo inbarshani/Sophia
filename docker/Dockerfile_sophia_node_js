@@ -2,27 +2,20 @@
 FROM node:5.3-slim
 
 # proxy env
-ENV HTTP_PROXY $HTTP_PROXY
-ENV HTTPS_PROXY $HTTPS_PROXY
-ENV http_proxy $HTTP_PROXY
-ENV https_proxy $HTTPS_PROXY
+# ENV HTTP_PROXY=$HTTP_PROXY \
+#	HTTPS_PROXY=$HTTPS_PROXY \
+#	http_proxy=$HTTP_PROXY \
+#	https_proxy=$HTTPS_PROXY
 
 # make sure all dependencies are installed
 # define npm http proxy
 COPY package.json /sophia/
 RUN cd sophia && \
-	npm config set proxy $HTTP_PROXY && \
-	npm config set http-proxy $HTTP_PROXY && \
-	npm config set https-proxy $HTTPS_PROXY && \
+	npm config set proxy http://web-proxy.il.hpecorp.net:8080 && \
+	npm config set http-proxy http://web-proxy.il.hpecorp.net:8080 && \
+	npm config set https-proxy https://web-proxy.il.hpecorp.net:8080 && \
 	npm config set registry http://registry.npmjs.org/ && \
-	npm config ls -l && \
 	npm install
 
 # copy the sophia code
 COPY . /sophia/
-
-# reset ENV
-ENV HTTP_PROXY ""
-ENV HTTPS_PROXY ""
-ENV http_proxy ""
-ENV https_proxy ""
