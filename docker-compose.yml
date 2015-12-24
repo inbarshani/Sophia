@@ -9,7 +9,7 @@ sophia_neo4j:
    - "$HOME/neo4j/data:/data"
 
 sophia_rabbitmq:
-  build: ./docker/Dockerfile_rabbitmq
+  build: ./docker/Dockerfile_rabbitMQ
   container_name: sophia_rabbitmq
   ports:
    - "5672:5672"
