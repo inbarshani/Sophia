@@ -21,6 +21,7 @@ sophia_app:
   build: .
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_app
+  env_file: ./docker/http.env
   environment:
    NODE_ENV: production
    NEO4J_DB_SERVER: sophia_neo4j
@@ -33,6 +34,7 @@ sophia_data_server:
   build: .
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_data_server
+  env_file: ./docker/http.env
   environment:
    NODE_ENV: production
    QUEUE_HOST: sophia_rabbitmq
@@ -49,6 +51,7 @@ sophia_file_server:
   build: .
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_file_server
+  env_file: ./docker/http.env
   environment:
    NODE_ENV: production
    QUEUE_HOST: sophia_rabbitmq
@@ -61,6 +64,7 @@ sophia_file_server:
 
 sophia_queue_server:
   build: .
+  env_file: ./docker/http.env
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_queue_server
   environment:
@@ -77,6 +81,7 @@ sophia_indexer_server:
   build: .
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_indexer_server
+  env_file: ./docker/http.env
   environment:
    NODE_ENV: production
    QUEUE_HOST: sophia_rabbitmq
