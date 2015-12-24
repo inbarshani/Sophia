@@ -9,7 +9,7 @@ FROM node:5.3-slim
 
 # make sure all dependencies are installed
 # define npm http proxy
-COPY package.json /sophia/
+COPY package.json /Sophia/
 RUN cd sophia && \
 	npm config set proxy http://web-proxy.il.hpecorp.net:8080 && \
 	npm config set http-proxy http://web-proxy.il.hpecorp.net:8080 && \
@@ -18,4 +18,4 @@ RUN cd sophia && \
 	npm install
 
 # copy the sophia code
-COPY . /sophia/
+COPY . /Sophia/

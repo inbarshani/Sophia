@@ -28,6 +28,8 @@ sophia_app:
    NEO4J_DB_SERVER: sophia_neo4j
   ports:
    - "8085:8085"
+  working_dir: /Sophia
+  command: node sophia_app.js
   links:
    - sophia_neo4j
 
