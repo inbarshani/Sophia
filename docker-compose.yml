@@ -21,8 +21,9 @@ sophia_app:
   build: .
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_app
-  env_file: http.env
+  env_file: ./docker/http.env
   environment:
+   HTTP_PROXY: http://web-proxy.il.hpecorp.net:8080
    NODE_ENV: production
    NEO4J_DB_SERVER: sophia_neo4j
   ports:
