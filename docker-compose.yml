@@ -18,8 +18,8 @@ sophia_rabbitmq:
    - "15672:15672"
 
 sophia_app:
-  build: ./docker/
-  dockerfile: Dockerfile_sophia_node_js
+  build: .
+  dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_app
   environment:
    NODE_ENV: production
