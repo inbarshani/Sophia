@@ -6,7 +6,7 @@
    ports:
     - "7474:7474"
    volumes:
-    - $HOME/neo4j/data:/data
+    - "$HOME/neo4j/data:/data"
 sophia_rabbitmq:
    build: docker/Dockerfile_neo4j
    container_name: sophia_rabbitmq
