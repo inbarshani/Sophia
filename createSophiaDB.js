@@ -6,6 +6,7 @@ var path = require('path');
 if (process.argv && process.argv.length >= 3)
 	sophia_config.TESTS_DB_FILE = process.argv[2] + path.basename(sophia_config.TESTS_DB_FILE);
 
+console.log('create Sophia DB at '+sophia_config.TESTS_DB_FILE);
 // make sure the DB folder exists
 mkpath(path.dirname(file_location), 
 	function(err){

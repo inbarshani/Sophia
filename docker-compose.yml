@@ -7,7 +7,7 @@ sophia_neo4j:
   ports:
    - "7474:7474"
   volumes:
-   - "$HOME/neo4j/data:/data"
+   - "$HOME/Sophia_data/neo4j:/data"
 
 sophia_rabbitmq:
   build: ./docker/
@@ -33,7 +33,7 @@ sophia_app:
   links:
    - sophia_neo4j
   volumes:
-   - "$HOME/Sophia/data:/Sophia/db"
+   - "$HOME/Sophia_data/db:/Sophia/db"
 
 sophia_data_server:
   build: .
@@ -82,7 +82,7 @@ sophia_queue_server:
    - sophia_neo4j
    - sophia_rabbitmq
   volumes:
-   - "$HOME/Sophia/data:/Sophia/db"
+   - "$HOME/Sophia_data/db:/Sophia/db"
 
 sophia_indexer_server:
   build: .
