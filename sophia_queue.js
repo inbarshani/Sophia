@@ -14,7 +14,7 @@ var test = require("./processors/test");
 var teststep = require("./processors/test_step");
 var ui_objects = require("./processors/ui_objects");
 
-var Step = require('Step');
+var Step = require('step');
 
 var sophia_config = require('./lib/sophia_config');
 var idol_queries = require('./lib/idol_queries');
