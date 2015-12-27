@@ -1,8 +1,13 @@
 var sophia_config = require('./lib/sophia_config');
 var mkpath = require('mkpath');
+var path = require('path');
+
+// if a new folder is supplied via CLI, change sophia settings
+if (process.argv && process.argv.length >= 3)
+	sophia_config.TESTS_DB_FILE = process.argv[2] + path.basename(sophia_config.TESTS_DB_FILE);
 
 // make sure the DB folder exists
-mkpath(require('path').dirname(sophia_config.TESTS_DB_FILE), 
+mkpath(path.dirname(file_location), 
 	function(err){
 		if (!err)
 		{
