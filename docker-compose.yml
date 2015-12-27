@@ -32,6 +32,8 @@ sophia_app:
   command: node sophia_app.js
   links:
    - sophia_neo4j
+  volumes:
+   - "$HOME/Sophia/data:/Sophia/db"
 
 sophia_data_server:
   build: .
@@ -79,6 +81,8 @@ sophia_queue_server:
   links:
    - sophia_neo4j
    - sophia_rabbitmq
+  volumes:
+   - "$HOME/Sophia/data:/Sophia/db"
 
 sophia_indexer_server:
   build: .

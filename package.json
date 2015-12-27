@@ -22,7 +22,8 @@
     "when": "^3.6.4",
     "xml2js": "^0.4.8",
     "xmldom": "0.X.X",
-    "xpath": "0.X.X"
+    "xpath": "0.X.X",
+    "mkpath": "*"
   },
   "scripts": {},
   "author": {
