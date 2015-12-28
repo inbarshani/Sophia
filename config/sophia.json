@@ -43,6 +43,12 @@
         "hashSimiliarityThreshold": 0.7,
         "testsHistoryLimit": 5,
         "uiObjectsAttributeWordLimit": 5,
+        "dnsResolveVars": [
+            "NEO4J_DB_SERVER",
+            "QUEUE_HOST",
+            "IDOL_SERVER",
+            "IDOL_OCR_SERVER"
+            ],
         "color_palette": {
             "#9B1C1F": ".bg--red0",
             "#D61313": ".bg--red1",
