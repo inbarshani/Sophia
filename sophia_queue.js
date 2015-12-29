@@ -316,7 +316,7 @@ function addNewData(data, test_id, test_node) {
     }, function(err, results) {
         try {
             if (err) {
-                console.error('neo4j query failed: ' + query + '\n');
+                console.error('neo4j query failed: ' + query + ' with err: '+err+'\n');
                 lock.release();
             } else if (results[0] && results[0]['NodeID']) {
                 idol_queries.addToIdol(results[0]['NodeID'], data);
