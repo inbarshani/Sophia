@@ -4,32 +4,39 @@ var neo4j_queries = require('./lib/neo4j_queries');
 
 var amqp = require('amqp');
 
-if (process.argv.length == 2)
-{
-	var connection = amqp.createConnection({
-	    host: sophia_config.QUEUE_HOST
-	});
+sophia_config.ready(function(){
+	main();
+});
 
-	connection.on('ready', function() {
-	    console.log('connected to RabbitMQ');
-	    connection.queue(sophia_config.QUEUE_TESTS_NAME, {
-	        autoDelete: false,
-	        durable: true
-	    }, function(queue) {
 
-	        console.log(' [*] Waiting for messages on '+sophia_config.QUEUE_TESTS_NAME+
-	        	'. To exit press CTRL+C')
+function main() {
+	if (process.argv.length == 2)
+	{
+		var connection = amqp.createConnection({
+		    host: sophia_config.QUEUE_HOST
+		});
 
-	        queue.subscribe(_hashBackboneNodes);
-	    });
-	});
-}
-else
-{
-	if (process.argv.length == 3 && process.argv[2] == 'all')
-		indexAll();
+		connection.on('ready', function() {
+		    console.log('connected to RabbitMQ');
+		    connection.queue(sophia_config.QUEUE_TESTS_NAME, {
+		        autoDelete: false,
+		        durable: true
+		    }, function(queue) {
+
+		        console.log(' [*] Waiting for messages on '+sophia_config.QUEUE_TESTS_NAME+
+		        	'. To exit press CTRL+C')
+
+		        queue.subscribe(_hashBackboneNodes);
+		    });
+		});
+	}
 	else
-		console.log('Usage: node sophia_indexer.js {all}');
+	{
+		if (process.argv.length == 3 && process.argv[2] == 'all')
+			indexAll();
+		else
+			console.log('Usage: node sophia_indexer.js {all}');
+	}
 }
 
 function _hashBackboneNodes(msg)

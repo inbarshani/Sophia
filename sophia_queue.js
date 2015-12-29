@@ -21,16 +21,13 @@ var idol_queries = require('./lib/idol_queries');
 var neo4j_queries = require('./lib/neo4j_queries');
 var tests_queries = require('./lib/tests_queries');
 
-// connect to neo4j DB
-var db = new neo4j.GraphDatabase('http://' + sophia_config.NEO4J_DB_SERVER + ':' + sophia_config.NEO4J_DB_PORT);
-
-
-var connection = amqp.createConnection({
-    host: sophia_config.QUEUE_HOST
-});
-
 var current_test_id = null;
 var current_test_node_id = null;
+
+// mutex locking to guarntee that neo4j calls of different incoming queue messages
+//  will not conflict (creating an unexpected graph structure)
+var Padlock = require("padlock").Padlock;
+var lock = new Padlock();
 
 // tests history contains test_id, test_node_id and test timestamps start/end
 var test_record = function(test_id, test_node_id, test_start_timestamp) {
@@ -44,16 +41,52 @@ test_record.prototype.node_id = null;
 test_record.prototype.start = null;
 
 var tests_history = [];
-tests_queries.getCapturedTestHistory(sophia_config.testsHistoryLimit, 
-    function(err, db_tests_history){
-        if (err)        
-            console.log('Failed recovering tests queue history');
-        else
-        {
-            console.log('Recovering tests queue history with '+db_tests_history.length+' tests');
-            tests_history = db_tests_history;
-        }
+
+// connect to neo4j DB
+var db = null;
+var connection = null;
+
+sophia_config.ready(function(){
+    db = new neo4j.GraphDatabase('http://' + sophia_config.NEO4J_DB_SERVER + ':' + sophia_config.NEO4J_DB_PORT);
+
+    connection = amqp.createConnection({
+        host: sophia_config.QUEUE_HOST
+    });
+
+    connection.on('ready', function() {
+        console.log('connected to RabbitMQ');
+        connection.queue(sophia_config.QUEUE_DATA_EVENTS_NAME, {
+            autoDelete: false,
+            durable: true
+        }, function(queue) {
+
+            console.log(' [*] Waiting for messages ' + sophia_config.QUEUE_DATA_EVENTS_NAME + '. To exit press CTRL+C')
+
+            queue.subscribe(processQueueMessage);
+        });
+        connection.queue(sophia_config.QUEUE_NOT_LINKED_NAME, {
+            autoDelete: false,
+            durable: true
+        }, function(queue) {
+
+            console.log(' [*] Waiting for messages ' + sophia_config.QUEUE_NOT_LINKED_NAME);
+
+            queue.subscribe(processNoLinkQueueMessage);
+        });
+    });
+
+    tests_queries.getCapturedTestHistory(sophia_config.testsHistoryLimit, 
+        function(err, db_tests_history){
+            if (err)        
+                console.log('Failed recovering tests queue history');
+            else
+            {
+                console.log('Recovering tests queue history with '+db_tests_history.length+' tests');
+                tests_history = db_tests_history;
+            }
+    });
 });
+
 
 function indexOfTestByID(test_id) {
     console.log('Find test by ID, tests_history.length: '+tests_history.length);
@@ -79,33 +112,6 @@ function indexOfTestByTimestamp(timestamp) {
     }
     return -1;
 }
-
-// mutex locking to guarntee that neo4j calls of different incoming queue messages
-//  will not conflict (creating an unexpected graph structure)
-var Padlock = require("padlock").Padlock;
-var lock = new Padlock();
-
-connection.on('ready', function() {
-    console.log('connected to RabbitMQ');
-    connection.queue(sophia_config.QUEUE_DATA_EVENTS_NAME, {
-        autoDelete: false,
-        durable: true
-    }, function(queue) {
-
-        console.log(' [*] Waiting for messages ' + sophia_config.QUEUE_DATA_EVENTS_NAME + '. To exit press CTRL+C')
-
-        queue.subscribe(processQueueMessage);
-    });
-    connection.queue(sophia_config.QUEUE_NOT_LINKED_NAME, {
-        autoDelete: false,
-        durable: true
-    }, function(queue) {
-
-        console.log(' [*] Waiting for messages ' + sophia_config.QUEUE_NOT_LINKED_NAME);
-
-        queue.subscribe(processNoLinkQueueMessage);
-    });
-});
 
 function processQueueMessage(msg) {
     var params = [];

@@ -3,7 +3,26 @@ var bodyParser = require('body-parser');
 var amqp = require('amqp');
 var sophia_config = require('./lib/sophia_config');
 
+var rabbitMq = null;
 var app = express();
+
+sophia_config.ready(function(){
+    rabbitMq = amqp.createConnection({
+        host: sophia_config.QUEUE_HOST
+    });
+
+    rabbitMq.on('ready', function() {
+        console.log("RabbitMQ connected!\n");
+    });
+
+
+    rabbitMq.on('error', function(err) {
+        //do something
+        console.log('An error occurred connecting to RabbitMQ:\n' + require('util').inspect(err));
+    });
+
+    app.listen(sophia_config.DATA_SERVER_PORT);
+});
 
 app.use(bodyParser.json())
 
@@ -26,23 +45,6 @@ app.post('/data', function(request, response) {
         });
     }
 });
-
-app.listen(sophia_config.DATA_SERVER_PORT);
-
-var rabbitMq = amqp.createConnection({
-    host: sophia_config.QUEUE_HOST
-});
-
-rabbitMq.on('ready', function() {
-    console.log("RabbitMQ connected!\n");
-});
-
-
-rabbitMq.on('error', function(err) {
-    //do something
-    console.log('An error occurred connecting to RabbitMQ:\n' + require('util').inspect(err));
-});
-
 
 function sendToQueue(data, response) {
     var data_json = JSON.stringify(data);

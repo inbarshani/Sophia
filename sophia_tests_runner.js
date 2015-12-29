@@ -99,10 +99,13 @@ function saveFlowResults(testId, results) {
     tests_queries.saveTestRun(testId, sophia_config.testRunTypes.SCHEDULER, results);
 }
 
-if (!running) {
-    runTests();
-    setInterval(function() {
-        if (!running)
-            runTests();
-    }, 30000);
-}
+sophia_config.ready(function(){
+    if (!running) {
+        runTests();
+        setInterval(function() {
+            if (!running)
+                runTests();
+        }, 30000);
+    }
+});
+
