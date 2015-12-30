@@ -24,7 +24,6 @@ sophia_app:
   container_name: sophia_app
   env_file: ./docker/http.env
   environment:
-   HTTP_PROXY: http://web-proxy.il.hpecorp.net:8080
    NODE_ENV: production
    NEO4J_DB_SERVER: sophia_neo4j
    NO_PROXY: sophia_neo4j
@@ -43,7 +42,7 @@ sophia_data_server:
   container_name: sophia_data_server
   env_file: ./docker/http.env
   environment:
-   NODE_ENV: development
+   NODE_ENV: production
    QUEUE_HOST: sophia_rabbitmq
    NEO4J_DB_SERVER: sophia_neo4j
    NO_PROXY: sophia_neo4j
@@ -60,7 +59,7 @@ sophia_file_server:
   container_name: sophia_file_server
   env_file: ./docker/http.env
   environment:
-   NODE_ENV: development
+   NODE_ENV: production
    QUEUE_HOST: sophia_rabbitmq
   ports:
    - "8083:8083"
@@ -74,7 +73,7 @@ sophia_queue_server:
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_queue_server
   environment:
-   NODE_ENV: development
+   NODE_ENV: production
    QUEUE_HOST: sophia_rabbitmq
    NEO4J_DB_SERVER: sophia_neo4j
    NO_PROXY: sophia_neo4j
@@ -92,7 +91,7 @@ sophia_indexer_server:
   container_name: sophia_indexer_server
   env_file: ./docker/http.env
   environment:
-   NODE_ENV: development
+   NODE_ENV: production
    QUEUE_HOST: sophia_rabbitmq
    NEO4J_DB_SERVER: sophia_neo4j
    NO_PROXY: sophia_neo4j
