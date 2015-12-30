@@ -7,7 +7,8 @@ sophia_neo4j:
   ports:
    - "7474:7474"
   volumes:
-   - "$HOME/Sophia_data/neo4j:/data"
+   - "$HOME/Sophia_data/neo4j/data:/data"
+   - "$HOME/Sophia_data/neo4j/conf:/conf"
 
 sophia_rabbitmq:
   build: ./docker/
@@ -21,7 +22,6 @@ sophia_app:
   build: .
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_app
-  env_file: ./docker/http.env
   environment:
    HTTP_PROXY: http://web-proxy.il.hpecorp.net:8080
    NODE_ENV: production
@@ -39,7 +39,6 @@ sophia_data_server:
   build: .
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_data_server
-  env_file: ./docker/http.env
   environment:
    NODE_ENV: development
    QUEUE_HOST: sophia_rabbitmq
@@ -55,7 +54,6 @@ sophia_file_server:
   build: .
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_file_server
-  env_file: ./docker/http.env
   environment:
    NODE_ENV: development
    QUEUE_HOST: sophia_rabbitmq
@@ -68,7 +66,6 @@ sophia_file_server:
 
 sophia_queue_server:
   build: .
-  env_file: ./docker/http.env
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_queue_server
   environment:
@@ -87,7 +84,6 @@ sophia_indexer_server:
   build: .
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_indexer_server
-  env_file: ./docker/http.env
   environment:
    NODE_ENV: development
    QUEUE_HOST: sophia_rabbitmq
