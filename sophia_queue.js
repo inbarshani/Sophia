@@ -52,13 +52,13 @@ sophia_config.ready(function(){
     {
         db = new neo4j.GraphDatabase(
             {
-                url: 'http://' + sophia_config.NEO4J_DB_SERVER + 
+                url: 'http://' + sophia_config.NEO4J_DB_SERVER_RESOLVED + 
                     ':' + sophia_config.NEO4J_DB_PORT,
                 proxy: null
             });
     }
     else
-        db = new neo4j.GraphDatabase('http://' + sophia_config.NEO4J_DB_SERVER + 
+        db = new neo4j.GraphDatabase('http://' + sophia_config.NEO4J_DB_SERVER_RESOLVED + 
             ':' + sophia_config.NEO4J_DB_PORT);
 
     connection = amqp.createConnection({
