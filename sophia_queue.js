@@ -47,7 +47,19 @@ var db = null;
 var connection = null;
 
 sophia_config.ready(function(){
-    db = new neo4j.GraphDatabase('http://' + sophia_config.NEO4J_DB_SERVER + ':' + sophia_config.NEO4J_DB_PORT);
+    var NO_PROXY = process.env.NO_PROXY;
+    if (NO_PROXY && NO_PROXY.indexOf(sophia_config.NEO4J_DB_SERVER) > 0)
+    {
+        db = new neo4j.GraphDatabase(
+            {
+                url: 'http://' + sophia_config.NEO4J_DB_SERVER + 
+                    ':' + sophia_config.NEO4J_DB_PORT,
+                proxy: null
+            });
+    }
+    else
+        db = new neo4j.GraphDatabase('http://' + sophia_config.NEO4J_DB_SERVER + 
+            ':' + sophia_config.NEO4J_DB_PORT);
 
     connection = amqp.createConnection({
         host: sophia_config.QUEUE_HOST

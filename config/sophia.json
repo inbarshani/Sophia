@@ -32,6 +32,7 @@
         "MAX_PATH_TO_DATA_LENGTH": 50,
         "NEO4J_DB_SERVER": "16.60.168.105",
         "NEO4J_DB_PORT": "7474",
+        "NEO4J_DB_PROXY": "",
         "QUEUE_HOST": "localhost",
         "QUEUE_DATA_EVENTS_NAME": "sophia_data_events",
         "QUEUE_NOT_LINKED_NAME": "sophia_nolink_events",
