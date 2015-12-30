@@ -72,6 +72,7 @@ sophia_queue_server:
   build: .
   dockerfile: ./docker/Dockerfile_sophia_node_js
   container_name: sophia_queue_server
+  env_file: ./docker/http.env
   environment:
    NODE_ENV: production
    QUEUE_HOST: sophia_rabbitmq
