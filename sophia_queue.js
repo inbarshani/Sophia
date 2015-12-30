@@ -48,7 +48,7 @@ var connection = null;
 
 sophia_config.ready(function(){
     var NO_PROXY = process.env.NO_PROXY;
-    if (NO_PROXY && NO_PROXY.indexOf(sophia_config.NEO4J_DB_SERVER) > 0)
+    if (NO_PROXY && NO_PROXY.indexOf(sophia_config.NEO4J_DB_SERVER) >= 0)
     {
         db = new neo4j.GraphDatabase(
             {
