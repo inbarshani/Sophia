@@ -36,6 +36,7 @@ sophia_app:
    - sophia_neo4j
   volumes:
    - "$HOME/Sophia_data/db:/Sophia/db"
+   - "$HOME/Sophia_data/upload:/Sophia/upload"
 
 sophia_data_server:
   build: .
@@ -70,6 +71,8 @@ sophia_file_server:
   command: node sophia_file_server.js
   links:
    - sophia_rabbitmq
+  volumes:
+   - "$HOME/Sophia_data/upload:/Sophia/upload"
 
 sophia_queue_server:
   build: .
