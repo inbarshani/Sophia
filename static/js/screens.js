@@ -1,6 +1,6 @@
 // TODO: extract to configuration by server (use REST to get it?) 
 //   the port is the one changing, maybe just calc it from this app
-var screensServer = 'http://myd-vm00366:8085';
+var screensServer = '';
 var screenGroups = null;
 var screenSearchedTerms = null;
 var screensGraphIDsGroups = null;
