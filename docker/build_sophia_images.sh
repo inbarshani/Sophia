@@ -1,2 +1,2 @@
 docker build -t sophia_node_js -f docker/Dockerfile_sophia_node_js .
-docker build -t sophia_file_server -f docker/Dockerfile_sophia_file_server .
+docker build --build-arg HTTP_PROXY=http://web-proxy.il.hpecorp.net:8080 --build-arg HTTPS_PROXY=https://web-proxy.il.hpecorp.net:8080 -t sophia_file_server -f docker/Dockerfile_sophia_file_server .
