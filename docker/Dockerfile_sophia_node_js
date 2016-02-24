@@ -1,9 +1,6 @@
 # base image
 FROM node:5.3-slim
 
-# update package manager
-RUN apt-get update
-
 # proxy env
 # ENV HTTP_PROXY=$HTTP_PROXY \
 #	HTTPS_PROXY=$HTTPS_PROXY \

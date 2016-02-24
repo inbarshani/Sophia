@@ -1,5 +1,8 @@
 # base image
 FROM sophia_node_js
 
+# update package manager
+RUN apt-get update
+
 # ImageMagick
 RUN apt-get -y install imagemagick --fix-missing
