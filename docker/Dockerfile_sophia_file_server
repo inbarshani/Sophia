@@ -1,0 +1,5 @@
+# base image
+FROM sophia_node_js
+
+# ImageMagick
+sudo apt-get -y install imagemagick --fix-missing
