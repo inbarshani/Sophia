@@ -10,6 +10,12 @@ var phash = require('phash-imagemagick');
 var rabbitMq = null;
 var app = express();
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 sophia_config.ready(function(){
     rabbitMq = amqp.createConnection({
         host: sophia_config.QUEUE_HOST
