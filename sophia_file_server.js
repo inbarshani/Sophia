@@ -66,9 +66,13 @@ app.post('/file', function(request, response) {
                 var absPath = fs.realpathSync('./upload/');
                 try {
                     phash.get(absPath + '/' + fileName, function(err, phash_data) {
-                        if (err) throw err;
-                        console.log('Completed hash calc for image ' + absPath + '/' + fileName);
-                        data.phash = phash_data;
+                        if (err) 
+                            console.log('Failed to complete hash calc for image ' + absPath + '/' + fileName+' due to error: '+err);
+                        else
+                        {
+                            console.log('Completed hash calc for image ' + absPath + '/' + fileName);
+                            data.phash = phash_data;
+                        }
                         try {
                             idol_queries.analyzeImagePost(absPath + '/' + fileName, function(token) {
                                 if (token && token.length > 0) {
