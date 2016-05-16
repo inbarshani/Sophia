@@ -120,3 +120,5 @@ sophia_tests_runner:
   links:
    - sophia_neo4j
    - sophia_rabbitmq
+  volumes:
+   - "$HOME/Sophia_data/db:/Sophia/db"
