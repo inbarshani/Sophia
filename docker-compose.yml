@@ -104,3 +104,19 @@ sophia_indexer_server:
   links:
    - sophia_neo4j
    - sophia_rabbitmq
+
+sophia_tests_runner:
+  image: sophia_node_js
+  container_name: sophia_tests_runner
+  env_file: ./docker/http.env
+  environment:
+   NODE_ENV: 
+   SOPHIA_APP: 
+   QUEUE_HOST: sophia_rabbitmq
+   NEO4J_DB_SERVER: sophia_neo4j
+   NO_PROXY: sophia_neo4j
+  working_dir: /Sophia
+  command: node sophia_tests_runner.js
+  links:
+   - sophia_neo4j
+   - sophia_rabbitmq
